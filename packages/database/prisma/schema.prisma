@@ -1,0 +1,47 @@
+// packages/database/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- MODELO PARA O SERVIÇO DE USERS (apps/users) ---
+model User {
+  id           String  @id @default(uuid())
+  name         String
+  email        String  @unique
+  password     String // Senha Hasheada
+  refreshToken String? @db.Text
+
+  // Auditoria
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// --- MODELO PARA O SERVIÇO DE ADMINS (apps/admins) ---
+model Admin {
+  id           String  @id @default(uuid())
+  name         String
+  email        String  @unique
+  password     String // Senha Hasheada
+  refreshToken String? @db.Text
+
+  // Controle de Nível de Acesso
+  role AdminRole @default(EDITOR)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  EDITOR
+}
