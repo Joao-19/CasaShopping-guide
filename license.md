@@ -1,7 +1,0 @@
-Copyright (c) 2025 CasaShopping
-
-NOTICE: All information contained herein is, and remains the property of CasaShopping.
-The intellectual and technical concepts contained herein are proprietary to CasaShopping
-and may be covered by patents in process, and are protected by trade secret or copyright law.
-Dissemination of this information or reproduction of this material is strictly forbidden
-unless prior written permission is obtained from CasaShopping.
