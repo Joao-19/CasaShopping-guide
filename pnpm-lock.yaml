@@ -318,6 +318,9 @@ importers:
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
+      lucide-react:
+        specifier: ^0.561.0
+        version: 0.561.0(react@19.2.0)
       next:
         specifier: 15.1.0
         version: 15.1.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)

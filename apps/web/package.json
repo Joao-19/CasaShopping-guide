@@ -11,10 +11,11 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
     "@repo/dtos": "workspace:*",
+    "@repo/ui": "workspace:*",
     "axios": "^1.13.2",
     "js-cookie": "^3.0.5",
+    "lucide-react": "^0.561.0",
     "next": "15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -8,9 +8,10 @@ export default function FormCard({
     children: React.ReactNode;
 }) {
 
-
     return (
-        <Card className="w-100" style={cardStyle}>
+        <Card
+            className="relative z-10 w-full max-w-[440px] bg-white rounded-3xl shadow-2xl"
+        >
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
             </CardHeader>
@@ -19,12 +20,4 @@ export default function FormCard({
             </CardContent>
         </Card>
     )
-}
-
-const cardStyle = {
-    width: "400px",
-    background: "white",
-    borderRadius: "10px",
-    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-    padding: "20px",
 }

@@ -1,9 +1,10 @@
 @import "tailwindcss";
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
 
 /* 2. Definir o Tema (Opcional - O v4 prefere variáveis CSS) */
 @theme {
-  --color-primary: #0F172A;
-  --color-primary-light: #334155;
+  --color-primary: #003ba6;
+  --color-primary-light: #0059b3;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
 }
 
@@ -31,5 +32,9 @@
 
   a {
     @apply transition-colors duration-200;
+  }
+
+  .text-primary {
+    color: var(--color-primary);
   }
 }
