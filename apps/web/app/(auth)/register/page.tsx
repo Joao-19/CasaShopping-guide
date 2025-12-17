@@ -1,11 +1,11 @@
-
 'use client';
+
 import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
 import FormCard from "@repo/ui/cards/FormCard";
-import Image from "next/image";
 import Link from "next/link";
 import { OAuthOptions } from "../login/-components/OAuthOptions";
+import { UnloggedToolbar } from "../login/-components/UnloggedToolbar";
 
 const RegisterPage = () => {
 
@@ -16,9 +16,12 @@ const RegisterPage = () => {
 
     return (
         <div
-            className="h-screen w-full flex items-center justify-center bg-cover bg-center"
+            className="h-screen w-full flex flex-col items-center justify-center align-middle bg-cover bg-center"
             style={{ backgroundImage: "url('/login-bg.webp')" }}
         >
+
+            <UnloggedToolbar />
+
             <FormCard title="">
                 <div className="flex flex-col items-center">
                     {/* Header */}
@@ -102,34 +105,29 @@ const RegisterPage = () => {
                         </Button>
                     </form>
 
-                    {/* Divider or Spacer */}
-                    <div className="w-full my-4 flex items-center gap-2">
-                        <div className="h-px bg-gray-200 flex-1"></div>
-                        <span className="text-xs text-gray-400 font-medium">OU</span>
-                        <div className="h-px bg-gray-200 flex-1"></div>
-                    </div>
-
                     {/* Guest Login */}
                     <Button
                         variant="outline"
-                        className="w-full h-11 text-[#4B5563] font-semibold border-gray-200 hover:bg-gray-50 hover:text-[#1A2B3C]"
+                        className="w-full h-11 text-[#4B5563] font-semibold border-gray-200 hover:bg-gray-50 hover:text-[#1A2B3C] mt-6"
                     >
                         Entrar como Convidado (Demo)
                     </Button>
 
-                    {/* Footer */}
-                    <div className="mt-6 text-center text-sm text-[#4B5563]">
+                    {/** Divider */}
+                    <div className="border-t pt-2 border-gray-200" />
+
+                    <div className="mt-6 text-center text-sm text-gray-500 ">
                         Já tem uma conta?{" "}
                         <Link href="/login" className="text-primary font-bold hover:underline">
                             Entrar
                         </Link>
                     </div>
-
-                    <div className="mt-8 text-xs text-gray-400">
-                        CasaShopping © 2025
-                    </div>
                 </div>
             </FormCard>
+
+            <div className="absolute bottom-6 left-0 w-full text-center z-20 pointer-events-none">
+                <p className="text-white/60 text-[10px] tracking-widest uppercase">CasaShopping © 2025</p>
+            </div>
         </div>
     );
 };

@@ -14,6 +14,7 @@ import {
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import { OAuthOptions } from "./-components/OAuthOptions";
+import { UnloggedToolbar } from "./-components/UnloggedToolbar";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -50,33 +51,7 @@ export default function LoginPage() {
                 <div className="absolute inset-0 bg-black/20"></div>
             </div>
 
-            <div className="absolute top-6 left-6 z-20 md:top-8 md:left-8">
-                <button className="flex items-center gap-2 text-white hover:text-white/80 transition-colors text-sm font-medium drop-shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left" aria-hidden="true">
-                        <path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path>
-                    </svg>
-                    <span className="md:inline">
-                        Voltar (estamos no login, vai volta p onde ?)
-                        {/* TODO (Todo, precisa ser uma toolbar, e padronizar esses componentes todos, maioria copiado do html) */}
-                    </span>
-                </button>
-            </div>
-
-            <div className="absolute top-6 right-6 z-20 md:top-8 md:right-8">
-                <button className="flex items-center gap-2 text-white hover:text-white/80 transition-colors text-sm font-medium drop-shadow-md">
-                    <span className="md:inline">
-                        Fale com o suporte
-                    </span>
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                        className="lucide lucide-circle-question-mark" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path>
-                    </svg>
-                </button>
-            </div>
-
+            <UnloggedToolbar />
 
             <FormCard title="">
                 <CardHeader className="flex flex-col items-center">
@@ -142,14 +117,10 @@ export default function LoginPage() {
                             Entrar
                         </Button>
                     </form>
-                    <div className="mt-6 text-center space-y-3">
-                        <button type="button" className="text-xs text-gray-500 hover:text-primary transition-colors block w-full">
-                            Esqueceu sua senha?
-                        </button>
-                    </div>
+
                 </CardContent>
 
-                <CardFooter className="flex flex-col space-y-4 border-t border-gray-50 pt-6">
+                <CardFooter className="flex flex-col space-y-4 border-t border-gray-200 pt-6 mt-2">
                     <div className="text-center text-sm text-gray-600">
                         Não tem uma conta?{" "}
                         <Link href="/register" className="font-bold text-[#003B95] hover:underline">
