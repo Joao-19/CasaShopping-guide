@@ -14,6 +14,7 @@ model User {
   id           String  @id @default(uuid())
   name         String
   email        String  @unique
+  phone        String
   password     String // Senha Hasheada
   refreshToken String? @db.Text
 

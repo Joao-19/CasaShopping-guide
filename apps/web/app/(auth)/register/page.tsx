@@ -1,13 +1,46 @@
 'use client';
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "@repo/ui/sonner";
 import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
 import FormCard from "@repo/ui/cards/FormCard";
 import Link from "next/link";
 import { OAuthOptions } from "../login/-components/OAuthOptions";
 import { UnloggedToolbar } from "../login/-components/UnloggedToolbar";
+import userRegister from "@/composable/login/useRegister";
 
 const RegisterPage = () => {
+    const router = useRouter();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [phone, setPhone] = useState("");
+    const [loading, setLoading] = useState(false);
+    const { register, loading: registerLoading, error: registerError } = userRegister();
+
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const response = await register({
+                name,
+                email,
+                password,
+                phone,
+            });
+
+            toast.success("Conta criada com sucesso!");
+            router.push("/login");
+        } catch (error: any) {
+            console.error("Registration error:", error);
+            toast.error(error.message || "Ocorreu um erro ao tentar registrar.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Placeholder handlers for now
     const handleGoogleLogin = () => { };
@@ -48,7 +81,7 @@ const RegisterPage = () => {
                     </div>
 
                     {/* Form */}
-                    <form className="w-full space-y-4">
+                    <form onSubmit={handleRegister} className="w-full space-y-4">
                         <div className="space-y-1.5">
                             <label htmlFor="name" className="text-xs font-semibold text-[#1A2B3C] ml-1">
                                 Nome Completo
@@ -58,6 +91,9 @@ const RegisterPage = () => {
                                 type="text"
                                 placeholder="Seu nome completo"
                                 className="h-11 rounded-lg border-gray-200 focus:border-[#1A2B3C] focus:ring-[#1A2B3C]"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
                             />
                         </div>
 
@@ -70,6 +106,8 @@ const RegisterPage = () => {
                                 type="tel"
                                 placeholder="(00) 00000-0000"
                                 className="h-11 rounded-lg border-gray-200 focus:border-[#1A2B3C] focus:ring-[#1A2B3C]"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
                             />
                         </div>
 
@@ -82,6 +120,9 @@ const RegisterPage = () => {
                                 type="email"
                                 placeholder="exemplo@email.com"
                                 className="h-11 rounded-lg border-gray-200 focus:border-[#1A2B3C] focus:ring-[#1A2B3C]"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
                             />
                         </div>
 
@@ -94,14 +135,18 @@ const RegisterPage = () => {
                                 type="password"
                                 placeholder="••••••••"
                                 className="h-11 rounded-lg border-gray-200 focus:border-[#1A2B3C] focus:ring-[#1A2B3C]"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
                             />
                         </div>
 
                         <Button
                             type="submit"
-                            className="w-full h-11 mt-2 bg-primary hover:bg-bg-primary text-white font-semibold rounded-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-all"
+                            disabled={loading}
+                            className="w-full h-11 mt-2 bg-primary hover:bg-bg-primary text-white font-semibold rounded-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            Criar conta
+                            {loading ? "Criando conta..." : "Criar conta"}
                         </Button>
                     </form>
 

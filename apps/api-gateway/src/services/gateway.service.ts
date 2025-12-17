@@ -1,9 +1,28 @@
+import { HttpService } from "@nestjs/axios";
 import { Injectable, ConflictException } from "@nestjs/common";
-import { prisma } from "@repo/database"; // Nosso banco compartilhado
+import { ConfigService } from "@nestjs/config";
+import { prisma } from "@repo/database";
 import * as bcrypt from "bcryptjs";
 
-@Injectable() // Avisa ao Nest que isso pode ser injetado
-export class AuthService {
+@Injectable()
+export class GatewayService {
+  private AUTH_SERVICE_URL: string;
+
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService
+  ) {
+    console.log(
+      "GatewayService initialized. ConfigService:",
+      configService,
+      "HttpService:",
+      httpService
+    );
+    this.AUTH_SERVICE_URL =
+      this.configService?.get<string>("AUTH_SERVICE_URL") ||
+      "http://localhost:3002";
+  }
+
   async register(data: any) {
     const userExists = await prisma.user.findUnique({
       where: { email: data.email },
