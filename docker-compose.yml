@@ -38,6 +38,92 @@ services:
     networks:
       - casashopping-net
 
+  # --- API GATEWAY (Porta 3000) ---
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: casashopping-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - AUTH_SERVICE_URL=http://auth-service:3003
+      - USERS_SERVICE_URL=http://users-service:3004
+      - CORS_ORIGIN=http://localhost:3001
+    depends_on:
+      - database
+      - auth-service
+      - users-service
+    networks:
+      - casashopping-net
+
+  # --- AUTH SERVICE (Porta 3003) ---
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+    container_name: casashopping-auth
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - JWT_SECRET=${JWT_SECRET:-supersecret}
+    depends_on:
+      - database
+    networks:
+      - casashopping-net
+
+  # --- USERS SERVICE (Porta 3004) ---
+  users-service:
+    build:
+      context: .
+      dockerfile: apps/users/Dockerfile
+    container_name: casashopping-users
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+    depends_on:
+      - database
+    networks:
+      - casashopping-net
+
+  # --- WEB APP (Porta 3001) ---
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: casashopping-web
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    depends_on:
+      - api-gateway
+    networks:
+      - casashopping-net
+
+  # --- ADMIN APP (Porta 3002) ---
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    container_name: casashopping-admin
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    depends_on:
+      - api-gateway
+    networks:
+      - casashopping-net
+
 volumes:
   postgres_data:
   minio_data:
