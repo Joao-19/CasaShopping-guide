@@ -10,7 +10,7 @@ export default function FormCard({
 
     return (
         <Card
-            className="relative z-10 w-full max-w-[440px] bg-white rounded-3xl shadow-2xl"
+            className="relative w-full max-w-[440px] bg-white rounded-3xl shadow-2xl"
         >
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
