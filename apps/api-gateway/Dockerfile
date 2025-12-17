@@ -1,22 +1,49 @@
-FROM node:20-alpine
+FROM node:20-alpine AS base
 
+# Stage 1: Pruner - Isolate the app and its specific dependencies
+FROM base AS pruner
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+RUN npm install -g turbo
+COPY . .
+RUN turbo prune --scope=api-gateway --docker
+
+# Stage 2: Installer & Builder - Install deps and build
+FROM base AS builder
+RUN apk add --no-cache libc6-compat openssl python3 make g++
 WORKDIR /app
 
-# Instalar dependências do sistema necessárias para o Prisma (OpenSSL)
-RUN apk add --no-cache openssl
-
-RUN npm install -g pnpm turbo
-
-COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
-COPY package.json ./
-
-COPY . .
-
+# Install dependencies based on the pruned lockfile
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN npm install -g pnpm
 RUN pnpm install
 
-# Gerar o Prisma Client
+# Copy source code and build
+COPY --from=pruner /app/out/full/ .
+COPY turbo.json turbo.json
+
+# Generate Prisma Client
 RUN pnpm --filter @repo/database exec prisma generate
+
+# Build the application
+RUN pnpm --filter=api-gateway build
+
+# Stage 3: Runner - Minimal runtime image
+FROM base AS runner
+WORKDIR /app
+RUN apk add --no-cache openssl
+RUN npm install -g pnpm
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
+USER nestjs
+
+# Copy the built application from the builder stage
+COPY --from=builder --chown=nestjs:nodejs /app .
 
 EXPOSE 3000
 
-CMD ["pnpm", "--filter", "api-gateway", "dev"]
+# Run the compiled application directly
+CMD ["node", "apps/api-gateway/dist/main"]

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import User from "../Domain/User";
 import Cookies from "js-cookie";
 
@@ -10,19 +10,31 @@ interface AuthStore {
 }
 
 export function useAuthStore(): AuthStore {
-  const [token, setTokenState] = useState<string | null>(() => {
-    return localStorage.getItem("authToken");
-  });
-  const [user, setUserState] = useState<User | null>(() => {
-    const data = localStorage.getItem("authUser");
-    if (!data) return null;
-    return JSON.parse(data, (data: any) => ({
-      uuid: data.id,
-      name: data.name,
-      loginToken: data.loginToken,
-      email: data.email,
-    }));
-  });
+  const [token, setTokenState] = useState<string | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
+
+  // Initialize from localStorage on mount (client-only)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("authToken");
+      if (storedToken) setTokenState(storedToken);
+
+      const storedUser = localStorage.getItem("authUser");
+      if (storedUser) {
+        try {
+          const data = JSON.parse(storedUser);
+          setUserState({
+            uuid: data.id || data.uuid,
+            name: data.name,
+            loginToken: data.loginToken,
+            email: data.email,
+          });
+        } catch (e) {
+          console.error("Failed to parse user from local storage", e);
+        }
+      }
+    }
+  }, []);
 
   const setToken = useCallback((newToken: string | null) => {
     setTokenState(newToken);

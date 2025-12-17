@@ -224,6 +224,9 @@ importers:
       '@nestjs/schematics':
         specifier: ^11.0.9
         version: 11.0.9(chokidar@4.0.3)(typescript@5.9.2)
+      '@nestjs/swagger':
+        specifier: ^7.2.1
+        version: 7.4.2(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)
       '@types/bcryptjs':
         specifier: ^2.4.6
         version: 2.4.6
@@ -239,6 +242,9 @@ importers:
       '@types/node':
         specifier: ^20.10.0
         version: 20.19.27
+      ts-loader:
+        specifier: ^9.5.4
+        version: 9.5.4(typescript@5.9.2)(webpack@5.103.0)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -312,6 +318,9 @@ importers:
       '@types/node':
         specifier: ^20.10.0
         version: 20.19.27
+      ts-loader:
+        specifier: ^9.5.4
+        version: 9.5.4(typescript@5.9.2)(webpack@5.103.0)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0

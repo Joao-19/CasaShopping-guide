@@ -23,7 +23,7 @@ export const UnloggedToolbar = () => {
             }
             if (hasHistory && !isFromRegister) setShowBackButton(true);
         }
-    }, [document.referrer]);
+    }, []);
 
     const handleBack = () => {
         router.back();

@@ -1,22 +1,39 @@
-FROM node:20-alpine
+FROM node:20-alpine AS base
 
+FROM base AS pruner
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+RUN npm install -g turbo
+COPY . .
+RUN turbo prune --scope=admin --docker
+
+FROM base AS builder
+RUN apk add --no-cache libc6-compat openssl python3 make g++
 WORKDIR /app
 
-# Instalar dependências do sistema (OpenSSL)
-RUN apk add --no-cache openssl
-
-RUN npm install -g pnpm turbo
-
-COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
-COPY package.json ./
-
-COPY . .
-
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN npm install -g pnpm
 RUN pnpm install
 
-# Gerar o Prisma Client
+COPY --from=pruner /app/out/full/ .
+COPY turbo.json turbo.json
+
 RUN pnpm --filter @repo/database exec prisma generate
+
+RUN pnpm --filter=admin build
+
+FROM base AS runner
+WORKDIR /app
+RUN apk add --no-cache openssl
+RUN npm install -g pnpm
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
+USER nestjs
+
+COPY --from=builder --chown=nestjs:nodejs /app .
 
 EXPOSE 3002
 
-CMD ["pnpm", "--filter", "admin", "dev"]
+CMD ["pnpm", "--filter", "admin", "start"]
