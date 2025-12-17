@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "@repo/ui/sonner";
 import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
+import {
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from "@repo/ui/card";
 import FormCard from "@repo/ui/cards/FormCard";
 import Link from "next/link";
 import { OAuthOptions } from "../login/-components/OAuthOptions";
@@ -49,20 +56,28 @@ const RegisterPage = () => {
 
     return (
         <div
-            className="h-screen w-full flex flex-col items-center justify-center align-middle bg-cover bg-center"
-            style={{ backgroundImage: "url('/login-bg.webp')" }}
-        >
+            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-y-auto bg-gray-900 px-4 pt-14 pb-20 md:p-24 md:overflow-hidden">
+            {/* Background Image */}
+            <div className="absolute inset-0 z-0">
+                <img
+                    src="/login-bg.webp"
+                    alt="Interior Background"
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/20"></div>
+            </div>
 
             <UnloggedToolbar />
 
             <FormCard title="">
-                <div className="flex flex-col items-center">
-                    {/* Header */}
+                <CardHeader className="flex flex-col items-center">
                     <div className="mb-6 text-center">
-                        <h1 className="text-primary text-2xl font-bold">Crie sua conta</h1>
-                        <p className="text-[#4B5563] text-sm mt-1">Preencha os dados abaixo para começar.</p>
+                        <CardTitle className="text-primary text-2xl font-bold">Crie sua conta</CardTitle>
+                        <CardDescription className="text-[#4B5563] text-sm mt-1">Preencha os dados abaixo para começar.</CardDescription>
                     </div>
+                </CardHeader>
 
+                <CardContent>
                     {/* OAuth Options */}
                     <div className="w-full">
                         <OAuthOptions
@@ -149,25 +164,25 @@ const RegisterPage = () => {
                             {loading ? "Criando conta..." : "Criar conta"}
                         </Button>
                     </form>
+                </CardContent>
+
+                <CardFooter className="flex flex-col space-y-2 border-t border-gray-200 pt-6 mt-2">
+                    <div className="text-center text-sm text-gray-500">
+                        Já tem uma conta?
+                    </div>
+
+                    <Link href="/login" className="text-center text-primary font-bold hover:underline">
+                        Entrar
+                    </Link>
 
                     {/* Guest Login */}
                     <Button
                         variant="outline"
-                        className="w-full h-11 text-[#4B5563] font-semibold border-gray-200 hover:bg-gray-50 hover:text-[#1A2B3C] mt-6"
+                        className="w-full h-11 text-[#4B5563] font-semibold border-gray-200 hover:bg-gray-50 hover:text-[#1A2B3C]"
                     >
                         Entrar como Convidado (Demo)
                     </Button>
-
-                    {/** Divider */}
-                    <div className="border-t pt-2 border-gray-200" />
-
-                    <div className="mt-6 text-center text-sm text-gray-500 ">
-                        Já tem uma conta?{" "}
-                        <Link href="/login" className="text-primary font-bold hover:underline">
-                            Entrar
-                        </Link>
-                    </div>
-                </div>
+                </CardFooter>
             </FormCard>
 
             <div className="absolute bottom-6 left-0 w-full text-center z-20 pointer-events-none">

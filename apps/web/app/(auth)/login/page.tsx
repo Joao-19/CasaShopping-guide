@@ -13,7 +13,6 @@ import {
 } from "@repo/ui/card";
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
-import { OAuthOptions } from "./-components/OAuthOptions";
 import { UnloggedToolbar } from "./-components/UnloggedToolbar";
 
 export default function LoginPage() {
@@ -40,7 +39,7 @@ export default function LoginPage() {
 
     return (
         <div
-            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden bg-gray-900">
+            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-y-auto bg-gray-900 px-4 pt-24 pb-20 md:p-0 md:overflow-hidden">
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
@@ -78,19 +77,6 @@ export default function LoginPage() {
 
                 <CardContent className="">
                     {/* Social Login Buttons */}
-                    <OAuthOptions
-                        onAppleClick={() => handleAppleLogin()}
-                        onGoogleClick={() => handleGoogleLogin()}
-                        onFacebookClick={() => handleFacebookLogin()}
-                    />
-
-                    <div className="relative flex items-center mb-6">
-                        <div className="grow border-t border-gray-100" />
-                        <span className="shrink-0 mx-3 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-                            OU
-                        </span>
-                        <div className="grow border-t border-gray-100" />
-                    </div>
 
                     <form onSubmit={handleLogin} className="space-y-6">
 
@@ -120,13 +106,14 @@ export default function LoginPage() {
 
                 </CardContent>
 
-                <CardFooter className="flex flex-col space-y-4 border-t border-gray-200 pt-6 mt-2">
+                <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6 mt-2">
                     <div className="text-center text-sm text-gray-600">
-                        Não tem uma conta?{" "}
-                        <Link href="/register" className="font-bold text-[#003B95] hover:underline">
-                            Cadastre-se grátis
-                        </Link>
+                        Não tem uma conta?
                     </div>
+
+                    <Link href="/register" className="font-bold text-primary hover:underline">
+                        Cadastre-se grátis
+                    </Link>
 
                     <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
                         Área Administrativa
