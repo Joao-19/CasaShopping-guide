@@ -21,6 +21,9 @@ COPY turbo.json turbo.json
 
 RUN pnpm --filter @repo/database exec prisma generate
 
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Use pnpm --filter to run build directly, bypassing turbo CLI in builder
 RUN pnpm --filter=web build
 
