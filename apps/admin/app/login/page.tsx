@@ -1,20 +1,19 @@
 'use client';
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@repo/ui/button";
 import {
     CardContent,
-    CardFooter,
     CardHeader,
     CardTitle,
     CardDescription,
+    CardFooter,
 } from "@repo/ui/card";
+import Link from "next/link";
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
-import { UnloggedToolbar } from "./-components/UnloggedToolbar";
 import useLogin from "@/composable/login/useLogin";
 import { useRedirectUrl } from "@/composable/useRedirectUrl";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
@@ -46,7 +45,7 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
                 id="email"
                 label="E-mail"
                 type="email"
-                placeholder="exemplo@email.com"
+                placeholder="admin@casashopping.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -71,7 +70,7 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
                 disabled={loading}
                 className="w-full h-11 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-[#002a78] active:scale-[0.98] transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-                {loading ? "Entrando..." : "Entrar"}
+                {loading ? "Entrando..." : "Entrar como Admin"}
             </Button>
         </form>
     );
@@ -83,7 +82,7 @@ const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { FormProvider, validateAll } = useForm();
-    const adminUrl = useRedirectUrl(process.env.NEXT_PUBLIC_ADMIN_URL, 3002);
+    const webUrl = useRedirectUrl(process.env.NEXT_PUBLIC_WEB_URL, 3001);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -103,7 +102,7 @@ const LoginPage = () => {
 
     return (
         <div
-            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-y-auto bg-gray-900 px-4 pt-18 pb-20 sm:p-8 p-0 lg:p-24 md:overflow-y-auto lg:overflow-hidden">
+            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden bg-gray-900 px-4">
             {/* Background Image */}
             <div className="fixed inset-0 z-0">
                 <img
@@ -113,8 +112,6 @@ const LoginPage = () => {
                 />
                 <div className="absolute inset-0 bg-black/20"></div>
             </div>
-
-            <UnloggedToolbar />
 
             <FormCard title="">
                 <CardHeader className="flex flex-col items-center">
@@ -131,11 +128,11 @@ const LoginPage = () => {
                     </div>
 
                     <CardTitle className="text-2xl font-bold text-primary">
-                        Entrar na conta
+                        Acesso Administrativo
                     </CardTitle>
 
                     <CardDescription className="text-center text-gray-500">
-                        Bem-vindo de volta! Insira seus dados.
+                        Acesso administrativo ao sistema.
                     </CardDescription>
                 </CardHeader>
 
@@ -151,17 +148,9 @@ const LoginPage = () => {
                 </CardContent>
 
                 <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6 mt-2">
-                    <div className="text-center text-sm text-gray-600">
-                        Não tem uma conta?
-                    </div>
-
-                    <Link href="/register" className="font-bold text-primary hover:underline">
-                        Cadastre-se grátis
-                    </Link>
-
-                    <Link href={adminUrl} className="w-full">
+                    <Link href={webUrl} className="w-full">
                         <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
-                            Área Administrativa
+                            Acesso Usuário
                         </Button>
                     </Link>
                 </CardFooter>

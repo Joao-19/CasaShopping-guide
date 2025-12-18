@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@repo/ui/sonner";
@@ -18,6 +17,7 @@ import Link from "next/link";
 import { UnloggedToolbar } from "../login/-components/UnloggedToolbar";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import userRegister from "@/composable/login/useRegister";
+import { useRedirectUrl } from "@/composable/useRedirectUrl";
 
 interface RegisterFormProps {
     formData: {
@@ -115,6 +115,7 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const { register } = userRegister();
     const { FormProvider, validateAll } = useForm();
+    const adminUrl = useRedirectUrl(process.env.NEXT_PUBLIC_ADMIN_URL, 3002);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -180,8 +181,15 @@ const RegisterPage = () => {
                         Já tem uma conta?
                     </div>
 
+
                     <Link href="/login" className="text-center text-primary font-bold hover:underline">
                         Entrar
+                    </Link>
+
+                    <Link href={adminUrl} className="w-full">
+                        <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
+                            Área Administrativa
+                        </Button>
                     </Link>
                 </CardFooter>
             </FormCard>
