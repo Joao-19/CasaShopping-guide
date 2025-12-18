@@ -128,12 +128,17 @@ export function useFormField<T>(value: T, rules: ValidatorRule<T>, disableRequir
   const [error, setError] = useState('');
   const validator = useValidator();
   const idRef = useRef<number | null>(null);
+  const isFirstRender = useRef(true);
 
   const validate = useCallback(() => {
     const errorMessage = validator.validate(rules, value);
     setError(errorMessage);
     return !errorMessage;
   }, [rules, value, validator]);
+
+  const onBlur = useCallback(() => {
+    validate();
+  }, [validate]);
 
   useEffect(() => {
     const field = {
@@ -159,11 +164,16 @@ export function useFormField<T>(value: T, rules: ValidatorRule<T>, disableRequir
   }, [value, rules, updateInput]);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     validate();
   }, [value, validate]);
 
   return {
     error,
     validate,
+    onBlur,
   };
 }

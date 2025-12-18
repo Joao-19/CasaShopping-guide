@@ -47,7 +47,7 @@ const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterForm
     const phoneField = useFormField(phone, []);
 
     return (
-        <form onSubmit={onSubmit} className="w-full">
+        <form onSubmit={onSubmit} className="w-full h-min-[300px]">
             <BaseInput
                 id="name"
                 label="Nome Completo"
@@ -57,6 +57,7 @@ const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterForm
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 error={nameField.error}
+                onBlur={nameField.onBlur}
             />
 
             <BaseInput
@@ -67,6 +68,7 @@ const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterForm
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 error={phoneField.error}
+                onBlur={phoneField.onBlur}
             />
 
             <BaseInput
@@ -78,6 +80,7 @@ const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterForm
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 error={emailField.error}
+                onBlur={emailField.onBlur}
             />
 
             <BaseInput
@@ -89,6 +92,7 @@ const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterForm
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 error={passwordField.error}
+                onBlur={passwordField.onBlur}
             />
 
             <Button

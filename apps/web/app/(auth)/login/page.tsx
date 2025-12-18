@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,18 +16,78 @@ import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import { UnloggedToolbar } from "./-components/UnloggedToolbar";
 import useLogin from "@/composable/login/useLogin";
+import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 
-export default function LoginPage() {
+interface LoginFormProps {
+    formData: {
+        email: string;
+        password: string;
+    };
+    setFormData: {
+        setEmail: (val: string) => void;
+        setPassword: (val: string) => void;
+    };
+    loading: boolean;
+    onSubmit: (e: React.FormEvent) => void;
+}
+
+const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps) => {
+    const validator = useValidator();
+    const { email, password } = formData;
+    const { setEmail, setPassword } = setFormData;
+
+    const emailField = useFormField(email, [validator.rules.required, validator.rules.email]);
+    const passwordField = useFormField(password, [validator.rules.required]);
+
+    return (
+        <form onSubmit={onSubmit} className="">
+            <BaseInput
+                id="email"
+                label="E-mail"
+                type="email"
+                placeholder="exemplo@email.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                error={emailField.error}
+                onBlur={emailField.onBlur}
+            />
+
+            <BaseInput
+                id="password"
+                label="Senha"
+                type="password"
+                placeholder="••••••••"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                error={passwordField.error}
+                onBlur={passwordField.onBlur}
+            />
+
+            <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-[#002a78] active:scale-[0.98] transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+                {loading ? "Entrando..." : "Entrar"}
+            </Button>
+        </form>
+    );
+};
+
+const LoginPage = () => {
     const router = useRouter();
-    const [showPassword, setShowPassword] = useState(false);
-    const { login, loading, error } = useLogin();
+    const { login, loading } = useLogin();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { FormProvider, validateAll } = useForm();
 
-    // Empty handlers as requested
-    // Empty handlers as requested
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateAll()) return;
+
         try {
             await login({
                 email,
@@ -36,18 +97,6 @@ export default function LoginPage() {
         } catch (error) {
             console.error("Login failed", error);
         }
-    };
-
-    const handleAppleLogin = () => {
-        // TODO: Implement Apple login
-    };
-
-    const handleGoogleLogin = () => {
-        // TODO: Implement Google login
-    };
-
-    const handleFacebookLogin = () => {
-        // TODO: Implement Facebook login
     };
 
     return (
@@ -88,39 +137,15 @@ export default function LoginPage() {
                     </CardDescription>
                 </CardHeader>
 
-                <CardContent className="">
-                    {/* Social Login Buttons */}
-
-                    <form onSubmit={handleLogin} className="space-y-6">
-
-                        <BaseInput
-                            id="email"
-                            label="E-mail"
-                            type="email"
-                            placeholder="exemplo@email.com"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                <CardContent>
+                    <FormProvider>
+                        <LoginForm
+                            formData={{ email, password }}
+                            setFormData={{ setEmail, setPassword }}
+                            loading={loading}
+                            onSubmit={handleLogin}
                         />
-
-                        <BaseInput
-                            id="password"
-                            label="Senha"
-                            type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-
-                        <Button
-                            type="submit"
-                            className="w-full h-11 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-[#002a78] active:scale-[0.98] transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-                        >
-                            Entrar
-                        </Button>
-                    </form>
-
+                    </FormProvider>
                 </CardContent>
 
                 <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6 mt-2">
@@ -138,7 +163,7 @@ export default function LoginPage() {
                 </CardFooter>
             </FormCard>
 
-            <div className="absolute bottom-12 left-0 w-full text-center">
+            <div className="absolute bottom-6 left-0 w-full text-center z-20 pointer-events-none">
                 <p className="text-white/60 text-[10px] tracking-widest uppercase">
                     CasaShopping © 2025
                 </p>
@@ -146,4 +171,6 @@ export default function LoginPage() {
 
         </div>
     );
-}
+};
+
+export default LoginPage;
