@@ -7,7 +7,7 @@ const publicRoutes = ["/login", "/register"];
 
 export function middleware(request: NextRequest) {
   // Tenta pegar o token
-  const token = request.cookies.get("token")?.value;
+  const token = request.cookies.get("access_token")?.value;
 
   // Pega a rota atual
   const { pathname } = request.nextUrl;

@@ -1,4 +1,3 @@
-import axios from "axios";
 import User from "@/Domain/User";
 
 export interface LoginForm {
@@ -7,7 +6,7 @@ export interface LoginForm {
 }
 export interface LoginResponse {
   user: User;
-  token: string;
+  token?: string; // Optional now
 }
 
 export interface RecoverPasswordRequestForm {
@@ -37,20 +36,32 @@ export interface RegisterResponse {
   token: string;
 }
 
+import http from "./index";
+
 export default {
   login(form: LoginForm) {
-    return axios.post<LoginResponse>("auth/login/", form);
+    return http
+      .post<LoginResponse>("auth/login/", form)
+      .then((res) => res.data);
   },
   register(form: RegisterForm) {
-    return axios.post<RegisterResponse>("auth/register", form);
+    return http
+      .post<RegisterResponse>("auth/register", form)
+      .then((res) => res.data);
   },
   recoverPasswordRequest(form: RecoverPasswordRequestForm) {
-    return axios.post<void>("user/recoverPasswordRequest", form);
+    return http
+      .post<void>("user/recoverPasswordRequest", form)
+      .then((res) => res.data);
   },
   recoverPassword(form: RecoverPasswordForm) {
-    return axios.post<void>("user/recoverPassword", form);
+    return http
+      .post<void>("user/recoverPassword", form)
+      .then((res) => res.data);
   },
   changePassword(form: ChangePasswordForm) {
-    return axios.post<void>("customers/password/change", form);
+    return http
+      .post<void>("customers/password/change", form)
+      .then((res) => res.data);
   },
 };

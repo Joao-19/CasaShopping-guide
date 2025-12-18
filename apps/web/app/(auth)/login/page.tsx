@@ -24,12 +24,18 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
 
     // Empty handlers as requested
-    const handleLogin = (e: React.FormEvent) => {
+    // Empty handlers as requested
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        login({
-            email,
-            password,
-        });
+        try {
+            await login({
+                email,
+                password,
+            });
+            router.push("/");
+        } catch (error) {
+            console.error("Login failed", error);
+        }
     };
 
     const handleAppleLogin = () => {
@@ -46,9 +52,9 @@ export default function LoginPage() {
 
     return (
         <div
-            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-y-auto bg-gray-900 px-4 pt-24 pb-20 md:p-0 md:overflow-hidden">
+            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-y-auto bg-gray-900 px-4 pt-18 pb-20 sm:p-8 p-0 lg:p-24 md:overflow-y-auto lg:overflow-hidden">
             {/* Background Image */}
-            <div className="absolute inset-0 z-0">
+            <div className="fixed inset-0 z-0">
                 <img
                     src="/login-bg.webp"
                     alt="Interior Background"
@@ -132,7 +138,7 @@ export default function LoginPage() {
                 </CardFooter>
             </FormCard>
 
-            <div className="absolute bottom-6 left-0 w-full text-center z-20 pointer-events-none">
+            <div className="absolute bottom-12 left-0 w-full text-center">
                 <p className="text-white/60 text-[10px] tracking-widest uppercase">
                     CasaShopping © 2025
                 </p>

@@ -34,4 +34,20 @@ export class GatewayService {
       throw error;
     }
   }
+  async login(data: any) {
+    try {
+      const response = await this.httpService.axiosRef.post(
+        `${this.AUTH_SERVICE_URL}/auth/login`,
+        data
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new ConflictException(
+          error.response.data.message || "Erro no login"
+        );
+      }
+      throw error;
+    }
+  }
 }

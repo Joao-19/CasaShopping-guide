@@ -139,14 +139,6 @@ const RegisterPage = () => {
                     <Link href="/login" className="text-center text-primary font-bold hover:underline">
                         Entrar
                     </Link>
-
-                    {/* Guest Login */}
-                    <Button
-                        variant="outline"
-                        className="w-full h-11 text-[#4B5563] font-semibold border-gray-200 hover:bg-gray-50 hover:text-[#1A2B3C]"
-                    >
-                        Entrar como Convidado (Demo)
-                    </Button>
                 </CardFooter>
             </FormCard>
 
