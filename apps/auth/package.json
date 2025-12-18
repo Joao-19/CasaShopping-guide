@@ -8,11 +8,12 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@repo/dtos": "workspace:*",
     "@nestjs/common": "^11.1.9",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.9",
     "@nestjs/platform-express": "^11.1.9",
     "@repo/database": "workspace:*",
+    "@repo/dtos": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

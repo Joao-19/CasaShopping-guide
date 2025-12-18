@@ -71,6 +71,9 @@ services:
       - PORT=3003
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
       - JWT_SECRET=${JWT_SECRET:-supersecret}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-15m}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET:-refresh-secret}
+      - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN:-7d}
     depends_on:
       - database
     networks:

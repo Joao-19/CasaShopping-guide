@@ -1,10 +1,13 @@
 import { Injectable, ConflictException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { prisma } from "@repo/database"; // Nosso banco compartilhado
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 
 @Injectable()
 export class AuthService {
+  constructor(private configService: ConfigService) {}
+
   async register(data: any) {
     const userExists = await prisma.user.findUnique({
       where: { email: data.email },
@@ -41,19 +44,23 @@ export class AuthService {
 
     const accessToken = jwt.sign(
       payload,
-      process.env.JWT_SECRET || "access-secret",
+      this.configService.getOrThrow<string>("JWT_SECRET"),
       {
-        expiresIn: (process.env.JWT_EXPIRES_IN ||
-          "15m") as jwt.SignOptions["expiresIn"],
+        expiresIn: this.configService.get<string>(
+          "JWT_EXPIRES_IN",
+          "15m"
+        ) as jwt.SignOptions["expiresIn"],
       }
     );
 
     const refreshToken = jwt.sign(
       payload,
-      process.env.REFRESH_TOKEN_SECRET || "refresh-secret",
+      this.configService.getOrThrow<string>("REFRESH_TOKEN_SECRET"),
       {
-        expiresIn: (process.env.REFRESH_TOKEN_EXPIRES_IN ||
-          "7d") as jwt.SignOptions["expiresIn"],
+        expiresIn: this.configService.get<string>(
+          "REFRESH_TOKEN_EXPIRES_IN",
+          "7d"
+        ) as jwt.SignOptions["expiresIn"],
       }
     );
 
