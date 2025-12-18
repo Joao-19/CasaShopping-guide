@@ -14,15 +14,22 @@ import {
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import { UnloggedToolbar } from "./-components/UnloggedToolbar";
+import useLogin from "@/composable/login/useLogin";
 
 export default function LoginPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const { login, loading, error } = useLogin();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
     // Empty handlers as requested
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implement login logic
+        login({
+            email,
+            password,
+        });
     };
 
     const handleAppleLogin = () => {
@@ -86,6 +93,8 @@ export default function LoginPage() {
                             type="email"
                             placeholder="exemplo@email.com"
                             required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
 
                         <BaseInput
@@ -94,6 +103,8 @@ export default function LoginPage() {
                             type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
                             required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
 
                         <Button

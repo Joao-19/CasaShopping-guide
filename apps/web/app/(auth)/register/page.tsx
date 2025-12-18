@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@repo/ui/sonner";
 import { Button } from "@repo/ui/button";
-import { Input } from "@repo/ui/input";
+
 import {
     CardContent,
     CardFooter,
@@ -13,6 +13,7 @@ import {
     CardDescription,
 } from "@repo/ui/card";
 import FormCard from "@repo/ui/cards/FormCard";
+import BaseInput from "@repo/ui/inputs/BaseInput";
 import Link from "next/link";
 import { OAuthOptions } from "../login/-components/OAuthOptions";
 import { UnloggedToolbar } from "../login/-components/UnloggedToolbar";
@@ -78,83 +79,47 @@ const RegisterPage = () => {
                 </CardHeader>
 
                 <CardContent>
-                    {/* OAuth Options */}
-                    <div className="w-full">
-                        <OAuthOptions
-                            onGoogleClick={() => handleGoogleLogin()}
-                            onFacebookClick={() => handleFacebookLogin()}
-                            onAppleClick={() => handleAppleLogin()}
-                        />
-                    </div>
-
-                    <div className="relative flex items-center mb-6 w-full">
-                        <div className="grow border-t border-gray-100" />
-                        <span className="shrink-0 mx-3 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-                            OU
-                        </span>
-                        <div className="grow border-t border-gray-100" />
-                    </div>
 
                     {/* Form */}
                     <form onSubmit={handleRegister} className="w-full space-y-4">
-                        <div className="space-y-1.5">
-                            <label htmlFor="name" className="text-xs font-semibold text-[#1A2B3C] ml-1">
-                                Nome Completo
-                            </label>
-                            <Input
-                                id="name"
-                                type="text"
-                                placeholder="Seu nome completo"
-                                className="h-11 rounded-lg border-gray-200 focus:border-[#1A2B3C] focus:ring-[#1A2B3C]"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                        </div>
+                        <BaseInput
+                            id="name"
+                            label="Nome Completo"
+                            type="text"
+                            placeholder="Seu nome completo"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
 
-                        <div className="space-y-1.5">
-                            <label htmlFor="phone" className="text-xs font-semibold text-[#1A2B3C] ml-1">
-                                Telefone
-                            </label>
-                            <Input
-                                id="phone"
-                                type="tel"
-                                placeholder="(00) 00000-0000"
-                                className="h-11 rounded-lg border-gray-200 focus:border-[#1A2B3C] focus:ring-[#1A2B3C]"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                            />
-                        </div>
+                        <BaseInput
+                            id="phone"
+                            label="Telefone"
+                            type="tel"
+                            placeholder="(00) 00000-0000"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                        />
 
-                        <div className="space-y-1.5">
-                            <label htmlFor="email" className="text-xs font-semibold text-[#1A2B3C] ml-1">
-                                E-mail
-                            </label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="exemplo@email.com"
-                                className="h-11 rounded-lg border-gray-200 focus:border-[#1A2B3C] focus:ring-[#1A2B3C]"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
+                        <BaseInput
+                            id="email"
+                            label="E-mail"
+                            type="email"
+                            placeholder="exemplo@email.com"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
 
-                        <div className="space-y-1.5">
-                            <label htmlFor="password" className="text-xs font-semibold text-[#1A2B3C] ml-1">
-                                Senha
-                            </label>
-                            <Input
-                                id="password"
-                                type="password"
-                                placeholder="••••••••"
-                                className="h-11 rounded-lg border-gray-200 focus:border-[#1A2B3C] focus:ring-[#1A2B3C]"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
+                        <BaseInput
+                            id="password"
+                            label="Senha"
+                            type="password"
+                            placeholder="••••••••"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
 
                         <Button
                             type="submit"

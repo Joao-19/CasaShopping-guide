@@ -10,12 +10,6 @@ export class GatewayService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService
   ) {
-    console.log(
-      "GatewayService initialized. ConfigService:",
-      configService,
-      "HttpService:",
-      httpService
-    );
     this.AUTH_SERVICE_URL =
       this.configService?.get<string>("AUTH_SERVICE_URL") ||
       "http://localhost:3002";

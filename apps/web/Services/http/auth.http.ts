@@ -2,7 +2,7 @@ import axios from "axios";
 import User from "@/Domain/User";
 
 export interface LoginForm {
-  name: string;
+  email: string;
   password: string;
 }
 export interface LoginResponse {
