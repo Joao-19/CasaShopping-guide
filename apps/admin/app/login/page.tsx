@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@repo/ui/button";
@@ -77,13 +77,28 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
     );
 };
 
+const BACKGROUND_IMAGES = [
+    "/login/close-up-keyboard-glasses-with-executives-background.jpg",
+    "/login/office-desktop-with-laptop-analytics.jpg",
+    "/login/office-working-desktop-xa.jpg",
+    "/login/tochscreen-documents-with-charts.jpg",
+    "/login/top-view-desk-concept-with-laptop.jpg",
+    "/login/workplace-objects.jpg"
+];
+
 const LoginPage = () => {
     const router = useRouter();
     const { login, loading } = useLogin();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [backgroundImage, setBackgroundImage] = useState("");
     const { FormProvider, validateAll } = useForm();
     const webUrl = useRedirectUrl(process.env.NEXT_PUBLIC_WEB_URL, 3001);
+
+    useEffect(() => {
+        const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
+        setBackgroundImage(BACKGROUND_IMAGES[randomIndex] || "");
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -103,14 +118,16 @@ const LoginPage = () => {
 
     return (
         <div
-            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden bg-gray-900 px-4">
+            className="relative min-h-[900px] w-full flex items-center justify-center font-sans overflow-hidden bg-linear-to-b from-gray-800 to-black px-4">
             {/* Background Image */}
-            <div className="fixed inset-0 z-0">
-                <img
-                    src="/login-bg.webp"
-                    alt="Interior Background"
-                    className="w-full h-full object-cover"
-                />
+            <div className={`fixed inset-0 z-0 transition-opacity duration-2500 ease-in-out ${backgroundImage ? "opacity-100" : "opacity-0"}`}>
+                {backgroundImage && (
+                    <img
+                        src={backgroundImage}
+                        alt="Interior Background"
+                        className="w-full h-full object-cover"
+                    />
+                )}
                 <div className="absolute inset-0 bg-black/20"></div>
             </div>
 

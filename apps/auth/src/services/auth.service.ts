@@ -1,11 +1,11 @@
-import { Injectable, ConflictException } from "@nestjs/common";
+import { Injectable, ConflictException, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { prisma } from "@repo/database"; // Nosso banco compartilhado
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   constructor(private configService: ConfigService) {}
 
   async register(data: any) {
@@ -37,6 +37,36 @@ export class AuthService {
       return result;
     }
     return null;
+  }
+
+  async onModuleInit() {
+    await this.createAdminIfNotExists();
+  }
+
+  async createAdminIfNotExists() {
+    const email = this.configService.getOrThrow<string>("ADMIN_EMAIL");
+    const password = this.configService.getOrThrow<string>("ADMIN_PASSWORD");
+    const name = this.configService.getOrThrow<string>("ADMIN_NAME");
+
+    const adminExists = await prisma.admin.findUnique({
+      where: { email },
+    });
+
+    if (!adminExists) {
+      const passwordHash = await bcrypt.hash(password, 6);
+
+      await prisma.admin.create({
+        data: {
+          email,
+          name,
+          password: passwordHash,
+          role: "SUPER_ADMIN",
+        },
+      });
+      console.log(`✅ Admin user created: ${email}`);
+    } else {
+      console.log(`ℹ️ Admin user already exists: ${email}`);
+    }
   }
 
   async login(user: any) {
