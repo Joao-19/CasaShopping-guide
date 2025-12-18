@@ -165,7 +165,7 @@ const LoginPage = () => {
 
             <div className="absolute bottom-6 left-0 w-full text-center z-20 pointer-events-none">
                 <p className="text-white/60 text-[10px] tracking-widest uppercase">
-                    CasaShopping © 2025
+                    CasaShopping © {new Date().getFullYear()}
                 </p>
             </div>
 
