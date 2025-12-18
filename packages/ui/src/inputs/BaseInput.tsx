@@ -40,7 +40,8 @@ const BaseInput = React.forwardRef<HTMLInputElement, BaseInputProps>(
                             "pl-4", // Explicit default left padding
                             "pr-10", // Space for the icon (default right padding)
                             error && "border-destructive focus-visible:ring-destructive",
-                            "w-full h-11 rounded-lg border border-gray-200 text-gray-900 placeholder:text--400 focus:ring-1 outline-none transition-all text-sm bg-white",
+                            "w-full h-11 rounded-lg border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-1 outline-none transition-all text-sm bg-white",
+                            error && "invalidField",
                             className,
                         )}
                         ref={ref}
