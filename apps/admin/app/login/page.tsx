@@ -117,8 +117,7 @@ const LoginPage = () => {
     };
 
     return (
-        <div
-            className="relative min-h-[900px] w-full flex items-center justify-center font-sans overflow-hidden bg-linear-to-b from-gray-800 to-black px-4">
+        <div className="relative h-dvh w-full font-sans bg-linear-to-b from-gray-800 to-black overflow-hidden">
             {/* Background Image */}
             <div className={`fixed inset-0 z-0 transition-opacity duration-2500 ease-in-out ${backgroundImage ? "opacity-100" : "opacity-0"}`}>
                 {backgroundImage && (
@@ -131,57 +130,62 @@ const LoginPage = () => {
                 <div className="absolute inset-0 bg-black/20"></div>
             </div>
 
+            {/* Note: UnloggedToolbar is absolute oriented. We leave it outside the scroll flow or ensure scroll view handles it */}
             <UnloggedToolbar />
 
-            <FormCard title="">
-                <CardHeader className="flex flex-col items-center">
-                    {/* Logo */}
-                    <div className="text-center mb-4">
-                        <Image
-                            src="/logo.avif"
-                            alt="Casa Shopping Logo"
-                            width={108}
-                            height={56}
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
+            {/* Scrollable Content Container */}
+            <div className="relative z-10 h-full w-full overflow-y-auto flex flex-col items-center px-4 pt-24 pb-6">
+                <div className="flex-1 flex items-center justify-center w-full my-4">
+                    <FormCard title="">
+                        <CardHeader className="flex flex-col items-center">
+                            {/* Logo */}
+                            <div className="text-center mb-4">
+                                <Image
+                                    src="/logo.avif"
+                                    alt="Casa Shopping Logo"
+                                    width={108}
+                                    height={56}
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
 
-                    <CardTitle className="text-2xl font-bold text-primary">
-                        Login Administrativo
-                    </CardTitle>
+                            <CardTitle className="text-2xl font-bold text-primary">
+                                Login Administrativo
+                            </CardTitle>
 
-                    <CardDescription className="text-center text-gray-500">
-                        Acesso administrativo ao sistema.
-                    </CardDescription>
-                </CardHeader>
+                            <CardDescription className="text-center text-gray-500">
+                                Acesso administrativo ao sistema.
+                            </CardDescription>
+                        </CardHeader>
 
-                <CardContent>
-                    <FormProvider>
-                        <LoginForm
-                            formData={{ email, password }}
-                            setFormData={{ setEmail, setPassword }}
-                            loading={loading}
-                            onSubmit={handleLogin}
-                        />
-                    </FormProvider>
-                </CardContent>
+                        <CardContent>
+                            <FormProvider>
+                                <LoginForm
+                                    formData={{ email, password }}
+                                    setFormData={{ setEmail, setPassword }}
+                                    loading={loading}
+                                    onSubmit={handleLogin}
+                                />
+                            </FormProvider>
+                        </CardContent>
 
-                <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6 mt-2">
-                    <Link href={webUrl} className="w-full">
-                        <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
-                            Acesso Usuário
-                        </Button>
-                    </Link>
-                </CardFooter>
-            </FormCard>
+                        <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6 mt-2">
+                            <Link href={webUrl} className="w-full">
+                                <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
+                                    Acesso Usuário
+                                </Button>
+                            </Link>
+                        </CardFooter>
+                    </FormCard>
+                </div>
 
-            <div className="absolute bottom-6 left-0 w-full text-center z-20 pointer-events-none">
-                <p className="text-white/60 text-[10px] tracking-widest uppercase">
-                    CasaShopping © {new Date().getFullYear()}
-                </p>
+                <div className="w-full text-center pointer-events-none mt-auto shrink-0">
+                    <p className="text-white/60 text-[10px] tracking-widest uppercase">
+                        CasaShopping © {new Date().getFullYear()}
+                    </p>
+                </div>
             </div>
-
         </div>
     );
 };
