@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "tsx --watch src/main.ts",
+    "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/index.js"
   },

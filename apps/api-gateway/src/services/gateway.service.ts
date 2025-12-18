@@ -1,8 +1,6 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable, ConflictException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { prisma } from "@repo/database";
-import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class GatewayService {
@@ -24,21 +22,22 @@ export class GatewayService {
   }
 
   async register(data: any) {
-    const userExists = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
-    if (userExists) {
-      throw new ConflictException("Email já cadastrado");
+    try {
+      const usersServiceUrl =
+        this.configService.get<string>("USERS_SERVICE_URL") ||
+        "http://localhost:3004";
+      const response = await this.httpService.axiosRef.post(
+        `${usersServiceUrl}/user/register`,
+        data
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new ConflictException(
+          error.response.data.message || "Erro no registro"
+        );
+      }
+      throw error;
     }
-
-    const passwordHash = await bcrypt.hash(data.password, 6);
-
-    const newUser = await prisma.user.create({
-      data: { ...data, password: passwordHash },
-    });
-
-    const { password, ...result } = newUser;
-    return result;
   }
 }
