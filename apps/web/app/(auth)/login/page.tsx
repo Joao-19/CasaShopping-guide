@@ -15,6 +15,7 @@ import {
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import { UnloggedToolbar } from "@repo/ui/UnloggedToolbar";
+import { UnloggedFooter } from "@repo/ui/UnloggedFooter";
 import useLogin from "@/composable/login/useLogin";
 import { useRedirectUrl } from "@/composable/useRedirectUrl";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
@@ -102,8 +103,7 @@ const LoginPage = () => {
     };
 
     return (
-        <div
-            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-y-auto bg-gray-900 px-4 pt-18 pb-20 sm:p-8 p-0 lg:p-24 md:overflow-y-auto lg:overflow-hidden">
+        <div className="relative h-dvh w-full font-sans bg-gray-900 overflow-hidden">
             {/* Background Image */}
             <div className="fixed inset-0 z-0">
                 <img
@@ -116,63 +116,63 @@ const LoginPage = () => {
 
             <UnloggedToolbar />
 
-            <FormCard title="">
-                <CardHeader className="flex flex-col items-center">
-                    {/* Logo */}
-                    <div className="text-center mb-4">
-                        <Image
-                            src="/logo.avif"
-                            alt="Casa Shopping Logo"
-                            width={108}
-                            height={56}
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
+            {/* Scrollable Content Container */}
+            <div className="relative z-10 h-full w-full overflow-y-auto flex flex-col items-center px-4 pt-24 pb-6">
+                <div className="flex-1 flex items-center justify-center w-full my-4">
+                    <FormCard title="">
+                        <CardHeader className="flex flex-col items-center">
+                            {/* Logo */}
+                            <div className="text-center mb-4">
+                                <Image
+                                    src="/logo.avif"
+                                    alt="Casa Shopping Logo"
+                                    width={108}
+                                    height={56}
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
 
-                    <CardTitle className="text-2xl font-bold text-primary">
-                        Entrar na conta
-                    </CardTitle>
+                            <CardTitle className="text-2xl font-bold text-primary">
+                                Entrar na conta
+                            </CardTitle>
 
-                    <CardDescription className="text-center text-gray-500">
-                        Bem-vindo de volta! Insira seus dados.
-                    </CardDescription>
-                </CardHeader>
+                            <CardDescription className="text-center text-gray-500">
+                                Bem-vindo de volta! Insira seus dados.
+                            </CardDescription>
+                        </CardHeader>
 
-                <CardContent>
-                    <FormProvider>
-                        <LoginForm
-                            formData={{ email, password }}
-                            setFormData={{ setEmail, setPassword }}
-                            loading={loading}
-                            onSubmit={handleLogin}
-                        />
-                    </FormProvider>
-                </CardContent>
+                        <CardContent>
+                            <FormProvider>
+                                <LoginForm
+                                    formData={{ email, password }}
+                                    setFormData={{ setEmail, setPassword }}
+                                    loading={loading}
+                                    onSubmit={handleLogin}
+                                />
+                            </FormProvider>
+                        </CardContent>
 
-                <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6 mt-2">
-                    <div className="text-center text-sm text-gray-600">
-                        Não tem uma conta?
-                    </div>
+                        <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6 mt-2">
+                            <div className="text-center text-sm text-gray-600">
+                                Não tem uma conta?
+                            </div>
 
-                    <Link href="/register" className="font-bold text-primary hover:underline">
-                        Cadastre-se grátis
-                    </Link>
+                            <Link href="/register" className="font-bold text-primary hover:underline">
+                                Cadastre-se grátis
+                            </Link>
 
-                    <Link href={adminUrl} className="w-full">
-                        <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
-                            Área Administrativa
-                        </Button>
-                    </Link>
-                </CardFooter>
-            </FormCard>
+                            <Link href={adminUrl} className="w-full">
+                                <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
+                                    Área Administrativa
+                                </Button>
+                            </Link>
+                        </CardFooter>
+                    </FormCard>
+                </div>
 
-            <div className="absolute bottom-6 left-0 w-full text-center z-20 pointer-events-none">
-                <p className="text-white/60 text-[10px] tracking-widest uppercase">
-                    CasaShopping © {new Date().getFullYear()}
-                </p>
+                <UnloggedFooter />
             </div>
-
         </div>
     );
 };

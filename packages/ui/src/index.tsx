@@ -6,3 +6,4 @@ export * from "./label";
 export * from "./sonner";
 export * from "./lib/utils";
 export * from "./UnloggedToolbar";
+export * from "./UnloggedFooter";

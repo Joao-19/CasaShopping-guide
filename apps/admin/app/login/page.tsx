@@ -13,6 +13,9 @@ import {
 } from "@repo/ui/card";
 import Link from "next/link";
 import { UnloggedToolbar } from "@repo/ui/UnloggedToolbar";
+import { UnloggedFooter } from "@repo/ui/UnloggedFooter";
+
+
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import useLogin from "@/composable/login/useLogin";
@@ -180,11 +183,7 @@ const LoginPage = () => {
                     </FormCard>
                 </div>
 
-                <div className="w-full text-center pointer-events-none mt-auto shrink-0">
-                    <p className="text-white/60 text-[10px] tracking-widest uppercase">
-                        CasaShopping © {new Date().getFullYear()}
-                    </p>
-                </div>
+                <UnloggedFooter />
             </div>
         </div>
     );
