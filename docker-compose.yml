@@ -51,7 +51,7 @@ services:
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
       - AUTH_SERVICE_URL=http://auth-service:3003
       - USERS_SERVICE_URL=http://users-service:3004
-      - CORS_ORIGIN=http://localhost:3001
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3001}
     depends_on:
       - database
       - auth-service
@@ -102,7 +102,7 @@ services:
       - "3001:3001"
     environment:
       - PORT=3001
-      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     depends_on:
       - api-gateway
     networks:
@@ -118,7 +118,7 @@ services:
       - "3002:3002"
     environment:
       - PORT=3002
-      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     depends_on:
       - api-gateway
     networks:
