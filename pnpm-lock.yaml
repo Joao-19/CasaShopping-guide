@@ -524,6 +524,9 @@ importers:
       eslint:
         specifier: ^9.39.1
         version: 9.39.1(jiti@2.6.1)
+      next:
+        specifier: 15.1.0
+        version: 15.1.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       typescript:
         specifier: 5.9.2
         version: 5.9.2

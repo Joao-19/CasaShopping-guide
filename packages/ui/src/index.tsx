@@ -5,3 +5,4 @@ export * from "./input";
 export * from "./label";
 export * from "./sonner";
 export * from "./lib/utils";
+export * from "./UnloggedToolbar";

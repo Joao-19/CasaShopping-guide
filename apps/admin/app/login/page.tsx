@@ -12,6 +12,7 @@ import {
     CardFooter,
 } from "@repo/ui/card";
 import Link from "next/link";
+import { UnloggedToolbar } from "@repo/ui/UnloggedToolbar";
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import useLogin from "@/composable/login/useLogin";
@@ -113,6 +114,8 @@ const LoginPage = () => {
                 <div className="absolute inset-0 bg-black/20"></div>
             </div>
 
+            <UnloggedToolbar />
+
             <FormCard title="">
                 <CardHeader className="flex flex-col items-center">
                     {/* Logo */}
@@ -128,7 +131,7 @@ const LoginPage = () => {
                     </div>
 
                     <CardTitle className="text-2xl font-bold text-primary">
-                        Acesso Administrativo
+                        Login Administrativo
                     </CardTitle>
 
                     <CardDescription className="text-center text-gray-500">

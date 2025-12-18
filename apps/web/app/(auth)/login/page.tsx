@@ -14,7 +14,7 @@ import {
 } from "@repo/ui/card";
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
-import { UnloggedToolbar } from "./-components/UnloggedToolbar";
+import { UnloggedToolbar } from "@repo/ui/UnloggedToolbar";
 import useLogin from "@/composable/login/useLogin";
 import { useRedirectUrl } from "@/composable/useRedirectUrl";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";

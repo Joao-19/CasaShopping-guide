@@ -36,7 +36,7 @@ export const UnloggedToolbar = () => {
                 {showBackButton && (
                     <button
                         onClick={handleBack}
-                        className="flex items-center gap-2 text-white hover:text-white/80 transition-colors text-sm font-medium drop-shadow-md"
+                        className="flex items-center gap-2 text-white hover:text-white/80 transition-colors text-sm font-medium drop-shadow-md cursor-pointer"
                     >
                         <ArrowLeft className="h-[18px] w-[18px]" strokeWidth={2} />
                         <span className="md:inline">Voltar</span>
@@ -46,7 +46,7 @@ export const UnloggedToolbar = () => {
 
             {/* Support Button */}
             <div className="pointer-events-auto min-w-[100px] flex justify-end">
-                <button className="flex items-center gap-2 text-white hover:text-white/80 transition-colors text-sm font-medium drop-shadow-md">
+                <button className="flex items-center gap-2 text-white hover:text-white/80 transition-colors text-sm font-medium drop-shadow-md cursor-pointer">
                     <span className="md:inline">
                         Fale com o suporte
                     </span>

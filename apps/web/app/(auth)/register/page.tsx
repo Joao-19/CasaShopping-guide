@@ -14,7 +14,7 @@ import {
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import Link from "next/link";
-import { UnloggedToolbar } from "../login/-components/UnloggedToolbar";
+import { UnloggedToolbar } from "@repo/ui/UnloggedToolbar";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import userRegister from "@/composable/login/useRegister";
 import { useRedirectUrl } from "@/composable/useRedirectUrl";
