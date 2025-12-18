@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 
 import { useValidator } from './composable/useForm';
+export { useValidator } from './composable/useForm';
 
 // Types
 export type ValidatorRule<T> = ((value: T) => string | boolean | number)[];

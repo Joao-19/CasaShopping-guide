@@ -15,9 +15,92 @@ import {
 import FormCard from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import Link from "next/link";
-import { OAuthOptions } from "../login/-components/OAuthOptions";
 import { UnloggedToolbar } from "../login/-components/UnloggedToolbar";
+import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import userRegister from "@/composable/login/useRegister";
+
+interface RegisterFormProps {
+    formData: {
+        name: string;
+        email: string;
+        phone: string;
+        password: string;
+    };
+    setFormData: {
+        setName: (val: string) => void;
+        setEmail: (val: string) => void;
+        setPhone: (val: string) => void;
+        setPassword: (val: string) => void;
+    };
+    loading: boolean;
+    onSubmit: (e: React.FormEvent) => void;
+}
+
+const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterFormProps) => {
+    const validator = useValidator();
+    const { name, email, phone, password } = formData;
+    const { setName, setEmail, setPhone, setPassword } = setFormData;
+
+    const nameField = useFormField(name, [validator.rules.required]);
+    const emailField = useFormField(email, [validator.rules.required, validator.rules.email]);
+    const passwordField = useFormField(password, [validator.rules.required]);
+    const phoneField = useFormField(phone, []);
+
+    return (
+        <form onSubmit={onSubmit} className="w-full">
+            <BaseInput
+                id="name"
+                label="Nome Completo"
+                type="text"
+                placeholder="Seu nome completo"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                error={nameField.error}
+            />
+
+            <BaseInput
+                id="phone"
+                label="Telefone"
+                type="tel"
+                placeholder="(00) 00000-0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                error={phoneField.error}
+            />
+
+            <BaseInput
+                id="email"
+                label="E-mail"
+                type="email"
+                placeholder="exemplo@email.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                error={emailField.error}
+            />
+
+            <BaseInput
+                id="password"
+                label="Senha"
+                type="password"
+                placeholder="••••••••"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                error={passwordField.error}
+            />
+
+            <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 mt-2 bg-primary hover:bg-bg-primary text-white font-semibold rounded-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+                {loading ? "Criando conta..." : "Criar conta"}
+            </Button>
+        </form>
+    );
+};
 
 const RegisterPage = () => {
     const router = useRouter();
@@ -26,14 +109,18 @@ const RegisterPage = () => {
     const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
     const [loading, setLoading] = useState(false);
-    const { register, loading: registerLoading, error: registerError } = userRegister();
+    const { register } = userRegister();
+    const { FormProvider, validateAll } = useForm();
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateAll()) return;
+
         setLoading(true);
 
         try {
-            const response = await register({
+            await register({
                 name,
                 email,
                 password,
@@ -49,11 +136,6 @@ const RegisterPage = () => {
             setLoading(false);
         }
     };
-
-    // Placeholder handlers for now
-    const handleGoogleLogin = () => { };
-    const handleFacebookLogin = () => { };
-    const handleAppleLogin = () => { };
 
     return (
         <div
@@ -79,56 +161,14 @@ const RegisterPage = () => {
                 </CardHeader>
 
                 <CardContent>
-
-                    {/* Form */}
-                    <form onSubmit={handleRegister} className="w-full space-y-4">
-                        <BaseInput
-                            id="name"
-                            label="Nome Completo"
-                            type="text"
-                            placeholder="Seu nome completo"
-                            required
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                    <FormProvider>
+                        <RegisterForm
+                            formData={{ name, email, phone, password }}
+                            setFormData={{ setName, setEmail, setPhone, setPassword }}
+                            loading={loading}
+                            onSubmit={handleRegister}
                         />
-
-                        <BaseInput
-                            id="phone"
-                            label="Telefone"
-                            type="tel"
-                            placeholder="(00) 00000-0000"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                        />
-
-                        <BaseInput
-                            id="email"
-                            label="E-mail"
-                            type="email"
-                            placeholder="exemplo@email.com"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-
-                        <BaseInput
-                            id="password"
-                            label="Senha"
-                            type="password"
-                            placeholder="••••••••"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full h-11 mt-2 bg-primary hover:bg-bg-primary text-white font-semibold rounded-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                        >
-                            {loading ? "Criando conta..." : "Criar conta"}
-                        </Button>
-                    </form>
+                    </FormProvider>
                 </CardContent>
 
                 <CardFooter className="flex flex-col space-y-2 border-t border-gray-200 pt-6 mt-2">

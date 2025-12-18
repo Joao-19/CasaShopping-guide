@@ -4,6 +4,8 @@ import { Input } from "../input";
 import { Label } from "../label";
 import { cn } from "../lib/utils";
 import { Button } from "../button";
+import BaseErrorText from "../Texts/BaseErrorText";
+import BaseText from "../Texts/BaseText";
 
 interface BaseInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
@@ -65,11 +67,7 @@ const BaseInput = React.forwardRef<HTMLInputElement, BaseInputProps>(
                     )}
                 </div>
 
-                {error ? (
-                    <p className="text-sm font-medium text-destructive">{error}</p>
-                ) : helperText ? (
-                    <p className="text-sm text-muted-foreground">{helperText}</p>
-                ) : null}
+                <BaseErrorText errorMessage={error || null} />
             </div>
         );
     }
