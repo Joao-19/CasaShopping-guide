@@ -81,12 +81,12 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
 };
 
 const BACKGROUND_IMAGES = [
-    "/login/close-up-keyboard-glasses-with-executives-background.jpg",
-    "/login/office-desktop-with-laptop-analytics.jpg",
-    "/login/office-working-desktop-xa.jpg",
-    "/login/tochscreen-documents-with-charts.jpg",
-    "/login/top-view-desk-concept-with-laptop.jpg",
-    "/login/workplace-objects.jpg"
+    "/Login/close-up-keyboard-glasses-with-executives-background.jpg",
+    "/Login/office-desktop-with-laptop-analytics.jpg",
+    "/Login/office-working-desktop-xa.jpg",
+    "/Login/tochscreen-documents-with-charts.jpg",
+    "/Login/top-view-desk-concept-with-laptop.jpg",
+    "/Login/workplace-objects.jpg"
 ];
 
 const LoginPage = () => {
