@@ -1,23 +1,52 @@
 'use client';
 
+import { useState } from 'react';
 import { ImageUpload, BaseText, Button, Input, Label, FormCard } from '@repo/ui';
+import useStore from '@/composable/useStore';
+import { CreateStoreDto } from '@repo/dtos';
 
 interface CreateStoreFormProps {
     onClose: () => void;
 }
 
 export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
-    const handleSubmit = (e: React.FormEvent) => {
+    const { createStore, loading } = useStore();
+    const [formData, setFormData] = useState<CreateStoreDto>({
+        name: '',
+        location: '',
+        phone: '',
+        website: '',
+        facebook: '',
+        instagram: '',
+        youtube: '',
+        image: null
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleImageSelect = (file: File) => {
+        setFormData(prev => ({ ...prev, image: file }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implement submission logic
-        console.log('Form submitted');
-        onClose();
+        try {
+            await createStore(formData);
+            console.log('Store created successfully');
+            onClose();
+        } catch (error) {
+            console.error('Failed to create store', error);
+            // Ideally assume useStore or specific error handling here
+        }
     };
 
     return (
         <FormCard
             title="Nova Loja"
-            className="max-w-xl w-full md:min-w-[600px] xs:m-2"
+            className="max-w-xl w-full md:min-w-[600px] "
             headerAction={
                 <button
                     onClick={onClose}
@@ -35,13 +64,16 @@ export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
                 <ImageUpload
                     variant="profile"
                     label="Logo da Loja"
-                    onImageSelect={(file: File) => console.log(file)}
+                    onImageSelect={handleImageSelect}
                 />
 
                 {/* Nome da Loja */}
                 <div>
                     <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Nome da Loja</Label>
                     <Input
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
                         type="text"
                         className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
                         placeholder="Ex: Abracasa"
@@ -53,6 +85,9 @@ export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
                     <div>
                         <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Endereço (Bloco/Piso)</Label>
                         <Input
+                            name="location"
+                            value={formData.location}
+                            onChange={handleChange}
                             type="text"
                             className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
                             placeholder="Bloco A, 101"
@@ -61,6 +96,9 @@ export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
                     <div>
                         <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Telefone</Label>
                         <Input
+                            name="phone"
+                            value={formData.phone || ''}
+                            onChange={handleChange}
                             type="text"
                             className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
                             placeholder="(00) 0000-0000"
@@ -78,6 +116,9 @@ export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
                             <path d="M2 12h20"></path>
                         </svg>
                         <Input
+                            name="website"
+                            value={formData.website || ''}
+                            onChange={handleChange}
                             type="text"
                             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
                             placeholder="https://www.loja.com.br"
@@ -95,6 +136,9 @@ export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
                             <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                         </svg>
                         <Input
+                            name="facebook"
+                            value={formData.facebook || ''}
+                            onChange={handleChange}
                             type="text"
                             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
                             placeholder="URL do Facebook"
@@ -109,6 +153,9 @@ export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
                             <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
                         </svg>
                         <Input
+                            name="instagram"
+                            value={formData.instagram || ''}
+                            onChange={handleChange}
                             type="text"
                             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
                             placeholder="URL do Instagram"
@@ -122,6 +169,9 @@ export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
                             <path d="m10 15 5-3-5-3z"></path>
                         </svg>
                         <Input
+                            name="youtube"
+                            value={formData.youtube || ''}
+                            onChange={handleChange}
                             type="text"
                             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
                             placeholder="URL do YouTube"

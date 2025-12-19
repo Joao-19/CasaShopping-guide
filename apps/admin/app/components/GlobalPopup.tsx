@@ -14,7 +14,7 @@ export function GlobalPopup() {
         // onClick={hidePopup}
         >
             <div
-                className="relative z-50 animate-in slide-in-from-bottom-5 duration-300"
+                className="relative z-50 animate-in slide-in-from-bottom-5 duration-300 p-4"
                 onClick={(e) => e.stopPropagation()}
             >
                 {content}
