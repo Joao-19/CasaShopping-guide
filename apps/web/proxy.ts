@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 // Removi a barra '/' daqui, pois queremos proteger a home
 const publicRoutes = ["/login", "/register"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Tenta pegar o token
   const token = request.cookies.get("access_token")?.value;
 

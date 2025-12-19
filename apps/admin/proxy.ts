@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 // Removed '/' from here, as we want to protect the home
 const publicRoutes = ["/login"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Try to get the token
   // Using 'access_token' to match the web app pattern, assuming backend sets same cookie name or gateway handles it
   const token = request.cookies.get("access_token")?.value;

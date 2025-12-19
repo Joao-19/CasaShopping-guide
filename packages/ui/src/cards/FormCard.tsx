@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../card";
 
-export default function FormCard({
+export function FormCard({
     title,
     children,
 }: {

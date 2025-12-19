@@ -11,7 +11,7 @@ import {
     CardTitle,
     CardDescription,
 } from "@repo/ui/card";
-import FormCard from "@repo/ui/cards/FormCard";
+import { FormCard } from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import Link from "next/link";
 import { UnloggedToolbar } from "@repo/ui/UnloggedToolbar";

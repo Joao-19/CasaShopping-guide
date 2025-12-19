@@ -1,0 +1,118 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const menuItems = [
+    {
+        label: 'Lojas',
+        href: '/DashBoard/lojas',
+        icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-store" aria-hidden="true">
+                <path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"></path>
+                <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"></path>
+                <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"></path>
+            </svg>
+        ),
+    },
+    {
+        label: 'Produtos',
+        href: '/DashBoard/produtos',
+        icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-package" aria-hidden="true">
+                <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path>
+                <path d="M12 22V12"></path>
+                <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                <path d="m7.5 4.27 9 5.15"></path>
+            </svg>
+        ),
+    },
+    {
+        label: 'Usuários',
+        href: '/DashBoard/usuarios',
+        icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users" aria-hidden="true">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+        ),
+    },
+];
+
+interface SidebarProps {
+    onLogout?: () => void;
+}
+
+export function Sidebar({ onLogout }: SidebarProps) {
+    const pathname = usePathname();
+
+    const handleLogout = () => {
+        if (onLogout) {
+            onLogout();
+        } else {
+            // Lógica padrão de logout
+            console.log('Logout');
+        }
+    };
+
+    return (
+        <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-30 flex flex-col">
+            {/* Logo */}
+            <div className="h-24 flex items-center px-6 border-b border-gray-100">
+                <img
+                    src="/_assets/v11/6185a459e744ef985eb76eac209651a566e786e4.png"
+                    alt="CasaShopping"
+                    className="h-10 w-auto object-contain brightness-0 opacity-80"
+                />
+            </div>
+
+            {/* Menu Items */}
+            <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                    Menu Principal
+                </p>
+
+                {menuItems.map((item) => {
+                    const isActive = pathname === item.href || pathname?.startsWith(item.href);
+
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`
+                                w-full flex items-center gap-3 px-4 py-3 rounded-lg 
+                                transition-all duration-200 group
+                                ${isActive
+                                    ? 'bg-[#1A2B3C] text-white shadow-md'
+                                    : 'text-gray-500 hover:bg-gray-100 hover:text-[#1A2B3C]'
+                                }
+                            `}
+                        >
+                            <span className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-[#1A2B3C]'}>
+                                {item.icon}
+                            </span>
+                            <span className="font-medium text-sm">{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </div>
+
+            {/* Logout Button */}
+            <div className="p-4 border-t border-gray-100">
+                <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out" aria-hidden="true">
+                        <path d="m16 17 5-5-5-5"></path>
+                        <path d="M21 12H9"></path>
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    </svg>
+                    <span className="font-medium text-sm">Sair</span>
+                </button>
+            </div>
+        </aside>
+    );
+}
