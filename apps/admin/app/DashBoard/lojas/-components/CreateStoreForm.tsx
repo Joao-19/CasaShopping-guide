@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ImageUpload, BaseText, Button, Input, Label, FormCard } from '@repo/ui';
-import useStore from '@/composable/useStore';
+import useStore from '@/composable/store/useStore';
 import { CreateStoreDto, Store } from '@repo/dtos';
 
 interface CreateStoreFormProps {
@@ -14,12 +14,12 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
     const { createStore, updateStore, loading } = useStore();
     const [formData, setFormData] = useState<CreateStoreDto>({
         name: initialData?.name || '',
-        location: initialData?.location || '',
+        address: initialData?.address || '',
         phone: initialData?.phone || '',
-        website: initialData?.website || '',
-        facebook: initialData?.facebook || '',
-        instagram: initialData?.instagram || '',
-        youtube: initialData?.youtube || '',
+        site: initialData?.site || '',
+        facebookLink: initialData?.facebookLink || '',
+        instagramLink: initialData?.instagramLink || '',
+        youtubeLink: initialData?.youtubeLink || '',
         image: null // File can't be pre-filled from URL easily, would need separate handling for preview
     });
 
@@ -92,8 +92,8 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                     <div>
                         <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Endereço (Bloco/Piso)</Label>
                         <Input
-                            name="location"
-                            value={formData.location}
+                            name="address"
+                            value={formData.address}
                             onChange={handleChange}
                             type="text"
                             className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
@@ -123,8 +123,8 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                             <path d="M2 12h20"></path>
                         </svg>
                         <Input
-                            name="website"
-                            value={formData.website || ''}
+                            name="site"
+                            value={formData.site || ''}
                             onChange={handleChange}
                             type="text"
                             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
@@ -143,8 +143,8 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                             <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                         </svg>
                         <Input
-                            name="facebook"
-                            value={formData.facebook || ''}
+                            name="facebookLink"
+                            value={formData.facebookLink || ''}
                             onChange={handleChange}
                             type="text"
                             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
@@ -160,8 +160,8 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                             <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
                         </svg>
                         <Input
-                            name="instagram"
-                            value={formData.instagram || ''}
+                            name="instagramLink"
+                            value={formData.instagramLink || ''}
                             onChange={handleChange}
                             type="text"
                             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
@@ -176,8 +176,8 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                             <path d="m10 15 5-3-5-3z"></path>
                         </svg>
                         <Input
-                            name="youtube"
-                            value={formData.youtube || ''}
+                            name="youtubeLink"
+                            value={formData.youtubeLink || ''}
                             onChange={handleChange}
                             type="text"
                             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"

@@ -9,35 +9,41 @@ let globalStores: Store[] = [
   {
     id: "1",
     name: "Abracasa",
-    location: "Bloco A, 1º Piso",
+    address: "Bloco A, 1º Piso",
     phone: "(21) 2441-1234",
-    website: "https://abracasa.com.br",
-    facebook: "abracasa",
-    instagram: "abracasa",
-    youtube: "abracasa",
-    image: "AB",
+    site: "https://abracasa.com.br",
+    facebookLink: "abracasa",
+    instagramLink: "abracasa",
+    youtubeLink: "abracasa",
+    logoImage: "AB",
+    createdAt: new Date(),
+    modifiedAt: new Date(),
   },
   {
     id: "2",
     name: "Lumini",
-    location: "Bloco B, 2º Piso",
+    address: "Bloco B, 2º Piso",
     phone: "(21) 2441-5678",
-    website: "https://lumini.com.br",
-    facebook: "lumini",
-    instagram: "lumini",
-    youtube: "lumini",
-    image: "LU",
+    site: "https://lumini.com.br",
+    facebookLink: "lumini",
+    instagramLink: "lumini",
+    youtubeLink: "lumini",
+    logoImage: "LU",
+    createdAt: new Date(),
+    modifiedAt: new Date(),
   },
   {
     id: "3",
     name: "Tok&Stok",
-    location: "Bloco C, Térreo",
+    address: "Bloco C, Térreo",
     phone: "(21) 2441-9012",
-    website: "https://tokstok.com.br",
-    facebook: "tokstok",
-    instagram: "tokstok",
-    youtube: "tokstok",
-    image: "TO",
+    site: "https://tokstok.com.br",
+    facebookLink: "tokstok",
+    instagramLink: "tokstok",
+    youtubeLink: "tokstok",
+    logoImage: "TO",
+    createdAt: new Date(),
+    modifiedAt: new Date(),
   },
 ];
 
@@ -73,29 +79,16 @@ const useStore = () => {
   const deleteHttp = useHttp(storeHttp.delete);
 
   const createStore = async (form: CreateStoreDto) => {
-    setLoadingList(true);
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        let imageUrl = "AB"; // Default fallback
-        if (form.image instanceof File) {
-          imageUrl = URL.createObjectURL(form.image);
-        } else if (typeof form.image === "string") {
-          imageUrl = form.image;
-        }
-
-        const newStore: Store = {
-          id: Math.random().toString(36).substr(2, 9),
-          ...form,
-          phone: form.phone || null, // handle optional
-          image: imageUrl,
-        } as Store;
-
+    try {
+      const newStore = await createHttp.request(form);
+      if (newStore) {
         globalStores = [...globalStores, newStore];
         notifyListeners();
-        setLoadingList(false);
-        resolve();
-      }, 500);
-    });
+      }
+    } catch (error) {
+      console.error("Failed to create store:", error);
+      // createHttp.request handles error state setting, but we might want to log it
+    }
   };
 
   const fetchStores = async () => {
@@ -115,16 +108,21 @@ const useStore = () => {
       setTimeout(() => {
         globalStores = globalStores.map((store) => {
           if (store.id === id) {
-            let updatedImage = store.image; // Default to keeping existing
+            let updatedImage = store.logoImage; // Default to keeping existing
 
             if (form.image instanceof File) {
               updatedImage = URL.createObjectURL(form.image);
             } else if (typeof form.image === "string") {
               updatedImage = form.image;
             }
-            // If form.image is null or undefined, we keep updatedImage as store.image
+            // If form.image is null or undefined, we keep updatedImage as store.logoImage
 
-            return { ...store, ...form, image: updatedImage } as Store;
+            return {
+              ...store,
+              ...form,
+              logoImage: updatedImage,
+              modifiedAt: new Date(),
+            } as Store;
           }
           return store;
         });

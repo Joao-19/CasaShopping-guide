@@ -2,6 +2,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -45,4 +46,23 @@ model Admin {
 enum AdminRole {
   SUPER_ADMIN
   EDITOR
+}
+
+// --- MODELO PARA O SERVIÇO DE STORES (apps/stores) ---
+model Store {
+  id            String  @id @default(uuid())
+  name          String
+  address       String
+  phone         String?
+  site          String?
+  logoImage     String?
+  facebookLink  String?
+  instagramLink String?
+  youtubeLink   String?
+
+  createdAt  DateTime  @default(now())
+  modifiedAt DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  @@map("stores")
 }

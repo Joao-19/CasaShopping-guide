@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { usePopup } from '../../contexts/PopupContext';
 import { CreateStoreForm } from './-components/CreateStoreForm';
 import { Header } from '../components';
-import useStore from '@/composable/useStore';
+import useStore from '@/composable/store/useStore';
 import {
     Table,
     TableBody,
@@ -118,10 +118,10 @@ export default function LojasPage() {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
-                                                    {store.image && store.image.length <= 2 ? (
-                                                        <span className="text-[#1A2B3C] font-bold text-xs">{store.image}</span>
+                                                    {store.logoImage && store.logoImage.length <= 2 ? (
+                                                        <span className="text-[#1A2B3C] font-bold text-xs">{store.logoImage}</span>
                                                     ) : (
-                                                        <img src={store.image} alt={store.name} className="w-full h-full object-cover" />
+                                                        <img src={store.logoImage || undefined} alt={store.name} className="w-full h-full object-cover" />
                                                     )}
                                                 </div>
                                                 <span className="font-medium text-[#1A2B3C] text-sm">{store.name}</span>
@@ -133,7 +133,7 @@ export default function LojasPage() {
                                                     <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
                                                     <circle cx="12" cy="10" r="3"></circle>
                                                 </svg>
-                                                {store.location}
+                                                {store.address}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -146,9 +146,9 @@ export default function LojasPage() {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2 text-gray-400">
-                                                {store.facebook && (
+                                                {store.facebookLink && (
                                                     <a
-                                                        href={store.facebook}
+                                                        href={store.facebookLink}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         onClick={(e) => e.stopPropagation()}
@@ -158,9 +158,9 @@ export default function LojasPage() {
                                                         </svg>
                                                     </a>
                                                 )}
-                                                {store.instagram && (
+                                                {store.instagramLink && (
                                                     <a
-                                                        href={store.instagram}
+                                                        href={store.instagramLink}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         onClick={(e) => e.stopPropagation()}
@@ -172,9 +172,9 @@ export default function LojasPage() {
                                                         </svg>
                                                     </a>
                                                 )}
-                                                {store.youtube && (
+                                                {store.youtubeLink && (
                                                     <a
-                                                        href={store.youtube}
+                                                        href={store.youtubeLink}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         onClick={(e) => e.stopPropagation()}

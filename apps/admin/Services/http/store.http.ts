@@ -3,26 +3,20 @@ import { CreateStoreDto, Store } from "@repo/dtos";
 
 export default {
   create(form: CreateStoreDto) {
-    // If we need to send as FormData for file upload:
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("location", form.location);
-    if (form.phone) formData.append("phone", form.phone);
-    if (form.website) formData.append("website", form.website);
-    if (form.facebook) formData.append("facebook", form.facebook);
-    if (form.instagram) formData.append("instagram", form.instagram);
-    if (form.youtube) formData.append("youtube", form.youtube);
-    if (form.image) {
-      formData.append("image", form.image);
-    }
+    // For now, send as JSON. We'll handle file upload later.
+    // When we add file upload, we'll convert to FormData
+    const payload = {
+      name: form.name,
+      address: form.address,
+      phone: form.phone,
+      site: form.site,
+      facebookLink: form.facebookLink,
+      instagramLink: form.instagramLink,
+      youtubeLink: form.youtubeLink,
+      // image will be handled later
+    };
 
-    return http
-      .post<Store>("stores", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((res) => res.data);
+    return http.post<Store>("stores", payload).then((res) => res.data);
   },
 
   // Placeholders for other methods
