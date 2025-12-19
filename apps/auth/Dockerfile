@@ -1,14 +1,16 @@
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 FROM base AS pruner
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN npm install -g turbo
 COPY . .
 RUN turbo prune --scope=auth-service --docker
 
 FROM base AS builder
-RUN apk add --no-cache libc6-compat openssl python3 make g++
+RUN apt-get update -y && apt-get install -y openssl python3 make g++
 WORKDIR /app
 
 COPY --from=pruner /app/out/json/ .
@@ -25,7 +27,7 @@ RUN pnpm --filter=auth-service build
 
 FROM base AS runner
 WORKDIR /app
-RUN apk add --no-cache openssl
+RUN apt-get update -y && apt-get install -y openssl
 RUN npm install -g pnpm
 
 RUN addgroup --system --gid 1001 nodejs

@@ -1,8 +1,10 @@
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 # Stage 1: Pruner - Isolate the app and its specific dependencies
 FROM base AS pruner
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN npm install -g turbo
 COPY . .
@@ -10,7 +12,7 @@ RUN turbo prune --scope=api-gateway --docker
 
 # Stage 2: Installer & Builder - Install deps and build
 FROM base AS builder
-RUN apk add --no-cache libc6-compat openssl python3 make g++
+RUN apt-get update -y && apt-get install -y openssl python3 make g++
 WORKDIR /app
 
 # Install dependencies based on the pruned lockfile
@@ -32,7 +34,8 @@ RUN pnpm --filter=api-gateway build
 # Stage 3: Runner - Minimal runtime image
 FROM base AS runner
 WORKDIR /app
-RUN apk add --no-cache openssl
+RUN apt-get update -y && apt-get install -y openssl
+RUN npm install -g pnpm
 RUN npm install -g pnpm
 
 # Create non-root user for security
