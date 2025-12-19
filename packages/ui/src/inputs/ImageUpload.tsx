@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import { BaseText } from '../Texts/BaseText';
 
 interface ImageUploadProps {
     variant?: 'profile' | 'card';
@@ -105,7 +106,14 @@ export function ImageUpload({
                         </svg>
                     )}
                 </div>
-                {label && <span className="text-xs text-gray-500 mt-2">{label}</span>}
+                {label && (
+                    <BaseText
+                        text={label}
+                        size="small"
+                        color="gray"
+                        className="text-center mt-2"
+                    />
+                )}
             </div>
         );
     }
@@ -113,7 +121,14 @@ export function ImageUpload({
     // Card variant
     return (
         <div className={`w-full ${className}`}>
-            {label && <span className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</span>}
+            {label && (
+                <BaseText
+                    text={label}
+                    size="small"
+                    color="gray"
+                    className="mb-1.5 font-semibold text-gray-700"
+                />
+            )}
             <div
                 onClick={handleClick}
                 onDragOver={handleDragOver}
@@ -168,8 +183,18 @@ export function ImageUpload({
                                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
                             </svg>
                         </div>
-                        <p className="text-sm font-medium text-gray-700">Clique ou arraste a imagem</p>
-                        <p className="text-xs text-gray-500 mt-1">SVG, PNG, JPG (max. 800x800px)</p>
+                        <BaseText
+                            text="Clique ou arraste a imagem"
+                            size="small"
+                            color="gray"
+                            className="font-medium text-gray-700 text-center"
+                        />
+                        <BaseText
+                            text="SVG, PNG, JPG (max. 800x800px)"
+                            size="small"
+                            color="gray"
+                            className="text-center mt-1"
+                        />
                     </>
                 )}
             </div>

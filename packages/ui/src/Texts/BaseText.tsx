@@ -17,23 +17,23 @@ const colorClasses: Record<BaseTextProps['color'], string> = {
 
 interface BaseTextProps {
     text: string | null;
-    size?: sizes,
-    color: "black" | "white" | "gray" // TODO Add theme colors here!
+    size?: sizes;
+    color: "black" | "white" | "gray"; // TODO Add theme colors here!
+    className?: string;
 }
 
-const BaseText: React.FC<BaseTextProps> = ({ text, size = "medium", color }) => {
+export const BaseText: React.FC<BaseTextProps> = ({ text, size = "medium", color, className }) => {
     return (
         <div
             className={cn(
                 "overflow-hidden transition-all duration-300 ease-in-out w-full text-left",
                 sizeClasses[size],
                 colorClasses[color],
-                text ? "max-h-[100px] opacity-100" : "max-h-0 opacity-0"
+                text ? "max-h-[100px] opacity-100" : "max-h-0 opacity-0",
+                className
             )}
         >
             <p className="p-0 m-0">{text || ""}</p>
         </div>
     );
 };
-
-export default BaseText;

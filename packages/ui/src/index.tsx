@@ -9,4 +9,5 @@ export * from "./UnloggedToolbar";
 export * from "./UnloggedFooter";
 export * from "./cards/FormCard";
 export * from "./inputs/ImageUpload";
+export * from "./Texts/BaseText";
 
