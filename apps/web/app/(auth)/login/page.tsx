@@ -162,11 +162,11 @@ const LoginPage = () => {
                                 Cadastre-se grátis
                             </Link>
 
-                            <Link href={adminUrl} className="w-full">
+                            {/* <Link href={adminUrl} className="w-full">
                                 <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
                                     Área Administrativa
                                 </Button>
-                            </Link>
+                            </Link> */}
                         </CardFooter>
                     </FormCard>
                 </div>
