@@ -18,7 +18,7 @@ WORKDIR /app
 # Install dependencies based on the pruned lockfile
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN npm install -g pnpm
+
 RUN pnpm install
 
 # Copy source code and build
