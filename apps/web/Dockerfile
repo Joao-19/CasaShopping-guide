@@ -40,4 +40,6 @@ COPY --from=builder --chown=nestjs:nodejs /app .
 
 EXPOSE 3001
 
+ENV HOME=/app
+
 CMD ["pnpm", "--filter", "web", "start"]
