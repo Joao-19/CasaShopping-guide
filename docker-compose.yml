@@ -74,6 +74,9 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-15m}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET:-refresh-secret}
       - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN:-7d}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@casashopping.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-Admin123!}
+      - ADMIN_NAME=${ADMIN_NAME:-Admin}
     depends_on:
       - database
     networks:
