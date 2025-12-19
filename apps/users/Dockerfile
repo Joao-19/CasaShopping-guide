@@ -28,7 +28,6 @@ RUN pnpm --filter=users-service build
 FROM base AS runner
 WORKDIR /app
 RUN apt-get update -y && apt-get install -y openssl
-RUN npm install -g pnpm
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs

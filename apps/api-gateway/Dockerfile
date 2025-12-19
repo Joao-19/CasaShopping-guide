@@ -35,8 +35,6 @@ RUN pnpm --filter=api-gateway build
 FROM base AS runner
 WORKDIR /app
 RUN apt-get update -y && apt-get install -y openssl
-RUN npm install -g pnpm
-RUN npm install -g pnpm
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs
