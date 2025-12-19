@@ -6,18 +6,18 @@ function webSocketHostResolver(): string {
   let currentHost = window.location.hostname;
 
   // Se estiver rodando em Electron (protocolo 'file:'), use 'localhost'
-  if (window.location.protocol === 'file:') {
-    currentHost = 'localhost';
+  if (window.location.protocol === "file:") {
+    currentHost = "localhost";
   }
 
   // 2. Detecta se a página atual (Vite) está em HTTPS
-  const isSecure = window.location.protocol === 'https:';
+  const isSecure = window.location.protocol === "https:";
 
   // 3. Define o protocolo do WebSocket (WSS para HTTPS, WS para HTTP)
-  const protocol = isSecure ? 'wss' : 'ws';
+  const protocol = isSecure ? "wss" : "ws";
 
   // 4. Define a porta do seu backend Node.js (que está rodando localmente)
-  const backendPort = 3001; 
+  const backendPort = 3000;
 
   // 5. Monta a URL completa e dinâmica do backend
   // Ex: "ws://26.234.128.245:3001"
@@ -32,7 +32,4 @@ function setWebSocketEventName(entityName: string, eventName: string) {
   return `${entityName}:${eventName}`;
 }
 
-export {
-  webSocketHostResolver,
-  setWebSocketEventName
-};
+export { webSocketHostResolver, setWebSocketEventName };
