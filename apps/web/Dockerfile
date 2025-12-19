@@ -34,9 +34,10 @@ RUN apt-get update -y && apt-get install -y openssl
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
-USER nestjs
-
 COPY --from=builder --chown=nestjs:nodejs /app .
+RUN chown -R nestjs:nodejs /app
+
+USER nestjs
 
 EXPOSE 3001
 
