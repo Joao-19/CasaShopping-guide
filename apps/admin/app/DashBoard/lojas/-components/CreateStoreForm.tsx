@@ -3,24 +3,27 @@
 import { useState } from 'react';
 import { ImageUpload, BaseText, Button, Input, Label, FormCard } from '@repo/ui';
 import useStore from '@/composable/useStore';
-import { CreateStoreDto } from '@repo/dtos';
+import { CreateStoreDto, Store } from '@repo/dtos';
 
 interface CreateStoreFormProps {
     onClose: () => void;
+    initialData?: Store;
 }
 
-export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
-    const { createStore, loading } = useStore();
+export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) {
+    const { createStore, updateStore, loading } = useStore();
     const [formData, setFormData] = useState<CreateStoreDto>({
-        name: '',
-        location: '',
-        phone: '',
-        website: '',
-        facebook: '',
-        instagram: '',
-        youtube: '',
-        image: null
+        name: initialData?.name || '',
+        location: initialData?.location || '',
+        phone: initialData?.phone || '',
+        website: initialData?.website || '',
+        facebook: initialData?.facebook || '',
+        instagram: initialData?.instagram || '',
+        youtube: initialData?.youtube || '',
+        image: null // File can't be pre-filled from URL easily, would need separate handling for preview
     });
+
+    const isEditing = !!initialData;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -34,18 +37,22 @@ export function CreateStoreForm({ onClose }: CreateStoreFormProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await createStore(formData);
-            console.log('Store created successfully');
+            if (isEditing && initialData?.id) {
+                await updateStore(initialData.id, formData);
+                console.log('Store updated successfully');
+            } else {
+                await createStore(formData);
+                console.log('Store created successfully');
+            }
             onClose();
         } catch (error) {
-            console.error('Failed to create store', error);
-            // Ideally assume useStore or specific error handling here
+            console.error('Failed to save store', error);
         }
     };
 
     return (
         <FormCard
-            title="Nova Loja"
+            title={isEditing ? "Editar Loja" : "Nova Loja"}
             className="max-w-xl w-full md:min-w-[600px] "
             headerAction={
                 <button

@@ -62,9 +62,9 @@ export function Sidebar({ onLogout }: SidebarProps) {
             {/* Logo */}
             <div className="h-24 flex items-center px-6 border-b border-gray-100">
                 <img
-                    src="/_assets/v11/6185a459e744ef985eb76eac209651a566e786e4.png"
+                    src="/logomarca_1.png"
                     alt="CasaShopping"
-                    className="h-10 w-auto object-contain brightness-0 opacity-80"
+                    className="h-10 w-auto object-contain grayscale brightness-20"
                 />
             </div>
 
