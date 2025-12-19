@@ -41,7 +41,7 @@ import http from "./index";
 export default {
   login(form: LoginForm) {
     return http
-      .post<LoginResponse>("auth/login/", form)
+      .post<LoginResponse>("auth/admin/login/", form)
       .then((res) => res.data);
   },
   register(form: RegisterForm) {

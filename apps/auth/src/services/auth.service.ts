@@ -69,6 +69,18 @@ export class AuthService implements OnModuleInit {
     }
   }
 
+  async validateAdmin(email: string, pass: string): Promise<any> {
+    const admin = await prisma.admin.findUnique({
+      where: { email },
+    });
+
+    if (admin && (await bcrypt.compare(pass, admin.password))) {
+      const { password, ...result } = admin;
+      return result;
+    }
+    return null;
+  }
+
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
 
@@ -105,6 +117,45 @@ export class AuthService implements OnModuleInit {
       accessToken,
       refreshToken,
       user,
+    };
+  }
+
+  async loginAdmin(admin: any) {
+    const payload = { email: admin.email, sub: admin.id, role: "admin" };
+
+    const accessToken = jwt.sign(
+      payload,
+      this.configService.getOrThrow<string>("JWT_SECRET"),
+      {
+        expiresIn: this.configService.get<string>(
+          "JWT_EXPIRES_IN",
+          "15m"
+        ) as jwt.SignOptions["expiresIn"],
+      }
+    );
+
+    const refreshToken = jwt.sign(
+      payload,
+      this.configService.getOrThrow<string>("REFRESH_TOKEN_SECRET"),
+      {
+        expiresIn: this.configService.get<string>(
+          "REFRESH_TOKEN_EXPIRES_IN",
+          "7d"
+        ) as jwt.SignOptions["expiresIn"],
+      }
+    );
+
+    const refreshHash = await bcrypt.hash(refreshToken, 6);
+
+    await prisma.admin.update({
+      where: { id: admin.id },
+      data: { refreshToken: refreshHash },
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: admin,
     };
   }
 }

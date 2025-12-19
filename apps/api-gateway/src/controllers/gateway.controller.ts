@@ -34,4 +34,29 @@ export class AuthController {
 
     return user;
   }
+
+  @Post("admin/login")
+  async loginAdmin(
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { accessToken, refreshToken, user } =
+      await this.gatewayService.adminLogin(body);
+
+    res.cookie("access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return user;
+  }
 }
