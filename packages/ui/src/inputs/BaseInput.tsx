@@ -5,7 +5,7 @@ import { Label } from "../label";
 import { cn } from "../lib/utils";
 import { Button } from "../button";
 import BaseErrorText from "../Texts/BaseErrorText";
-import BaseText from "../Texts/BaseText";
+
 
 interface BaseInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
