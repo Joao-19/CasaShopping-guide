@@ -1,8 +1,14 @@
 import { useEffect } from "react";
-import { useSocket } from "@/composable/Service/Socket/useSocket";
-import { webSocketHostResolver } from "@/composable/Service/Socket/useHostResolver";
+import { useSocket, UseSocketResult } from "@/Service/Socket/useSocket";
+import { webSocketHostResolver } from "@/Service/Socket/useHostResolver";
 
-export default function useEmitWebSocket(eventName: string, ...form: any[]) {
+export default function useEmitWebSocket(
+  eventName: string,
+  ...form: any[]
+): Omit<UseSocketResult, "error" | "loading" | "emitLoading" | "emitError"> & {
+  socketError: Error | null;
+  socketLoading: boolean;
+} {
   const currentHost = webSocketHostResolver();
 
   const {
