@@ -10,7 +10,7 @@ COPY .gitignore .gitignore
 COPY --from=turbo-builder /app/out/json/ .
 COPY --from=turbo-builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN corepack enable
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 FROM node:20-slim AS builder
 WORKDIR /app
