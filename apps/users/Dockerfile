@@ -33,5 +33,6 @@ COPY --from=builder /app/apps/users/dist ./apps/users/dist
 COPY --from=installer /app/node_modules ./node_modules
 COPY --from=installer /app/apps/users/package.json ./apps/users/package.json
 COPY --from=installer /app/apps/users/node_modules ./apps/users/node_modules
+COPY --from=builder /app/packages ./packages
 WORKDIR /app/apps/users
 CMD ["node", "dist/main"]

@@ -33,5 +33,6 @@ COPY --from=builder /app/apps/auth/dist ./apps/auth/dist
 COPY --from=installer /app/node_modules ./node_modules
 COPY --from=installer /app/apps/auth/package.json ./apps/auth/package.json
 COPY --from=installer /app/apps/auth/node_modules ./apps/auth/node_modules
+COPY --from=builder /app/packages ./packages
 WORKDIR /app/apps/auth
 CMD ["node", "dist/main"]
