@@ -29,6 +29,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 FROM node:20-alpine AS runner
 WORKDIR /app
+RUN apk add --no-cache openssl libc6-compat
 COPY --from=builder /app/apps/auth/dist ./apps/auth/dist
 COPY --from=installer /app/node_modules ./node_modules
 COPY --from=installer /app/apps/auth/package.json ./apps/auth/package.json
