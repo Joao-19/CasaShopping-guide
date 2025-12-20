@@ -39,7 +39,7 @@ services:
 
   # --- API GATEWAY ---
   api-gateway:
-    image: joaovvv/casashopping-gateway:latest # <--- NOVA LINHA
+    image: joaovvv/casashopping-api-gateway:latest
     build:
       context: .
       dockerfile: apps/api-gateway/Dockerfile
@@ -61,7 +61,7 @@ services:
 
   # --- AUTH SERVICE ---
   auth-service:
-    image: joaovvv/casashopping-auth:latest # <--- NOVA LINHA
+    image: joaovvv/casashopping-auth-service:latest
     build:
       context: .
       dockerfile: apps/auth/Dockerfile
@@ -85,7 +85,7 @@ services:
 
   # --- USERS SERVICE ---
   users-service:
-    image: joaovvv/casashopping-users:latest # <--- NOVA LINHA
+    image: joaovvv/casashopping-users-service:latest
     build:
       context: .
       dockerfile: apps/users/Dockerfile
@@ -102,7 +102,7 @@ services:
 
   # --- WEB APP ---
   web:
-    image: joaovvv/casashopping-web:latest # <--- NOVA LINHA
+    image: joaovvv/casashopping-web:latest
     build:
       context: .
       dockerfile: apps/web/Dockerfile
@@ -121,7 +121,7 @@ services:
 
   # --- ADMIN APP ---
   admin:
-    image: joaovvv/casashopping-admin:latest # <--- NOVA LINHA
+    image: joaovvv/casashopping-admin:latest
     build:
       context: .
       dockerfile: apps/admin/Dockerfile

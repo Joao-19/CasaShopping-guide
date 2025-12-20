@@ -1,41 +1,28 @@
-FROM node:20-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-
-FROM base AS pruner
+FROM node:20-alpine AS turbo-builder
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN npm install -g turbo
 COPY . .
 RUN turbo prune --scope=users-service --docker
 
-FROM base AS builder
-RUN apt-get update -y && apt-get install -y openssl python3 make g++
+FROM node:20-alpine AS installer
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
+COPY .gitignore .gitignore
+COPY --from=turbo-builder /app/out/json/ .
+COPY --from=turbo-builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN corepack enable
+RUN pnpm install --frozen-lockfile
 
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-
-RUN pnpm install
-
-COPY --from=pruner /app/out/full/ .
-COPY turbo.json turbo.json
-
-RUN pnpm --filter @repo/database exec prisma generate
-
-RUN pnpm --filter=users-service build
-
-FROM base AS runner
+FROM node:20-alpine AS builder
 WORKDIR /app
-RUN apt-get update -y && apt-get install -y openssl
+COPY --from=installer /app/ .
+COPY --from=turbo-builder /app/out/full/ .
+RUN corepack enable
+RUN turbo run build --filter=users-service
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nestjs
-USER nestjs
-
-COPY --from=builder --chown=nestjs:nodejs /app .
-
-EXPOSE 3004
-
-# users-service package.json defines start as "node dist/index.js"
-CMD ["node", "apps/users/dist/main.js"]
+FROM node:20-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/apps/users/dist ./dist
+COPY --from=installer /app/node_modules ./node_modules
+CMD ["node", "dist/main"]

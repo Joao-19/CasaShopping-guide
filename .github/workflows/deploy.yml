@@ -2,7 +2,7 @@ name: Build All & Deploy
 
 on:
   push:
-    branches: ["main", "admin"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:

@@ -1,46 +1,38 @@
-FROM node:20-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-
-FROM base AS pruner
+FROM node:20-alpine AS turbo-builder
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN npm install -g turbo
 COPY . .
 RUN turbo prune --scope=web --docker
 
-FROM base AS builder
-RUN apt-get update -y && apt-get install -y openssl python3 make g++
+FROM node:20-alpine AS installer
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
+COPY .gitignore .gitignore
+COPY --from=turbo-builder /app/out/json/ .
+COPY --from=turbo-builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN corepack enable
+RUN pnpm install --frozen-lockfile
 
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install
-
-COPY --from=pruner /app/out/full/ .
-COPY turbo.json turbo.json
-
-RUN pnpm --filter @repo/database exec prisma generate
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=installer /app/ .
+COPY --from=turbo-builder /app/out/full/ .
 
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Use pnpm --filter to run build directly, bypassing turbo CLI in builder
-RUN pnpm --filter=web build
+RUN corepack enable
+RUN turbo run build --filter=web
 
-FROM base AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
-RUN apt-get update -y && apt-get install -y openssl
-
 RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nestjs
-COPY --from=builder --chown=nestjs:nodejs /app .
-RUN chown -R nestjs:nodejs /app
+RUN adduser --system --uid 1001 nextjs
+USER nextjs
 
-USER nestjs
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
 
-EXPOSE 3001
-
-ENV HOME=/app
-
-CMD ["pnpm", "--filter", "web", "start"]
+CMD ["node", "apps/web/server.js"]
