@@ -21,7 +21,7 @@ do
         
         # Executa a migration (Ajuste para seu ORM: prisma, typeorm, etc)
         # Exemplo com Prisma:
-        docker exec $SERVICE npx prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma
+        docker exec $SERVICE npx -y prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma
         
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}✅ $SERVICE sincronizado com sucesso!${NC}"

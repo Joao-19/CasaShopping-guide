@@ -79,7 +79,7 @@ jobs:
 
             # Executa as migrations automaticamente
             echo "Rodando migrations..."
-            docker exec casashopping-auth npx prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma || echo "Sem migrations para auth"
+            docker exec casashopping-auth npx -y prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma || echo "Sem migrations para auth"
 
             # Limpa o lixo
             docker image prune -f
