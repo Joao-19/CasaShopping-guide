@@ -23,6 +23,7 @@ ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN corepack enable
+RUN npm install -g turbo
 RUN turbo run build --filter=admin
 
 FROM node:20-alpine AS runner

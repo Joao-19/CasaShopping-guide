@@ -19,6 +19,7 @@ WORKDIR /app
 COPY --from=installer /app/ .
 COPY --from=turbo-builder /app/out/full/ .
 RUN corepack enable
+RUN npm install -g turbo
 RUN turbo run build --filter=api-gateway
 
 FROM node:20-alpine AS runner
