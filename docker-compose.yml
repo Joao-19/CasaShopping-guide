@@ -51,6 +51,7 @@ services:
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
       - AUTH_SERVICE_URL=http://auth-service:3003
       - USERS_SERVICE_URL=http://users-service:3004
+      - STORES_SERVICE_URL=http://stores-service:3005
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3001}
     depends_on:
       - database
@@ -135,6 +136,23 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     depends_on:
       - api-gateway
+    networks:
+      - casashopping-net
+
+  # --- STORES SERVICE ---
+  stores-service:
+    image: joaovvv/casashopping-stores-service:latest
+    build:
+      context: .
+      dockerfile: apps/stores/Dockerfile
+    container_name: casashopping-stores
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+    depends_on:
+      - database
     networks:
       - casashopping-net
 
