@@ -10,6 +10,7 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     allowedDevOrigins: ["192.168.0.5"],
+    output: "standalone",
 };
 
 export default nextConfig;
