@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 echo -e "${YELLOW}Iniciando sincronização de bancos de dados...${NC}"
 
 # Lista de containers que precisam de migration (nomes definidos no docker-compose)
-SERVICES=("casashopping-auth" "casashopping-users" "casashopping-gateway")
+SERVICES=("casashopping-auth" "casashopping-users" "casashopping-gateway" "casashopping-stores")
 
 for SERVICE in "${SERVICES[@]}"
 do
@@ -21,7 +21,7 @@ do
         
         # Executa a migration (Ajuste para seu ORM: prisma, typeorm, etc)
         # Exemplo com Prisma:
-        docker exec $SERVICE npx prisma migrate deploy
+        docker exec $SERVICE npx prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma
         
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}✅ $SERVICE sincronizado com sucesso!${NC}"
