@@ -30,7 +30,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 FROM node:20-alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache openssl libc6-compat \
-    && apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.17/main compat-openssl1.1
+    && apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.19/community compat-openssl1.1
 COPY --from=builder /app/apps/stores/dist ./apps/stores/dist
 COPY --from=installer /app/node_modules ./node_modules
 COPY --from=installer /app/apps/stores/package.json ./apps/stores/package.json
