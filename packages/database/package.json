@@ -9,7 +9,8 @@
   "scripts": {
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

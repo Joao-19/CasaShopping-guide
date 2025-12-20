@@ -18,8 +18,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=installer /app/ .
 COPY --from=turbo-builder /app/out/full/ .
+RUN apk add --no-cache libc6-compat openssl
 RUN corepack enable
 RUN npm install -g turbo
+RUN cd packages/database && npx prisma generate
 RUN turbo run build --filter=auth-service
 
 FROM node:20-alpine AS runner
