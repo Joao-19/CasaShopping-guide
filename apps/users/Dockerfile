@@ -24,8 +24,13 @@ RUN npm install -g turbo
 RUN cd packages/database && npx prisma generate
 RUN turbo run build --filter=users-service
 
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 FROM node:20-alpine AS runner
 WORKDIR /app
-COPY --from=builder /app/apps/users/dist ./dist
+COPY --from=builder /app/apps/users/dist ./apps/users/dist
 COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/apps/users/package.json ./apps/users/package.json
+WORKDIR /app/apps/users
 CMD ["node", "dist/main"]
