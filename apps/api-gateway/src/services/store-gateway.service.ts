@@ -21,4 +21,13 @@ export class StoreGatewayService {
     );
     return response.data;
   }
+
+  async findAll(page: number): Promise<Store[]> {
+    const response = await firstValueFrom(
+      this.httpService.get<Store[]>(`${this.storesServiceUrl}/stores`, {
+        params: { page },
+      })
+    );
+    return response.data;
+  }
 }

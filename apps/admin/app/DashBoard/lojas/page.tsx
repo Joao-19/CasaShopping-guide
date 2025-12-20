@@ -118,10 +118,12 @@ export default function LojasPage() {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
-                                                    {store.logoImage && store.logoImage.length <= 2 ? (
-                                                        <span className="text-[#1A2B3C] font-bold text-xs">{store.logoImage}</span>
+                                                    {store.logoImage && store.logoImage.length > 2 ? (
+                                                        <img src={store.logoImage} alt={store.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <img src={store.logoImage || undefined} alt={store.name} className="w-full h-full object-cover" />
+                                                        <span className="text-[#1A2B3C] font-bold text-xs">
+                                                            {store.name.substring(0, 2).toUpperCase()}
+                                                        </span>
                                                     )}
                                                 </div>
                                                 <span className="font-medium text-[#1A2B3C] text-sm">{store.name}</span>

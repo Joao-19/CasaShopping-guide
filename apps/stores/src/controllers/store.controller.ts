@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, Get, Query } from "@nestjs/common";
 import { StoreService } from "@/services/store.service";
 import { CreateStoreDto, Store } from "@repo/dtos";
 
@@ -9,5 +9,10 @@ export class StoreController {
   @Post()
   async create(@Body() createStoreDto: CreateStoreDto): Promise<Store> {
     return this.storeService.create(createStoreDto);
+  }
+
+  @Get()
+  async findAll(@Query("page") page: string = "1"): Promise<Store[]> {
+    return this.storeService.findAll(+page);
   }
 }

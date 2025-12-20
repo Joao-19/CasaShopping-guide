@@ -20,4 +20,20 @@ export class StoreService {
 
     return store;
   }
+
+  async findAll(page: number = 1): Promise<Store[]> {
+    const take = 15;
+    const skip = (page - 1) * take;
+
+    return prisma.store.findMany({
+      take,
+      skip,
+      orderBy: {
+        name: "asc",
+      },
+      where: {
+        deletedAt: null,
+      },
+    });
+  }
 }

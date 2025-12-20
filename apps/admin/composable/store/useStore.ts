@@ -5,47 +5,7 @@ import storeHttp from "@/Services/http/store.http";
 import { CreateStoreDto, Store } from "@repo/dtos";
 
 // --- Module-Level State (Shared across all useStore instances) ---
-let globalStores: Store[] = [
-  {
-    id: "1",
-    name: "Abracasa",
-    address: "Bloco A, 1º Piso",
-    phone: "(21) 2441-1234",
-    site: "https://abracasa.com.br",
-    facebookLink: "abracasa",
-    instagramLink: "abracasa",
-    youtubeLink: "abracasa",
-    logoImage: "AB",
-    createdAt: new Date(),
-    modifiedAt: new Date(),
-  },
-  {
-    id: "2",
-    name: "Lumini",
-    address: "Bloco B, 2º Piso",
-    phone: "(21) 2441-5678",
-    site: "https://lumini.com.br",
-    facebookLink: "lumini",
-    instagramLink: "lumini",
-    youtubeLink: "lumini",
-    logoImage: "LU",
-    createdAt: new Date(),
-    modifiedAt: new Date(),
-  },
-  {
-    id: "3",
-    name: "Tok&Stok",
-    address: "Bloco C, Térreo",
-    phone: "(21) 2441-9012",
-    site: "https://tokstok.com.br",
-    facebookLink: "tokstok",
-    instagramLink: "tokstok",
-    youtubeLink: "tokstok",
-    logoImage: "TO",
-    createdAt: new Date(),
-    modifiedAt: new Date(),
-  },
-];
+let globalStores: Store[] = [];
 
 // Simple subscription system
 const listeners: Set<(stores: Store[]) => void> = new Set();
@@ -78,12 +38,30 @@ const useStore = () => {
   );
   const deleteHttp = useHttp(storeHttp.delete);
 
+  const fetchStores = async () => {
+    try {
+      setLoadingList(true);
+      const stores = await listHttp.request(undefined as any);
+      if (stores) {
+        globalStores = stores;
+        notifyListeners();
+        return stores;
+      }
+      return [];
+    } catch (error) {
+      console.error("Failed to fetch stores:", error);
+      return [];
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
   const createStore = async (form: CreateStoreDto) => {
     try {
       const newStore = await createHttp.request(form);
       if (newStore) {
-        globalStores = [...globalStores, newStore];
-        notifyListeners();
+        // Refresh the list from the server to ensure consistency
+        await fetchStores();
       }
     } catch (error) {
       console.error("Failed to create store:", error);
@@ -91,60 +69,29 @@ const useStore = () => {
     }
   };
 
-  const fetchStores = async () => {
-    // Just simulates a delay, data is already synced via listener
-    setLoadingList(true);
-    return new Promise<Store[]>((resolve) => {
-      setTimeout(() => {
-        setLoadingList(false);
-        resolve([...globalStores]);
-      }, 500);
-    });
-  };
-
   const updateStore = async (id: string, form: Partial<CreateStoreDto>) => {
-    setLoadingList(true);
-    return new Promise<Store>((resolve) => {
-      setTimeout(() => {
-        globalStores = globalStores.map((store) => {
-          if (store.id === id) {
-            let updatedImage = store.logoImage; // Default to keeping existing
-
-            if (form.image instanceof File) {
-              updatedImage = URL.createObjectURL(form.image);
-            } else if (typeof form.image === "string") {
-              updatedImage = form.image;
-            }
-            // If form.image is null or undefined, we keep updatedImage as store.logoImage
-
-            return {
-              ...store,
-              ...form,
-              logoImage: updatedImage,
-              modifiedAt: new Date(),
-            } as Store;
-          }
-          return store;
-        });
+    try {
+      const updatedStore = await updateHttp.request({ id, form });
+      if (updatedStore) {
+        globalStores = globalStores.map((s) =>
+          s.id === id ? updatedStore : s
+        );
         notifyListeners();
-        setLoadingList(false);
-        // Find updated store to return
-        const updated = globalStores.find((s) => s.id === id);
-        resolve(updated as Store);
-      }, 500);
-    });
+        return updatedStore;
+      }
+    } catch (error) {
+      console.error("Failed to update store:", error);
+    }
   };
 
   const deleteStore = async (id: string) => {
-    setLoadingList(true);
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        globalStores = globalStores.filter((store) => store.id !== id);
-        notifyListeners();
-        setLoadingList(false);
-        resolve();
-      }, 500);
-    });
+    try {
+      await deleteHttp.request(id);
+      globalStores = globalStores.filter((s) => s.id !== id);
+      notifyListeners();
+    } catch (error) {
+      console.error("Failed to delete store:", error);
+    }
   };
 
   return {
