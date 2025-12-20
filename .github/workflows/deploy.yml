@@ -1,43 +1,56 @@
-name: Build & Deploy
+name: Build All & Deploy
 
 on:
   push:
-    branches: ["main", "admin"] # Só roda quando commitar na main
+    branches: ["main", "admin"]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Aqui definimos os 5 serviços e onde está o Dockerfile de cada um
+        service:
+          - name: casashopping-gateway
+            file: apps/api-gateway/Dockerfile
+          - name: casashopping-auth
+            file: apps/auth/Dockerfile
+          - name: casashopping-users
+            file: apps/users/Dockerfile
+          - name: casashopping-web
+            file: apps/web/Dockerfile
+          - name: casashopping-admin
+            file: apps/admin/Dockerfile
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      # Configura o QEMU para conseguir emular o processador ARM da Oracle
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      # Configura o Docker Buildx (o construtor multi-plataforma)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Loga no Docker Hub
       - name: Login no Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Builda para ARM64 (Oracle) e envia para o Docker Hub
-      - name: Build and push
+      - name: Build and push (${{ matrix.service.name }})
         uses: docker/build-push-action@v5
         with:
-          context: . # Ou a pasta onde está seu Dockerfile (ex: ./apps/web)
-          file: ./Dockerfile # Caminho do seu Dockerfile
+          context: .
+          file: ./${{ matrix.service.file }} # Usa o caminho específico da matriz
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/casashopping-web:latest
-          platforms: linux/arm64 # ⚠️ O SEGREDO ESTÁ AQUI (Compila para ARM)
+          # Gera a tag correta para cada serviço
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service.name }}:latest
+          platforms: linux/arm64
 
   deploy-to-oracle:
-    needs: build-and-push # Só roda se o build der certo
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
@@ -47,17 +60,16 @@ jobs:
           username: ${{ secrets.HOST_USER }}
           key: ${{ secrets.HOST_KEY }}
           script: |
-            # Entra na pasta
             cd ~/apps/CasaShopping-guide
 
-            # Baixa a versão nova do Git (se tiver mudado docker-compose)
+            # Baixa o docker-compose novo (com as imagens configuradas)
             git pull
 
-            # Baixa a imagem nova do Docker Hub
+            # Baixa as 5 imagens novas do Docker Hub
             docker compose pull
 
-            # Recria os containers
+            # Sobe tudo
             docker compose up -d
 
-            # Limpa o lixo (imagens velhas)
+            # Limpa o lixo
             docker image prune -f

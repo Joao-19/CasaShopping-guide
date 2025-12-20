@@ -25,7 +25,7 @@ RUN pnpm --filter @repo/database exec prisma generate
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Build the project
+# Use pnpm --filter to run build directly, bypassing turbo CLI in builder
 RUN pnpm --filter=web build
 
 FROM base AS runner
@@ -34,17 +34,13 @@ RUN apt-get update -y && apt-get install -y openssl
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
-
-# Copy standalone output
-COPY --from=builder --chown=nestjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=nestjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder --chown=nestjs:nodejs /app/apps/web/public ./apps/web/public
+COPY --from=builder --chown=nestjs:nodejs /app .
+RUN chown -R nestjs:nodejs /app
 
 USER nestjs
 
-EXPOSE 3000
+EXPOSE 3001
 
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+ENV HOME=/app
 
-CMD ["node", "apps/web/server.js"]
+CMD ["pnpm", "--filter", "web", "start"]

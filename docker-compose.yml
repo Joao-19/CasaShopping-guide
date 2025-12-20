@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  # --- BANCO DE DADOS (PostgreSQL) ---
+  # --- BANCO DE DADOS ---
   database:
     image: postgres:15-alpine
     container_name: casashopping-db
@@ -21,14 +21,13 @@ services:
       timeout: 5s
       retries: 5
 
-  # --- STORAGE (MinIO - S3 Compatible) ---
-  # Sua "carta na manga" para as imagens
+  # --- STORAGE ---
   storage:
     image: minio/minio:latest
     container_name: casashopping-storage
     ports:
-      - "9000:9000" # API (Back-end acessa aqui)
-      - "9001:9001" # Console Web (Você acessa aqui)
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: ${STORAGE_USER:-admin}
       MINIO_ROOT_PASSWORD: ${STORAGE_PASSWORD:-password123}
@@ -38,8 +37,9 @@ services:
     networks:
       - casashopping-net
 
-  # --- API GATEWAY (Porta 3000) ---
+  # --- API GATEWAY ---
   api-gateway:
+    image: joaovvv/casashopping-gateway:latest # <--- NOVA LINHA
     build:
       context: .
       dockerfile: apps/api-gateway/Dockerfile
@@ -59,8 +59,9 @@ services:
     networks:
       - casashopping-net
 
-  # --- AUTH SERVICE (Porta 3003) ---
+  # --- AUTH SERVICE ---
   auth-service:
+    image: joaovvv/casashopping-auth:latest # <--- NOVA LINHA
     build:
       context: .
       dockerfile: apps/auth/Dockerfile
@@ -82,8 +83,9 @@ services:
     networks:
       - casashopping-net
 
-  # --- USERS SERVICE (Porta 3004) ---
+  # --- USERS SERVICE ---
   users-service:
+    image: joaovvv/casashopping-users:latest # <--- NOVA LINHA
     build:
       context: .
       dockerfile: apps/users/Dockerfile
@@ -98,8 +100,9 @@ services:
     networks:
       - casashopping-net
 
-  # --- WEB APP (Porta 3001) ---
+  # --- WEB APP ---
   web:
+    image: joaovvv/casashopping-web:latest # <--- NOVA LINHA
     build:
       context: .
       dockerfile: apps/web/Dockerfile
@@ -116,8 +119,9 @@ services:
     networks:
       - casashopping-net
 
-  # --- ADMIN APP (Porta 3002) ---
+  # --- ADMIN APP ---
   admin:
+    image: joaovvv/casashopping-admin:latest # <--- NOVA LINHA
     build:
       context: .
       dockerfile: apps/admin/Dockerfile
