@@ -21,9 +21,21 @@ export class StoreService {
     return store;
   }
 
-  async findAll(page: number = 1): Promise<Store[]> {
+  async findAll(page: number = 1, search?: string): Promise<Store[]> {
     const take = 15;
     const skip = (page - 1) * take;
+
+    const where: any = {
+      deletedAt: null,
+    };
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { address: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search, mode: "insensitive" } },
+      ];
+    }
 
     return prisma.store.findMany({
       take,
@@ -31,9 +43,14 @@ export class StoreService {
       orderBy: {
         name: "asc",
       },
-      where: {
-        deletedAt: null,
-      },
+      where,
+    });
+  }
+
+  async delete(id: string): Promise<Store> {
+    return prisma.store.update({
+      where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 }

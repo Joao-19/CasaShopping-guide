@@ -20,8 +20,15 @@ export default {
   },
 
   // Placeholders for other methods
-  list() {
-    return http.get<Store[]>("stores").then((res) => res.data);
+  list(params?: { page?: number; search?: string }) {
+    return http
+      .get<Store[]>("stores", {
+        params: {
+          page: params?.page,
+          search: params?.search,
+        },
+      })
+      .then((res) => res.data);
   },
 
   update(id: string, form: Partial<CreateStoreDto>) {

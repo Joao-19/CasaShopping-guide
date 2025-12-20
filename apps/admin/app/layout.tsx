@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { PopupProvider } from "./contexts/PopupContext";
-import { GlobalPopup } from "./components/GlobalPopup";
+import Providers from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,10 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <PopupProvider>
-          {children}
-          <GlobalPopup />
-        </PopupProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

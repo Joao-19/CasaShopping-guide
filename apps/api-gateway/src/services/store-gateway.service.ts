@@ -22,11 +22,18 @@ export class StoreGatewayService {
     return response.data;
   }
 
-  async findAll(page: number): Promise<Store[]> {
+  async findAll(page: number, search?: string): Promise<Store[]> {
     const response = await firstValueFrom(
       this.httpService.get<Store[]>(`${this.storesServiceUrl}/stores`, {
-        params: { page },
+        params: { page, search },
       })
+    );
+    return response.data;
+  }
+
+  async delete(id: string): Promise<Store> {
+    const response = await firstValueFrom(
+      this.httpService.delete<Store>(`${this.storesServiceUrl}/stores/${id}`)
     );
     return response.data;
   }

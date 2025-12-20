@@ -1,124 +1,77 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useHttp } from "@/composable/Service/http/useHttp";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import storeHttp from "@/Services/http/store.http";
-import { CreateStoreDto, Store } from "@repo/dtos";
-
-// --- Module-Level State (Shared across all useStore instances) ---
-let globalStores: Store[] = [];
-
-// Simple subscription system
-const listeners: Set<(stores: Store[]) => void> = new Set();
-const notifyListeners = () => {
-  listeners.forEach((listener) => listener([...globalStores]));
-};
+import { CreateStoreDto } from "@repo/dtos";
 
 const useStore = () => {
-  const [data, setData] = useState<Store[]>(globalStores); // Initialize with current global state
-  const [loadingList, setLoadingList] = useState(false);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const queryClient = useQueryClient();
 
-  // Sync with global state
-  useEffect(() => {
-    const listener = (newStores: Store[]) => setData(newStores);
-    listeners.add(listener);
-    // Ensure we have the latest data on mount
-    setData([...globalStores]);
-    return () => {
-      listeners.delete(listener);
-    };
-  }, []);
+  const {
+    data: stores = [],
+    isLoading: loadingList,
+    error: listError,
+  } = useQuery({
+    queryKey: ["stores", page, search],
+    queryFn: () => storeHttp.list({ page, search }),
+    // In TanStack Query v5, keepPreviousData is placeholderData: (previousData) => previousData
+    placeholderData: (previousData) => previousData,
+  });
 
-  // Operations
-  const createHttp = useHttp(storeHttp.create);
-  const listHttp = useHttp(storeHttp.list);
-  // Explicitly typing params for updateHttp to avoid inference issues with Partial types
-  const updateHttp = useHttp(
-    (params: { id: string; form: Partial<CreateStoreDto> }) =>
-      storeHttp.update(params.id, params.form)
-  );
-  const deleteHttp = useHttp(storeHttp.delete);
+  const createMutation = useMutation({
+    mutationFn: (form: CreateStoreDto) => storeHttp.create(form),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stores"] });
+    },
+  });
 
-  const fetchStores = async () => {
-    try {
-      setLoadingList(true);
-      const stores = await listHttp.request(undefined as any);
-      if (stores) {
-        globalStores = stores;
-        notifyListeners();
-        return stores;
-      }
-      return [];
-    } catch (error) {
-      console.error("Failed to fetch stores:", error);
-      return [];
-    } finally {
-      setLoadingList(false);
-    }
-  };
+  const updateMutation = useMutation({
+    mutationFn: ({ id, form }: { id: string; form: Partial<CreateStoreDto> }) =>
+      storeHttp.update(id, form),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stores"] });
+    },
+  });
 
-  const createStore = async (form: CreateStoreDto) => {
-    try {
-      const newStore = await createHttp.request(form);
-      if (newStore) {
-        // Refresh the list from the server to ensure consistency
-        await fetchStores();
-      }
-    } catch (error) {
-      console.error("Failed to create store:", error);
-      // createHttp.request handles error state setting, but we might want to log it
-    }
-  };
-
-  const updateStore = async (id: string, form: Partial<CreateStoreDto>) => {
-    try {
-      const updatedStore = await updateHttp.request({ id, form });
-      if (updatedStore) {
-        globalStores = globalStores.map((s) =>
-          s.id === id ? updatedStore : s
-        );
-        notifyListeners();
-        return updatedStore;
-      }
-    } catch (error) {
-      console.error("Failed to update store:", error);
-    }
-  };
-
-  const deleteStore = async (id: string) => {
-    try {
-      await deleteHttp.request(id);
-      globalStores = globalStores.filter((s) => s.id !== id);
-      notifyListeners();
-    } catch (error) {
-      console.error("Failed to delete store:", error);
-    }
-  };
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => storeHttp.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stores"] });
+    },
+  });
 
   return {
     // Methods
-    createStore,
-    fetchStores,
-    updateStore,
-    deleteStore,
+    createStore: createMutation.mutateAsync,
+    updateStore: (id: string, form: Partial<CreateStoreDto>) =>
+      updateMutation.mutateAsync({ id, form }),
+    deleteStore: deleteMutation.mutateAsync,
+
+    // State Setters
+    setPage,
+    setSearch,
 
     // Status
     loading:
-      createHttp.loading ||
-      listHttp.loading ||
-      updateHttp.loading ||
-      deleteHttp.loading ||
-      loadingList,
+      loadingList ||
+      createMutation.isPending ||
+      updateMutation.isPending ||
+      deleteMutation.isPending,
 
     // Errors
     errors: {
-      create: createHttp.error,
-      list: listHttp.error,
-      update: updateHttp.error,
-      delete: deleteHttp.error,
+      create: createMutation.error,
+      list: listError,
+      update: updateMutation.error,
+      delete: deleteMutation.error,
     },
 
     // Data
-    stores: data,
+    stores,
+    page,
+    search,
   };
 };
 

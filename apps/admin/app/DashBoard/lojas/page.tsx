@@ -18,11 +18,10 @@ import { ConfirmationCard } from '@repo/ui';
 
 export default function LojasPage() {
     const { showPopup, hidePopup } = usePopup();
-    const { fetchStores, stores, loading, deleteStore } = useStore();
-
-    useEffect(() => {
-        fetchStores();
-    }, []);
+    const { stores, loading, deleteStore, search, setSearch } = useStore();
+    // However, the original code had useEffect. Let's remove it if it's no longer needed or keep empty.
+    // Actually, createStore calls queryClient.invalidateQueries so list updates auto.
+    // We can remove the useEffect.
 
     const handleRegisterStore = () => {
         showPopup(
@@ -80,7 +79,13 @@ export default function LojasPage() {
                             <path d="m21 21-4.34-4.34"></path>
                             <circle cx="11" cy="11" r="8"></circle>
                         </svg>
-                        <input type="text" placeholder="Buscar loja por nome..." className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#1A2B3C]" />
+                        <input
+                            type="text"
+                            placeholder="Buscar loja por nome..."
+                            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#1A2B3C]"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </div>
                 </div>
 
