@@ -2,7 +2,7 @@ name: Build & Deploy
 
 on:
   push:
-    branches: ["main"] # Só roda quando commitar na main
+    branches: ["main", "admin"] # Só roda quando commitar na main
 
 jobs:
   build-and-push:
