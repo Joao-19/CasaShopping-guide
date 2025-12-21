@@ -9,7 +9,7 @@ const Table = React.forwardRef<
     <div className="relative w-full overflow-auto">
         <table
             ref={ref}
-            className={cn("w-full caption-bottom text-sm text-left", className)} // Added text-left for consistency
+            className={cn("w-full text-sm text-left block lg:table", className)} // Changed to block lg:table
             {...props}
         />
     </div>
@@ -20,7 +20,7 @@ const TableHeader = React.forwardRef<
     HTMLTableSectionElement,
     React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn("bg-gray-50", className)} {...props} /> // Added mock style bg-gray-50
+    <thead ref={ref} className={cn("hidden lg:table-header-group bg-gray-50", className)} {...props} /> // Hidden on mobile/tablet
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -30,7 +30,14 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tbody
         ref={ref}
-        className={cn("[&_tr:last-child]:border-0 divide-y divide-gray-100", className)} // Added divide-y
+        className={cn(
+            // Mobile: Grid 1 col
+            // Tablet: Grid 2 cols
+            "grid grid-cols-1 md:grid-cols-2 gap-4",
+            // Desktop: Table layout
+            "lg:table-row-group lg:block-none lg:gap-0 lg:[&_tr:last-child]:border-0 lg:divide-y lg:divide-gray-100",
+            className
+        )}
         {...props}
     />
 ))
@@ -43,7 +50,7 @@ const TableFooter = React.forwardRef<
     <tfoot
         ref={ref}
         className={cn(
-            "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+            "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0 block lg:table-footer-group",
             className
         )}
         {...props}
@@ -58,7 +65,10 @@ const TableRow = React.forwardRef<
     <tr
         ref={ref}
         className={cn(
-            "border-b transition-colors hover:bg-gray-50 data-[state=selected]:bg-muted", // Added hover:bg-gray-50
+            // Mobile/Tablet: Card style
+            "block p-6 border border-gray-200 rounded-lg shadow-sm bg-white h-full", // Removed mb-4, added h-full, p-6
+            // Desktop: Table row style
+            "lg:table-row lg:mb-0 lg:p-0 lg:border-b lg:shadow-none lg:rounded-none lg:bg-transparent transition-colors hover:bg-gray-50 data-[state=selected]:bg-muted",
             className
         )}
         {...props}
@@ -73,8 +83,8 @@ const TableHead = React.forwardRef<
     <th
         ref={ref}
         className={cn(
-            "h-12 px-6 py-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0", // Adjusted padding px-6 py-4
-            "text-gray-500 text-xs uppercase tracking-wider font-semibold", // Added header text styles
+            "h-12 px-6 py-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+            "text-gray-500 text-xs uppercase tracking-wider font-semibold",
             className
         )}
         {...props}
@@ -88,7 +98,13 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <td
         ref={ref}
-        className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0 px-6 py-4", className)} // Adjusted padding px-6 py-4
+        className={cn(
+            // Mobile/Tablet: Flow layout/Rows
+            "block py-2 px-0 border-b border-gray-50 last:border-0",
+            // Desktop: Table cell
+            "lg:table-cell lg:p-4 lg:border-b-0 lg:px-6 lg:py-4 align-middle [&:has([role=checkbox])]:pr-0",
+            className
+        )}
         {...props}
     />
 ))
