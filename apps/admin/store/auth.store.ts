@@ -5,7 +5,7 @@ interface AuthStore {
   token: string | null;
   setToken: (token: string | null) => void;
   user: Admin | null;
-  setUser: (user: Admin) => void;
+  setUser: (user: Admin | null) => void;
 }
 
 export function useAuthStore(): AuthStore {
@@ -31,7 +31,7 @@ export function useAuthStore(): AuthStore {
     }
   }, []);
 
-  const setUser = useCallback((user: Admin) => {
+  const setUser = useCallback((user: Admin | null) => {
     setUserState(user);
     if (user) {
       localStorage.setItem("authAdmin", JSON.stringify(user));

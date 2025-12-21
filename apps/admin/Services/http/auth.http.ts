@@ -44,6 +44,9 @@ export default {
       .post<LoginResponse>("auth/admin/login/", form)
       .then((res) => res.data);
   },
+  logout() {
+    return http.post<void>("auth/logout").then((res) => res.data);
+  },
   register(form: RegisterForm) {
     return http
       .post<RegisterResponse>("auth/register", form)

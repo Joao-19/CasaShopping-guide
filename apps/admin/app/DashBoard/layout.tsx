@@ -1,19 +1,41 @@
 'use client';
 
 import { useState } from 'react';
-import { Sidebar } from './components';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+import authHttp from '@/Services/http/auth.http';
+import { useAuthStore } from '@/store/auth.store';
+import { Sidebar } from './components/Sidebar';
 
+// ...
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { setUser } = useAuthStore();
 
-    const handleLogout = () => {
-        // TODO: Implementar lógica de logout
-        // Exemplo: limpar cookies, redirecionar para login, etc.
-        console.log('Logout clicado');
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await authHttp.logout();
+        } catch (error) {
+            // Ignora erro de API no logout para não travar o usuário
+            console.error('Erro ao fazer logout:', error);
+        } finally {
+            // Limpa dados locais via store (padrão do projeto)
+            setUser(null);
+
+            // Força limpeza de cookies com path explícito
+            Cookies.remove('token', { path: '/' });
+            Cookies.remove('refreshToken', { path: '/' });
+
+            // Redireciona e atualiza
+            router.push('/login');
+            router.refresh();
+        }
     };
 
     return (
