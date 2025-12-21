@@ -40,7 +40,25 @@ export class AuthService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.createAdminIfNotExists();
+    const retryInterval = this.configService.get<number>(
+      "DB_RETRY_INTERVAL",
+      30000
+    );
+
+    while (true) {
+      try {
+        await this.createAdminIfNotExists();
+        break; // Sucesso, sai do loop
+      } catch (error) {
+        console.error(
+          `❌ Erro ao conectar ao banco. Tentando novamente em ${
+            retryInterval / 1000
+          }s...`,
+          error instanceof Error ? error.message : error
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryInterval));
+      }
+    }
   }
 
   async createAdminIfNotExists() {
