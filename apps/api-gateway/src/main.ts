@@ -10,7 +10,8 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   const corsOrigin =
-    configService.get<string>("CORS_ORIGIN") || "http://localhost:3001";
+    configService.get<string>("CORS_ORIGIN") ||
+    "http://localhost:3001,http://localhost:3002";
 
   const origins = corsOrigin.includes(",")
     ? corsOrigin.split(",").map((origin) => origin.trim())

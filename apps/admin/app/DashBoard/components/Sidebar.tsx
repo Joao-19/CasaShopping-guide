@@ -1,7 +1,9 @@
 'use client';
 
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
 
 const menuItems = [
     {
@@ -43,76 +45,103 @@ const menuItems = [
 
 interface SidebarProps {
     onLogout?: () => void;
+    isOpen?: boolean;
+    onClose?: () => void;
 }
 
-export function Sidebar({ onLogout }: SidebarProps) {
+export function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
     const pathname = usePathname();
 
     const handleLogout = () => {
         if (onLogout) {
             onLogout();
         } else {
-            // Lógica padrão de logout
             console.log('Logout');
         }
     };
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-30 flex flex-col">
-            {/* Logo */}
-            <div className="h-24 flex items-center px-6 border-b border-gray-100">
-                <img
-                    src="/logomarca_1.png"
-                    alt="CasaShopping"
-                    className="h-10 w-auto object-contain grayscale brightness-20"
-                />
-            </div>
+        <>
+            {/* Overlay for mobile */}
+            <div
+                className={`fixed inset-0 z-20 bg-black/50 transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
+                onClick={onClose}
+                aria-hidden="true"
+            />
 
-            {/* Menu Items */}
-            <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
-                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                    Menu Principal
-                </p>
+            <aside
+                className={`
+                    fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-30 flex flex-col
+                    transition-transform duration-300 ease-in-out md:translate-x-0
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+                `}
+            >
+                {/* Logo and Close Button */}
+                <div className="h-24 flex items-center justify-between px-6 border-b border-gray-100">
+                    <img
+                        src="/logomarca_1.png"
+                        alt="CasaShopping"
+                        className="h-10 w-auto object-contain grayscale brightness-20"
+                    />
+                    <button
+                        onClick={onClose}
+                        className="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
 
-                {menuItems.map((item) => {
-                    const isActive = pathname === item.href || pathname?.startsWith(item.href);
+                {/* Menu Items */}
+                <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+                    <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        Menu Principal
+                    </p>
 
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`
-                                w-full flex items-center gap-3 px-4 py-3 rounded-lg 
-                                transition-all duration-200 group
-                                ${isActive
-                                    ? 'bg-[#1A2B3C] text-white shadow-md'
-                                    : 'text-gray-500 hover:bg-gray-100 hover:text-[#1A2B3C]'
-                                }
-                            `}
-                        >
-                            <span className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-[#1A2B3C]'}>
-                                {item.icon}
-                            </span>
-                            <span className="font-medium text-sm">{item.label}</span>
-                        </Link>
-                    );
-                })}
-            </div>
+                    {menuItems.map((item) => {
+                        const isActive = pathname === item.href || pathname?.startsWith(item.href);
 
-            {/* Logout Button */}
-            <div className="p-4 border-t border-gray-100">
-                <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out" aria-hidden="true">
-                        <path d="m16 17 5-5-5-5"></path>
-                        <path d="M21 12H9"></path>
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    </svg>
-                    <span className="font-medium text-sm">Sair</span>
-                </button>
-            </div>
-        </aside>
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={onClose} // Close sidebar on mobile when link clicked
+                                className={`
+                                    w-full flex items-center gap-3 px-4 py-3 rounded-lg 
+                                    transition-all duration-200 group
+                                    ${isActive
+                                        ? 'bg-[#1A2B3C] text-white shadow-md'
+                                        : 'text-gray-500 hover:bg-gray-100 hover:text-[#1A2B3C]'
+                                    }
+                                `}
+                            >
+                                <span className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-[#1A2B3C]'}>
+                                    {item.icon}
+                                </span>
+                                <span className="font-medium text-sm">{item.label}</span>
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* Logout Button */}
+                <div className="p-4 border-t border-gray-100">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out" aria-hidden="true">
+                            <path d="m16 17 5-5-5-5"></path>
+                            <path d="M21 12H9"></path>
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        </svg>
+                        <span className="font-medium text-sm">Sair</span>
+                    </button>
+                </div>
+            </aside>
+        </>
     );
 }
