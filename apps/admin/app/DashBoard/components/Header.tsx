@@ -22,7 +22,7 @@ export function Header({
     };
 
     return (
-        <header className="flex justify-between items-center mb-8">
+        <header className="flex flex-col items-start gap-4 mb-8 md:flex-row md:items-center md:justify-between">
             <div>
                 <h1 className="text-2xl font-bold text-[#1A2B3C]">{title}</h1>
                 <p className="text-gray-500 text-sm mt-1">{subtitle}</p>
