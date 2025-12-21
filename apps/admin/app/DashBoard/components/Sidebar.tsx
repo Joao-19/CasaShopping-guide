@@ -64,7 +64,7 @@ export function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
         <>
             {/* Overlay for mobile */}
             <div
-                className={`fixed inset-0 z-20 bg-black/50 transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-20 bg-black/50 transition-opacity duration-300 lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={onClose}
                 aria-hidden="true"
@@ -73,7 +73,7 @@ export function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
             <aside
                 className={`
                     fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-30 flex flex-col
-                    transition-transform duration-300 ease-in-out md:translate-x-0
+                    transition-transform duration-300 ease-in-out lg:translate-x-0
                     ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 `}
             >
@@ -86,7 +86,7 @@ export function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
                     />
                     <button
                         onClick={onClose}
-                        className="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
+                        className="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
