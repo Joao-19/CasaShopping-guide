@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, OnModuleInit } from "@nestjs/common";
+import {
+  Injectable,
+  ConflictException,
+  OnModuleInit,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { prisma } from "@repo/database"; // Nosso banco compartilhado
 import * as bcrypt from "bcryptjs";
@@ -175,5 +180,55 @@ export class AuthService implements OnModuleInit {
       refreshToken,
       user: admin,
     };
+  }
+  async refreshToken(token: string) {
+    try {
+      const payload = jwt.verify(
+        token,
+        this.configService.getOrThrow<string>("REFRESH_TOKEN_SECRET")
+      ) as any;
+
+      if (payload.role === "admin") {
+        const admin = await prisma.admin.findUnique({
+          where: { id: payload.sub },
+        });
+
+        if (!admin || !admin.refreshToken) {
+          throw new UnauthorizedException("Acesso negado");
+        }
+
+        const isRefreshTokenValid = await bcrypt.compare(
+          token,
+          admin.refreshToken
+        );
+
+        if (!isRefreshTokenValid) {
+          throw new UnauthorizedException("Refresh token inválido");
+        }
+
+        return this.loginAdmin(admin);
+      } else {
+        const user = await prisma.user.findUnique({
+          where: { id: payload.sub },
+        });
+
+        if (!user || !user.refreshToken) {
+          throw new UnauthorizedException("Acesso negado");
+        }
+
+        const isRefreshTokenValid = await bcrypt.compare(
+          token,
+          user.refreshToken
+        );
+
+        if (!isRefreshTokenValid) {
+          throw new UnauthorizedException("Refresh token inválido");
+        }
+
+        return this.login(user);
+      }
+    } catch (e) {
+      throw new UnauthorizedException("Refresh token inválido ou expirado");
+    }
   }
 }

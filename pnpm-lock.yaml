@@ -135,6 +135,9 @@ importers:
       '@types/passport-jwt':
         specifier: ^4.0.1
         version: 4.0.1
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3

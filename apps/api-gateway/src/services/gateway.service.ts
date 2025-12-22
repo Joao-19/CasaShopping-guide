@@ -67,4 +67,20 @@ export class GatewayService {
       throw error;
     }
   }
+  async refreshToken(refreshToken: string) {
+    try {
+      const response = await this.httpService.axiosRef.post(
+        `${this.AUTH_SERVICE_URL}/auth/refresh`,
+        { refreshToken }
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new ConflictException(
+          error.response.data.message || "Erro ao atualizar token"
+        );
+      }
+      throw error;
+    }
+  }
 }

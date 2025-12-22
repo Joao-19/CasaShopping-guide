@@ -32,4 +32,8 @@ export class AuthController {
     }
     return this.authService.loginAdmin(admin);
   }
+  @Post("refresh")
+  async refresh(@Body() body: any) {
+    return this.authService.refreshToken(body.refreshToken);
+  }
 }
