@@ -1,4 +1,6 @@
 import axios from "axios";
+import { eventBus } from "@/utils/eventBus";
+import { translateError } from "@/utils/errorTranslation";
 
 const getBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
@@ -18,5 +20,18 @@ const http = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+http.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Translate message
+    const message = translateError(error);
+
+    // Emit global error event
+    eventBus.emit("api-error", message);
+
+    return Promise.reject(error);
+  }
+);
 
 export default http;
