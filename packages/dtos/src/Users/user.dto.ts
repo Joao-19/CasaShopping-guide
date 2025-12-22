@@ -1,3 +1,5 @@
+import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+
 export interface UserResponseDto {
   id: string;
   name: string;
@@ -5,10 +7,20 @@ export interface UserResponseDto {
   phone: string;
 }
 
-export interface CreateUserDto {
-  name: string;
-  email: string;
-  phone: string;
-  // password não deve trafegar em DTOs de resposta, só de entrada
-  password: string;
+export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phone!: string;
+
+  @IsString()
+  @MinLength(6)
+  password!: string;
 }

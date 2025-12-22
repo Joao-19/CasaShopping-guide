@@ -1,10 +1,26 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, ConflictException } from "@nestjs/common";
 import { prisma } from "@repo/database";
 import { CreateProductDto, Product } from "@repo/dtos";
 
 @Injectable()
 export class ProductService {
   async create(data: CreateProductDto): Promise<Product> {
+    const existingProduct = await prisma.product.findFirst({
+      where: {
+        storeId: data.storeId,
+        name: {
+          equals: data.name,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    if (existingProduct) {
+      throw new ConflictException(
+        "Product with this name already exists in this store"
+      );
+    }
+
     const product = await prisma.product.create({
       data: {
         name: data.name,
@@ -16,7 +32,7 @@ export class ProductService {
       },
     });
 
-    return product as unknown as Product; // Casting due to potential slight type mismatch if strict or validation needed
+    return product as unknown as Product;
   }
 
   async findAll(storeId?: string, search?: string): Promise<Product[]> {

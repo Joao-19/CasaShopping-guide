@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, HttpException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { CreateProductDto, Product } from "@repo/dtos";
 import { firstValueFrom } from "rxjs";
@@ -21,18 +21,25 @@ export class ProductGatewayService {
     createProductDto: CreateProductDto,
     token: string
   ): Promise<Product> {
-    const response = await firstValueFrom(
-      this.httpService.post<Product>(
-        `${this.productsServiceUrl}/products`,
-        createProductDto,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-    );
-    return response.data;
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<Product>(
+          `${this.productsServiceUrl}/products`,
+          createProductDto,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
   }
 
   async findAll(

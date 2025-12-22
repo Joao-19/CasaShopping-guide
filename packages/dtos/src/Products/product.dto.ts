@@ -1,12 +1,40 @@
-export type PriceTier = "LOW" | "MEDIUM" | "HIGH";
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from "class-validator";
 
-export interface CreateProductDto {
-  name: string;
-  description: string;
-  price: PriceTier;
-  categories: string[];
+export enum PriceTier {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+}
+
+export class CreateProductDto {
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description!: string;
+
+  @IsEnum(PriceTier)
+  price!: PriceTier;
+
+  @IsArray()
+  @IsString({ each: true })
+  categories!: string[];
+
+  @IsOptional()
+  @IsString()
   tags?: string;
-  storeId: string;
+
+  @IsUUID()
+  storeId!: string;
 }
 
 export interface Product {
