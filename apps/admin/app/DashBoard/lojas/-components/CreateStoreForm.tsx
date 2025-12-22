@@ -79,7 +79,7 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
             />
 
             {/* Grid Endereço/Telefone */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <BaseInput
                     id="address"
                     label="Endereço (Bloco/Piso)"
@@ -248,7 +248,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
     return (
         <FormCard
             title={isEditing ? "Editar Loja" : "Nova Loja"}
-            className="max-w-xl w-full md:min-w-[600px] max-h-[750px] overflow-y-auto"
+            className="max-w-xl w-full md:min-w-[600px] max-h-[85vh] overflow-y-auto"
             headerAction={
                 <button
                     onClick={onClose}
