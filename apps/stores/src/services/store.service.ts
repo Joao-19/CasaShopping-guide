@@ -53,4 +53,20 @@ export class StoreService {
       data: { deletedAt: new Date() },
     });
   }
+
+  async update(id: string, data: Partial<CreateStoreDto>): Promise<Store> {
+    const updateData: any = {
+      ...data,
+      modifiedAt: new Date(),
+    };
+
+    // Remove image if it's sent as file (handled separately) or handle as needed
+    // For now, we sanitize strictly what is in the DTO that maps to DB fields
+    delete updateData.image;
+
+    return prisma.store.update({
+      where: { id },
+      data: updateData,
+    });
+  }
 }

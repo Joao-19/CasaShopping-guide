@@ -49,16 +49,16 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
 
     // Optional fields
     const phoneField = useFormField(data.phone, [validator.rules.phone]);
-    const facebookField = useFormField(data.facebookLink, []);
-    const instagramField = useFormField(data.instagramLink, []);
-    const youtubeField = useFormField(data.youtubeLink, []);
+    const facebookField = useFormField(data.facebookLink, [validator.rules.url]);
+    const instagramField = useFormField(data.instagramLink, [validator.rules.url]);
+    const youtubeField = useFormField(data.youtubeLink, [validator.rules.url]);
 
     const handleImageSelect = (file: File) => {
         handlers.setImage(file);
     };
 
     return (
-        <div className="space-y-5">
+        <div className="">
             <ImageUpload
                 variant="profile"
                 label="Logo da Loja"
@@ -79,7 +79,7 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
             />
 
             {/* Grid Endereço/Telefone */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
                 <BaseInput
                     id="address"
                     label="Endereço (Bloco/Piso)"
@@ -123,8 +123,8 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
             />
 
             {/* Redes Sociais */}
-            <div className="space-y-3 pt-2">
-                <Label className="block text-sm font-semibold text-gray-700">Redes Sociais</Label>
+            <div className="">
+                <Label className="block text-sm font-semibold text-gray-700 mb-2">Redes Sociais</Label>
 
                 <BaseInput
                     id="facebook"
@@ -250,7 +250,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
     return (
         <FormCard
             title={isEditing ? "Editar Loja" : "Nova Loja"}
-            className="max-w-xl w-full md:min-w-[600px]"
+            className="max-w-xl w-full md:min-w-[600px] max-h-[750px] overflow-y-auto"
             headerAction={
                 <button
                     onClick={onClose}

@@ -6,6 +6,7 @@ import {
   Query,
   Delete,
   Param,
+  Put,
 } from "@nestjs/common";
 import { StoreService } from "@/services/store.service";
 import { CreateStoreDto, Store } from "@repo/dtos";
@@ -30,5 +31,13 @@ export class StoreController {
   @Delete(":id")
   async delete(@Param("id") id: string): Promise<Store> {
     return this.storeService.delete(id);
+  }
+
+  @Put(":id")
+  async update(
+    @Param("id") id: string,
+    @Body() updateStoreDto: Partial<CreateStoreDto>
+  ): Promise<Store> {
+    return this.storeService.update(id, updateStoreDto);
   }
 }

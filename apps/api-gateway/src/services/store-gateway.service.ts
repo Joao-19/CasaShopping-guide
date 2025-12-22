@@ -37,4 +37,17 @@ export class StoreGatewayService {
     );
     return response.data;
   }
+
+  async update(
+    id: string,
+    updateStoreDto: Partial<CreateStoreDto>
+  ): Promise<Store> {
+    const response = await firstValueFrom(
+      this.httpService.put<Store>(
+        `${this.storesServiceUrl}/stores/${id}`,
+        updateStoreDto
+      )
+    );
+    return response.data;
+  }
 }
