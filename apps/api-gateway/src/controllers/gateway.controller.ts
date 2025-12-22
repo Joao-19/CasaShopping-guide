@@ -1,5 +1,12 @@
-import { Controller, Post, Body, Res } from "@nestjs/common";
-import { Response } from "express";
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  Req,
+  ConflictException,
+} from "@nestjs/common";
+import { Response, Request } from "express";
 import { GatewayService } from "../services/gateway.service";
 import { CreateUserDto } from "@repo/dtos";
 
@@ -33,5 +40,74 @@ export class AuthController {
     });
 
     return user;
+  }
+
+  @Post("admin/login")
+  async loginAdmin(
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { accessToken, refreshToken, user } =
+      await this.gatewayService.adminLogin(body);
+
+    res.cookie("access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return user;
+  }
+
+  @Post("logout")
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+    return { message: "Logged out successfully" };
+  }
+
+  @Post("refresh")
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const refreshTokenCookie = (req as any).cookies["refresh_token"];
+
+    if (!refreshTokenCookie) {
+      throw new ConflictException("Refresh token não encontrado");
+    }
+
+    try {
+      const { accessToken, refreshToken, user } =
+        await this.gatewayService.refreshToken(refreshTokenCookie);
+
+      res.cookie("access_token", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
+
+      res.cookie("refresh_token", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      return user;
+    } catch (error) {
+      res.clearCookie("access_token");
+      res.clearCookie("refresh_token");
+      throw error;
+    }
   }
 }

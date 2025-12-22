@@ -1,0 +1,85 @@
+name: Build All & Deploy
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Aqui definimos os 5 serviços e onde está o Dockerfile de cada um
+        service:
+          - name: casashopping-gateway
+            file: apps/api-gateway/Dockerfile
+          - name: casashopping-auth
+            file: apps/auth/Dockerfile
+          - name: casashopping-users
+            file: apps/users/Dockerfile
+          - name: casashopping-web
+            file: apps/web/Dockerfile
+          - name: casashopping-admin
+            file: apps/admin/Dockerfile
+          - name: casashopping-stores
+            file: apps/stores/Dockerfile
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push (${{ matrix.service.name }})
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./${{ matrix.service.file }} # Usa o caminho específico da matriz
+          push: true
+          # Gera a tag correta para cada serviço
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service.name }}:latest
+          platforms: linux/arm64
+
+  deploy-to-oracle:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_IP }}
+          username: ${{ secrets.HOST_USER }}
+          key: ${{ secrets.HOST_KEY }}
+          script: |
+            cd ~/apps/CasaShopping-guide
+
+            # Baixa o docker-compose novo (com as imagens configuradas)
+            git pull
+
+            # Baixa as 5 imagens novas do Docker Hub
+            docker compose pull
+
+            # Sobe tudo
+            docker compose up -d
+
+            # Aguarda o banco subir antes de migrar
+            echo "Aguardando serviços iniciarem..."
+            sleep 10
+
+            # Executa as migrations automaticamente
+            echo "Rodando migrations..."
+            docker exec casashopping-auth npx -y prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma || echo "Sem migrations para auth"
+
+            # Limpa o lixo
+            docker image prune -f

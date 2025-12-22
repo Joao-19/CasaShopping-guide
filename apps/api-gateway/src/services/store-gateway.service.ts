@@ -1,0 +1,79 @@
+import { Injectable } from "@nestjs/common";
+import { HttpService } from "@nestjs/axios";
+import { CreateStoreDto, Store } from "@repo/dtos";
+import { firstValueFrom } from "rxjs";
+import { ConfigService } from "@nestjs/config";
+
+@Injectable()
+export class StoreGatewayService {
+  private readonly storesServiceUrl: string;
+
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService
+  ) {
+    this.storesServiceUrl =
+      this.configService.getOrThrow<string>("STORE_SERVICE_URL");
+  }
+
+  async create(createStoreDto: CreateStoreDto, token: string): Promise<Store> {
+    const response = await firstValueFrom(
+      this.httpService.post<Store>(
+        `${this.storesServiceUrl}/stores`,
+        createStoreDto,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+    );
+    return response.data;
+  }
+
+  async findAll(
+    page: number,
+    token: string,
+    search?: string
+  ): Promise<Store[]> {
+    const response = await firstValueFrom(
+      this.httpService.get<Store[]>(`${this.storesServiceUrl}/stores`, {
+        params: { page, search },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    );
+    return response.data;
+  }
+
+  async delete(id: string, token: string): Promise<Store> {
+    const response = await firstValueFrom(
+      this.httpService.delete<Store>(`${this.storesServiceUrl}/stores/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    );
+    return response.data;
+  }
+
+  async update(
+    id: string,
+    updateStoreDto: Partial<CreateStoreDto>,
+    token: string
+  ): Promise<Store> {
+    const response = await firstValueFrom(
+      this.httpService.put<Store>(
+        `${this.storesServiceUrl}/stores/${id}`,
+        updateStoreDto,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+    );
+    return response.data;
+  }
+}

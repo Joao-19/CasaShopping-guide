@@ -1,0 +1,34 @@
+import { NestFactory } from "@nestjs/core";
+import { StoreModule } from "@/modules/store.module";
+import { ConfigService } from "@nestjs/config";
+
+async function bootstrap() {
+  try {
+    const app = await NestFactory.create(StoreModule);
+    const configService = app.get(ConfigService);
+
+    const port = process.env.PORT || 3005;
+    const corsOrigin =
+      configService.get<string>("CORS_ORIGIN") || "http://localhost:3000";
+
+    console.log(`[StoresService] Starting on port: ${port}`);
+    console.log(`[StoresService] Configured CORS Origin: ${corsOrigin}`);
+
+    const origins = corsOrigin.includes(",")
+      ? corsOrigin.split(",").map((origin) => origin.trim())
+      : corsOrigin;
+
+    app.enableCors({
+      origin: origins,
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      credentials: true,
+    });
+
+    await app.listen(port, "0.0.0.0");
+    console.log(`🚀 Stores Service (NestJS) rodando na porta ${port}`);
+  } catch (error) {
+    console.error("❌ Error starting Stores Service:", error);
+    process.exit(1);
+  }
+}
+bootstrap();

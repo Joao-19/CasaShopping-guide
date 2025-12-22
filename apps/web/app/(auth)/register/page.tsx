@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@repo/ui/sonner";
@@ -12,12 +11,14 @@ import {
     CardTitle,
     CardDescription,
 } from "@repo/ui/card";
-import FormCard from "@repo/ui/cards/FormCard";
+import { FormCard } from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import Link from "next/link";
-import { UnloggedToolbar } from "../login/-components/UnloggedToolbar";
+import { UnloggedToolbar } from "@repo/ui/UnloggedToolbar";
+import { UnloggedFooter } from "@repo/ui/UnloggedFooter";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import userRegister from "@/composable/login/useRegister";
+import { useRedirectUrl } from "@/composable/useRedirectUrl";
 
 interface RegisterFormProps {
     formData: {
@@ -115,6 +116,7 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const { register } = userRegister();
     const { FormProvider, validateAll } = useForm();
+    const adminUrl = useRedirectUrl(process.env.NEXT_PUBLIC_ADMIN_URL, 3002);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -142,10 +144,9 @@ const RegisterPage = () => {
     };
 
     return (
-        <div
-            className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-y-auto bg-gray-900 px-4 pt-14 pb-20 md:p-24 md:overflow-hidden">
+        <div className="relative h-dvh w-full font-sans bg-gray-900 overflow-hidden">
             {/* Background Image */}
-            <div className="absolute inset-0 z-0">
+            <div className="fixed inset-0 z-0">
                 <img
                     src="/login-bg.webp"
                     alt="Interior Background"
@@ -156,38 +157,48 @@ const RegisterPage = () => {
 
             <UnloggedToolbar />
 
-            <FormCard title="">
-                <CardHeader className="flex flex-col items-center">
-                    <div className="mb-6 text-center">
-                        <CardTitle className="text-primary text-2xl font-bold">Crie sua conta</CardTitle>
-                        <CardDescription className="text-[#4B5563] text-sm mt-1">Preencha os dados abaixo para começar.</CardDescription>
-                    </div>
-                </CardHeader>
+            {/* Scrollable Content Container */}
+            <div className="relative z-10 h-full w-full overflow-y-auto flex flex-col items-center px-4 pt-24 pb-6">
+                <div className="flex-1 flex items-center justify-center w-full my-4">
+                    <FormCard title="">
+                        <CardHeader className="flex flex-col items-center">
+                            <div className="mb-6 text-center">
+                                <CardTitle className="text-primary text-2xl font-bold">Crie sua conta</CardTitle>
+                                <CardDescription className="text-[#4B5563] text-sm mt-1">Preencha os dados abaixo para começar.</CardDescription>
+                            </div>
+                        </CardHeader>
 
-                <CardContent>
-                    <FormProvider>
-                        <RegisterForm
-                            formData={{ name, email, phone, password }}
-                            setFormData={{ setName, setEmail, setPhone, setPassword }}
-                            loading={loading}
-                            onSubmit={handleRegister}
-                        />
-                    </FormProvider>
-                </CardContent>
+                        <CardContent>
+                            <FormProvider>
+                                <RegisterForm
+                                    formData={{ name, email, phone, password }}
+                                    setFormData={{ setName, setEmail, setPhone, setPassword }}
+                                    loading={loading}
+                                    onSubmit={handleRegister}
+                                />
+                            </FormProvider>
+                        </CardContent>
 
-                <CardFooter className="flex flex-col space-y-2 border-t border-gray-200 pt-6 mt-2">
-                    <div className="text-center text-sm text-gray-500">
-                        Já tem uma conta?
-                    </div>
+                        <CardFooter className="flex flex-col space-y-2 border-t border-gray-200 pt-6 mt-2">
+                            <div className="text-center text-sm text-gray-500">
+                                Já tem uma conta?
+                            </div>
 
-                    <Link href="/login" className="text-center text-primary font-bold hover:underline">
-                        Entrar
-                    </Link>
-                </CardFooter>
-            </FormCard>
 
-            <div className="absolute bottom-6 left-0 w-full text-center z-20 pointer-events-none">
-                <p className="text-white/60 text-[10px] tracking-widest uppercase">CasaShopping © {new Date().getFullYear()}</p>
+                            <Link href="/login" className="text-center text-primary font-bold hover:underline">
+                                Entrar
+                            </Link>
+                            {/* 
+                            <Link href={adminUrl} className="w-full">
+                                <Button variant="outline" className="w-full rounded-xl h-10 border-gray-200 text-gray-600 hover:bg-gray-50 font-normal">
+                                    Área Administrativa
+                                </Button>
+                            </Link> */}
+                        </CardFooter>
+                    </FormCard>
+                </div>
+
+                <UnloggedFooter />
             </div>
         </div>
     );

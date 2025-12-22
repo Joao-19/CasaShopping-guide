@@ -51,13 +51,18 @@ export default function useForm() {
   const fields = useRef<FormFieldRef[]>([]);
   const validator = useValidator();
 
-  const validateAll = useCallback(() => {
+  const checkValidity = useCallback(() => {
     const isFormValid = !fields.current.some(
       (item) => !item.ignoreRequired && validator.validate(item.rules, item.value)
     );
     setIsValid(isFormValid);
     return isFormValid;
   }, [validator]);
+
+  const validateAll = useCallback(() => {
+    const isFormValid = checkValidity();
+    return isFormValid;
+  }, [checkValidity]);
 
   const registerInput = useCallback((formField: Omit<FormFieldRef, 'id'>): number => {
     const lastItem = fields.current[fields.current.length - 1];
@@ -74,7 +79,8 @@ export default function useForm() {
     const idx = fields.current.findIndex((item) => item.id === id);
     if (idx === -1) return;
     fields.current.splice(idx, 1);
-  }, []);
+    checkValidity();
+  }, [checkValidity]);
 
   const updateInput = useCallback((id: number, value: unknown, rules: ValidatorRule<unknown>) => {
     const field = fields.current.find((item) => item.id === id);
@@ -82,7 +88,8 @@ export default function useForm() {
       field.value = value;
       field.rules = rules as ValidatorRule<any>;
     }
-  }, []);
+    checkValidity();
+  }, [checkValidity]);
 
   const formProvider = useMemo((): FormProvider => ({
     registerInput,
@@ -126,6 +133,7 @@ export default function useForm() {
 export function useFormField<T>(value: T, rules: ValidatorRule<T>, disableRequired?: boolean) {
   const { registerInput, unregisterInput, updateInput } = useFormContext();
   const [error, setError] = useState('');
+  const [isTouched, setIsTouched] = useState(false);
   const validator = useValidator();
   const idRef = useRef<number | null>(null);
   const isFirstRender = useRef(true);
@@ -137,6 +145,7 @@ export function useFormField<T>(value: T, rules: ValidatorRule<T>, disableRequir
   }, [rules, value, validator]);
 
   const onBlur = useCallback(() => {
+    setIsTouched(true);
     validate();
   }, [validate]);
 
@@ -168,8 +177,12 @@ export function useFormField<T>(value: T, rules: ValidatorRule<T>, disableRequir
       isFirstRender.current = false;
       return;
     }
-    validate();
-  }, [value, validate]);
+
+    // Only validate automatically if the field has been touched
+    if (isTouched) {
+      validate();
+    }
+  }, [value, validate, isTouched]);
 
   return {
     error,

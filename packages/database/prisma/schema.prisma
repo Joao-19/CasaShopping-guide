@@ -1,7 +1,9 @@
 // packages/database/prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  output        = "../generated/client"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-1.1.x", "linux-musl-arm64-openssl-3.0.x", "linux-arm64-openssl-1.1.x", "linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -45,4 +47,23 @@ model Admin {
 enum AdminRole {
   SUPER_ADMIN
   EDITOR
+}
+
+// --- MODELO PARA O SERVIÇO DE STORES (apps/stores) ---
+model Store {
+  id            String  @id @default(uuid())
+  name          String
+  address       String
+  phone         String?
+  site          String?
+  logoImage     String?
+  facebookLink  String?
+  instagramLink String?
+  youtubeLink   String?
+
+  createdAt  DateTime  @default(now())
+  modifiedAt DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  @@map("stores")
 }

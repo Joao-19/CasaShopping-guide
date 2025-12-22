@@ -1,49 +1,37 @@
-FROM node:20-alpine AS base
-
-# Stage 1: Pruner - Isolate the app and its specific dependencies
-FROM base AS pruner
-RUN apk add --no-cache libc6-compat
+FROM node:20-slim AS turbo-builder
 WORKDIR /app
 RUN npm install -g turbo
 COPY . .
 RUN turbo prune --scope=api-gateway --docker
 
-# Stage 2: Installer & Builder - Install deps and build
-FROM base AS builder
-RUN apk add --no-cache libc6-compat openssl python3 make g++
+FROM node:20-slim AS installer
 WORKDIR /app
+COPY .gitignore .gitignore
+COPY --from=turbo-builder /app/out/json/ .
+COPY --from=turbo-builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN corepack enable
+RUN pnpm install --no-frozen-lockfile
 
-# Install dependencies based on the pruned lockfile
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN npm install -g pnpm
-RUN pnpm install
-
-# Copy source code and build
-COPY --from=pruner /app/out/full/ .
-COPY turbo.json turbo.json
-
-# Generate Prisma Client
-RUN pnpm --filter @repo/database exec prisma generate
-
-# Build the application
-RUN pnpm --filter=api-gateway build
-
-# Stage 3: Runner - Minimal runtime image
-FROM base AS runner
+FROM node:20-slim AS builder
 WORKDIR /app
-RUN apk add --no-cache openssl
-RUN npm install -g pnpm
+COPY --from=installer /app/ .
+COPY --from=turbo-builder /app/out/full/ .
+RUN apt-get update && apt-get install -y openssl
+RUN corepack enable
+RUN npm install -g turbo
+RUN cd packages/database && npx prisma generate
+RUN turbo run build --filter=api-gateway
 
-# Create non-root user for security
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nestjs
-USER nestjs
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Copy the built application from the builder stage
-COPY --from=builder --chown=nestjs:nodejs /app .
-
-EXPOSE 3000
-
-# Run the compiled application directly
-CMD ["node", "apps/api-gateway/dist/main"]
+FROM node:20-slim AS runner
+WORKDIR /app
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/apps/api-gateway/dist ./apps/api-gateway/dist
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/apps/api-gateway/package.json ./apps/api-gateway/package.json
+COPY --from=installer /app/apps/api-gateway/node_modules ./apps/api-gateway/node_modules
+COPY --from=builder /app/packages ./packages
+WORKDIR /app/apps/api-gateway
+CMD ["node", "dist/main"]

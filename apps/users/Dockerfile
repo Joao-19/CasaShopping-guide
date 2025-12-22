@@ -1,40 +1,37 @@
-FROM node:20-alpine AS base
-
-FROM base AS pruner
-RUN apk add --no-cache libc6-compat
+FROM node:20-slim AS turbo-builder
 WORKDIR /app
 RUN npm install -g turbo
 COPY . .
 RUN turbo prune --scope=users-service --docker
 
-FROM base AS builder
-RUN apk add --no-cache libc6-compat openssl python3 make g++
+FROM node:20-slim AS installer
 WORKDIR /app
+COPY .gitignore .gitignore
+COPY --from=turbo-builder /app/out/json/ .
+COPY --from=turbo-builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN corepack enable
+RUN pnpm install --no-frozen-lockfile
 
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN npm install -g pnpm
-RUN pnpm install
-
-COPY --from=pruner /app/out/full/ .
-COPY turbo.json turbo.json
-
-RUN pnpm --filter @repo/database exec prisma generate
-
-RUN pnpm --filter=users-service build
-
-FROM base AS runner
+FROM node:20-slim AS builder
 WORKDIR /app
-RUN apk add --no-cache openssl
-RUN npm install -g pnpm
+COPY --from=installer /app/ .
+COPY --from=turbo-builder /app/out/full/ .
+RUN apt-get update && apt-get install -y openssl
+RUN corepack enable
+RUN npm install -g turbo
+RUN cd packages/database && npx prisma generate
+RUN turbo run build --filter=users-service
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nestjs
-USER nestjs
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-COPY --from=builder --chown=nestjs:nodejs /app .
-
-EXPOSE 3004
-
-# users-service package.json defines start as "node dist/index.js"
-CMD ["node", "apps/users/dist/main.js"]
+FROM node:20-slim AS runner
+WORKDIR /app
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/apps/users/dist ./apps/users/dist
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/apps/users/package.json ./apps/users/package.json
+COPY --from=installer /app/apps/users/node_modules ./apps/users/node_modules
+COPY --from=builder /app/packages ./packages
+WORKDIR /app/apps/users
+CMD ["node", "dist/main"]

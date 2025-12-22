@@ -20,4 +20,20 @@ export class AuthController {
     }
     return this.authService.login(user);
   }
+
+  @Post("admin/login")
+  async loginAdmin(@Body() body: any) {
+    const admin = await this.authService.validateAdmin(
+      body.email,
+      body.password
+    );
+    if (!admin) {
+      throw new ConflictException("Credenciais de administrador inválidas");
+    }
+    return this.authService.loginAdmin(admin);
+  }
+  @Post("refresh")
+  async refresh(@Body() body: any) {
+    return this.authService.refreshToken(body.refreshToken);
+  }
 }
