@@ -7,6 +7,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { prisma } from "@repo/database"; // Nosso banco compartilhado
 import * as bcrypt from "bcryptjs";
+import { log } from "console";
 import * as jwt from "jsonwebtoken";
 
 @Injectable()
@@ -173,6 +174,12 @@ export class AuthService implements OnModuleInit {
     await prisma.admin.update({
       where: { id: admin.id },
       data: { refreshToken: refreshHash },
+    });
+
+    console.log(11111111111, {
+      accessToken,
+      refreshToken,
+      user: admin,
     });
 
     return {
