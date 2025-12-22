@@ -151,6 +151,9 @@ services:
     environment:
       - PORT=3005
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
     depends_on:
       - database
     networks:
