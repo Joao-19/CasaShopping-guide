@@ -28,6 +28,12 @@ export const translateError = (error: any): string => {
     "Internal Server Error": "Erro interno no servidor.",
   };
 
-  // Return translated message if found, otherwise return the tag (if it looks readable) or default
-  return errorMap[tag] || tag || defaultMessage;
+  // Return translated message if found, otherwise return default
+  return errorMap[tag] || defaultMessage;
+};
+
+export const VALIDATION_MESSAGES = {
+  REQUIRED_NAME: "Nome da loja é obrigatório",
+  REQUIRED_ADDRESS: "Endereço é obrigatório",
+  INVALID_URL: "URL inválida",
 };

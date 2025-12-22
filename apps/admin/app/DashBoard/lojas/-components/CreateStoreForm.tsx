@@ -10,24 +10,71 @@ interface CreateStoreFormProps {
     initialData?: Store;
 }
 
+import { formatPhone, cleanPhone } from '@/utils/formatters';
+import { VALIDATION_MESSAGES } from '@/utils/errorTranslation';
+
+// ...
 export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) {
     const { createStore, updateStore, loading } = useStore();
     const [formData, setFormData] = useState<CreateStoreDto>({
         name: initialData?.name || '',
         address: initialData?.address || '',
-        phone: initialData?.phone || '',
+        phone: initialData?.phone ? formatPhone(initialData.phone) : '',
         site: initialData?.site || '',
         facebookLink: initialData?.facebookLink || '',
         instagramLink: initialData?.instagramLink || '',
         youtubeLink: initialData?.youtubeLink || '',
-        image: null // File can't be pre-filled from URL easily, would need separate handling for preview
+        image: null
     });
+
+    // Track errors for fields
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const isEditing = !!initialData;
 
+    // Helper to validate a single field
+    const validateField = (name: string, value: any) => {
+        let error = '';
+        if (name === 'name' && !value.trim()) {
+            error = VALIDATION_MESSAGES.REQUIRED_NAME;
+        }
+        if (name === 'address' && !value.trim()) {
+            error = VALIDATION_MESSAGES.REQUIRED_ADDRESS;
+        }
+        if (name === 'site' && value) {
+            // Regex that allows http/https or just domain.tld
+            const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+            if (!urlPattern.test(value)) {
+                error = VALIDATION_MESSAGES.INVALID_URL;
+            }
+        }
+        return error;
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+
+        if (name === 'phone') {
+            const maskedValue = formatPhone(value);
+            setFormData(prev => ({ ...prev, [name]: maskedValue }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+
+        // Clear error when user types
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        const error = validateField(name, value);
+
+        setErrors(prev => ({
+            ...prev,
+            [name]: error
+        }));
     };
 
     const handleImageSelect = (file: File) => {
@@ -36,12 +83,33 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate all fields
+        const newErrors: Record<string, string> = {};
+        const nameError = validateField('name', formData.name);
+        if (nameError) newErrors.name = nameError;
+        const addressError = validateField('address', formData.address);
+        if (addressError) newErrors.address = addressError;
+        const siteError = validateField('site', formData.site);
+        if (siteError) newErrors.site = siteError;
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        // Prepare data for submission (clean phone number)
+        const submissionData = {
+            ...formData,
+            phone: cleanPhone(formData.phone || '')
+        };
+
         try {
             if (isEditing && initialData?.id) {
-                await updateStore(initialData.id, formData);
+                await updateStore(initialData.id, submissionData);
                 console.log('Store updated successfully');
             } else {
-                await createStore(formData);
+                await createStore(submissionData);
                 console.log('Store created successfully');
             }
             onClose();
@@ -76,29 +144,33 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
 
                 {/* Nome da Loja */}
                 <div>
-                    <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Nome da Loja</Label>
+                    <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Nome da Loja <span className="text-red-500">*</span></Label>
                     <Input
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         type="text"
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
+                        className={`w-full px-4 py-2 border rounded-lg text-sm outline-none ${errors.name ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-[#1A2B3C]'}`}
                         placeholder="Ex: Abracasa"
                     />
+                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                 </div>
 
                 {/* Grid Endereço/Telefone */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Endereço (Bloco/Piso)</Label>
+                        <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Endereço (Bloco/Piso) <span className="text-red-500">*</span></Label>
                         <Input
                             name="address"
                             value={formData.address}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                             type="text"
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
+                            className={`w-full px-4 py-2 border rounded-lg text-sm outline-none ${errors.address ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-[#1A2B3C]'}`}
                             placeholder="Bloco A, 101"
                         />
+                        {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
                     </div>
                     <div>
                         <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Telefone</Label>
@@ -117,7 +189,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 <div>
                     <Label className="block text-sm font-semibold text-gray-700 mb-1.5">Site</Label>
                     <div className="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-globe absolute left-3 top-1/2 -translate-y-1/2 ${errors.site ? 'text-red-400' : 'text-gray-400'}`} aria-hidden="true">
                             <circle cx="12" cy="12" r="10"></circle>
                             <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
                             <path d="M2 12h20"></path>
@@ -126,11 +198,13 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                             name="site"
                             value={formData.site || ''}
                             onChange={handleChange}
+                            onBlur={handleBlur}
                             type="text"
-                            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-[#1A2B3C] outline-none"
+                            className={`w-full pl-10 pr-4 py-2 border rounded-lg text-sm outline-none ${errors.site ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-[#1A2B3C]'}`}
                             placeholder="https://www.loja.com.br"
                         />
                     </div>
+                    {errors.site && <p className="text-red-500 text-xs mt-1">{errors.site}</p>}
                 </div>
 
                 {/* Redes Sociais */}
@@ -197,9 +271,10 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        className="px-6 py-2 bg-[#1A2B3C] text-white font-medium text-sm rounded-lg hover:bg-[#2c455d] transition-colors shadow-lg shadow-blue-900/10"
+                        disabled={loading || Object.values(errors).some(error => error !== '')}
+                        className="px-6 py-2 bg-[#1A2B3C] text-white font-medium text-sm rounded-lg hover:bg-[#2c455d] transition-colors shadow-lg shadow-blue-900/10 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Salvar Loja
+                        {loading ? 'Salvando...' : 'Salvar Loja'}
                     </Button>
                 </div>
             </div>
