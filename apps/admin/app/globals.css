@@ -5,6 +5,8 @@
 @theme {
   --color-primary: #003ba6;
   --color-primary-light: #0059b3;
+  --color-error: #dc2626;
+
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
 
   --animate-zoomIn: zoomIn 0.2s ease-out forwards;
@@ -73,5 +75,9 @@
 
   .text-primary {
     color: var(--color-primary);
+  }
+
+  .text-error {
+    color: var(--color-error);
   }
 }
