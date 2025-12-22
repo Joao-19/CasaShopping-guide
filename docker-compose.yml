@@ -53,10 +53,12 @@ services:
       - USERS_SERVICE_URL=http://users-service:3004
       - STORES_SERVICE_URL=http://stores-service:3005
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3001}
+      - STORE_SERVICE_URL=http://stores-service:3005
     depends_on:
       - database
       - auth-service
       - users-service
+      - stores-service
     networks:
       - casashopping-net
 
