@@ -7,11 +7,14 @@ import {
   Delete,
   Param,
   Put,
+  UseGuards,
 } from "@nestjs/common";
 import { StoreService } from "@/services/store.service";
 import { CreateStoreDto, Store } from "@repo/dtos";
+import { JwtAuthGuard } from "@repo/auth-guard";
 
 @Controller("stores")
+@UseGuards(JwtAuthGuard)
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 

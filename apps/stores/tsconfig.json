@@ -1,9 +1,8 @@
 {
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "isolatedModules": false,
     "declaration": true,
@@ -11,7 +10,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
+    "target": "ES2020",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
@@ -23,7 +22,8 @@
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@repo/auth-guard": ["../../packages/auth-guard/src/index.ts"]
     }
   },
   "include": ["src/**/*", "test/**/*"],
