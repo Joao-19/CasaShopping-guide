@@ -10,14 +10,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || "default_secret",
     });
-    console.log(
-      "JwtStrategy Initialized. Secret defined:",
-      !!process.env.JWT_SECRET
-    );
   }
 
   async validate(payload: any) {
-    console.log("JwtStrategy Validating payload:", payload);
     return { userId: payload.sub, email: payload.email, role: payload.role };
   }
 }

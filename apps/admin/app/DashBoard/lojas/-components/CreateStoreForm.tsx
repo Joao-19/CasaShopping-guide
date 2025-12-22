@@ -243,9 +243,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
         }
     };
 
-    useEffect(() => {
-        console.log(isValid);
-    }, [isValid]);
+
 
     return (
         <FormCard
