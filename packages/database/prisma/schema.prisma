@@ -65,5 +65,31 @@ model Store {
   modifiedAt DateTime  @updatedAt
   deletedAt  DateTime?
 
+  products Product[]
+
   @@map("stores")
+}
+
+// --- MODELO PARA O SERVIÇO DE PRODUCTS (apps/products) ---
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  price       PriceTier
+  categories  String[]
+  tags        String?
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("products")
+}
+
+enum PriceTier {
+  LOW
+  MEDIUM
+  HIGH
 }

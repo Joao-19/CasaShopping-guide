@@ -10,7 +10,7 @@ import {
   Req,
 } from "@nestjs/common";
 import { StoreGatewayService } from "../services/store-gateway.service";
-import { CreateStoreDto, Store } from "@repo/dtos";
+import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
 import { Request } from "express";
 
 @Controller("stores")
@@ -31,7 +31,7 @@ export class StoreGatewayController {
     @Query("page") page: string = "1",
     @Req() req: Request,
     @Query("search") search?: string
-  ): Promise<Store[]> {
+  ): Promise<PaginatedResult<Store>> {
     const token = req.cookies["access_token"];
     return this.storeGatewayService.findAll(+page, token, search);
   }

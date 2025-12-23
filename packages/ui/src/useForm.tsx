@@ -33,7 +33,7 @@ export interface FormFieldRef<T = unknown> extends FormField<T> {
 export interface FormProvider {
   registerInput: (item: Omit<FormFieldRef, 'id'>) => number;
   unregisterInput: (id: number) => void;
-  updateInput: (id: number, value: unknown, rules: ValidatorRule<unknown>) => void;
+  updateInput: (id: number, value: unknown, rules: ValidatorRule<unknown>, validate: () => void) => void;
 }
 
 const FormContext = createContext<FormProvider | null>(null);
@@ -82,11 +82,12 @@ export default function useForm() {
     checkValidity();
   }, [checkValidity]);
 
-  const updateInput = useCallback((id: number, value: unknown, rules: ValidatorRule<unknown>) => {
+  const updateInput = useCallback((id: number, value: unknown, rules: ValidatorRule<unknown>, validate: () => void) => {
     const field = fields.current.find((item) => item.id === id);
     if (field) {
       field.value = value;
       field.rules = rules as ValidatorRule<any>;
+      field.validate = validate;
     }
     checkValidity();
   }, [checkValidity]);
@@ -168,9 +169,9 @@ export function useFormField<T>(value: T, rules: ValidatorRule<T>, disableRequir
 
   useEffect(() => {
     if (idRef.current !== null) {
-      updateInput(idRef.current, value, rules as ValidatorRule<unknown>);
+      updateInput(idRef.current, value, rules as ValidatorRule<unknown>, validate);
     }
-  }, [value, rules, updateInput]);
+  }, [value, rules, updateInput, validate]);
 
   useEffect(() => {
     if (isFirstRender.current) {

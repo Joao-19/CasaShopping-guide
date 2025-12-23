@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { prisma } from "@repo/database";
-import { CreateStoreDto, Store } from "@repo/dtos";
+import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
 
 @Injectable()
 export class StoreService {
@@ -21,7 +21,10 @@ export class StoreService {
     return store;
   }
 
-  async findAll(page: number = 1, search?: string): Promise<Store[]> {
+  async findAll(
+    page: number = 1,
+    search?: string
+  ): Promise<PaginatedResult<Store>> {
     const take = 15;
     const skip = (page - 1) * take;
 
@@ -37,14 +40,27 @@ export class StoreService {
       ];
     }
 
-    return prisma.store.findMany({
-      take,
-      skip,
-      orderBy: {
-        name: "asc",
+    const [stores, total] = await Promise.all([
+      prisma.store.findMany({
+        take,
+        skip,
+        orderBy: {
+          name: "asc",
+        },
+        where,
+      }),
+      prisma.store.count({ where }),
+    ]);
+
+    return {
+      data: stores,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / take),
+        limit: take,
       },
-      where,
-    });
+    };
   }
 
   async delete(id: string): Promise<Store> {

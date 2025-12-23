@@ -1,5 +1,5 @@
 import http from "./index";
-import { CreateStoreDto, Store } from "@repo/dtos";
+import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
 
 export default {
   create(form: CreateStoreDto) {
@@ -22,7 +22,7 @@ export default {
   // Placeholders for other methods
   list(params?: { page?: number; search?: string }) {
     return http
-      .get<Store[]>("stores", {
+      .get<PaginatedResult<Store>>("stores", {
         params: {
           page: params?.page,
           search: params?.search,

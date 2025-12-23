@@ -111,14 +111,14 @@ export function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
                                 onClick={onClose} // Close sidebar on mobile when link clicked
                                 className={`
                                     w-full flex items-center gap-3 px-4 py-3 rounded-lg 
-                                    transition-all duration-200 group
+                                    transition-all duration-300 ease-in-out group
                                     ${isActive
-                                        ? 'bg-[#1A2B3C] text-white shadow-md'
-                                        : 'text-gray-500 hover:bg-gray-100 hover:text-[#1A2B3C]'
+                                        ? 'bg-gray-900 text-white shadow-md'
+                                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
                                     }
                                 `}
                             >
-                                <span className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-[#1A2B3C]'}>
+                                <span className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-900 transition-colors duration-300'}>
                                     {item.icon}
                                 </span>
                                 <span className="font-medium text-sm">{item.label}</span>

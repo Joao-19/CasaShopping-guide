@@ -1,27 +1,36 @@
 import { Injectable, HttpException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
-import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
+import {
+  CreateProductDto,
+  Product,
+  UpdateProductDto,
+  PaginatedResult,
+} from "@repo/dtos";
 import { firstValueFrom } from "rxjs";
 import { ConfigService } from "@nestjs/config";
 
 @Injectable()
-export class StoreGatewayService {
-  private readonly storesServiceUrl: string;
+export class ProductGatewayService {
+  private readonly productsServiceUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService
   ) {
-    this.storesServiceUrl =
-      this.configService.getOrThrow<string>("STORE_SERVICE_URL");
+    this.productsServiceUrl = this.configService.getOrThrow<string>(
+      "PRODUCTS_SERVICE_URL"
+    );
   }
 
-  async create(createStoreDto: CreateStoreDto, token: string): Promise<Store> {
+  async create(
+    createProductDto: CreateProductDto,
+    token: string
+  ): Promise<Product> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post<Store>(
-          `${this.storesServiceUrl}/stores`,
-          createStoreDto,
+        this.httpService.post<Product>(
+          `${this.productsServiceUrl}/products`,
+          createProductDto,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -39,16 +48,17 @@ export class StoreGatewayService {
   }
 
   async findAll(
-    page: number,
-    token: string,
-    search?: string
-  ): Promise<PaginatedResult<Store>> {
+    storeId?: string,
+    search?: string,
+    token?: string,
+    page: number = 1
+  ): Promise<PaginatedResult<Product>> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get<PaginatedResult<Store>>(
-          `${this.storesServiceUrl}/stores`,
+        this.httpService.get<PaginatedResult<Product>>(
+          `${this.productsServiceUrl}/products`,
           {
-            params: { page, search },
+            params: { storeId, search, page },
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -63,38 +73,36 @@ export class StoreGatewayService {
       );
     }
   }
-
-  async delete(id: string, token: string): Promise<Store> {
-    try {
-      const response = await firstValueFrom(
-        this.httpService.delete<Store>(
-          `${this.storesServiceUrl}/stores/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-      );
-      return response.data;
-    } catch (error: any) {
-      throw new HttpException(
-        error.response?.data || "Internal Server Error",
-        error.response?.status || 500
-      );
-    }
-  }
-
   async update(
     id: string,
-    updateStoreDto: Partial<CreateStoreDto>,
+    updateProductDto: any,
     token: string
-  ): Promise<Store> {
+  ): Promise<Product> {
     try {
       const response = await firstValueFrom(
-        this.httpService.put<Store>(
-          `${this.storesServiceUrl}/stores/${id}`,
-          updateStoreDto,
+        this.httpService.put<Product>(
+          `${this.productsServiceUrl}/products/${id}`,
+          updateProductDto,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+  async delete(id: string, token: string): Promise<Product> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.delete<Product>(
+          `${this.productsServiceUrl}/products/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

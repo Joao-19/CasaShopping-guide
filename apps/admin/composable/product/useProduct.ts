@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import storeHttp from "@/Services/http/store.http";
-import { CreateStoreDto } from "@repo/dtos";
+import productHttp from "@/Services/http/product.http";
+import { CreateProductDto, UpdateProductDto } from "@repo/dtos";
 
-const useStore = () => {
+const useProduct = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [storeId, setStoreId] = useState("");
   const queryClient = useQueryClient();
 
   const {
@@ -14,46 +15,47 @@ const useStore = () => {
     isLoading: loadingList,
     error: listError,
   } = useQuery({
-    queryKey: ["stores", page, search],
-    queryFn: () => storeHttp.list({ page, search }),
+    queryKey: ["products", page, search, storeId],
+    queryFn: () => productHttp.list({ page, search, storeId }),
     placeholderData: (previousData) => previousData,
   });
 
-  const stores = response?.data || [];
+  const products = response?.data || [];
   const meta = response?.meta || { total: 0, page: 1, lastPage: 1, limit: 15 };
 
   const createMutation = useMutation({
-    mutationFn: (form: CreateStoreDto) => storeHttp.create(form),
+    mutationFn: (form: CreateProductDto) => productHttp.create(form),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stores"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, form }: { id: string; form: Partial<CreateStoreDto> }) =>
-      storeHttp.update(id, form),
+    mutationFn: ({ id, form }: { id: string; form: UpdateProductDto }) =>
+      productHttp.update(id, form),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stores"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => storeHttp.delete(id),
+    mutationFn: (id: string) => productHttp.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stores"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 
   return {
     // Methods
-    createStore: createMutation.mutateAsync,
-    updateStore: (id: string, form: Partial<CreateStoreDto>) =>
+    createProduct: createMutation.mutateAsync,
+    updateProduct: (id: string, form: UpdateProductDto) =>
       updateMutation.mutateAsync({ id, form }),
-    deleteStore: deleteMutation.mutateAsync,
+    deleteProduct: deleteMutation.mutateAsync,
 
     // State Setters
     setPage,
     setSearch,
+    setStoreId,
 
     // Status
     loading:
@@ -71,11 +73,12 @@ const useStore = () => {
     },
 
     // Data
-    stores,
+    products,
     meta,
     page,
     search,
+    storeId,
   };
 };
 
-export default useStore;
+export default useProduct;

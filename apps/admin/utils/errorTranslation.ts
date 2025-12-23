@@ -10,6 +10,11 @@ export const translateError = (error: any): string => {
   // Check for response data message or tag
   const tag = error.response?.data?.message || error.message || "";
 
+  // Check for specific status codes
+  if (error.response?.status === 400) {
+    return "Houve um erro na validação do formulário, por favor revise os dados.";
+  }
+
   // Map of error tags to Portuguese messages
   const errorMap: Record<string, string> = {
     // Auth

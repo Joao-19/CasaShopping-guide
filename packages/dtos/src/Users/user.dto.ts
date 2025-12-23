@@ -1,3 +1,12 @@
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  Matches,
+} from "class-validator";
+import { Transform } from "class-transformer";
+
 export interface UserResponseDto {
   id: string;
   name: string;
@@ -5,10 +14,24 @@ export interface UserResponseDto {
   phone: string;
 }
 
-export interface CreateUserDto {
-  name: string;
-  email: string;
-  phone: string;
-  // password não deve trafegar em DTOs de resposta, só de entrada
-  password: string;
+export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Transform(({ value }) => value.replace(/\D/g, ""))
+  @Matches(/^(\d{2}9\d{8}|\d{10})$/, {
+    message: "Telefone inválido (10 ou 11 dígitos, celular deve ter 9).",
+  })
+  phone!: string;
+
+  @IsString()
+  @MinLength(6)
+  password!: string;
 }
