@@ -1,21 +1,18 @@
 'use client';
 
-import { useEffect } from 'react';
-import { usePopup } from '../contexts/PopupContext';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { eventBus } from '@/utils/eventBus';
 import { ErrorPopup } from './ErrorPopup';
 
 export function GlobalErrorListener() {
-    const { showPopup, hidePopup } = usePopup();
+    const [error, setError] = useState<string | null>(null);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         const handleError = (message: string) => {
-            showPopup(
-                <ErrorPopup
-                    message={message}
-                    onClose={hidePopup}
-                />
-            );
+            setError(message);
         };
 
         eventBus.on('api-error', handleError);
@@ -23,7 +20,17 @@ export function GlobalErrorListener() {
         return () => {
             eventBus.off('api-error', handleError);
         };
-    }, [showPopup, hidePopup]);
+    }, []);
 
-    return null;
+    if (!mounted || !error) return null;
+
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <ErrorPopup
+                message={error}
+                onClose={() => setError(null)}
+            />
+        </div>,
+        document.body
+    );
 }

@@ -45,7 +45,7 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
     // Form Fields with Validation
     const nameField = useFormField(data.name, [validator.rules.required]);
     const addressField = useFormField(data.address, [validator.rules.required]);
-    const siteField = useFormField(data.site, [validator.rules.url]);
+    const siteField = useFormField(data.site, []);
 
     // Optional fields
     const phoneField = useFormField(data.phone, [validator.rules.phone]);
