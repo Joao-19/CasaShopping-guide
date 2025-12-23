@@ -1,12 +1,13 @@
 import React from 'react';
 import { cn } from '../lib/utils';
 
-type sizes = "small" | "medium" | "large";
+type sizes = "small" | "medium" | "large" | "xl";
 
 const sizeClasses: Record<sizes, string> = {
     small: "text-sm",
     medium: "text-base",
     large: "text-lg",
+    xl: "text-xl",
 };
 
 const colorClasses: Record<BaseTextProps['color'], string> = {
@@ -27,13 +28,17 @@ export const BaseText: React.FC<BaseTextProps> = ({ text, size = "medium", color
         <div
             className={cn(
                 "overflow-hidden transition-all duration-300 ease-in-out w-full text-left",
-                sizeClasses[size],
-                colorClasses[color],
                 text ? "max-h-[100px] opacity-100" : "max-h-0 opacity-0",
-                className
             )}
         >
-            <p className="p-0 m-0">{text || ""}</p>
+            <p className={cn(
+                "p-0 m-0",
+                sizeClasses[size],
+                colorClasses[color],
+                className
+            )}>
+                {text || ""}
+            </p>
         </div>
     );
 };

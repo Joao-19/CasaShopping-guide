@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps } from "react"
+import { ComponentProps, useState } from "react"
 import { cn } from "../lib/utils"
 import { IconHeart } from "../icons/IconHeart"
 
@@ -25,6 +25,7 @@ export function ProductCard({
     onWishlistClick,
     ...props
 }: ProductCardProps) {
+    const [isLoaded, setIsLoaded] = useState(false);
 
     const getPriceSymbol = (p: string) => {
         switch (p) {
@@ -37,11 +38,15 @@ export function ProductCard({
 
     return (
         <div className={cn("flex flex-col gap-3 w-full cursor-pointer group", className)} {...props}>
-            <div className="relative aspect-square w-full rounded-[12px] overflow-hidden shadow-sm">
+            <div className="relative aspect-square w-full rounded-[12px] overflow-hidden shadow-sm bg-linear-to-br from-gray-200 via-gray-300 to-gray-200">
                 <img
                     src={imageSrc}
                     alt={title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onLoad={() => setIsLoaded(true)}
+                    className={cn(
+                        "w-full h-full object-cover transition-all duration-700 group-hover:scale-105",
+                        isLoaded ? "opacity-100" : "opacity-0"
+                    )}
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
 

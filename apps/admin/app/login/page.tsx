@@ -21,6 +21,8 @@ import BaseInput from "@repo/ui/inputs/BaseInput";
 import useLogin from "@/composable/login/useLogin";
 import { useRedirectUrl } from "@/composable/useRedirectUrl";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
+import { Assets } from "@repo/ui";
+
 
 interface LoginFormProps {
     formData: {
@@ -144,7 +146,7 @@ const LoginPage = () => {
                             {/* Logo */}
                             <div className="text-center mb-4">
                                 <Image
-                                    src="/logo.avif"
+                                    src={Assets.Logo}
                                     alt="Casa Shopping Logo"
                                     width={108}
                                     height={56}

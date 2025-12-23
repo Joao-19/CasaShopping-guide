@@ -1,4 +1,6 @@
-import type { ComponentProps, ReactNode } from "react"
+"use client";
+
+import { ComponentProps, ReactNode, useState } from "react"
 import { cn } from "../lib/utils"
 
 interface MediaCardProps extends ComponentProps<"div"> {
@@ -16,10 +18,12 @@ export function MediaCard({
     className,
     ...props
 }: MediaCardProps) {
+    const [isLoaded, setIsLoaded] = useState(false);
+
     return (
         <div
             className={cn(
-                "relative overflow-hidden rounded-[16px] cursor-pointer group shadow-md transition-transform duration-300 hover:scale-[1.02]",
+                "relative overflow-hidden rounded-[16px] cursor-pointer group shadow-md transition-transform duration-300 hover:scale-[1.02] bg-linear-to-br from-gray-200 via-gray-300 to-gray-200",
                 className
             )}
             {...props}
@@ -35,13 +39,23 @@ export function MediaCard({
                         muted
                     />
                 ) : imageSrc ? (
-                    <img
-                        src={imageSrc}
-                        alt={alt}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
+                    <>
+                        {/* Gradient placeholder is already the background of the container, 
+                            but we can add a specific element if needed. 
+                            The container bg handles the "behind" logic. 
+                        */}
+                        <img
+                            src={imageSrc}
+                            alt={alt}
+                            onLoad={() => setIsLoaded(true)}
+                            className={cn(
+                                "absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110",
+                                isLoaded ? "opacity-100" : "opacity-0"
+                            )}
+                        />
+                    </>
                 ) : null}
-                <div className="absolute bg-black/30 inset-0 transition-opacity hover:bg-black/40" />
+                <div className="absolute bg-black/10 inset-0 transition-opacity hover:bg-black/20" />
             </div>
 
             <div className="relative z-10 w-full h-full">

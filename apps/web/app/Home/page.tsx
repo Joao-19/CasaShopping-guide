@@ -88,6 +88,7 @@ export default function HomePage() {
         <main className="w-full h-full flex flex-col flex-1">
             <div className="min-h-screen bg-[#f0f1f3] font-sans antialiased">
                 <Toolbar />
+
                 <HeroSection />
 
                 <div className="max-w-7xl mx-auto px-8 flex flex-col gap-16 mt-16 pb-10">

@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Assets } from '@repo/ui';
 
 
 const menuItems = [
@@ -80,7 +81,7 @@ export function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
                 {/* Logo and Close Button */}
                 <div className="h-24 flex items-center justify-between px-6 border-b border-gray-100">
                     <img
-                        src="/logomarca_1.png"
+                        src={Assets.LogomarcaWhite.src}
                         alt="CasaShopping"
                         className="h-10 w-auto object-contain grayscale brightness-20"
                     />

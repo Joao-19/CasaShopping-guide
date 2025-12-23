@@ -2,7 +2,7 @@
 import { IconSearch } from "@repo/ui";
 
 export function HeroSection() {
-    const backGroundVideoLink = "https://dgqh380xariug.cloudfront.net/f4vy6b%2Ffile%2F94b2a36d401b4de616194fd7cdf6c833_1191bf7fabeb25d8d2eb57926af85f0b.mp4?response-content-disposition=inline%3Bfilename%3D%2294b2a36d401b4de616194fd7cdf6c833_1191bf7fabeb25d8d2eb57926af85f0b.mp4%22%3B&response-content-type=video%2Fmp4&Expires=1765907216&Signature=ZBHw13~VFhpBli7kRb60Kwo1mmHSP7KKrNClWlw9a2~KdO8GFXwDhXENECW1EwqxVEs~dqMCfV-sHhBQDCuFn-OSDvM-zWRUJ33sqMZ6Abr8k1-CGykrfFDR97PsfwGR54REfAG42K8Amvo7OycW1j6aTzjUS0VuzIOE9JiK4xYC6CwmjD3q3NBVeRirNJQ~t~aMEJEbZt~a5DROGS-zonBtdUo-BXfy02hwHK6qybEvcDJEG6A1A7S1ksauq3VOiPGmRC3xLUDBmfEmprs3oCTJxkgsJtK2jioKKFH7BSkuh-4~pnjUkwzlWlpSiUp2QoKdA6HuBrZGK7-oZpH-Ww__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ";
+    const backGroundVideoLink = "/DEFAULT_BACKGROUND.webm";
 
     return (
         <div className="relative h-[800px] w-full">

@@ -1,16 +1,17 @@
 import { IconHeart } from "@repo/ui";
+import { Assets } from "@repo/ui";
 
 export function Toolbar() {
     return (
         <header className="absolute top-0 left-0 right-0 h-[100px] z-50 bg-linear-to-b from-black/50 to-transparent">
             <div className="max-w-7xl mx-auto px-8 h-full flex items-center justify-between border-b border-white/30">
                 <div className="flex items-center gap-12">
-                    <img src="/_assets/v11/6185a459e744ef985eb76eac209651a566e786e4.png" alt="CasaShopping" className="h-[42px] w-auto object-contain" />
+                    <img src={Assets.LogomarcaWhite.src} alt="CasaShopping" className="h-[42px] w-auto object-contain" />
                     <nav className="hidden md:flex items-center gap-8">
                         <button className="text-white font-semibold text-[16px] hover:opacity-80 transition-opacity">
                             Home
                         </button>
-                        <button className="text-white/80 font-medium text-[16px] hover:text-white transition-colors">
+                        <button className="text-white font-medium text-[16px] hover:opacity-80 transition-opacity">
                             Loja
                         </button>
                     </nav>
