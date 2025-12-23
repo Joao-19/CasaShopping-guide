@@ -17,4 +17,6 @@ export * from "./icons/IconSearch";
 export * from "./icons/IconInstagram";
 export * from "./icons/IconFacebook";
 export * from "./icons/IconYoutube";
+export * from "./cards/MediaCard";
+export * from "./cards/ProductCard";
 
