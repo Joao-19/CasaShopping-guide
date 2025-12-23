@@ -35,7 +35,13 @@ export class ProductService {
     return product as unknown as Product;
   }
 
-  async findAll(storeId?: string, search?: string): Promise<Product[]> {
+  async findAll(
+    storeId?: string,
+    search?: string,
+    page: number = 1
+  ): Promise<Product[]> {
+    const take = 15;
+    const skip = (page - 1) * take;
     const where: any = {};
 
     if (storeId) {
@@ -52,6 +58,8 @@ export class ProductService {
 
     const products = await prisma.product.findMany({
       where,
+      take,
+      skip,
       orderBy: {
         name: "asc",
       },

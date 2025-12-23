@@ -20,9 +20,10 @@ export class ProductGatewayController {
   async findAll(
     @Req() req: Request,
     @Query("storeId") storeId?: string,
-    @Query("search") search?: string
+    @Query("search") search?: string,
+    @Query("page") page: string = "1"
   ): Promise<Product[]> {
     const token = req.cookies["access_token"];
-    return this.productGatewayService.findAll(storeId, search, token);
+    return this.productGatewayService.findAll(storeId, search, token, +page);
   }
 }

@@ -45,16 +45,24 @@ export class ProductGatewayService {
   async findAll(
     storeId?: string,
     search?: string,
-    token?: string
+    token?: string,
+    page: number = 1
   ): Promise<Product[]> {
-    const response = await firstValueFrom(
-      this.httpService.get<Product[]>(`${this.productsServiceUrl}/products`, {
-        params: { storeId, search },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-    );
-    return response.data;
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<Product[]>(`${this.productsServiceUrl}/products`, {
+          params: { storeId, search, page },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
   }
 }
