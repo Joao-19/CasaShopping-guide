@@ -12,4 +12,9 @@ export * from "./inputs/ImageUpload";
 export * from "./table";
 export * from "./confirmation-card";
 export * from "./Texts/BaseText";
+export * from "./icons/IconHeart";
+export * from "./icons/IconSearch";
+export * from "./icons/IconInstagram";
+export * from "./icons/IconFacebook";
+export * from "./icons/IconYoutube";
 
