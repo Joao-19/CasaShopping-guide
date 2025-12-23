@@ -1,6 +1,11 @@
 import { Injectable, ConflictException } from "@nestjs/common";
 import { prisma } from "@repo/database";
-import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
+import {
+  CreateProductDto,
+  Product,
+  UpdateProductDto,
+  PaginatedResult,
+} from "@repo/dtos";
 
 @Injectable()
 export class ProductService {
@@ -39,7 +44,7 @@ export class ProductService {
     storeId?: string,
     search?: string,
     page: number = 1
-  ): Promise<Product[]> {
+  ): Promise<PaginatedResult<Product>> {
     const take = 15;
     const skip = (page - 1) * take;
     const where: any = {};
@@ -56,16 +61,27 @@ export class ProductService {
       ];
     }
 
-    const products = await prisma.product.findMany({
-      where,
-      take,
-      skip,
-      orderBy: {
-        name: "asc",
-      },
-    });
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        take,
+        skip,
+        orderBy: {
+          name: "asc",
+        },
+      }),
+      prisma.product.count({ where }),
+    ]);
 
-    return products as unknown as Product[];
+    return {
+      data: products as unknown as Product[],
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / take),
+        limit: take,
+      },
+    };
   }
   async update(id: string, data: UpdateProductDto): Promise<Product> {
     const existingProduct = await prisma.product.findUnique({

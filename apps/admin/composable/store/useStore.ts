@@ -10,15 +10,17 @@ const useStore = () => {
   const queryClient = useQueryClient();
 
   const {
-    data: stores = [],
+    data: response,
     isLoading: loadingList,
     error: listError,
   } = useQuery({
     queryKey: ["stores", page, search],
     queryFn: () => storeHttp.list({ page, search }),
-    // In TanStack Query v5, keepPreviousData is placeholderData: (previousData) => previousData
     placeholderData: (previousData) => previousData,
   });
+
+  const stores = response?.data || [];
+  const meta = response?.meta || { total: 0, page: 1, lastPage: 1, limit: 15 };
 
   const createMutation = useMutation({
     mutationFn: (form: CreateStoreDto) => storeHttp.create(form),
@@ -70,6 +72,7 @@ const useStore = () => {
 
     // Data
     stores,
+    meta,
     page,
     search,
   };

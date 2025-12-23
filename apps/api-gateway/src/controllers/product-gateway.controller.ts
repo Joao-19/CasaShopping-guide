@@ -10,7 +10,12 @@ import {
   Delete,
 } from "@nestjs/common";
 import { ProductGatewayService } from "../services/product-gateway.service";
-import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
+import {
+  CreateProductDto,
+  Product,
+  UpdateProductDto,
+  PaginatedResult,
+} from "@repo/dtos";
 import { Request } from "express";
 
 @Controller("products")
@@ -32,7 +37,7 @@ export class ProductGatewayController {
     @Query("storeId") storeId?: string,
     @Query("search") search?: string,
     @Query("page") page: string = "1"
-  ): Promise<Product[]> {
+  ): Promise<PaginatedResult<Product>> {
     const token = req.cookies["access_token"];
     return this.productGatewayService.findAll(storeId, search, token, +page);
   }

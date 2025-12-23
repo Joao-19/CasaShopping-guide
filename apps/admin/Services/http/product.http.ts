@@ -1,13 +1,20 @@
 import http from "./index";
-import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
+import {
+  CreateProductDto,
+  Product,
+  UpdateProductDto,
+  PaginatedResult,
+} from "@repo/dtos";
 
 export class ProductHttpService {
   async list(params: {
     page?: number;
     search?: string;
     storeId?: string;
-  }): Promise<Product[]> {
-    const { data } = await http.get<Product[]>("/products", { params });
+  }): Promise<PaginatedResult<Product>> {
+    const { data } = await http.get<PaginatedResult<Product>>("/products", {
+      params,
+    });
     return data;
   }
 

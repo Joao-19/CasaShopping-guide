@@ -11,7 +11,7 @@ const useProduct = () => {
   const queryClient = useQueryClient();
 
   const {
-    data: products = [],
+    data: response,
     isLoading: loadingList,
     error: listError,
   } = useQuery({
@@ -19,6 +19,9 @@ const useProduct = () => {
     queryFn: () => productHttp.list({ page, search, storeId }),
     placeholderData: (previousData) => previousData,
   });
+
+  const products = response?.data || [];
+  const meta = response?.meta || { total: 0, page: 1, lastPage: 1, limit: 15 };
 
   const createMutation = useMutation({
     mutationFn: (form: CreateProductDto) => productHttp.create(form),
@@ -71,6 +74,7 @@ const useProduct = () => {
 
     // Data
     products,
+    meta,
     page,
     search,
     storeId,

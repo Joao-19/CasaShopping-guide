@@ -1,6 +1,11 @@
 import { Injectable, HttpException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
-import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
+import {
+  CreateProductDto,
+  Product,
+  UpdateProductDto,
+  PaginatedResult,
+} from "@repo/dtos";
 import { firstValueFrom } from "rxjs";
 import { ConfigService } from "@nestjs/config";
 
@@ -47,15 +52,18 @@ export class ProductGatewayService {
     search?: string,
     token?: string,
     page: number = 1
-  ): Promise<Product[]> {
+  ): Promise<PaginatedResult<Product>> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get<Product[]>(`${this.productsServiceUrl}/products`, {
-          params: { storeId, search, page },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        this.httpService.get<PaginatedResult<Product>>(
+          `${this.productsServiceUrl}/products`,
+          {
+            params: { storeId, search, page },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
       );
       return response.data;
     } catch (error: any) {

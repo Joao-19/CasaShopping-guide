@@ -10,7 +10,12 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { StoreService } from "@/services/store.service";
-import { CreateStoreDto, Store, UpdateStoreDto } from "@repo/dtos";
+import {
+  CreateStoreDto,
+  Store,
+  UpdateStoreDto,
+  PaginatedResult,
+} from "@repo/dtos";
 import { JwtAuthGuard } from "@repo/auth-guard";
 
 @Controller("stores")
@@ -27,7 +32,7 @@ export class StoreController {
   async findAll(
     @Query("page") page: string = "1",
     @Query("search") search?: string
-  ): Promise<Store[]> {
+  ): Promise<PaginatedResult<Store>> {
     return this.storeService.findAll(+page, search);
   }
 
