@@ -86,4 +86,19 @@ export class ProductService {
 
     return product as unknown as Product;
   }
+  async delete(id: string): Promise<Product> {
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+    });
+
+    if (!existingProduct) {
+      throw new ConflictException("Product not found");
+    }
+
+    const product = await prisma.product.delete({
+      where: { id },
+    });
+
+    return product as unknown as Product;
+  }
 }

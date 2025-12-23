@@ -90,4 +90,24 @@ export class ProductGatewayService {
       );
     }
   }
+  async delete(id: string, token: string): Promise<Product> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.delete<Product>(
+          `${this.productsServiceUrl}/products/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
 }

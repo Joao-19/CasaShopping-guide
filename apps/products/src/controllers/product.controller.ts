@@ -7,6 +7,7 @@ import {
   UseGuards,
   Put,
   Param,
+  Delete,
 } from "@nestjs/common";
 import { ProductService } from "@/services/product.service";
 import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
@@ -37,5 +38,10 @@ export class ProductController {
     @Body() updateProductDto: UpdateProductDto
   ): Promise<Product> {
     return this.productService.update(id, updateProductDto);
+  }
+
+  @Delete(":id")
+  async delete(@Param("id") id: string): Promise<Product> {
+    return this.productService.delete(id);
   }
 }

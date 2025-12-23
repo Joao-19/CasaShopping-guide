@@ -7,6 +7,7 @@ import {
   Req,
   Put,
   Param,
+  Delete,
 } from "@nestjs/common";
 import { ProductGatewayService } from "../services/product-gateway.service";
 import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
@@ -44,5 +45,11 @@ export class ProductGatewayController {
   ): Promise<Product> {
     const token = req.cookies["access_token"];
     return this.productGatewayService.update(id, updateProductDto, token);
+  }
+
+  @Delete(":id")
+  async delete(@Param("id") id: string, @Req() req: Request): Promise<Product> {
+    const token = req.cookies["access_token"];
+    return this.productGatewayService.delete(id, token);
   }
 }
