@@ -6,6 +6,7 @@ import {
   IsString,
   IsUUID,
 } from "class-validator";
+import { PartialType } from "@nestjs/mapped-types";
 
 export enum PriceTier {
   LOW = "LOW",
@@ -36,6 +37,8 @@ export class CreateProductDto {
   @IsUUID()
   storeId!: string;
 }
+
+export class UpdateProductDto extends PartialType(CreateProductDto) {}
 
 export interface Product {
   id: string;

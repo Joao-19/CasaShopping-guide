@@ -1,6 +1,6 @@
 import { Injectable, ConflictException } from "@nestjs/common";
 import { prisma } from "@repo/database";
-import { CreateProductDto, Product } from "@repo/dtos";
+import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
 
 @Injectable()
 export class ProductService {
@@ -66,5 +66,24 @@ export class ProductService {
     });
 
     return products as unknown as Product[];
+  }
+  async update(id: string, data: UpdateProductDto): Promise<Product> {
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+    });
+
+    if (!existingProduct) {
+      throw new ConflictException("Product not found"); // Or NotFoundException, using Conflict for simplified import reuse or ideally separate exception
+    }
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
+
+    return product as unknown as Product;
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, HttpException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
-import { CreateProductDto, Product } from "@repo/dtos";
+import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
 import { firstValueFrom } from "rxjs";
 import { ConfigService } from "@nestjs/config";
 
@@ -56,6 +56,31 @@ export class ProductGatewayService {
             Authorization: `Bearer ${token}`,
           },
         })
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+  async update(
+    id: string,
+    updateProductDto: any,
+    token: string
+  ): Promise<Product> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.put<Product>(
+          `${this.productsServiceUrl}/products/${id}`,
+          updateProductDto,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
       );
       return response.data;
     } catch (error: any) {

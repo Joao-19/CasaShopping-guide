@@ -1,6 +1,15 @@
-import { Controller, Post, Body, Get, Query, Req } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  Req,
+  Put,
+  Param,
+} from "@nestjs/common";
 import { ProductGatewayService } from "../services/product-gateway.service";
-import { CreateProductDto, Product } from "@repo/dtos";
+import { CreateProductDto, Product, UpdateProductDto } from "@repo/dtos";
 import { Request } from "express";
 
 @Controller("products")
@@ -25,5 +34,15 @@ export class ProductGatewayController {
   ): Promise<Product[]> {
     const token = req.cookies["access_token"];
     return this.productGatewayService.findAll(storeId, search, token, +page);
+  }
+
+  @Put(":id")
+  async update(
+    @Param("id") id: string,
+    @Body() updateProductDto: UpdateProductDto,
+    @Req() req: Request
+  ): Promise<Product> {
+    const token = req.cookies["access_token"];
+    return this.productGatewayService.update(id, updateProductDto, token);
   }
 }
