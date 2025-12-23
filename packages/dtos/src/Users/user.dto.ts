@@ -1,4 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  Matches,
+} from "class-validator";
+import { Transform } from "class-transformer";
 
 export interface UserResponseDto {
   id: string;
@@ -18,6 +25,10 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => value.replace(/\D/g, ""))
+  @Matches(/^(\d{2}9\d{8}|\d{10})$/, {
+    message: "Telefone inválido (10 ou 11 dígitos, celular deve ter 9).",
+  })
   phone!: string;
 
   @IsString()

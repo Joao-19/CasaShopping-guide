@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { StoreService } from "@/services/store.service";
-import { CreateStoreDto, Store } from "@repo/dtos";
+import { CreateStoreDto, Store, UpdateStoreDto } from "@repo/dtos";
 import { JwtAuthGuard } from "@repo/auth-guard";
 
 @Controller("stores")
@@ -39,7 +39,7 @@ export class StoreController {
   @Put(":id")
   async update(
     @Param("id") id: string,
-    @Body() updateStoreDto: Partial<CreateStoreDto>
+    @Body() updateStoreDto: UpdateStoreDto
   ): Promise<Store> {
     return this.storeService.update(id, updateStoreDto);
   }

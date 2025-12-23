@@ -1,10 +1,18 @@
 import { NestFactory } from "@nestjs/core";
+import { ValidationPipe } from "@nestjs/common";
 import { StoreModule } from "@/modules/store.module";
 import { ConfigService } from "@nestjs/config";
 
 async function bootstrap() {
   try {
     const app = await NestFactory.create(StoreModule);
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      })
+    );
     const configService = app.get(ConfigService);
 
     const port = process.env.PORT || 3005;
