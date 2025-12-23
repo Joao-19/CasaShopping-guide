@@ -117,11 +117,11 @@ export default function ProdutosPage() {
                                             <div className="text-xs text-gray-500 truncate max-w-[200px]">{product.description}</div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.price === 'HIGH' ? 'bg-red-100 text-red-700' :
-                                                product.price === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                                                    'bg-green-100 text-green-700'
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.price === 'HIGH' ? 'bg-purple-100 text-purple-700' :
+                                                product.price === 'MEDIUM' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-slate-100 text-slate-700'
                                                 }`}>
-                                                {product.price}
+                                                {product.price === 'LOW' ? '$' : product.price === 'MEDIUM' ? '$$' : '$$$'}
                                             </span>
                                         </TableCell>
                                         <TableCell>

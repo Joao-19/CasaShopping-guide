@@ -176,7 +176,7 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
             </div>
 
             {/* Footer Actions */}
-            <div className="pt-4 border-t border-gray-100 flex justify-end gap-3 mt-6">
+            <div className="pt-4 border-t border-gray-100 flex justify-end gap-3">
                 <Button
                     variant="ghost"
                     onClick={onClose}
