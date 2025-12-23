@@ -22,4 +22,56 @@ export class UserService {
     const { password, ...result } = newUser;
     return result;
   }
+
+  async findAll(page: number = 1, search?: string) {
+    const take = 15;
+    const skip = (page - 1) * take;
+
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        take,
+        skip,
+        orderBy: {
+          name: "asc",
+        },
+        where,
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    const sanitizedUsers = users.map((user) => {
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      };
+    });
+
+    return {
+      data: sanitizedUsers,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / take),
+        limit: take,
+      },
+    };
+  }
+
+  async delete(id: string) {
+    await prisma.user.delete({
+      where: { id },
+    });
+    return { message: "User deleted successfully" };
+  }
 }
