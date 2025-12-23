@@ -5,7 +5,7 @@ import {
   IsUrl,
   Matches,
 } from "class-validator";
-import { PartialType } from "@nestjs/mapped-types";
+
 import { Transform } from "class-transformer";
 
 export class CreateStoreDto {
@@ -22,7 +22,10 @@ export class CreateStoreDto {
 
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value?.replace(/\D/g, ""))
+  @Transform(({ value }) => {
+    if (!value) return null;
+    return value.replace(/\D/g, "");
+  })
   @Matches(/^(\d{2}9\d{8}|\d{10})$/, {
     message:
       "Invalid phone number (10 or 11 digits; cell phones must have 9 in the third digit).",
@@ -31,22 +34,71 @@ export class CreateStoreDto {
 
   @IsOptional()
   @IsUrl()
+  @Transform(({ value }) => (value === "" ? null : value))
   site?: string | null;
 
   @IsOptional()
   @IsUrl()
+  @Transform(({ value }) => (value === "" ? null : value))
   facebookLink?: string | null;
 
   @IsOptional()
   @IsUrl()
+  @Transform(({ value }) => (value === "" ? null : value))
   instagramLink?: string | null;
 
   @IsOptional()
   @IsUrl()
+  @Transform(({ value }) => (value === "" ? null : value))
   youtubeLink?: string | null;
 }
 
-export class UpdateStoreDto extends PartialType(CreateStoreDto) {}
+export class UpdateStoreDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  name?: string;
+
+  @IsOptional()
+  image?: any;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => {
+    if (!value) return null;
+    return value.replace(/\D/g, "");
+  })
+  @Matches(/^(\d{2}9\d{8}|\d{10})$/, {
+    message:
+      "Invalid phone number (10 or 11 digits; cell phones must have 9 in the third digit).",
+  })
+  phone?: string | null;
+
+  @IsOptional()
+  @IsUrl()
+  @Transform(({ value }) => (value === "" ? null : value))
+  site?: string | null;
+
+  @IsOptional()
+  @IsUrl()
+  @Transform(({ value }) => (value === "" ? null : value))
+  facebookLink?: string | null;
+
+  @IsOptional()
+  @IsUrl()
+  @Transform(({ value }) => (value === "" ? null : value))
+  instagramLink?: string | null;
+
+  @IsOptional()
+  @IsUrl()
+  @Transform(({ value }) => (value === "" ? null : value))
+  youtubeLink?: string | null;
+}
 
 export interface Store {
   id: string;
