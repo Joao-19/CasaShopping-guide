@@ -17,7 +17,11 @@ const nextConfig = {
                 protocol: 'http',
                 hostname: 'localhost',
                 port: '9000',
-                pathname: '/casashopping/**',
+            },
+            {
+                protocol: 'http',
+                hostname: '192.168.0.13',
+                port: '9000',
             },
         ],
     },

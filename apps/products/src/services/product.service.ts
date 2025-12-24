@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from "@nestjs/common";
+import {
+  Injectable,
+  ConflictException,
+  BadRequestException,
+} from "@nestjs/common";
 import { prisma } from "@repo/database";
 import {
   CreateProductDto,
@@ -26,6 +30,10 @@ export class ProductService {
       );
     }
 
+    if (data.images && data.images.length > 5) {
+      throw new BadRequestException("Maximum of 5 images allowed per product");
+    }
+
     const product = await prisma.product.create({
       data: {
         name: data.name,
@@ -34,10 +42,40 @@ export class ProductService {
         categories: data.categories,
         tags: data.tags,
         storeId: data.storeId,
+        images: {
+          create: data.images?.map((img) => ({
+            path: img.path,
+            index: img.index,
+          })),
+        },
+      },
+      include: {
+        images: true,
       },
     });
 
-    return product as unknown as Product;
+    return this.transformProduct(product) as unknown as Product;
+  }
+
+  private transformProduct(product: any): any {
+    if (product.images) {
+      const baseUrl =
+        process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+      const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+
+      product.images = product.images.map((img: any) => {
+        if (!img.path.startsWith("http")) {
+          const cleanKey = img.path.startsWith("/")
+            ? img.path.slice(1)
+            : img.path;
+          img.path = `${cleanBase}/${cleanKey}`;
+        }
+        return img;
+      });
+      // Sort by index
+      product.images.sort((a: any, b: any) => a.index - b.index);
+    }
+    return product;
   }
 
   async findAll(
@@ -69,12 +107,17 @@ export class ProductService {
         orderBy: {
           name: "asc",
         },
+        include: {
+          images: true,
+        },
       }),
       prisma.product.count({ where }),
     ]);
 
     return {
-      data: products as unknown as Product[],
+      data: products.map((p) =>
+        this.transformProduct(p)
+      ) as unknown as Product[],
       meta: {
         total,
         page,
@@ -92,15 +135,40 @@ export class ProductService {
       throw new ConflictException("Product not found"); // Or NotFoundException, using Conflict for simplified import reuse or ideally separate exception
     }
 
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
-        ...data,
-        updatedAt: new Date(),
-      },
+    if (data.images && data.images.length > 5) {
+      throw new BadRequestException("Maximum of 5 images allowed per product");
+    }
+
+    const product = await prisma.$transaction(async (tx) => {
+      // Handle Image Updates (Re-create strategy)
+      if (data.images) {
+        await tx.productImage.deleteMany({ where: { productId: id } });
+        await tx.productImage.createMany({
+          data: data.images.map((img) => ({
+            productId: id,
+            path: img.path,
+            index: img.index,
+          })),
+        });
+      }
+
+      // Explicitly construct update data to avoid 'images' being passed directly to update if it's in data
+      // (Though DTO validation usually handles this, safe to key it out)
+      const { images, ...otherData } = data;
+
+      return tx.product.update({
+        where: { id },
+        data: {
+          ...otherData,
+          updatedAt: new Date(),
+        },
+        include: {
+          images: true,
+        },
+      });
     });
 
-    return product as unknown as Product;
+    return this.transformProduct(product) as unknown as Product;
   }
   async delete(id: string): Promise<Product> {
     const existingProduct = await prisma.product.findUnique({
@@ -113,7 +181,7 @@ export class ProductService {
 
     const product = await prisma.product.delete({
       where: { id },
-    });
+    }); // Images cascade deleted
 
     return product as unknown as Product;
   }

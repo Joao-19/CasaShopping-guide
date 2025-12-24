@@ -1,5 +1,6 @@
 "use client";
 
+import "reflect-metadata";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, ReactNode } from "react";
 import { PopupProvider } from "./contexts/PopupContext";

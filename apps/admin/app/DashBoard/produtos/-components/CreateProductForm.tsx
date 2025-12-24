@@ -6,11 +6,19 @@ import BaseInput from "@repo/ui/inputs/BaseInput";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import useProduct from "@/composable/product/useProduct";
 import useStore from "@/composable/store/useStore";
-import { CreateProductDto, PriceTier, Product } from "@repo/dtos";
+import { CreateProductDto, PriceTier, Product, ProductImage } from "@repo/dtos";
+import { useImageUpload } from "@/composable/storage/useImageUpload";
 
 interface CreateProductFormProps {
     onClose: () => void;
     initialData?: Product;
+}
+
+interface ImageState {
+    id?: string;
+    file?: File;
+    preview: string;
+    path?: string; // Existing path or result from upload
 }
 
 interface CreateProductFormContentProps {
@@ -21,6 +29,7 @@ interface CreateProductFormContentProps {
         categories: string;
         tags: string;
         storeId: string;
+        images: ImageState[];
     };
     handlers: {
         setName: (v: string) => void;
@@ -29,6 +38,7 @@ interface CreateProductFormContentProps {
         setCategories: (v: string) => void;
         setTags: (v: string) => void;
         setStoreId: (v: string) => void;
+        setImages: (v: ImageState[]) => void;
     };
     loading: boolean;
     onClose: () => void;
@@ -36,6 +46,8 @@ interface CreateProductFormContentProps {
     isValid: boolean;
     stores: any[]; // Using any[] for simplicity, ideally Store[]
     isEditing: boolean;
+    images: ImageState[];
+    uploadingImage: boolean;
 }
 
 function CreateProductFormContent({
@@ -108,6 +120,66 @@ function CreateProductFormContent({
                 error={nameField.error}
                 onBlur={nameField.onBlur}
             />
+
+            {/* Image Gallery */}
+            <div className="mb-6">
+                <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Imagens do Produto (Máx 5)
+                </Label>
+
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {data.images.map((img, index) => (
+                        <div key={index} className="relative aspect-square rounded-lg border border-gray-200 overflow-hidden group bg-gray-50">
+                            <img
+                                src={img.preview}
+                                alt={`Produto ${index + 1}`}
+                                className="object-cover w-full h-full"
+                            />
+                            {/* Remove Button */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const newImages = [...data.images];
+                                    newImages.splice(index, 1);
+                                    handlers.setImages(newImages);
+                                }}
+                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                            </button>
+                            {/* Index Badge */}
+                            <div className="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+                                #{index + 1}
+                            </div>
+                        </div>
+                    ))}
+
+                    {/* Add Button */}
+                    {data.images.length < 5 && (
+                        <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        const file = e.target.files[0];
+                                        handlers.setImages([
+                                            ...data.images,
+                                            {
+                                                file,
+                                                preview: URL.createObjectURL(file)
+                                            }
+                                        ]);
+                                    }
+                                }}
+                            />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus text-gray-400 mb-1"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                            <span className="text-xs text-gray-500">Adicionar</span>
+                        </label>
+                    )}
+                </div>
+            </div>
 
             {/* Description */}
             <div className="mb-4">
@@ -210,11 +282,63 @@ export function CreateProductForm({
     );
     const [tags, setTags] = useState(initialData?.tags || "");
     const [storeId, setStoreId] = useState(initialData?.storeId || "");
+    const [images, setImages] = useState<ImageState[]>(
+        initialData?.images?.map((img: ProductImage) => ({
+            id: img.id,
+            path: img.path, // This works if backend returns full URL in path, or we use a separate field. Backend transformProduct puts full URL in path.
+            preview: img.path,
+        })) || []
+    );
+    const { uploadImage, uploading: uploadingImage } = useImageUpload();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (images.length === 0) {
+            alert("Adicione pelo menos uma imagem"); // Simple validation
+            return;
+        }
+
         if (!validateAll()) return;
+
+        // Upload new images
+        const finalImages = [];
+        try {
+            for (let i = 0; i < images.length; i++) {
+                const img = images[i];
+                if (!img) continue;
+
+                if (img.file) {
+                    // New file, upload it
+                    const key = await uploadImage(img.file, storeId);
+                    finalImages.push({ path: key, index: i });
+                } else if (img.path) {
+                    // Existing image (URL), extract key if needed, or backend handles it?
+                    // Backend transformProduct returns FULL URL.
+                    // We need to extract the KEY (stores/storeId/filename) to send back, OR backend is smart enough?
+                    // Implementation plan said: "Client sends full array... Backend deletes existing... creates new".
+                    // Backend expects DTO: { path: string, index: number }.
+                    // Note: If we send full URL, backend might store full URL if we're not careful.
+                    // Our DTO expects 'path'.
+                    // Let's strip the domain if it exists to be safe and consistently store relative paths.
+                    let key = img.path;
+                    if (key.startsWith("http")) {
+                        // Attempt to extract relative path "stores/..."
+                        // Assuming standard structure or just splitting by domain
+                        const parts = key.split(storeId);
+                        // If URL is http://minio.../stores/{storeId}/{file}, split by stores/ might be safer
+                        const match = key.match(/stores\/.*$/);
+                        if (match) {
+                            key = match[0];
+                        }
+                    }
+                    finalImages.push({ path: key, index: i });
+                }
+            }
+        } catch (e) {
+            console.error("Upload failed", e);
+            return;
+        }
 
 
 
@@ -231,6 +355,7 @@ export function CreateProductForm({
             categories: categoryList,
             tags: tags || undefined, // Send undefined if empty string
             storeId,
+            images: finalImages,
         };
 
         try {
@@ -287,6 +412,7 @@ export function CreateProductForm({
                         categories,
                         tags,
                         storeId,
+                        images,
                     }}
                     handlers={{
                         setName,
@@ -295,12 +421,15 @@ export function CreateProductForm({
                         setCategories,
                         setTags,
                         setStoreId,
+                        setImages,
                     }}
-                    loading={loading}
+                    loading={loading || uploadingImage}
                     onClose={onClose}
                     onSubmit={handleSubmit}
                     stores={stores || []}
                     isEditing={isEditing}
+                    images={images}
+                    uploadingImage={uploadingImage}
                 />
             </FormProvider>
         </FormCard>

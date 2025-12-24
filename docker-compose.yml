@@ -203,6 +203,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
     depends_on:
       - database
     networks:
