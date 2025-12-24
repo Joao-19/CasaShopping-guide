@@ -2,7 +2,7 @@
 
 const nextConfig = {
     reactStrictMode: true,
-    transpilePackages: ["@repo/ui", "@repo/dtos", "@repo/database"],
+    transpilePackages: ["@repo/ui", "@repo/dtos", "@repo/database", "@repo/api-client"],
     typescript: {
         ignoreBuildErrors: true,
     },

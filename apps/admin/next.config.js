@@ -2,7 +2,7 @@
 const nextConfig = {
     allowedDevOrigins: ["192.168.0.5"],
     output: "standalone",
-    transpilePackages: ["@repo/ui", "@repo/dtos", "@repo/database"],
+    transpilePackages: ["@repo/ui", "@repo/dtos", "@repo/database", "@repo/api-client"],
     typescript: {
         ignoreBuildErrors: true,
     },

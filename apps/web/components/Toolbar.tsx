@@ -63,8 +63,8 @@ export function Toolbar() {
     }
 
     return (
-        <header className="bg-[rgb(0,59,166)] text-white py-4 px-6 shadow-md sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <header className="bg-[rgb(0,59,166)] text-white py-4 px-6 shadow-md sticky top-0 z-50 h-[100px]">
+            <div className="max-w-7xl mx-auto px-8 h-full flex items-center justify-between">
                 <div className="flex items-center gap-8">
                     <button className="p-2 hover:bg-white/10 rounded-full transition-colors md:hidden">
                         <svg
@@ -88,7 +88,7 @@ export function Toolbar() {
                         <img
                             src={Assets.LogomarcaWhite.src}
                             alt="CasaShopping"
-                            className="h-[32px] w-auto object-contain"
+                            className="h-[42px] w-auto object-contain"
                         />
                     </Link>
                     <nav className="hidden md:flex items-center gap-8">

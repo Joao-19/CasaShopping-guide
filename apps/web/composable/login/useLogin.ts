@@ -17,7 +17,11 @@ const useLogin = () => {
       const response = await http.request(form);
       // Backend returns the user object directly now
       if (response) {
-        authStore.setUser(response as unknown as User);
+        authStore.setUser(response.user);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("accessToken", response.accessToken);
+          localStorage.setItem("refreshToken", response.refreshToken);
+        }
       }
       return response;
     } catch (error) {

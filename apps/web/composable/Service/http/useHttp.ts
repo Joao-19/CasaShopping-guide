@@ -18,9 +18,6 @@ export function useBaseHttp<Response, Form, DefaultValue>(
       setLoading(true);
       setError(null);
       try {
-        if (authStore.token) {
-          axios.defaults.headers.authorization = authStore.token;
-        }
         const res = await api(form);
         if (
           res &&
@@ -29,9 +26,6 @@ export function useBaseHttp<Response, Form, DefaultValue>(
           "headers" in res
         ) {
           const axiosRes = res as AxiosResponse<Response>;
-          if (axiosRes.headers.token) {
-            authStore.setToken(axiosRes.headers.token);
-          }
           setData(axiosRes.data);
           return axiosRes.data;
         }
@@ -42,10 +36,6 @@ export function useBaseHttp<Response, Form, DefaultValue>(
         setError(
           (apiError.response?.data ? apiError.response.data : e) as ApiError
         );
-        if (apiError.response?.status === 401) {
-          authStore.setToken(null);
-          window.location.hash = "/login";
-        }
         throw e;
       } finally {
         setLoading(false);
