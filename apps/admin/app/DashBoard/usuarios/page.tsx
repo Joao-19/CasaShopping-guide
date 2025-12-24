@@ -69,6 +69,7 @@ export default function UsuariosPage() {
                             <TableRow>
                                 <TableHead>Nome</TableHead>
                                 <TableHead>Email</TableHead>
+                                <TableHead>Telefone</TableHead>
                                 <TableHead className="text-right">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -96,6 +97,9 @@ export default function UsuariosPage() {
                                         </TableCell>
                                         <TableCell>
                                             <div className="text-sm text-gray-600">{user.email}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="text-sm text-gray-600">{user.phone}</div>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <button
