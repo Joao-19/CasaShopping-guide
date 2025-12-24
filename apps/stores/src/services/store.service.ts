@@ -23,9 +23,12 @@ export class StoreService {
 
   async findAll(
     page: number = 1,
-    search?: string
+    search?: string,
+    limit?: number
   ): Promise<PaginatedResult<Store>> {
-    const take = 15;
+    const MAX_LIMIT = 25;
+    const DEFAULT_LIMIT = 15;
+    const take = Math.min(limit || DEFAULT_LIMIT, MAX_LIMIT);
     const skip = (page - 1) * take;
 
     const where: any = {

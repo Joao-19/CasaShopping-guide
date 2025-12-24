@@ -41,14 +41,15 @@ export class StoreGatewayService {
   async findAll(
     page: number,
     token: string,
-    search?: string
+    search?: string,
+    limit?: number
   ): Promise<PaginatedResult<Store>> {
     try {
       const response = await firstValueFrom(
         this.httpService.get<PaginatedResult<Store>>(
           `${this.storesServiceUrl}/stores`,
           {
-            params: { page, search },
+            params: { page, search, limit },
             headers: {
               Authorization: `Bearer ${token}`,
             },

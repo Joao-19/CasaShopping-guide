@@ -31,9 +31,10 @@ export class StoreController {
   @Get()
   async findAll(
     @Query("page") page: string = "1",
-    @Query("search") search?: string
+    @Query("search") search?: string,
+    @Query("limit") limit?: string
   ): Promise<PaginatedResult<Store>> {
-    return this.storeService.findAll(+page, search);
+    return this.storeService.findAll(+page, search, limit ? +limit : undefined);
   }
 
   @Delete(":id")

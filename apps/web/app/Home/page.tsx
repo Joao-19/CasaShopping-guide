@@ -3,7 +3,6 @@ import { CategoriesSection } from "../../components/CategoriesSection";
 import { HeroSection } from "../../components/HeroSection";
 import { HighlightsSection } from "../../components/HighlightsSection";
 import { ProductShowcase } from "../../components/ProductShowcase";
-import { NewsletterSection } from "../../components/NewsletterSection";
 import { Footer } from "../../components/Footer";
 
 // Data mocks to allow cleaner page structure
@@ -107,8 +106,6 @@ export default function HomePage() {
                         tags={['Vasos', 'Quadros', 'Iluminação', 'Espelhos']}
                         products={decoracaoProducts}
                     />
-
-                    <NewsletterSection />
                 </div>
 
                 <Footer />

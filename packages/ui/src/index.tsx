@@ -20,4 +20,6 @@ export * from "./icons/IconYoutube";
 export * from "./cards/MediaCard";
 export * from "./cards/ProductCard";
 export * from "./assets";
+export * from "./pagination";
+
 

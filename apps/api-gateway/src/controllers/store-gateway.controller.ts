@@ -30,10 +30,16 @@ export class StoreGatewayController {
   async findAll(
     @Query("page") page: string = "1",
     @Req() req: Request,
-    @Query("search") search?: string
+    @Query("search") search?: string,
+    @Query("limit") limit?: string
   ): Promise<PaginatedResult<Store>> {
     const token = req.cookies["access_token"];
-    return this.storeGatewayService.findAll(+page, token, search);
+    return this.storeGatewayService.findAll(
+      +page,
+      token,
+      search,
+      limit ? +limit : undefined
+    );
   }
 
   @Delete(":id")

@@ -1,6 +1,6 @@
 "use client";
 
-import { ComponentProps, ReactNode, useState } from "react"
+import { ComponentProps, ReactNode, useState, useRef, useEffect } from "react"
 import { cn } from "../lib/utils"
 
 interface MediaCardProps extends ComponentProps<"div"> {
@@ -19,6 +19,13 @@ export function MediaCard({
     ...props
 }: MediaCardProps) {
     const [isLoaded, setIsLoaded] = useState(false);
+    const imgRef = useRef<HTMLImageElement>(null);
+
+    useEffect(() => {
+        if (imgRef.current && imgRef.current.complete) {
+            setIsLoaded(true);
+        }
+    }, []);
 
     return (
         <div
@@ -45,6 +52,7 @@ export function MediaCard({
                             The container bg handles the "behind" logic. 
                         */}
                         <img
+                            ref={imgRef}
                             src={imageSrc}
                             alt={alt}
                             onLoad={() => setIsLoaded(true)}

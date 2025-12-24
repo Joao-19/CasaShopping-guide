@@ -42,6 +42,8 @@ export class GatewayService {
       );
       return response.data;
     } catch (error: any) {
+      console.log(error);
+
       if (error.response) {
         throw new ConflictException(
           error.response.data.message || "Erro no login"
