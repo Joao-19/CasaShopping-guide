@@ -14,10 +14,23 @@ export class StoreService {
         facebookLink: data.facebookLink,
         instagramLink: data.instagramLink,
         youtubeLink: data.youtubeLink,
-        // logoImage will be handled later, after create works
+        logoImage: data.logoImage,
       },
     });
 
+    return this.transformStore(store);
+  }
+
+  private transformStore(store: Store): Store {
+    if (store.logoImage && !store.logoImage.startsWith("http")) {
+      const baseUrl =
+        process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+      const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+      const cleanKey = store.logoImage.startsWith("/")
+        ? store.logoImage.slice(1)
+        : store.logoImage;
+      store.logoImage = `${cleanBase}/${cleanKey}`;
+    }
     return store;
   }
 
@@ -56,7 +69,7 @@ export class StoreService {
     ]);
 
     return {
-      data: stores,
+      data: stores.map((store) => this.transformStore(store)),
       meta: {
         total,
         page,
@@ -83,9 +96,10 @@ export class StoreService {
     // For now, we sanitize strictly what is in the DTO that maps to DB fields
     delete updateData.image;
 
-    return prisma.store.update({
+    const updatedStore = await prisma.store.update({
       where: { id },
       data: updateData,
     });
+    return this.transformStore(updatedStore);
   }
 }

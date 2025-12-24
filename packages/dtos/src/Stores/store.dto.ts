@@ -16,6 +16,10 @@ export class CreateStoreDto {
   @IsOptional()
   image?: any;
 
+  @IsOptional()
+  @IsString()
+  logoImage?: string;
+
   @IsString()
   @IsNotEmpty()
   address!: string;
@@ -60,7 +64,8 @@ export class UpdateStoreDto {
   name?: string;
 
   @IsOptional()
-  image?: any;
+  @IsString()
+  logoImage?: string;
 
   @IsOptional()
   @IsString()

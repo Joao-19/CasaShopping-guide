@@ -9,8 +9,18 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
-    allowedDevOrigins: ["192.168.0.5"],
+    allowedDevOrigins: ["192.168.0.13"],
     output: "standalone",
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'http',
+                hostname: 'localhost',
+                port: '9000',
+                pathname: '/casashopping/**',
+            },
+        ],
+    },
 };
 
 export default nextConfig;
