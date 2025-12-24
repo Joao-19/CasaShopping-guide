@@ -11,6 +11,9 @@ import {
   PaginatedResult,
 } from "@repo/dtos";
 
+const STORAGE_SERVICE_URL =
+  process.env.STORAGE_SERVICE_URL || "http://storage-service:3007";
+
 @Injectable()
 export class ProductService {
   async create(data: CreateProductDto): Promise<Product> {
@@ -129,6 +132,9 @@ export class ProductService {
   async update(id: string, data: UpdateProductDto): Promise<Product> {
     const existingProduct = await prisma.product.findUnique({
       where: { id },
+      include: {
+        images: true,
+      },
     });
 
     if (!existingProduct) {
@@ -168,6 +174,18 @@ export class ProductService {
       });
     });
 
+    // Post-transaction: Delete orphaned images from storage
+    if (data.images && existingProduct.images) {
+      const newPaths = new Set(data.images.map((img) => img.path));
+      const imagesToDelete = existingProduct.images.filter(
+        (img) => !newPaths.has(img.path)
+      );
+
+      for (const img of imagesToDelete) {
+        await this.deleteFileFromStorage(img.path);
+      }
+    }
+
     return this.transformProduct(product) as unknown as Product;
   }
   async delete(id: string): Promise<Product> {
@@ -181,8 +199,41 @@ export class ProductService {
 
     const product = await prisma.product.delete({
       where: { id },
-    }); // Images cascade deleted
+      include: { images: true },
+    }); // Images cascade deleted in DB
+
+    // Cleanup storage
+    if (product.images && product.images.length > 0) {
+      for (const img of product.images) {
+        await this.deleteFileFromStorage(img.path);
+      }
+    }
 
     return product as unknown as Product;
+  }
+  async deleteFileFromStorage(key: string) {
+    try {
+      if (!key) return;
+      // Ensure we don't try to delete external http links if they somehow exist
+      if (key.startsWith("http")) return;
+
+      console.log(`Deleting orphaned file: ${key}`);
+
+      const response = await fetch(`${STORAGE_SERVICE_URL}/storage/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ key }),
+      });
+
+      if (!response.ok) {
+        console.error(
+          `Failed to delete file ${key} from storage: ${response.statusText}`
+        );
+      }
+    } catch (error) {
+      console.error(`Error deleting file ${key} from storage:`, error);
+    }
   }
 }
