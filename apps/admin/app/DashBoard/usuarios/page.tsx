@@ -18,6 +18,23 @@ export default function UsuariosPage() {
     const { showPopup, hidePopup } = usePopup();
     const { users, loading, deleteUser, search, setSearch, page, setPage, meta } = useUser();
 
+    const formatPhoneNumber = (value: string | null | undefined) => {
+        if (!value) return '-';
+
+        // Remove non-numeric characters
+        const cleaned = value.replace(/\D/g, '');
+
+        // Check standard lengths (10 or 11 digits)
+        if (cleaned.length === 11) {
+            return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+        } else if (cleaned.length === 10) {
+            return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
+        }
+
+        // Fallback to original if length doesn't match standard
+        return value;
+    };
+
     const handleDeleteClick = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         showPopup(
@@ -99,7 +116,7 @@ export default function UsuariosPage() {
                                             <div className="text-sm text-gray-600">{user.email}</div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="text-sm text-gray-600">{user.phone}</div>
+                                            <div className="text-sm text-gray-600">{formatPhoneNumber(user.phone)}</div>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <button
