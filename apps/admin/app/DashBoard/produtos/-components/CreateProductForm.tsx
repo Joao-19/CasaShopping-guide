@@ -8,6 +8,22 @@ import useProduct from "@/composable/product/useProduct";
 import useStore from "@/composable/store/useStore";
 import { CreateProductDto, PriceTier, Product, ProductImage } from "@repo/dtos";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableImage } from './SortableImage';
 
 interface CreateProductFormProps {
     onClose: () => void;
@@ -72,6 +88,24 @@ function CreateProductFormContent({
     ]);
     const storeIfField = useFormField(data.storeId, [validator.rules.required]);
 
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    function handleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = data.images.findIndex((img) => img.id === active.id);
+            const newIndex = data.images.findIndex((img) => img.id === over.id);
+
+            handlers.setImages(arrayMove(data.images, oldIndex, newIndex));
+        }
+    }
+
     return (
         <div className="">
             {/* Store Selection */}
@@ -127,58 +161,60 @@ function CreateProductFormContent({
                     Imagens do Produto (Máx 5)
                 </Label>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    {data.images.map((img, index) => (
-                        <div key={index} className="relative aspect-square rounded-lg border border-gray-200 overflow-hidden group bg-gray-50">
-                            <img
-                                src={img.preview}
-                                alt={`Produto ${index + 1}`}
-                                className="object-cover w-full h-full"
-                            />
-                            {/* Remove Button */}
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const newImages = [...data.images];
-                                    newImages.splice(index, 1);
-                                    handlers.setImages(newImages);
-                                }}
-                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                            </button>
-                            {/* Index Badge */}
-                            <div className="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
-                                #{index + 1}
-                            </div>
-                        </div>
-                    ))}
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext
+                        items={data.images.map(img => img.id!)}
+                        strategy={rectSortingStrategy}
+                    >
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            {data.images.map((img, index) => (
+                                <SortableImage
+                                    key={img.id}
+                                    id={img.id!}
+                                    preview={img.preview}
+                                    index={index}
+                                    onRemove={() => {
+                                        const newImages = [...data.images];
+                                        newImages.splice(index, 1);
+                                        handlers.setImages(newImages);
+                                    }}
+                                />
+                            ))}
 
-                    {/* Add Button */}
-                    {data.images.length < 5 && (
-                        <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                    if (e.target.files && e.target.files[0]) {
-                                        const file = e.target.files[0];
-                                        handlers.setImages([
-                                            ...data.images,
-                                            {
-                                                file,
-                                                preview: URL.createObjectURL(file)
+                            {/* Add Button */}
+                            {data.images.length < 5 && (
+                                <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files[0]) {
+                                                const file = e.target.files[0];
+                                                handlers.setImages([
+                                                    ...data.images,
+                                                    {
+                                                        id: `temp-${Date.now()}`, // Consistent ID for DND
+                                                        file,
+                                                        preview: URL.createObjectURL(file)
+                                                    }
+                                                ]);
                                             }
-                                        ]);
-                                    }
-                                }}
-                            />
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus text-gray-400 mb-1"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-                            <span className="text-xs text-gray-500">Adicionar</span>
-                        </label>
-                    )}
-                </div>
+                                        }}
+                                    />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus text-gray-400 mb-1"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                                    <span className="text-xs text-gray-500">Adicionar</span>
+                                </label>
+                            )}
+                        </div>
+                    </SortableContext>
+                </DndContext>
+
+
             </div>
 
             {/* Description */}
