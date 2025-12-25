@@ -4,8 +4,7 @@ export interface LoginForm {
   email: string;
   password: string;
 }
-export interface LoginResponse {
-  user: User;
+export interface LoginResponse extends User {
   accessToken: string;
   refreshToken: string;
 }
@@ -32,8 +31,7 @@ export interface RegisterForm {
   phone: string;
 }
 
-export interface RegisterResponse {
-  user: User;
+export interface RegisterResponse extends User {
   token: string;
 }
 

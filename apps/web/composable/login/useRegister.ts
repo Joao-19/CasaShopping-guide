@@ -14,7 +14,14 @@ const userRegister = () => {
     setLoading(true);
     try {
       const response = await http.request(form);
-      if (response.token) authStore.setToken(response.token);
+      if (response) {
+        authStore.setUser(response);
+        if (typeof window !== "undefined" && response.token) {
+          // Assuming 'token' is the accessToken based on interface, but checking for others if available
+          localStorage.setItem("accessToken", response.token);
+          // If backend returns refreshToken in future, handle it here.
+        }
+      }
       return response;
     } catch (error) {
       throw error;

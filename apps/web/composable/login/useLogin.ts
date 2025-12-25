@@ -15,9 +15,9 @@ const useLogin = () => {
     setLoading(true);
     try {
       const response = await http.request(form);
-      // Backend returns the user object directly now
+      // Backend returns the user fields at the root level, so 'response' IS the user
       if (response) {
-        authStore.setUser(response.user);
+        authStore.setUser(response);
         if (typeof window !== "undefined") {
           localStorage.setItem("accessToken", response.accessToken);
           localStorage.setItem("refreshToken", response.refreshToken);
