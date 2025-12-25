@@ -73,8 +73,10 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                 <div className="relative group">
                     <Swiper
                         grabCursor={true}
-                        spaceBetween={24}
-                        slidesPerView={2}
+                        spaceBetween={16}
+                        slidesPerView={'auto'}
+                        centeredSlides={true}
+                        loop={true}
                         navigation={{
                             prevEl: `.prev-${uniqueId}`,
                             nextEl: `.next-${uniqueId}`,
@@ -88,6 +90,8 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                         breakpoints={{
                             640: {
                                 slidesPerView: 2,
+                                centeredSlides: false,
+                                spaceBetween: 24,
                             },
                             768: {
                                 slidesPerView: 3,
@@ -102,7 +106,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                         className="w-full pb-10! px-1!"
                     >
                         {products.map((product) => (
-                            <SwiperSlide key={product.id}>
+                            <SwiperSlide key={product.id} className="max-[639px]:w-[85%]!">
                                 <ProductCardSwiper
                                     title={product.title}
                                     storeName={product.storeName}
