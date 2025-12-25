@@ -58,6 +58,9 @@ export default {
       .post<void>("user/recoverPassword", form)
       .then((res) => res.data);
   },
+  logout() {
+    return http.post<void>("auth/logout").then((res) => res.data);
+  },
   changePassword(form: ChangePasswordForm) {
     return http
       .post<void>("customers/password/change", form)

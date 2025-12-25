@@ -13,11 +13,18 @@ export function Toolbar() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const router = useRouter();
 
-    const handleLogout = () => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        setUser(null as any);
-        router.push("/login"); // Or home
+    const handleLogout = async () => {
+        try {
+            await import("@/Services/http/auth.http").then((m) => m.default.logout());
+        } catch (error) {
+            console.warn("Logout backend call failed (offline?), forcing local logout.", error);
+        } finally {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("authUser");
+            setUser(null);
+            router.push("/login");
+        }
     };
 
     const getInitials = (name: string) => {
