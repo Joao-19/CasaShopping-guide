@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Search } from "lucide-react";
 import { Toolbar } from "../../components/Toolbar";
 import { Footer } from "../../components/Footer";
@@ -12,6 +13,45 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@repo/ui";
+
+const StoreCard = ({ store }: { store: any }) => {
+    const [imgError, setImgError] = useState(false);
+
+    return (
+        <div
+            className="bg-white rounded-2xl p-6 flex flex-col items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group border border-gray-100"
+        >
+            <div className="w-24 h-24 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-colors">
+                {!imgError && store.logoImage && store.logoImage.length > 2 ? (
+                    <img
+                        src={store.logoImage.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')}
+                        alt={store.name}
+                        className="w-full h-full object-cover"
+                        onError={() => setImgError(true)}
+                    />
+                ) : (
+                    <div className="text-[#1A2B3C] font-bold text-2xl">
+                        {store.name.substring(0, 2).toUpperCase()}
+                    </div>
+                )}
+            </div>
+            <div className="text-center w-full">
+                <h3
+                    className="font-bold text-[#1A2B3C] text-lg mb-1 group-hover:text-primary transition-colors truncate w-full"
+                    title={store.name}
+                >
+                    {store.name}
+                </h3>
+                <div
+                    className="text-sm text-gray-500 font-medium truncate w-full"
+                    title={store.address}
+                >
+                    {store.address}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function StoresPage() {
     const { stores, loading, search, setSearch, page, setPage, meta } = useStore();
@@ -140,38 +180,7 @@ export default function StoresPage() {
                         <>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 mb-12">
                                 {stores.map((store) => (
-                                    <div
-                                        key={store.id}
-                                        className="bg-white rounded-2xl p-6 flex flex-col items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group border border-gray-100"
-                                    >
-                                        <div className="w-24 h-24 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-colors">
-                                            {store.logoImage && store.logoImage.length > 2 ? (
-                                                <img
-                                                    src={store.logoImage}
-                                                    alt={store.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="text-[#1A2B3C] font-bold text-2xl">
-                                                    {store.name.substring(0, 2).toUpperCase()}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="text-center w-full">
-                                            <h3
-                                                className="font-bold text-[#1A2B3C] text-lg mb-1 group-hover:text-primary transition-colors truncate w-full"
-                                                title={store.name}
-                                            >
-                                                {store.name}
-                                            </h3>
-                                            <div
-                                                className="text-sm text-gray-500 font-medium truncate w-full"
-                                                title={store.address}
-                                            >
-                                                {store.address}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <StoreCard key={store.id} store={store} />
                                 ))}
                             </div>
 

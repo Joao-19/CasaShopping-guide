@@ -44,7 +44,8 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         title: p.name,
         storeName: p.store?.name || "Loja",
         price: p.price,
-        images: p.images?.sort((a, b) => a.index - b.index).map(img => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || []
+        images: p.images?.sort((a, b) => a.index - b.index)
+            .map(img => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || []
     }))) || [];
 
     return (
@@ -128,13 +129,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
                     {/* Custom Navigation Buttons */}
                     <button
-                        className={`prev-${uniqueId} absolute -left-12 top-1/2 -translate-y-1/2 -mt-5 z-10 w-12 h-12 flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        className={`prev-${uniqueId} absolute -left-12 top-1/2 -translate-y-1/2 -mt-5 z-10 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
                     </button>
                     <button
-                        className={`next-${uniqueId} absolute -right-12 top-1/2 -translate-y-1/2 -mt-5 z-10 w-12 h-12 flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        className={`next-${uniqueId} absolute -right-12 top-1/2 -translate-y-1/2 -mt-5 z-10 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-10 h-10" strokeWidth={1.5} />

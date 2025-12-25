@@ -11,6 +11,10 @@
 /* 3. Camada Base (Padronização de Títulos) */
 /* O @layer agora é nativo do CSS, o Tailwind entende ele */
 @layer base {
+  body {
+    @apply overflow-x-hidden;
+  }
+
   h1 {
     /* Você pode usar @apply ou CSS puro */
     @apply text-3xl md:text-4xl font-bold tracking-tight mb-4;
