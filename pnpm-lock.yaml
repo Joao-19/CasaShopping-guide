@@ -720,6 +720,9 @@ importers:
       lucide-react:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.3)
+      md5:
+        specifier: ^2.3.0
+        version: 2.3.0
       next:
         specifier: 16.1.0
         version: 16.1.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -729,6 +732,12 @@ importers:
       react-dom:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
+      socket.io-client:
+        specifier: ^4.8.1
+        version: 4.8.1
+      swiper:
+        specifier: ^12.0.3
+        version: 12.0.3
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -742,6 +751,9 @@ importers:
       '@types/js-cookie':
         specifier: ^3.0.6
         version: 3.0.6
+      '@types/md5':
+        specifier: ^2.3.6
+        version: 2.3.6
       '@types/node':
         specifier: ^20.11.0
         version: 20.19.27
@@ -4430,6 +4442,10 @@ packages:
 
   swagger-ui-dist@5.17.14:
     resolution: {integrity: sha512-CVbSfaLpstV65OnSjbXfVd6Sta3q3F7Cj/yYuvHMp1P90LztOLs6PfUnKEVAeiIVQt9u2SaPwv0LiH/OyMjHRw==}
+
+  swiper@12.0.3:
+    resolution: {integrity: sha512-BHd6U1VPEIksrXlyXjMmRWO0onmdNPaTAFduzqR3pgjvi7KfmUCAm/0cj49u2D7B0zNjMw02TSeXfinC1hDCXg==}
+    engines: {node: '>= 4.7.0'}
 
   symbol-observable@4.0.0:
     resolution: {integrity: sha512-b19dMThMV4HVFynSAM1++gBHAbk2Tc/osgLIBZMKsyqh34jb2e8Os7T6ZW/Bt3pJFdBTd2JwAnAAEQV7rSNvcQ==}
@@ -8872,6 +8888,8 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   swagger-ui-dist@5.17.14: {}
+
+  swiper@12.0.3: {}
 
   symbol-observable@4.0.0: {}
 

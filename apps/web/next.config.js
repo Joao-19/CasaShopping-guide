@@ -10,7 +10,7 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     allowedDevOrigins: ["192.168.0.13"],
-    output: "standalone",
+    // output: "standalone",
     images: {
         remotePatterns: [
             {

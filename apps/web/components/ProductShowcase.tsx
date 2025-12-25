@@ -1,23 +1,52 @@
 "use client";
 
-import { ProductCard } from "@repo/ui";
+import { ProductCardSwiper } from "./ProductCardSwiper";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { getProducts } from "../Services/http/product.http";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
-interface ProductItem {
-    id: string;
-    title: string;
-    storeName: string;
-    price: 'LOW' | 'MEDIUM' | 'HIGH';
-    imageSrc: string;
-}
+import 'swiper/css';
+import 'swiper/css/navigation';
+import { useId } from "react";
 
 interface ProductShowcaseProps {
     title: string;
     tags?: string[];
-    products: ProductItem[];
+    // filters for API
+    category?: string;
     viewAllLink?: string;
 }
 
-export function ProductShowcase({ title, tags, products, viewAllLink = "#" }: ProductShowcaseProps) {
+export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: ProductShowcaseProps) {
+    const uniqueId = useId().replace(/:/g, ''); // Sanitize ID for class selectors
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+    } = useInfiniteQuery({
+        queryKey: ['products', category],
+        queryFn: ({ pageParam = 1 }) => getProducts({ category, page: pageParam, limit: 10 }),
+        getNextPageParam: (lastPage) => {
+            if (lastPage.meta.page < lastPage.meta.totalPages) {
+                return lastPage.meta.page + 1;
+            }
+            return undefined;
+        },
+        initialPageParam: 1,
+    });
+
+    const products = data?.pages.flatMap((page) => page.data.map(p => ({
+        id: p.id,
+        title: p.name,
+        storeName: p.store?.name || "Loja",
+        price: p.price,
+        images: p.images?.sort((a, b) => a.index - b.index).map(img => img.path) || []
+    }))) || [];
+
     return (
         <section>
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -35,18 +64,79 @@ export function ProductShowcase({ title, tags, products, viewAllLink = "#" }: Pr
                 </div>
                 <button className="text-[#162e47] font-semibold hover:underline">Ver tudo em {title}</button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {products.map((product) => (
-                    <ProductCard
-                        key={product.id}
-                        title={product.title}
-                        storeName={product.storeName}
-                        price={product.price}
-                        imageSrc={product.imageSrc}
-                        onWishlistClick={() => console.log('Wishlist', product.id)}
-                    />
-                ))}
-            </div>
+
+            {isLoading ? (
+                <div className="flex items-center justify-center p-12 w-full">
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+            ) : (
+                <div className="relative group">
+                    <Swiper
+                        grabCursor={true}
+                        spaceBetween={24}
+                        slidesPerView={2}
+                        navigation={{
+                            prevEl: `.prev-${uniqueId}`,
+                            nextEl: `.next-${uniqueId}`,
+                        }}
+                        modules={[Navigation]}
+                        onReachEnd={() => {
+                            if (hasNextPage && !isFetchingNextPage) {
+                                fetchNextPage();
+                            }
+                        }}
+                        breakpoints={{
+                            640: {
+                                slidesPerView: 2,
+                            },
+                            768: {
+                                slidesPerView: 3,
+                            },
+                            1024: {
+                                slidesPerView: 4,
+                            },
+                            1280: {
+                                slidesPerView: 5,
+                            },
+                        }}
+                        className="w-full pb-10! px-1!"
+                    >
+                        {products.map((product) => (
+                            <SwiperSlide key={product.id}>
+                                <ProductCardSwiper
+                                    title={product.title}
+                                    storeName={product.storeName}
+                                    price={product.price}
+                                    images={product.images}
+                                    onWishlistClick={() => console.log('Wishlist', product.id)}
+                                    className="cursor-[inherit]!"
+                                />
+                            </SwiperSlide>
+                        ))}
+                        {isFetchingNextPage && (
+                            <SwiperSlide>
+                                <div className="h-full flex items-center justify-center">
+                                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                                </div>
+                            </SwiperSlide>
+                        )}
+                    </Swiper>
+
+                    {/* Custom Navigation Buttons */}
+                    <button
+                        className={`prev-${uniqueId} absolute -left-12 top-1/2 -translate-y-1/2 -mt-5 z-10 w-12 h-12 flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        aria-label="Previous slide"
+                    >
+                        <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
+                    </button>
+                    <button
+                        className={`next-${uniqueId} absolute -right-12 top-1/2 -translate-y-1/2 -mt-5 z-10 w-12 h-12 flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        aria-label="Next slide"
+                    >
+                        <ChevronRight className="w-10 h-10" strokeWidth={1.5} />
+                    </button>
+                </div>
+            )}
         </section>
     )
 }
