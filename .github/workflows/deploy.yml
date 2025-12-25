@@ -2,7 +2,7 @@ name: Build All & Deploy
 
 on:
   push:
-    branches: []
+    branches: ["main1"]
   workflow_dispatch:
 
 jobs:

@@ -44,7 +44,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         title: p.name,
         storeName: p.store?.name || "Loja",
         price: p.price,
-        images: p.images?.sort((a, b) => a.index - b.index).map(img => img.path) || []
+        images: p.images?.sort((a, b) => a.index - b.index).map(img => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || []
     }))) || [];
 
     return (

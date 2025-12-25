@@ -1,6 +1,7 @@
 "use client";
 
 import { ComponentProps, useState } from "react";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import { cn, IconHeart } from "@repo/ui";
