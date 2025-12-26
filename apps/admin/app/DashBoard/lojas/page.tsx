@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { usePopup } from '../../contexts/PopupContext';
+import { usePopup } from '@repo/ui';
 import { CreateStoreForm } from './-components/CreateStoreForm';
 import { Header } from '../components';
 import useStore from '@/composable/store/useStore';

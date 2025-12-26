@@ -1,5 +1,5 @@
 'use client';
-import { usePopup } from '../../contexts/PopupContext';
+import { usePopup } from '@repo/ui';
 import { Header } from '../components';
 import useProduct from '@/composable/product/useProduct';
 import {

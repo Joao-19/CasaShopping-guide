@@ -6,6 +6,8 @@ import { Navigation } from 'swiper/modules';
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts } from "../Services/http/product.http";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { usePopup } from "@repo/ui";
+import { ProductDetailsCard } from "./ProductDetailsCard";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -21,6 +23,7 @@ interface ProductShowcaseProps {
 
 export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: ProductShowcaseProps) {
     const uniqueId = useId().replace(/:/g, ''); // Sanitize ID for class selectors
+    const { showPopup } = usePopup();
     const {
         data,
         fetchNextPage,
@@ -44,9 +47,14 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         title: p.name,
         storeName: p.store?.name || "Loja",
         price: p.price,
+        description: p.description, // Added description mapper if available
         images: p.images?.sort((a, b) => a.index - b.index)
             .map(img => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || []
     }))) || [];
+
+    const handleProductClick = (product: any) => {
+        showPopup(<ProductDetailsCard product={product} />);
+    };
 
     return (
         <section>
@@ -108,14 +116,16 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                     >
                         {products.map((product) => (
                             <SwiperSlide key={product.id} className="max-[639px]:w-[85%]!">
-                                <ProductCardSwiper
-                                    title={product.title}
-                                    storeName={product.storeName}
-                                    price={product.price}
-                                    images={product.images}
-                                    onWishlistClick={() => console.log('Wishlist', product.id)}
-                                    className="cursor-[inherit]!"
-                                />
+                                <div onClick={() => handleProductClick(product)}>
+                                    <ProductCardSwiper
+                                        title={product.title}
+                                        storeName={product.storeName}
+                                        price={product.price}
+                                        images={product.images}
+                                        onWishlistClick={() => { console.log('Wishlist', product.id) }}
+                                        className="cursor-[inherit]!"
+                                    />
+                                </div>
                             </SwiperSlide>
                         ))}
                         {isFetchingNextPage && (
