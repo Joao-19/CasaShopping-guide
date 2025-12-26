@@ -1,18 +1,16 @@
 "use client";
 import { useState } from "react";
 import Admin from "@/Domain/User";
-import { useHttp } from "@/composable/Service/http/useHttp";
 import authHttp, { LoginForm } from "@/Services/http/auth.http";
 import { useAuthStore } from "@/store/auth.store";
+import { useHttp } from "@repo/api-client";
 
 const useLogin = () => {
-  const [loading, setLoading] = useState(false);
   const http = useHttp(authHttp.login);
-  const { error, data } = http;
+  const { error, data, loading } = http;
   const authStore = useAuthStore();
 
   const login = async (form: LoginForm) => {
-    setLoading(true);
     try {
       const response = await http.request(form);
       // Backend returns the user object directly now
@@ -22,8 +20,6 @@ const useLogin = () => {
       return response;
     } catch (error) {
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 

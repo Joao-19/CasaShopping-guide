@@ -6,6 +6,43 @@
   --color-primary: #003ba6;
   --color-primary-light: #0059b3;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
+  
+  --animate-zoomIn: zoomIn 0.2s ease-out forwards;
+  --animate-zoomOut: zoomOut 0.2s ease-in forwards;
+  --animate-fadeIn: fadeIn 0.3s ease-out forwards;
+  --animate-fadeOut: fadeOut 0.2s ease-in forwards;
+
+  @keyframes zoomIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.75);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes zoomOut {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.75);
+    }
+  }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
 }
 
 /* 3. Camada Base (Padronização de Títulos) */

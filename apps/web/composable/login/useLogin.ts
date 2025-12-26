@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import authHttp, { LoginForm, LoginResponse } from "@/Services/http/auth.http";
+import authHttp, { LoginForm } from "@/Services/http/auth.http";
 import { useAuthStore } from "@/store/auth.store";
 import { useHttp } from "@repo/api-client";
 
