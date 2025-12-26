@@ -10,11 +10,18 @@ export interface ApiClientConfig extends AxiosRequestConfig {
     accessToken: string;
     refreshToken: string;
   }) => void;
+  refreshUrl?: string;
+  excludedRefreshRoutes?: string[];
 }
 
 export const createApiClient = (
   config: ApiClientConfig = {}
 ): AxiosInstance => {
+  const {
+    refreshUrl = "auth/refresh",
+    excludedRefreshRoutes = ["auth/login", "auth/admin/login"],
+  } = config;
+
   const getBaseUrl = () => {
     if (config.baseURL) return config.baseURL;
     if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
@@ -55,12 +62,17 @@ export const createApiClient = (
     async (error) => {
       const originalRequest = error.config;
 
+      // Check if the URL matches any excluded route
+      const isExcludedRoute = excludedRefreshRoutes.some((route) =>
+        originalRequest.url?.includes(route)
+      );
+
       // Handle 401 (Unauthorized) and attempt refresh
       if (
         error.response?.status === 401 &&
         !originalRequest._retry &&
-        !originalRequest.url?.includes("auth/refresh") &&
-        !originalRequest.url?.includes("auth/admin/login")
+        !originalRequest.url?.includes(refreshUrl) &&
+        !isExcludedRoute
       ) {
         originalRequest._retry = true;
 
@@ -69,7 +81,7 @@ export const createApiClient = (
           const refreshToken = config.getRefreshToken?.();
 
           if (refreshToken) {
-            const response = await http.post("auth/refresh", { refreshToken });
+            const response = await http.post(refreshUrl, { refreshToken });
 
             if (config.onTokenRefreshed && response.data) {
               config.onTokenRefreshed(response.data);
@@ -84,7 +96,7 @@ export const createApiClient = (
           }
 
           // Fallback to cookie-based refresh (existing admin flow)
-          await http.post("auth/refresh");
+          await http.post(refreshUrl);
           return http(originalRequest);
         } catch (refreshError) {
           // Refresh failed (token expired or invalid)

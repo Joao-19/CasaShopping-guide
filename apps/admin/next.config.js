@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     allowedDevOrigins: ["192.168.0.6"],
-    output: "standalone",
+    // output: "standalone",
     transpilePackages: ["@repo/ui", "@repo/dtos", "@repo/database", "@repo/api-client"],
     typescript: {
         ignoreBuildErrors: true,

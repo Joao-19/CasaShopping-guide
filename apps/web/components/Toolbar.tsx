@@ -3,7 +3,7 @@
 import { IconHeart, Assets, Drawer, IconHome, IconStore, IconFavorite, IconLogout, IconArrowRight, IconArrowLeft, IconMenu } from "@repo/ui";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/auth.store";
 
 export function Toolbar() {
@@ -12,6 +12,15 @@ export function Toolbar() {
     const { user, setUser } = useAuthStore();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Prevent hydration mismatch by returning a placeholder or null during SSR for user-dependent content
+    const safeUser = mounted ? user : null;
+
 
     const handleLogout = async () => {
         try {
@@ -55,12 +64,12 @@ export function Toolbar() {
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-[73px] h-[73px] rounded-full overflow-hidden border-2 border-white shadow-sm flex items-center justify-center bg-white">
                         <span className="text-primary text-2xl font-bold">
-                            {getInitials(user?.name || "Visitante")}
+                            {getInitials(safeUser?.name || "Visitante")}
                         </span>
                     </div>
                     <div className="text-center">
                         <h3 className="text-primary text-2xl font-normal font-sans">
-                            {user?.name || "Visitante"}
+                            {safeUser?.name || "Visitante"}
                         </h3>
                         <p className="text-[#7e8e9e] text-xs">Meu perfil</p>
                     </div>
@@ -146,12 +155,12 @@ export function Toolbar() {
                             <div className="hidden md:flex items-center gap-3 cursor-pointer group" onClick={toggleDrawer}>
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 group-hover:border-white transition-colors flex items-center justify-center bg-white/10 backdrop-blur-md">
                                     <span className="text-white font-semibold text-sm">
-                                        {getInitials(user?.name || "V")}
+                                        {getInitials(safeUser?.name || "V")}
                                     </span>
                                 </div>
                                 <div className="flex flex-col items-start">
                                     <span className="text-white font-semibold text-[14px] leading-tight group-hover:underline">
-                                        Olá, {user?.name || "Visitante"}
+                                        Olá, {safeUser?.name || "Visitante"}
                                     </span>
                                     <span className="text-white/70 text-[12px] leading-tight">
                                         Meu Perfil
@@ -210,12 +219,12 @@ export function Toolbar() {
                         <div className="hidden md:flex items-center gap-3 cursor-pointer group bg-[rgba(0,59,166,0)]" onClick={toggleDrawer}>
                             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 group-hover:border-white transition-colors flex items-center justify-center bg-white/10 backdrop-blur-md">
                                 <span className="text-white font-semibold text-sm">
-                                    {getInitials(user?.name || "V")}
+                                    {getInitials(safeUser?.name || "V")}
                                 </span>
                             </div>
                             <div className="hidden md:flex flex-col items-start">
                                 <span className="text-white font-semibold text-[14px] leading-tight group-hover:underline">
-                                    Olá, {user?.name || "Visitante"}
+                                    Olá, {safeUser?.name || "Visitante"}
                                 </span>
                                 <span className="text-white/70 text-[12px] leading-tight">
                                     Meu Perfil

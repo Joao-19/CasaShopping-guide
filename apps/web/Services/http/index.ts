@@ -22,10 +22,12 @@ const http = createApiClient({
   },
   onRefreshFail: () => {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("authUser");
-      window.location.href = "/login";
+      console.error("Refresh token failed. Logging out...");
+      // localStorage.removeItem("accessToken");
+      // localStorage.removeItem("refreshToken");
+      // localStorage.removeItem("authUser");
+      // window.location.href = "/login";
+      alert("Sessão expirada. Verifique o console antes de recarregar.");
     }
   },
 });

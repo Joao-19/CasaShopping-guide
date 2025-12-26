@@ -91,7 +91,8 @@ export function useSocket(config: SocketConfig): UseSocketResult {
             "useSocket: Erro de autenticação, limpando token e redirecionando."
           );
           setAuthToken(null);
-          window.location.href = "/login";
+          // window.location.href = "/login";
+          alert("Sessão do Socket expirada. Verifique o console.");
         }
       });
 
