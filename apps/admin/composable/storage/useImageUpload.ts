@@ -55,6 +55,7 @@ export function useImageUpload() {
           storeId,
           filename: finalFilename,
           contentType: compressedFile.type,
+          contentLength: compressedFile.size,
         },
         {
           withCredentials: true, // IMPORTANT: Send HttpOnly cookies

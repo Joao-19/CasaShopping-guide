@@ -194,7 +194,23 @@ export class StorageService {
     }
   }
 
-  async getUploadUrl(storeId: string, filename: string, contentType: string) {
+  async getUploadUrl(
+    storeId: string,
+    filename: string,
+    contentType: string,
+    contentLength: number
+  ) {
+    // Validate file size
+    const maxUploadSizeMb = this.configService.get<number>(
+      "MAX_UPLOAD_SIZE_MB",
+      5
+    ); // Default 5MB
+    const maxSizeBytes = maxUploadSizeMb * 1024 * 1024;
+
+    if (contentLength > maxSizeBytes) {
+      throw new Error(`File size exceeds limit of ${maxUploadSizeMb}MB`);
+    }
+
     // FORCE PATH STRUCTURE: stores/{storeId}/{filename}
     const key = `stores/${storeId}/${filename}`;
 
@@ -202,6 +218,7 @@ export class StorageService {
       Bucket: this.bucketName,
       Key: key,
       ContentType: contentType,
+      ContentLength: contentLength, // Enforce length in signature
     });
 
     try {

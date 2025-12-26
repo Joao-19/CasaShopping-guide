@@ -12,7 +12,7 @@ import {
 } from "@repo/dtos";
 
 const STORAGE_SERVICE_URL =
-  process.env.STORAGE_SERVICE_URL || "http://storage-service:3007";
+  process.env.STORAGE_SERVICE_URL || "http://localhost:3007";
 
 @Injectable()
 export class ProductService {

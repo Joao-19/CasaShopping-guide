@@ -24,6 +24,12 @@ export function ImageUpload({
 
     const handleFile = (file: File) => {
         if (file && file.type.startsWith('image/')) {
+            // Block GIFs specifically
+            if (file.type === 'image/gif') {
+                alert('GIFs não são permitidos. Por favor envie apenas imagens estáticas (JPG, PNG, WebP).');
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 setPreview(e.target?.result as string);
@@ -65,6 +71,8 @@ export function ImageUpload({
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    const allowedTypes = "image/jpeg, image/png, image/webp, image/bmp";
+
     if (variant === 'profile') {
         return (
             <div className={`flex flex-col items-center justify-center ${className}`}>
@@ -83,7 +91,7 @@ export function ImageUpload({
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept={allowedTypes}
                         onChange={handleChange}
                         className="hidden"
                     />
@@ -144,7 +152,7 @@ export function ImageUpload({
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept={allowedTypes}
                     onChange={handleChange}
                     className="hidden"
                 />
@@ -190,7 +198,7 @@ export function ImageUpload({
                             className="font-medium text-gray-700 text-center"
                         />
                         <BaseText
-                            text="SVG, PNG, JPG (max. 800x800px)"
+                            text="SVG, PNG, JPG, WebP"
                             size="small"
                             color="gray"
                             className="text-center mt-1"

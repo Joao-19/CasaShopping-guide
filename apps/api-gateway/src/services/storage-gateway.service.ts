@@ -20,13 +20,14 @@ export class StorageGatewayService {
     storeId: string,
     filename: string,
     contentType: string,
+    contentLength: number,
     token: string
   ): Promise<any> {
     try {
       const response = await firstValueFrom(
         this.httpService.post(
           `${this.storageServiceUrl}/storage/upload-url`,
-          { storeId, filename, contentType },
+          { storeId, filename, contentType, contentLength },
           {
             headers: {
               Authorization: `Bearer ${token}`,

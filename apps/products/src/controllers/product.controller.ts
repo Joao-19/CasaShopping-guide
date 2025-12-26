@@ -19,11 +19,11 @@ import {
 import { JwtAuthGuard } from "@repo/auth-guard";
 
 @Controller("products")
-@UseGuards(JwtAuthGuard)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productService.create(createProductDto);
   }
@@ -38,6 +38,7 @@ export class ProductController {
   }
 
   @Put(":id")
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param("id") id: string,
     @Body() updateProductDto: UpdateProductDto
@@ -46,6 +47,7 @@ export class ProductController {
   }
 
   @Delete(":id")
+  @UseGuards(JwtAuthGuard)
   async delete(@Param("id") id: string): Promise<Product> {
     return this.productService.delete(id);
   }

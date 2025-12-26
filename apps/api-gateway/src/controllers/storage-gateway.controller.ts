@@ -8,7 +8,13 @@ export class StorageGatewayController {
 
   @Post("upload-url")
   async getUploadUrl(
-    @Body() body: { storeId: string; filename: string; contentType: string },
+    @Body()
+    body: {
+      storeId: string;
+      filename: string;
+      contentType: string;
+      contentLength: number;
+    },
     @Req() req: Request
   ) {
     const token =
@@ -17,6 +23,7 @@ export class StorageGatewayController {
       body.storeId,
       body.filename,
       body.contentType,
+      body.contentLength,
       token || ""
     );
   }

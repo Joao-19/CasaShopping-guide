@@ -37,7 +37,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
     };
 
     return (
-        <div className="relative w-full max-w-[475px] bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="relative w-full max-w-[300px] md:max-w-[475px] bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 <div className="flex flex-col w-full">
                     {/* Image Section with Horizontal Swiper */}

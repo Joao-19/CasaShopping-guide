@@ -9,12 +9,19 @@ export class StorageController {
   @Post("upload-url")
   // @UseGuards(JwtAuthGuard)
   async getUploadUrl(
-    @Body() body: { storeId: string; filename: string; contentType: string }
+    @Body()
+    body: {
+      storeId: string;
+      filename: string;
+      contentType: string;
+      contentLength: number;
+    }
   ) {
     return this.storageService.getUploadUrl(
       body.storeId,
       body.filename,
-      body.contentType
+      body.contentType,
+      body.contentLength
     );
   }
 
