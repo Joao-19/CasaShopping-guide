@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "dotenv -e .env -- next dev",
+    "dev": "dotenv -e .env -- next dev -H 0.0.0.0 -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --max-warnings 0",

@@ -24,6 +24,25 @@ interface UseSocketResult {
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function useSocket(config: SocketConfig): UseSocketResult {
+  // ---------------------------------------------------------------------------
+  // WEBSOCKET COMPLETELY DISABLED PER USER REQUEST
+  // The code below is preserved for future use but is currently unreachable.
+  // ---------------------------------------------------------------------------
+  return {
+    socket: null,
+    isConnected: false,
+    error: null,
+    loading: false,
+    emitLoading: false,
+    emitError: null,
+    emit: async () => {},
+    on: () => () => {},
+    off: () => {},
+    connect: () => {},
+    disconnect: () => {},
+  };
+
+  /*
   const { url, namespace, autoConnect = true } = config;
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -105,13 +124,17 @@ export function useSocket(config: SocketConfig): UseSocketResult {
   );
 
   useEffect(() => {
-    console.log("useSocket: useEffect principal executado.");
+    // console.log("useSocket: WebSocket is currently disabled.");
+    // console.log("useSocket: useEffect principal executado.");
     const token = authToken;
     const connectionUrl = memoizedNamespace
       ? `${memoizedUrl}/${memoizedNamespace}`
       : memoizedUrl;
 
-    if (autoConnect && !socketRef.current) {
+    // Temporarily disabled per user request
+    const shouldConnect = false; // was: if (autoConnect && !socketRef.current)
+
+    if (shouldConnect && !socketRef.current) {
       // Conecta apenas se autoConnect for true e não houver socket ativo
       createSocketConnection(
         connectionUrl,
@@ -266,4 +289,5 @@ export function useSocket(config: SocketConfig): UseSocketResult {
     connect: manualConnect,
     disconnect: manualDisconnect,
   };
+*/
 }
