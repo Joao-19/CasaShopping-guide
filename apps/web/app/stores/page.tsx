@@ -4,6 +4,8 @@ import { Search } from "lucide-react";
 import { Toolbar } from "../../components/Toolbar";
 import { Footer } from "../../components/Footer";
 import useStore from "../../composable/store/useStore";
+import { usePopup } from "@repo/ui";
+import { StoreDetailsCard } from "../../components/StoreDetailsCard";
 import {
     Pagination,
     PaginationContent,
@@ -16,9 +18,11 @@ import {
 
 const StoreCard = ({ store }: { store: any }) => {
     const [imgError, setImgError] = useState(false);
+    const { showPopup } = usePopup();
 
     return (
         <div
+            onClick={() => showPopup(<StoreDetailsCard store={store} />)}
             className="bg-white rounded-2xl p-6 flex flex-col items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group border border-gray-100"
         >
             <div className="w-24 h-24 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-colors">
