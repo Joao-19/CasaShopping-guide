@@ -7,15 +7,15 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="flex flex-col gap-6">
                         <img src={Assets.LogomarcaWhite.src} alt="CasaShopping" className="h-[42px] w-auto object-contain self-start" />
-                        <div className="flex flex-col gap-1 !text-white text-sm font-sans">
-                            <p className="!text-white">Av. Ayrton Senna, 2150.</p>
-                            <p className="!text-white">Barra da Tijuca, Rio de Janeiro - RJ</p>
-                            <p className="!text-white">CEP 22775-900</p>
-                        </div>
-                        <div className="flex flex-col gap-1 !text-white text-sm font-sans mt-2">
-                            <p className="!text-white">Segunda a Sábado: 10h às 22h</p>
-                            <p className="!text-white">Domingos e Feriados: 15h às 21h</p>
-                        </div>
+                        <ul className="flex flex-col gap-1 text-white/70 text-sm font-sans">
+                            <li>Av. Ayrton Senna, 2150.</li>
+                            <li>Barra da Tijuca, Rio de Janeiro - RJ</li>
+                            <li>CEP 22775-900</li>
+                        </ul>
+                        <ul className="flex flex-col gap-1 text-white/70 text-sm font-sans mt-2">
+                            <li>Segunda a Sábado: 10h às 22h</li>
+                            <li>Domingos e Feriados: 15h às 21h</li>
+                        </ul>
                     </div>
                     <div className="flex flex-col gap-4">
                         <h3 className="text-white font-bold text-lg font-sans">Institucional</h3>

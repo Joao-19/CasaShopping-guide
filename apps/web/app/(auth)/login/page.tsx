@@ -20,6 +20,8 @@ import useLogin from "@/composable/login/useLogin";
 import { useRedirectUrl } from "@/composable/useRedirectUrl";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import { Assets } from "@repo/ui";
+import { usePopup } from "@repo/ui/context/PopupContext";
+import { ForgotPasswordPopup } from "@/components/ForgotPasswordPopup";
 
 interface LoginFormProps {
     formData: {
@@ -38,6 +40,11 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
     const validator = useValidator();
     const { email, password } = formData;
     const { setEmail, setPassword } = setFormData;
+    const { showPopup } = usePopup();
+
+    const handleForgotPassword = () => {
+        showPopup(<ForgotPasswordPopup />);
+    };
 
     const emailField = useFormField(email, [validator.rules.required, validator.rules.email]);
     const passwordField = useFormField(password, [validator.rules.required]);
@@ -75,6 +82,16 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
             >
                 {loading ? "Entrando..." : "Entrar"}
             </Button>
+
+            <div className="flex justify-center mt-6">
+                <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-sm text-gray-500 hover:underline focus:outline-none"
+                >
+                    Esqueceu sua senha?
+                </button>
+            </div>
         </form>
     );
 };
@@ -154,7 +171,7 @@ const LoginPage = () => {
                             </FormProvider>
                         </CardContent>
 
-                        <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6 mt-2">
+                        <CardFooter className="flex flex-col border-t space-y-2 border-gray-200 pt-6">
                             <div className="text-center text-sm text-gray-600">
                                 Não tem uma conta?
                             </div>
