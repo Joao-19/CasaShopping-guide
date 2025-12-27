@@ -17,7 +17,9 @@ export default function HomePage() {
                     <CategoriesSection />
 
                     <HighlightsSection />
+                </div>
 
+                <div className="flex flex-col gap-16 pb-10">
                     <ProductShowcase
                         title="Sala de estar"
                         tags={['Sofás', 'Poltronas', 'Racks', 'Mesas de Centro']}

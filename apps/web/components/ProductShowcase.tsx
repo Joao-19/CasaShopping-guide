@@ -58,7 +58,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
     return (
         <section>
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 w-full">
                 <div className="flex items-center gap-4">
                     <h2 className="text-[#162e47] text-[28px] font-bold font-sans">{title}</h2>
                     {tags && tags.length > 0 && (
@@ -79,12 +79,12 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                     <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                 </div>
             ) : (
-                <div className="relative group">
+                <div className="relative group w-full">
                     <Swiper
                         grabCursor={true}
                         spaceBetween={16}
-                        slidesPerView={'auto'}
-                        centeredSlides={true}
+                        slidesPerView={2.5}
+                        centeredSlides={false}
                         loop={true}
                         navigation={{
                             prevEl: `.prev-${uniqueId}`,
@@ -112,10 +112,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                 slidesPerView: 5,
                             },
                         }}
-                        className="w-full pb-10! px-1!"
+                        className="w-full pb-10! px-4 md:px-0"
+                        style={{
+                            paddingLeft: 'max(2rem, calc((100vw - 80rem) / 2 + 2rem))'
+                        }}
                     >
                         {products.map((product) => (
-                            <SwiperSlide key={product.id} className="max-[639px]:w-[85%]!">
+                            <SwiperSlide key={product.id}>
                                 <div onClick={() => handleProductClick(product)}>
                                     <ProductCardSwiper
                                         title={product.title}
@@ -137,15 +140,15 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                         )}
                     </Swiper>
 
-                    {/* Custom Navigation Buttons */}
+                    {/* Custom Navigation Buttons - Adjusted Position */}
                     <button
-                        className={`prev-${uniqueId} absolute -left-12 top-1/2 -translate-y-1/2 -mt-5 z-10 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        className={`prev-${uniqueId} absolute left-4 md:left-[max(2rem,calc((100vw-80rem)/2+1rem))] top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
                     </button>
                     <button
-                        className={`next-${uniqueId} absolute -right-12 top-1/2 -translate-y-1/2 -mt-5 z-10 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        className={`next-${uniqueId} absolute right-4 md:right-[max(2rem,calc((100vw-80rem)/2+1rem))] top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-10 h-10" strokeWidth={1.5} />
