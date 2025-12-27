@@ -22,13 +22,11 @@ export default function HomePage() {
                 <div className="flex flex-col gap-16 pb-10">
                     <ProductShowcase
                         title="Sala de estar"
-                        tags={['Sofás', 'Poltronas', 'Racks', 'Mesas de Centro']}
                         category="sala-de-estar"
                     />
 
                     <ProductShowcase
                         title="Decoração"
-                        tags={['Vasos', 'Quadros', 'Iluminação', 'Espelhos']}
                         category="decoracao"
                     />
                 </div>

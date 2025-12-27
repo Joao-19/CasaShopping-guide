@@ -4,7 +4,7 @@ import { ComponentProps, useState } from "react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
-import { cn, IconHeart } from "@repo/ui";
+import { cn, IconHeart, formatPriceTier } from "@repo/ui";
 
 // Import Swiper styles
 import "swiper/css";
@@ -30,15 +30,6 @@ export function ProductCardSwiper({
     ...props
 }: ProductCardSwiperProps) {
     const [isLoaded, setIsLoaded] = useState(false);
-
-    const getPriceSymbol = (p: string) => {
-        switch (p) {
-            case 'LOW': return '$';
-            case 'MEDIUM': return '$$';
-            case 'HIGH': return '$$$';
-            default: return '$$';
-        }
-    }
 
     return (
         <div className={cn("flex flex-col gap-3 w-full cursor-pointer group h-full", className)} {...props}>
@@ -75,7 +66,7 @@ export function ProductCardSwiper({
 
                 {/* Price Tag */}
                 <div className="absolute bottom-3 right-3 font-bold text-white text-sm bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">
-                    {getPriceSymbol(price as string)}
+                    {formatPriceTier(price as string)}
                 </div>
 
                 {/* Wishlist Button */}

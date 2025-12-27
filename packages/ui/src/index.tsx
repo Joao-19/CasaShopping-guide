@@ -33,3 +33,4 @@ export * from "./pagination";
 export * from "./components/drawer";
 export * from "./context/PopupContext";
 export * from "./components/GlobalPopup";
+export * from "./lib/utils";

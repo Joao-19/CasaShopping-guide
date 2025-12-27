@@ -10,7 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from "@repo/ui/table";
-import { ConfirmationCard } from '@repo/ui';
+import { ConfirmationCard, formatPriceTier } from '@repo/ui';
 import { CreateProductForm } from './-components/CreateProductForm';
 
 export default function ProdutosPage() {
@@ -121,7 +121,7 @@ export default function ProdutosPage() {
                                                 product.price === 'MEDIUM' ? 'bg-blue-100 text-blue-700' :
                                                     'bg-slate-100 text-slate-700'
                                                 }`}>
-                                                {product.price === 'LOW' ? '$' : product.price === 'MEDIUM' ? '$$' : '$$$'}
+                                                {formatPriceTier(product.price)}
                                             </span>
                                         </TableCell>
                                         <TableCell>

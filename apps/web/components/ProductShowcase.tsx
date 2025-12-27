@@ -5,7 +5,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts } from "../Services/http/product.http";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { usePopup } from "@repo/ui";
 import { ProductDetailsCard } from "./ProductDetailsCard";
 
@@ -61,22 +61,24 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
             <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 w-full">
                 <div className="flex items-center gap-4">
                     <h2 className="text-[#162e47] text-[28px] font-bold font-sans">{title}</h2>
-                    {tags && tags.length > 0 && (
-                        <div className="hidden md:flex gap-2">
-                            {tags.map((tag) => (
-                                <button key={tag} className="px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer bg-[#E9EBEF] text-[#162e47] hover:bg-primary hover:text-white">
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
-                <button className="text-[#162e47] font-semibold hover:underline">Ver tudo em {title}</button>
             </div>
 
             {isLoading ? (
                 <div className="flex items-center justify-center p-12 w-full">
                     <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                </div>
+            ) : products.length === 0 ? (
+                <div className="w-full flex justify-center px-8">
+                    <div className="max-w-7xl w-full flex flex-col items-center justify-center py-20 bg-white/50 rounded-2xl border border-dashed border-gray-200">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <Sparkles className="w-8 h-8 text-gray-300" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-[#162e47] mb-2">Novidades em breve</h3>
+                        <p className="text-gray-500 text-sm max-w-[300px] text-center">
+                            Estamos selecionando os melhores produtos desta categoria para você.
+                        </p>
+                    </div>
                 </div>
             ) : (
                 <div className="relative group w-full">

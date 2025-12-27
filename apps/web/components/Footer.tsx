@@ -1,4 +1,4 @@
-import { IconFacebook, IconInstagram, IconYoutube } from "@repo/ui";
+import { IconFacebook, IconInstagram, IconYoutube, Assets } from "@repo/ui";
 
 export function Footer() {
     return (
@@ -6,7 +6,7 @@ export function Footer() {
             <div className="max-w-7xl mx-auto px-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="flex flex-col gap-6">
-                        <img src="/_assets/v11/6185a459e744ef985eb76eac209651a566e786e4.png" alt="CasaShopping" className="h-[42px] w-auto object-contain self-start" />
+                        <img src={Assets.LogomarcaWhite.src} alt="CasaShopping" className="h-[42px] w-auto object-contain self-start" />
                         <div className="flex flex-col ga text-white/70 text-sm font-sans">
                             <p>Av. Ayrton Senna, 2150.</p>
                             <p>Barra da Tijuca, Rio de Janeiro - RJ</p>

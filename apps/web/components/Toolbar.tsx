@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/auth.store";
 
+
 export function Toolbar() {
     const pathname = usePathname();
     const isHome = pathname === "/";

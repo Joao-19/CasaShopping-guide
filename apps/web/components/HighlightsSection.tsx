@@ -1,4 +1,8 @@
+'use client';
 import { MediaCard, IconHeart, BaseText } from "@repo/ui";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+
 export function HighlightsSection() {
 
     const temporaryImages = {
@@ -19,61 +23,73 @@ export function HighlightsSection() {
                     </div>
                 </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Card 1 */}
-                <MediaCard
-                    videoSrc={temporaryImages[1]}
-                    className="w-full aspect-231/306"
-                >
 
-                    <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                        <BaseText text="$$$" size="large" color="white" className="font-bold mb-1 text-[18px]" />
-                        <BaseText text="Poltrona Decorativa Premium Berlim" size="xl" color="white" className="font-semibold leading-tight mb-1 text-[20px]" />
-                        <BaseText text="Abracasa" size="small" color="white" className="opacity-80" />
-                    </div>
-                    <div className="absolute top-4 right-4 flex gap-2">
-                        <div className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20">
-                            <IconHeart className="w-6 h-6 text-white" />
+            <Swiper
+                spaceBetween={32}
+                slidesPerView={1.2}
+                breakpoints={{
+                    640: { slidesPerView: 2.2 },
+                    1024: { slidesPerView: 3 },
+                }}
+                className="w-full"
+            >
+                {/* Card 1 */}
+                <SwiperSlide>
+                    <MediaCard
+                        videoSrc={temporaryImages[1]}
+                        className="w-full aspect-231/306"
+                    >
+                        <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                            <BaseText text="$$$" size="large" color="white" className="font-bold mb-1 text-[18px]" />
+                            <BaseText text="Poltrona Decorativa Premium Berlim" size="xl" color="white" className="font-semibold leading-tight mb-1 text-[20px]" />
+                            <BaseText text="Abracasa" size="small" color="white" className="opacity-80" />
                         </div>
-                    </div>
-                </MediaCard>
+                        <div className="absolute top-4 right-4 flex gap-2">
+                            <div className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20">
+                                <IconHeart className="w-6 h-6 text-white" />
+                            </div>
+                        </div>
+                    </MediaCard>
+                </SwiperSlide>
 
                 {/* Card 2 */}
-                <MediaCard
-                    imageSrc={temporaryImages[2]}
-                    className="w-full aspect-231/306"
-                >
-
-                    <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                        <BaseText text="$$$" size="large" color="white" className="font-bold mb-1 text-[18px]" />
-                        <BaseText text="Poltrona Moderno Beige" size="xl" color="white" className="font-semibold leading-tight mb-1 text-[20px]" />
-                        <BaseText text="Tok&Stok" size="small" color="white" className="opacity-80" />
-                    </div>
-                    <div className="absolute top-4 right-4 flex gap-2">
-                        <div className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20">
-                            <IconHeart className="w-6 h-6 text-white" />
+                <SwiperSlide>
+                    <MediaCard
+                        imageSrc={temporaryImages[2]}
+                        className="w-full aspect-231/306"
+                    >
+                        <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                            <BaseText text="$$$" size="large" color="white" className="font-bold mb-1 text-[18px]" />
+                            <BaseText text="Poltrona Moderno Beige" size="xl" color="white" className="font-semibold leading-tight mb-1 text-[20px]" />
+                            <BaseText text="Tok&Stok" size="small" color="white" className="opacity-80" />
                         </div>
-                    </div>
-                </MediaCard>
+                        <div className="absolute top-4 right-4 flex gap-2">
+                            <div className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20">
+                                <IconHeart className="w-6 h-6 text-white" />
+                            </div>
+                        </div>
+                    </MediaCard>
+                </SwiperSlide>
 
                 {/* Card 3 */}
-                <MediaCard
-                    videoSrc={temporaryImages[3]}
-                    className="w-full aspect-231/306"
-                >
-
-                    <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                        <BaseText text="$$$" size="large" color="white" className="font-bold mb-1 text-[18px]" />
-                        <BaseText text="Mesa de Jantar Externa Horizon" size="xl" color="white" className="font-semibold leading-tight mb-1 text-[20px]" />
-                        <BaseText text="Tok&Stok" size="small" color="white" className="opacity-80" />
-                    </div>
-                    <div className="absolute top-4 right-4 flex gap-2">
-                        <div className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20">
-                            <IconHeart className="w-6 h-6 text-white" />
+                <SwiperSlide>
+                    <MediaCard
+                        videoSrc={temporaryImages[3]}
+                        className="w-full aspect-231/306"
+                    >
+                        <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                            <BaseText text="$$$" size="large" color="white" className="font-bold mb-1 text-[18px]" />
+                            <BaseText text="Mesa de Jantar Externa Horizon" size="xl" color="white" className="font-semibold leading-tight mb-1 text-[20px]" />
+                            <BaseText text="Tok&Stok" size="small" color="white" className="opacity-80" />
                         </div>
-                    </div>
-                </MediaCard>
-            </div>
+                        <div className="absolute top-4 right-4 flex gap-2">
+                            <div className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20">
+                                <IconHeart className="w-6 h-6 text-white" />
+                            </div>
+                        </div>
+                    </MediaCard>
+                </SwiperSlide>
+            </Swiper>
         </section>
     )
 }

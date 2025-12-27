@@ -1,4 +1,4 @@
-import { IconFavorite, IconArrowLeft, cn } from "@repo/ui";
+import { IconFavorite, IconArrowLeft, cn, formatPriceTier } from "@repo/ui";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -23,18 +23,6 @@ interface ProductDetailsCardProps {
 
 export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
     const { hidePopup } = usePopup();
-
-    const getPriceSymbol = (price: number | string) => {
-        // Simple logic to determine price tier based on numeric value if available, 
-        // or just return '$$$' if unknown. 
-        // Assuming the same logic as ProductCardSwiper might be needed, 
-        // but here we might receive the raw number. 
-        // Let's implement a heuristic or just default to $$$ as requested.
-        // User said: "Nao tera preço em si... é exibido como $$$"
-        // Let's assume we map the price to symbols or it comes as a symbol.
-        // If price is a number, we'll just format as $$$ for now or maybe checks
-        return '$$$';
-    };
 
     return (
         <div className="relative w-full max-w-[300px] md:max-w-[475px] bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
@@ -95,7 +83,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                 {product.title}
                             </h2>
                             <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap">
-                                {getPriceSymbol(product.price)}
+                                {formatPriceTier(String(product.price))}
                             </span>
                         </div>
 
