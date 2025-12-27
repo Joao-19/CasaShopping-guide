@@ -79,9 +79,11 @@ model Product {
   categories  String[]
   tags        String?
 
-  storeId String
-  store   Store          @relation(fields: [storeId], references: [id])
-  images  ProductImage[]
+  storeId        String
+  store          Store          @relation(fields: [storeId], references: [id])
+  showStorePhone Boolean        @default(false)
+  isFeatured     Boolean        @default(false)
+  images         ProductImage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

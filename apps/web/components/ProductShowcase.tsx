@@ -49,7 +49,9 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         price: p.price,
         description: p.description, // Added description mapper if available
         images: p.images?.sort((a, b) => a.index - b.index)
-            .map(img => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || []
+            .map(img => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
+        showStorePhone: p.showStorePhone,
+        storePhone: p.store?.phone,
     }))) || [];
 
     const handleProductClick = (product: any) => {

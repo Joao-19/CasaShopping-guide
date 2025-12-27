@@ -46,6 +46,8 @@ interface CreateProductFormContentProps {
         tags: string;
         storeId: string;
         images: ImageState[];
+        showStorePhone: boolean;
+        isFeatured: boolean;
     };
     handlers: {
         setName: (v: string) => void;
@@ -55,6 +57,8 @@ interface CreateProductFormContentProps {
         setTags: (v: string) => void;
         setStoreId: (v: string) => void;
         setImages: (v: ImageState[]) => void;
+        setShowStorePhone: (v: boolean) => void;
+        setIsFeatured: (v: boolean) => void;
     };
     loading: boolean;
     onClose: () => void;
@@ -277,6 +281,29 @@ function CreateProductFormContent({
                 onChange={(e) => handlers.setTags(e.target.value)}
             />
 
+            {/* Checkboxes */}
+            <div className="flex flex-col gap-3 mt-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={data.showStorePhone}
+                        onChange={(e) => handlers.setShowStorePhone(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 text-[#1A2B3C] focus:ring-[#1A2B3C]"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Exibir telefone da loja</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={data.isFeatured}
+                        onChange={(e) => handlers.setIsFeatured(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 text-[#1A2B3C] focus:ring-[#1A2B3C]"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Marcar como Destaque</span>
+                </label>
+            </div>
+
             {/* Footer Actions */}
             <div className="pt-4 border-t border-gray-100 flex justify-end gap-3 mt-6">
                 <Button
@@ -325,6 +352,8 @@ export function CreateProductForm({
             preview: img.path,
         })) || []
     );
+    const [showStorePhone, setShowStorePhone] = useState(initialData?.showStorePhone || false);
+    const [isFeatured, setIsFeatured] = useState(initialData?.isFeatured || false);
     const { uploadImage, uploading: uploadingImage } = useImageUpload();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -392,6 +421,8 @@ export function CreateProductForm({
             tags: tags || undefined, // Send undefined if empty string
             storeId,
             images: finalImages,
+            showStorePhone,
+            isFeatured,
         };
 
         try {
@@ -449,6 +480,8 @@ export function CreateProductForm({
                         tags,
                         storeId,
                         images,
+                        showStorePhone,
+                        isFeatured,
                     }}
                     handlers={{
                         setName,
@@ -458,6 +491,8 @@ export function CreateProductForm({
                         setTags,
                         setStoreId,
                         setImages,
+                        setShowStorePhone,
+                        setIsFeatured,
                     }}
                     loading={loading || uploadingImage}
                     onClose={onClose}

@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -57,6 +58,14 @@ export class CreateProductDto {
   @ValidateNested({ each: true })
   @Type(() => ProductImageDto)
   images?: ProductImageDto[];
+
+  @IsOptional()
+  @IsBoolean()
+  showStorePhone?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
 }
 
 export class UpdateProductDto {
@@ -92,6 +101,14 @@ export class UpdateProductDto {
   @ValidateNested({ each: true })
   @Type(() => ProductImageDto)
   images?: ProductImageDto[];
+
+  @IsOptional()
+  @IsBoolean()
+  showStorePhone?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
 }
 
 export interface Product {
@@ -105,6 +122,8 @@ export interface Product {
   createdAt: Date;
   updatedAt: Date;
   images?: ProductImage[];
+  showStorePhone: boolean;
+  isFeatured: boolean;
 }
 
 export interface ProductImage {

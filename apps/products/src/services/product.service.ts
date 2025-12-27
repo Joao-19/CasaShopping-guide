@@ -116,6 +116,7 @@ export class ProductService {
             select: {
               name: true,
               address: true,
+              phone: true,
             },
           },
         },

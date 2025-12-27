@@ -18,6 +18,7 @@ interface ProductDetailsCardProps {
         images: string[];
         tags?: string[];
         storePhone?: string;
+        showStorePhone?: boolean;
     };
 }
 
@@ -25,7 +26,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
     const { hidePopup } = usePopup();
 
     return (
-        <div className="relative w-full max-w-[300px] md:max-w-[475px] bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="relative w-[90vw] md:w-full md:max-w-[475px] bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 <div className="flex flex-col w-full">
                     {/* Image Section with Horizontal Swiper */}
@@ -122,11 +123,11 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                 <Heart size={20} />
                                 Favoritar
                             </button>
-                            {product.storePhone && (
-                                <button className="flex-1 bg-[#003ba6] text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] hover:bg-[#002a78] transition-colors font-medium cursor-pointer">
+                            {product.storePhone && product.showStorePhone && (
+                                <a href={`tel:${product.storePhone}`} className="flex-1 bg-[#003ba6] text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] hover:bg-[#002a78] transition-colors font-medium cursor-pointer text-decoration-none">
                                     <Phone size={20} />
                                     Ligar
-                                </button>
+                                </a>
                             )}
                         </div>
                     </div>
