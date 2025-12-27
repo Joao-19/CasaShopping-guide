@@ -112,6 +112,12 @@ export class ProductService {
         },
         include: {
           images: true,
+          store: {
+            select: {
+              name: true,
+              address: true,
+            },
+          },
         },
       }),
       prisma.product.count({ where }),

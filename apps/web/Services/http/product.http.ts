@@ -4,6 +4,7 @@ import { Product } from "@repo/dtos";
 export interface ProductWithStore extends Product {
   store?: {
     name: string;
+    address: string;
   };
 }
 
