@@ -18,7 +18,10 @@ export function HighlightsSection() {
                 playOnInit: true,
                 stopOnInteraction: false,
                 stopOnMouseEnter: false, // Managed manually for instant resume
-                speed: 1
+                speed: 0.8,
+                breakpoints: {
+                    '(max-width: 768px)': { speed: 0.5 }
+                }
             })
         ]
     );
@@ -96,10 +99,11 @@ export function HighlightsSection() {
             </div>
 
             <div
-                className="relative w-screen ml-[calc(50%-50vw)] z-10"
+                className="relative w-screen ml-[calc(50%-50vw)] z-10 overflow-hidden"
                 ref={emblaRef}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
+                onTouchEnd={handleMouseLeave} // Ensure resume on touch lift
             >
                 <div className="flex touch-pan-y will-change-transform">
                     {slidesData.map((product, index) => {
