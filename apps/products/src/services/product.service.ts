@@ -84,6 +84,7 @@ export class ProductService {
   async findAll(
     storeId?: string,
     search?: string,
+    isFeatured?: boolean,
     page: number = 1
   ): Promise<PaginatedResult<Product>> {
     const take = 15;
@@ -92,6 +93,10 @@ export class ProductService {
 
     if (storeId) {
       where.storeId = storeId;
+    }
+
+    if (isFeatured) {
+      where.isFeatured = true;
     }
 
     if (search) {
@@ -107,9 +112,7 @@ export class ProductService {
         where,
         take,
         skip,
-        orderBy: {
-          name: "asc",
-        },
+        orderBy: isFeatured ? { updatedAt: "desc" } : { name: "asc" },
         include: {
           images: true,
           store: {

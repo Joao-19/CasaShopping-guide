@@ -79,3 +79,22 @@
     color: var(--color-primary);
   }
 }
+
+.swiper-transition-linear .swiper-wrapper {
+  transition-timing-function: linear !important;
+}
+
+/* Ensure carousel receives hover events even with child elements */
+.highlights-carousel {
+  position: relative;
+}
+
+.highlights-carousel .swiper-slide {
+  pointer-events: auto;
+}
+
+/* Prevent autoplay direction change on drag */
+.highlights-carousel.swiper-paused .swiper-wrapper {
+  transition-duration: 600ms !important;
+  transition-timing-function: ease-out !important;
+}

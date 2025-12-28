@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    allowedDevOrigins: ["192.168.100.12"],
+    allowedDevOrigins: ["192.168.0.13"],
     output: "standalone",
     transpilePackages: ["@repo/ui", "@repo/dtos", "@repo/database", "@repo/api-client"],
     typescript: {
@@ -15,7 +15,7 @@ const nextConfig = {
             },
             {
                 protocol: 'http',
-                hostname: '192.168.100.12',
+                hostname: '192.168.0.13',
                 port: '9000',
             },
             {

@@ -9,7 +9,7 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
-    allowedDevOrigins: ["192.168.100.12"],
+    allowedDevOrigins: ["192.168.0.13"],
     output: "standalone",
     images: {
         remotePatterns: [
@@ -20,7 +20,7 @@ const nextConfig = {
             },
             {
                 protocol: 'http',
-                hostname: '192.168.100.12',
+                hostname: '192.168.0.13',
                 port: '9000',
             },
         ],

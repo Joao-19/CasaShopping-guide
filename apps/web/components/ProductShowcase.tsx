@@ -4,9 +4,10 @@ import { ProductCardSwiper } from "./ProductCardSwiper";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getProducts } from "../Services/http/product.http";
+import { getProducts, ProductWithStore } from "../Services/http/product.http";
 import { Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { usePopup } from "@repo/ui";
+import { ProductImage } from "@repo/dtos";
 import { ProductDetailsCard } from "./ProductDetailsCard";
 
 import 'swiper/css';
@@ -42,14 +43,14 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         initialPageParam: 1,
     });
 
-    const products = data?.pages.flatMap((page) => page.data.map(p => ({
+    const products = data?.pages.flatMap((page) => page.data.map((p: ProductWithStore) => ({
         id: p.id,
         title: p.name,
         storeName: p.store?.name || "Loja",
         price: p.price,
         description: p.description, // Added description mapper if available
-        images: p.images?.sort((a, b) => a.index - b.index)
-            .map(img => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
+        images: p.images?.sort((a: ProductImage, b: ProductImage) => a.index - b.index)
+            .map((img: ProductImage) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
         showStorePhone: p.showStorePhone,
         storePhone: p.store?.phone,
     }))) || [];
@@ -83,7 +84,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                     </div>
                 </div>
             ) : (
-                <div className="relative group w-full">
+                <div className="relative group w-full md:max-w-7xl md:mx-auto md:px-8">
                     <Swiper
                         grabCursor={true}
                         spaceBetween={16}
@@ -116,10 +117,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                 slidesPerView: 5,
                             },
                         }}
-                        className="w-full pb-10! px-4 md:px-0"
-                        style={{
-                            paddingLeft: 'max(2rem, calc((100vw - 80rem) / 2 + 2rem))'
-                        }}
+                        className="w-full pb-10! px-4 md:px-0 pl-8 md:pl-0"
                     >
                         {products.map((product) => (
                             <SwiperSlide key={product.id}>
@@ -146,13 +144,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
                     {/* Custom Navigation Buttons - Adjusted Position */}
                     <button
-                        className={`prev-${uniqueId} absolute left-4 md:left-[max(2rem,calc((100vw-80rem)/2+1rem))] top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        className={`prev-${uniqueId} absolute left-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
                     </button>
                     <button
-                        className={`next-${uniqueId} absolute right-4 md:right-[max(2rem,calc((100vw-80rem)/2+1rem))] top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        className={`next-${uniqueId} absolute right-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-10 h-10" strokeWidth={1.5} />
