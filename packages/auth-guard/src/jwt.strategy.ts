@@ -5,16 +5,11 @@ import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly configService: ConfigService) {
-    const secret = configService.get<string>("JWT_SECRET") || "default_secret";
-    console.log(
-      `[JwtStrategy] Initialized with secret: ${secret === "access-secret" ? "MATCH" : "MISMATCH (" + secret + ")"}`
-    );
-
+  constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: secret,
+      secretOrKey: process.env.JWT_SECRET || "default_secret",
     });
   }
 

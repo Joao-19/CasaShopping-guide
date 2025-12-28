@@ -1,3 +1,9 @@
+import * as dotenv from "dotenv";
+import { resolve } from "path";
+
+// Force load local .env (apps/auth/.env) to override global/monorepo injections
+dotenv.config({ path: resolve(__dirname, "../.env"), override: true });
+
 import { NestFactory } from "@nestjs/core";
 import { AuthModule } from "@/modules/auth.module";
 import { ConfigService } from "@nestjs/config";
