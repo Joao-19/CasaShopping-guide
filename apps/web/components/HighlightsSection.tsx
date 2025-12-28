@@ -1,17 +1,28 @@
 'use client';
-import { MediaCard, IconHeart, BaseText, usePopup } from "@repo/ui";
-import { Swiper, SwiperSlide } from 'swiper/react';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { MediaCard, usePopup, formatPriceTier, IconHeart, BaseText } from "@repo/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts } from "../Services/http/product.http";
-import { Autoplay } from 'swiper/modules';
-import 'swiper/css';
 import { ProductDetailsCard } from "./ProductDetailsCard";
-import { useState } from "react";
+import useEmblaCarousel from 'embla-carousel-react';
+import AutoScroll from 'embla-carousel-auto-scroll';
 
 export function HighlightsSection() {
     const { showPopup } = usePopup();
-    const [isInteracting, setIsInteracting] = useState(false);
-    const carrousselSpeed: number = 4000;
+
+    const [emblaRef, emblaApi] = useEmblaCarousel(
+        { loop: true, dragFree: true, align: 'center', containScroll: false },
+        [
+            AutoScroll({
+                playOnInit: true,
+                stopOnInteraction: false,
+                stopOnMouseEnter: false, // Managed manually for instant resume
+                speed: 1
+            })
+        ]
+    );
+
     const {
         data,
         fetchNextPage,
@@ -31,10 +42,15 @@ export function HighlightsSection() {
 
     const products = data?.pages.flatMap((page) => Array.isArray(page) ? page : page.data) || [];
 
-    // Duplicate products for seamless loop if there are few items
-    const slidesData = products.length > 0 && products.length < 10
-        ? [...products, ...products, ...products]
-        : products;
+    useEffect(() => {
+        if (hasNextPage && !isFetchingNextPage && products.length < 30) {
+            fetchNextPage();
+        }
+    }, [products.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const slidesData = products.length > 0
+        ? [...products, ...products, ...products, ...products]
+        : [];
 
     const handleProductClick = (product: any) => {
         const productDetails = {
@@ -51,15 +67,25 @@ export function HighlightsSection() {
         showPopup(<ProductDetailsCard product={productDetails} />);
     };
 
+    // Manual Pause/Resume for instant response
+    const handleMouseEnter = useCallback(() => {
+        const autoScroll = emblaApi?.plugins()?.autoScroll;
+        if (autoScroll) autoScroll.stop();
+    }, [emblaApi]);
+
+    const handleMouseLeave = useCallback(() => {
+        const autoScroll = emblaApi?.plugins()?.autoScroll;
+        if (autoScroll) autoScroll.play();
+    }, [emblaApi]);
+
     if (!products || products.length === 0) return null;
 
-    function onHoverStart() {
-        setIsInteracting(true);
-    }
-
-    function onHoverEnd() {
-        setIsInteracting(false);
-    }
+    // Responsive: Double sizing as requested (Updated by user in step 753)
+    // - Mobile: 55%
+    // - SM: 30%
+    // - LG: 35%
+    // - XL: 25%
+    const slideClass = "flex-[0_0_55%] sm:flex-[0_0_30%] lg:flex-[0_0_30%] xl:flex-[0_0_30%] max-w-[400px] pl-4 sm:pl-6 lg:pl-8 min-w-0 relative";
 
     return (
         <section className="rounded-[24px] py-10 bg-[rgb(236,236,238)] relative overflow-visible">
@@ -69,247 +95,55 @@ export function HighlightsSection() {
                 </div>
             </div>
 
-            <div className="w-screen ml-[calc(50%-50vw)]">
-                <Swiper
-                    modules={[]} // Removed Autoplay module
-                    spaceBetween={16}
-                    slidesPerView={2.1}
-                    centeredSlides={true}
-                    grabCursor={true}
-                    loop={true}
-                    speed={4000}
-                    allowTouchMove={true}
-                    simulateTouch={true}
-                    loopAdditionalSlides={10} // Ensure enough buffer for smooth infinite scroll
-                    // @ts-ignore
-                    loopedSlides={10}         // Explicitly set high buffer count
-                    onSwiper={(swiper: any) => {
-                        // STRICT CLEANUP: Remove any existing custom listeners to prevent stacking
-                        if (swiper._customCleanup) {
-                            swiper._customCleanup();
-                        }
-
-                        const wrapper = swiper.el;
-                        let isPaused = false;
-                        let isDragging = false;
-                        let transitionTimeout: NodeJS.Timeout;
-                        let lastMoveTime = 0;
-
-                        // Force linear transition style
-                        setTimeout(() => {
-                            if (wrapper && !swiper.destroyed) {
-                                wrapper.classList.add('swiper-transition-linear');
-                            }
-                        }, 100);
-
-                        const moveForward = (duration = carrousselSpeed) => {
-                            if (swiper.destroyed || isPaused || isDragging) return;
-
-                            // Debounce: prevent overlapping moves if called too rapidly
-                            const now = Date.now();
-                            if (now - lastMoveTime < duration * 0.8 && duration > 1000) {
-                                return;
-                            }
-                            lastMoveTime = now;
-
-                            wrapper.classList.add('swiper-transition-linear');
-
-                            // Force move to next slide
-                            swiper.slideNext(duration);
-                        };
-
-                        const freeze = () => {
-                            const swiperWrapper = swiper.wrapperEl;
-                            const computedStyle = window.getComputedStyle(swiperWrapper);
-                            const transform = computedStyle.transform;
-
-                            // Stop current transition visually
-                            wrapper.classList.remove('swiper-transition-linear');
-                            swiper.setTransition(0);
-
-                            // Lock position to current computed state
-                            if (transform !== 'none') {
-                                const matrix = transform.match(/^matrix\((.+)\)$/);
-                                if (matrix && matrix[1]) {
-                                    const values = matrix[1].split(',').map(parseFloat);
-                                    const tx = values[4] || 0;
-                                    swiper.setTranslate(tx);
-                                    swiper.updateProgress();
-                                }
-                            }
-                        };
-
-                        const resume = () => {
-                            if (swiper.destroyed) return;
-
-                            const currentTranslate = swiper.getTranslate();
-                            const slideWidth = swiper.slides[0].offsetWidth + swiper.params.spaceBetween;
-                            const targetTranslate = Math.floor(currentTranslate / slideWidth) * slideWidth;
-
-                            const distanceRemaining = Math.abs(currentTranslate - targetTranslate);
-                            const fullSpeed = carrousselSpeed;
-                            const ratio = distanceRemaining / slideWidth;
-
-                            // Safety: if very close, just snap and start next
-                            if (ratio < 0.01) {
-                                swiper.setTranslate(targetTranslate);
-                                moveForward(carrousselSpeed);
-                                return;
-                            }
-
-                            const resumeSpeed = Math.max(fullSpeed * ratio, 20);
-
-                            // Use translateTo for the partial move
-                            // This ensures we go to the exact target regardless of internal index
-                            wrapper.classList.add('swiper-transition-linear');
-                            swiper.translateTo(targetTranslate, resumeSpeed, false, false);
-
-                            // watchdog
-                            clearTimeout(transitionTimeout);
-                            transitionTimeout = setTimeout(() => {
-                                if (!isPaused && !isDragging && !swiper.destroyed && !swiper.animating) {
-                                    moveForward(carrousselSpeed);
-                                }
-                            }, resumeSpeed + 100);
-                        };
-
-                        // --- Named Event Handlers for Cleanup ---
-
-                        const onTransitionEnd = () => {
-                            clearTimeout(transitionTimeout);
-                            if (!isPaused && !isDragging) {
-                                swiper.updateActiveIndex();
-
-                                // WAIT for loop fix to settle. Swiper might need a frame to teleport.
-                                requestAnimationFrame(() => {
-                                    requestAnimationFrame(() => {
-                                        moveForward(carrousselSpeed);
-                                    });
-                                });
-                            }
-                        };
-
-                        const onTransitionStart = () => {
-                            clearTimeout(transitionTimeout);
-                            if (!isPaused && !isDragging) {
-                                const currentDuration = swiper.params.speed || carrousselSpeed;
-                                transitionTimeout = setTimeout(() => {
-                                    if (!isPaused && !isDragging && !swiper.destroyed && !swiper.animating) {
-                                        moveForward(carrousselSpeed);
-                                    }
-                                }, currentDuration + 200);
-                            }
-                        };
-
-                        const onTouchStart = () => {
-                            isDragging = true;
-                            clearTimeout(transitionTimeout);
-                            wrapper.classList.remove('swiper-transition-linear');
-                        };
-
-                        const onTouchEnd = () => {
-                            isDragging = false;
-
-                            // Prevent "flicker" by NOT calling resume() manually.
-                            // swiper will naturally snap to slide.
-                            // Then 'transitionEnd' event will fire and restart the linear loop.
-
-                            // Safety fallback only: if for some reason no transition happens (e.g. stopped exactly on pixel)
-                            setTimeout(() => {
-                                if (!isPaused && !isDragging && !swiper.destroyed && !swiper.animating) {
-                                    moveForward(carrousselSpeed);
-                                }
-                            }, 1000);
-                        };
-
-                        const handleMouseEnter = () => {
-                            isPaused = true;
-                            clearTimeout(transitionTimeout);
-                            if (!isDragging) {
-                                freeze();
-                            }
-                        };
-
-                        const handleMouseLeave = () => {
-                            isPaused = false;
-                            if (!isDragging) {
-                                resume();
-                            }
-                        };
-
-                        const onDestroy = () => {
-                            if (swiper._customCleanup) swiper._customCleanup();
-                        };
-
-                        // Attach Listeners
-                        swiper.on('transitionEnd', onTransitionEnd);
-                        swiper.on('transitionStart', onTransitionStart);
-                        swiper.on('touchStart', onTouchStart);
-                        swiper.on('touchEnd', onTouchEnd);
-                        swiper.on('destroy', onDestroy);
-
-                        wrapper.addEventListener('mouseenter', handleMouseEnter);
-                        wrapper.addEventListener('mouseleave', handleMouseLeave);
-
-                        // Kickstart
-                        setTimeout(() => {
-                            moveForward(carrousselSpeed);
-                        }, 500);
-
-                        // Store Cleanup Function
-                        swiper._customCleanup = () => {
-                            clearTimeout(transitionTimeout);
-                            swiper.off('transitionEnd', onTransitionEnd);
-                            swiper.off('transitionStart', onTransitionStart);
-                            swiper.off('touchStart', onTouchStart);
-                            swiper.off('touchEnd', onTouchEnd);
-                            swiper.off('destroy', onDestroy);
-                            wrapper.removeEventListener('mouseenter', handleMouseEnter);
-                            wrapper.removeEventListener('mouseleave', handleMouseLeave);
-                            delete swiper._customCleanup;
-                        };
-
-                    }}
-                    onReachEnd={() => {
-                        if (hasNextPage && !isFetchingNextPage) {
-                            fetchNextPage();
-                        }
-                    }}
-                    breakpoints={{
-                        640: {
-                            slidesPerView: 3.2,
-                            spaceBetween: 24,
-                            centeredSlides: true,
-                        },
-                        1024: {
-                            slidesPerView: 5.5,
-                            spaceBetween: 32,
-                            centeredSlides: true,
-                        },
-                        1280: {
-                            slidesPerView: 6.5,
-                            spaceBetween: 32,
-                            centeredSlides: true,
-                        }
-                    }}
-                    className="w-full px-4 md:px-0 swiper-transition-linear highlights-carousel"
-                >
-                    {/* Manually duplicate data to ensure Swiper has enough real slides for a seamless loop */}
-                    {[...slidesData, ...slidesData, ...slidesData, ...slidesData].map((product, index) => {
+            <div
+                className="relative w-screen ml-[calc(50%-50vw)] z-10"
+                ref={emblaRef}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                <div className="flex touch-pan-y will-change-transform">
+                    {slidesData.map((product, index) => {
                         const image = product.images?.[0]?.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost');
 
                         return (
-                            <SwiperSlide key={`${product.id}-${index}`}>
-                                <div onClick={() => handleProductClick(product)}>
+                            <div className={slideClass} key={`${product.id}-${index}`}>
+                                <div onClick={() => handleProductClick(product)} className="w-full aspect-[231/306] relative rounded-[16px] overflow-hidden cursor-pointer group shadow-lg">
                                     <MediaCard
-                                        imageSrc={image}
-                                        className="w-full aspect-231/306 cursor-pointer"
+                                        imageSrc={image || '/placeholder.png'}
+                                        className="w-full h-full"
                                     >
-                                        <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                                            <BaseText text="$$$" size="large" color="white" className="font-bold mb-1 text-[18px]" />
-                                            <BaseText text={product.name} size="xl" color="white" className="font-semibold leading-tight mb-1 text-[20px]" />
-                                            <BaseText text={product.store?.name || "Loja"} size="small" color="white" className="opacity-80" />
+                                        {/* Gradient Overlay */}
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-80 transition-opacity" />
+
+                                        {/* Content Bottom */}
+                                        <div className="absolute bottom-6 left-6 right-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                            {/* Price Tier $$$ */}
+                                            <BaseText
+                                                text={formatPriceTier(product.price || 'MEDIUM')}
+                                                color="white"
+                                                size="large"
+                                                className="font-bold mb-1"
+                                            />
+
+                                            {/* Title */}
+                                            {/* Using BaseText for Title with line-clamp */}
+                                            <BaseText
+                                                text={product.name}
+                                                color="white"
+                                                size="xl"
+                                                className="font-semibold leading-tight mb-1 line-clamp-2"
+                                            />
+
+                                            {/* Store */}
+                                            <BaseText
+                                                text={product.store?.name || "Loja Desconhecida"}
+                                                color="white"
+                                                size="small"
+                                                className="opacity-80"
+                                            />
                                         </div>
+
+                                        {/* Heart Icon Top Right */}
                                         <div className="absolute top-4 right-4 flex gap-2">
                                             <div className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20">
                                                 <IconHeart className="w-6 h-6 text-white" />
@@ -317,11 +151,11 @@ export function HighlightsSection() {
                                         </div>
                                     </MediaCard>
                                 </div>
-                            </SwiperSlide>
+                            </div>
                         );
                     })}
-                </Swiper>
+                </div>
             </div>
-        </section >
-    )
+        </section>
+    );
 }

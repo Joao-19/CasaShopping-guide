@@ -1,16 +1,8 @@
 import http from "./index";
-import { Product } from "@repo/dtos";
-
-export interface ProductWithStore extends Product {
-  store?: {
-    name: string;
-    address: string;
-    phone?: string;
-  };
-}
+import { Product } from "../../Domain/Product";
 
 export interface ProductResponse {
-  data: ProductWithStore[];
+  data: Product[];
   meta: {
     total: number;
     page: number;

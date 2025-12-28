@@ -95,8 +95,8 @@ export class ProductService {
       where.storeId = storeId;
     }
 
-    if (isFeatured) {
-      where.isFeatured = true;
+    if (isFeatured === true || isFeatured === false) {
+      where.isFeatured = isFeatured;
     }
 
     if (search) {

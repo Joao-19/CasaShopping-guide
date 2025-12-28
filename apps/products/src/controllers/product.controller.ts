@@ -38,7 +38,7 @@ export class ProductController {
     return this.productService.findAll(
       storeId,
       search,
-      isFeatured === "true",
+      isFeatured ? isFeatured === "true" : undefined,
       +page
     );
   }
