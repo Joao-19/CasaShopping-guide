@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { MediaCard, usePopup, formatPriceTier, IconHeart, BaseText } from "@repo/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getProducts } from "../Services/http/product.http";
+import { getProducts, toggleFavorite } from "../Services/http/product.http";
 import { ProductDetailsCard } from "./ProductDetailsCard";
 import useEmblaCarousel from 'embla-carousel-react';
 import AutoScroll from 'embla-carousel-auto-scroll';
@@ -149,7 +149,13 @@ export function HighlightsSection() {
 
                                         {/* Heart Icon Top Right */}
                                         <div className="absolute top-4 right-4 flex gap-2">
-                                            <div className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20">
+                                            <div
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleFavorite(product.id).then(res => console.log('Favorited:', res));
+                                                }}
+                                                className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20"
+                                            >
                                                 <IconHeart className="w-6 h-6 text-white" />
                                             </div>
                                         </div>

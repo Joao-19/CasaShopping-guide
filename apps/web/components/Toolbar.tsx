@@ -148,11 +148,14 @@ export function Toolbar() {
                             </nav>
                         </div>
                         <div className="flex items-center gap-2 md:gap-8">
-                            <button className="group flex items-center hover:opacity-80 transition-opacity relative">
+                            <Link href="/favoritos" className="group flex items-center gap-2 hover:opacity-80 transition-opacity relative">
                                 <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20">
                                     <IconHeart className="w-5 h-5 text-white" />
                                 </div>
-                            </button>
+                                <span className="hidden md:block text-white font-medium text-[14px]">
+                                    Meus Favoritos
+                                </span>
+                            </Link>
                             <div className="hidden md:flex items-center gap-3 cursor-pointer group" onClick={toggleDrawer}>
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 group-hover:border-white transition-colors flex items-center justify-center bg-white/10 backdrop-blur-md">
                                     <span className="text-white font-semibold text-sm">
@@ -209,14 +212,14 @@ export function Toolbar() {
                         </nav>
                     </div>
                     <div className="flex items-center sm:items-end gap-2 md:gap-8">
-                        <button className="group flex items-center gap-2 hover:opacity-80 transition-opacity relative">
+                        <Link href="/favoritos" className="group flex items-center gap-2 hover:opacity-80 transition-opacity relative">
                             <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20 bg-[rgba(0,59,166,0)]">
                                 <IconFavorite className="w-5 h-5 text-white" strokeWidth={1.5} />
                             </div>
                             <span className="hidden md:block text-white font-medium text-[14px]">
                                 Meus Favoritos
                             </span>
-                        </button>
+                        </Link>
                         <div className="hidden md:flex items-center gap-3 cursor-pointer group bg-[rgba(0,59,166,0)]" onClick={toggleDrawer}>
                             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 group-hover:border-white transition-colors flex items-center justify-center bg-white/10 backdrop-blur-md">
                                 <span className="text-white font-semibold text-sm">

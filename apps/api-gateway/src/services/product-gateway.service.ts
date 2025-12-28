@@ -118,4 +118,19 @@ export class ProductGatewayService {
       );
     }
   }
+  async getCategories(token?: string): Promise<any[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<any[]>(`${this.productsServiceUrl}/categories`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
 }

@@ -8,6 +8,7 @@ import {
   Put,
   Param,
   Delete,
+  Req,
 } from "@nestjs/common";
 import { ProductService } from "@/services/product.service";
 import {
@@ -56,5 +57,13 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   async delete(@Param("id") id: string): Promise<Product> {
     return this.productService.delete(id);
+  }
+  @Post(":id/favorite")
+  @UseGuards(JwtAuthGuard)
+  async toggleFavorite(
+    @Param("id") id: string,
+    @Req() req: any
+  ): Promise<{ isFavorited: boolean }> {
+    return this.productService.toggleFavorite(req.user.id, id);
   }
 }

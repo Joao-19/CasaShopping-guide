@@ -18,14 +18,17 @@ export class StoreGatewayService {
 
   async create(createStoreDto: CreateStoreDto, token: string): Promise<Store> {
     try {
+      const headers: any = {};
+      if (token && token !== "undefined" && token !== "null") {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await firstValueFrom(
         this.httpService.post<Store>(
           `${this.storesServiceUrl}/stores`,
           createStoreDto,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers,
           }
         )
       );
@@ -45,14 +48,17 @@ export class StoreGatewayService {
     limit?: number
   ): Promise<PaginatedResult<Store>> {
     try {
+      const headers: any = {};
+      if (token && token !== "undefined" && token !== "null") {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await firstValueFrom(
         this.httpService.get<PaginatedResult<Store>>(
           `${this.storesServiceUrl}/stores`,
           {
             params: { page, search, limit },
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers,
           }
         )
       );
@@ -67,13 +73,16 @@ export class StoreGatewayService {
 
   async delete(id: string, token: string): Promise<Store> {
     try {
+      const headers: any = {};
+      if (token && token !== "undefined" && token !== "null") {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await firstValueFrom(
         this.httpService.delete<Store>(
           `${this.storesServiceUrl}/stores/${id}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers,
           }
         )
       );
@@ -92,14 +101,17 @@ export class StoreGatewayService {
     token: string
   ): Promise<Store> {
     try {
+      const headers: any = {};
+      if (token && token !== "undefined" && token !== "null") {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await firstValueFrom(
         this.httpService.put<Store>(
           `${this.storesServiceUrl}/stores/${id}`,
           updateStoreDto,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers,
           }
         )
       );

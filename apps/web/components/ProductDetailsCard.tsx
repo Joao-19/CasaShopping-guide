@@ -1,4 +1,5 @@
 import { IconFavorite, IconArrowLeft, cn, formatPriceTier } from "@repo/ui";
+import { toggleFavorite } from "../Services/http/product.http";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -119,7 +120,10 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
 
                         {/* Actions */}
                         <div className="flex gap-[16px] w-full">
-                            <button className="flex-1 bg-[#e95a5a] text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] hover:bg-red-500 transition-colors font-medium cursor-pointer">
+                            <button
+                                onClick={() => toggleFavorite(product.id).then(res => console.log('Favorited:', res))}
+                                className="flex-1 bg-[#e95a5a] text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] hover:bg-red-500 transition-colors font-medium cursor-pointer"
+                            >
                                 <Heart size={20} />
                                 Favoritar
                             </button>

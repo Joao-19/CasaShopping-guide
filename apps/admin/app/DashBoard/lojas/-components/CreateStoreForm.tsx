@@ -207,7 +207,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
     // Form State
     const [name, setName] = useState(initialData?.name || '');
     const [address, setAddress] = useState(initialData?.address || '');
-    const [phone, setPhone] = useState(initialData?.phone || '');
+    const [phone, setPhone] = useState(initialData?.phone ? formatPhone(initialData.phone) : '');
     const [site, setSite] = useState(initialData?.site || '');
     const [facebookLink, setFacebook] = useState(initialData?.facebookLink || '');
     const [instagramLink, setInstagram] = useState(initialData?.instagramLink || '');

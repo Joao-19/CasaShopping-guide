@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, ConflictException } from "@nestjs/common";
 import { prisma } from "@repo/database";
 import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
 
@@ -8,6 +8,19 @@ const STORAGE_SERVICE_URL =
 @Injectable()
 export class StoreService {
   async create(data: CreateStoreDto): Promise<Store> {
+    const existingStore = await prisma.store.findFirst({
+      where: {
+        name: { equals: data.name, mode: "insensitive" },
+        deletedAt: null,
+      },
+    });
+
+    if (existingStore) {
+      throw new ConflictException(
+        `A store with name "${data.name}" already exists.`
+      );
+    }
+
     const store = await prisma.store.create({
       data: {
         name: data.name,
@@ -92,6 +105,22 @@ export class StoreService {
   async update(id: string, data: Partial<CreateStoreDto>): Promise<Store> {
     const existingStore = await prisma.store.findUnique({ where: { id } });
     if (!existingStore) throw new Error("Store not found");
+
+    if (data.name) {
+      const duplicateName = await prisma.store.findFirst({
+        where: {
+          name: { equals: data.name, mode: "insensitive" },
+          id: { not: id },
+          deletedAt: null,
+        },
+      });
+
+      if (duplicateName) {
+        throw new ConflictException(
+          `A store with name "${data.name}" already exists.`
+        );
+      }
+    }
 
     const updateData: any = {
       ...data,

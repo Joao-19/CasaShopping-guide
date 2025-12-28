@@ -195,17 +195,26 @@ function CreateProductFormContent({
                                     <input
                                         type="file"
                                         accept="image/*"
+                                        multiple
                                         className="hidden"
                                         onChange={(e) => {
-                                            if (e.target.files && e.target.files[0]) {
-                                                const file = e.target.files[0];
+                                            if (e.target.files && e.target.files.length > 0) {
+                                                const newFiles = Array.from(e.target.files);
+                                                const remainingSlots = 5 - data.images.length;
+
+                                                if (remainingSlots <= 0) return;
+
+                                                const filesToAdd = newFiles.slice(0, remainingSlots);
+
+                                                const newImageStates = filesToAdd.map((file, i) => ({
+                                                    id: `temp-${Date.now()}-${i}`,
+                                                    file,
+                                                    preview: URL.createObjectURL(file)
+                                                }));
+
                                                 handlers.setImages([
                                                     ...data.images,
-                                                    {
-                                                        id: `temp-${Date.now()}`, // Consistent ID for DND
-                                                        file,
-                                                        preview: URL.createObjectURL(file)
-                                                    }
+                                                    ...newImageStates
                                                 ]);
                                             }
                                         }}

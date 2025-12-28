@@ -32,6 +32,16 @@ async function bootstrap() {
       credentials: true,
     });
 
+    app.use((req: any, res: any, next: any) => {
+      console.log(`[DEBUG] Incoming Request: ${req.method} ${req.url}`);
+      console.log(`[DEBUG] Authorization Header: ${req.headers.authorization}`);
+      const secret = process.env.JWT_SECRET;
+      console.log(
+        `[DEBUG] JWT_SECRET Status: ${secret ? "DEFINED" : "UNDEFINED"} | Is 'access-secret'? ${secret === "access-secret"}`
+      );
+      next();
+    });
+
     await app.listen(port, "0.0.0.0");
     console.log(`🚀 Stores Service (NestJS) rodando na porta ${port}`);
   } catch (error) {

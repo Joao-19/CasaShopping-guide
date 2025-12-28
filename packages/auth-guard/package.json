@@ -5,11 +5,12 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@nestjs/common": "^11.1.9",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.9",
     "@nestjs/passport": "^11.0.5",
+    "dotenv": "^16.3.1",
     "passport": "^0.7.0",
-    "passport-jwt": "^4.0.1",
-    "dotenv": "^16.3.1"
+    "passport-jwt": "^4.0.1"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

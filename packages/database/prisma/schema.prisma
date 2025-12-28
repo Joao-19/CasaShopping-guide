@@ -84,6 +84,7 @@ model Product {
   showStorePhone Boolean        @default(false)
   isFeatured     Boolean        @default(false)
   images         ProductImage[]
+  favorites      Favorite[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -102,8 +103,27 @@ model ProductImage {
   @@map("product_images")
 }
 
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("favorites")
+}
+
 enum PriceTier {
   LOW
   MEDIUM
   HIGH
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
 }

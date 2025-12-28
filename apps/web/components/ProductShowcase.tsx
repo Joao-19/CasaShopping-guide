@@ -4,10 +4,10 @@ import { ProductCardSwiper } from "./ProductCardSwiper";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getProducts, ProductWithStore } from "../Services/http/product.http";
+import { getProducts, ProductWithStore, toggleFavorite } from "../Services/http/product.http";
 import { Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { usePopup } from "@repo/ui";
-import { ProductImage } from "@repo/dtos";
+
 import { ProductDetailsCard } from "./ProductDetailsCard";
 
 import 'swiper/css';
@@ -49,8 +49,8 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         storeName: p.store?.name || "Loja",
         price: p.price,
         description: p.description, // Added description mapper if available
-        images: p.images?.sort((a: ProductImage, b: ProductImage) => a.index - b.index)
-            .map((img: ProductImage) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
+        images: p.images?.sort((a, b) => a.index - b.index)
+            .map((img) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
         showStorePhone: p.showStorePhone,
         storePhone: p.store?.phone,
     }))) || [];
@@ -127,7 +127,12 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                         storeName={product.storeName}
                                         price={product.price}
                                         images={product.images}
-                                        onWishlistClick={() => { console.log('Wishlist', product.id) }}
+                                        onWishlistClick={() => {
+                                            toggleFavorite(product.id).then((res) => {
+                                                console.log("Favorited:", res);
+                                                // TODO: Update local state or invalidate query when API supports isFavorited in list
+                                            });
+                                        }}
                                         className="cursor-[inherit]!"
                                     />
                                 </div>

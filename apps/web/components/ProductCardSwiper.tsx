@@ -18,6 +18,7 @@ interface ProductCardSwiperProps extends ComponentProps<"div"> {
     price?: PriceTier | string;
     images: string[];
     onWishlistClick?: () => void;
+    isFavorited?: boolean;
 }
 
 export function ProductCardSwiper({
@@ -27,6 +28,7 @@ export function ProductCardSwiper({
     images,
     className,
     onWishlistClick,
+    isFavorited = false,
     ...props
 }: ProductCardSwiperProps) {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -78,7 +80,7 @@ export function ProductCardSwiper({
                         }}
                         className="w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center cursor-pointer bg-white/20 hover:bg-white/30 transition-colors"
                     >
-                        <IconHeart className="w-5 h-5 text-white" />
+                        <IconHeart className={cn("w-5 h-5 transition-colors", isFavorited ? "text-red-500 fill-red-500" : "text-white")} />
                     </button>
                 </div>
             </div>

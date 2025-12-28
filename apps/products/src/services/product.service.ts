@@ -221,6 +221,41 @@ export class ProductService {
 
     return product as unknown as Product;
   }
+  async toggleFavorite(
+    userId: string,
+    productId: string
+  ): Promise<{ isFavorited: boolean }> {
+    const existingProduct = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!existingProduct) {
+      throw new ConflictException("Product not found");
+    }
+
+    const favorite = await prisma.favorite.findFirst({
+      where: {
+        userId,
+        productId,
+      },
+    });
+
+    if (favorite) {
+      await prisma.favorite.delete({
+        where: { id: favorite.id },
+      });
+      return { isFavorited: false };
+    } else {
+      await prisma.favorite.create({
+        data: {
+          userId,
+          productId,
+        },
+      });
+      return { isFavorited: true };
+    }
+  }
+
   async deleteFileFromStorage(key: string) {
     try {
       if (!key) return;

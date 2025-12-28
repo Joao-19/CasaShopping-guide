@@ -30,9 +30,9 @@ export class CreateStoreDto {
     if (!value) return null;
     return value.replace(/\D/g, "");
   })
-  @Matches(/^(\d{2}9\d{8}|\d{10})$/, {
+  @Matches(/^(\d{2}9\d{8}|\d{10}|0800\d{7})$/, {
     message:
-      "Invalid phone number (10 or 11 digits; cell phones must have 9 in the third digit).",
+      "Invalid phone number (10 or 11 digits; cell phones must have 9 in the third digit, or 0800).",
   })
   phone?: string | null;
 
@@ -78,9 +78,9 @@ export class UpdateStoreDto {
     if (!value) return null;
     return value.replace(/\D/g, "");
   })
-  @Matches(/^(\d{2}9\d{8}|\d{10})$/, {
+  @Matches(/^(\d{2}9\d{8}|\d{10}|0800\d{7})$/, {
     message:
-      "Invalid phone number (10 or 11 digits; cell phones must have 9 in the third digit).",
+      "Invalid phone number (10 or 11 digits; cell phones must have 9 in the third digit, or 0800).",
   })
   phone?: string | null;
 

@@ -26,8 +26,9 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => value.replace(/\D/g, ""))
-  @Matches(/^(\d{2}9\d{8}|\d{10})$/, {
-    message: "Telefone inválido (10 ou 11 dígitos, celular deve ter 9).",
+  @Matches(/^(\d{2}9\d{8}|\d{10}|0800\d{7})$/, {
+    message:
+      "Telefone inválido (10 ou 11 dígitos, celular deve ter 9 ou 0800).",
   })
   phone!: string;
 

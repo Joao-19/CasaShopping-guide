@@ -11,6 +11,8 @@ export interface ProductResponse {
   };
 }
 
+export type ProductWithStore = Product;
+
 export const getProducts = async (params?: {
   category?: string;
   limit?: number;
@@ -47,4 +49,16 @@ export const getProducts = async (params?: {
       totalPages: data.meta.lastPage ?? data.meta.totalPages ?? 0,
     },
   };
+};
+
+export const getProduct = async (id: string) => {
+  const { data } = await http.get<Product>(`/products/${id}`);
+  return data;
+};
+
+export const toggleFavorite = async (id: string) => {
+  const { data } = await http.post<{ isFavorited: boolean }>(
+    `/products/${id}/favorite`
+  );
+  return data;
 };
