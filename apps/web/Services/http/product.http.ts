@@ -62,3 +62,37 @@ export const toggleFavorite = async (id: string) => {
   );
   return data;
 };
+
+export const getFavorites = async (params?: {
+  page?: number;
+  limit?: number;
+}) => {
+  const { data } = await http.get<ProductResponse>("/products/favorites", {
+    params,
+  });
+
+  if (Array.isArray(data)) {
+    // Fallback if API returns just array
+    return {
+      data,
+      meta: {
+        total: data.length,
+        page: params?.page || 1,
+        limit: params?.limit || 10,
+        totalPages: 1,
+      },
+    };
+  }
+
+  // Normalize backend response (lastPage -> totalPages)
+  return {
+    ...data,
+    meta: {
+      ...data.meta,
+      totalPages:
+        (data.meta as any).lastPage ?? (data.meta as any).totalPages ?? 0,
+    },
+    // Ensure pages is present if infinite query relies on it, though react-query usually handles data.pages array from the infinite query result,
+    // but here we are returning the raw page result.
+  };
+};

@@ -78,6 +78,9 @@ export class ProductService {
       // Sort by index
       product.images.sort((a: any, b: any) => a.index - b.index);
     }
+    if (product.tags && typeof product.tags === "string") {
+      product.tags = product.tags.split(",").map((tag: string) => tag.trim());
+    }
     return product;
   }
 
@@ -280,5 +283,52 @@ export class ProductService {
     } catch (error) {
       console.error(`Error deleting file ${key} from storage:`, error);
     }
+  }
+  async findFavorites(
+    userId: string,
+    page: number = 1
+  ): Promise<PaginatedResult<Product>> {
+    const take = 15;
+    const skip = (page - 1) * take;
+
+    const where = {
+      favorites: {
+        some: {
+          userId,
+        },
+      },
+    };
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        take,
+        skip,
+        orderBy: { name: "asc" },
+        include: {
+          images: true,
+          store: {
+            select: {
+              name: true,
+              address: true,
+              phone: true,
+            },
+          },
+        },
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    return {
+      data: products.map((p) =>
+        this.transformProduct(p)
+      ) as unknown as Product[],
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / take),
+        limit: take,
+      },
+    };
   }
 }

@@ -133,4 +133,54 @@ export class ProductGatewayService {
       );
     }
   }
+
+  async toggleFavorite(
+    id: string,
+    token: string
+  ): Promise<{ isFavorited: boolean }> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<{ isFavorited: boolean }>(
+          `${this.productsServiceUrl}/products/${id}/favorite`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
+  async getFavorites(
+    token: string,
+    page: number = 1
+  ): Promise<PaginatedResult<Product>> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<PaginatedResult<Product>>(
+          `${this.productsServiceUrl}/products/favorites`,
+          {
+            params: { page },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
 }

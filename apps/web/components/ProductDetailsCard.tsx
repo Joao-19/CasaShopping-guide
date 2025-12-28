@@ -1,4 +1,5 @@
 import { IconFavorite, IconArrowLeft, cn, formatPriceTier } from "@repo/ui";
+import { useState } from "react";
 import { toggleFavorite } from "../Services/http/product.http";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
@@ -20,14 +21,25 @@ interface ProductDetailsCardProps {
         tags?: string[];
         storePhone?: string;
         showStorePhone?: boolean;
+        isFavorited?: boolean;
     };
 }
 
 export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
     const { hidePopup } = usePopup();
+    const [isFavorited, setIsFavorited] = useState(product.isFavorited || false);
+
+    const handleToggleFavorite = async () => {
+        try {
+            const res = await toggleFavorite(product.id);
+            setIsFavorited(res.isFavorited);
+        } catch (error) {
+            console.error("Failed to toggle favorite", error);
+        }
+    };
 
     return (
-        <div className="relative w-[90vw] md:w-full md:max-w-[475px] bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="relative w-full bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col h-full">
             <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 <div className="flex flex-col w-full">
                     {/* Image Section with Horizontal Swiper */}
@@ -81,7 +93,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                     {/* Info Section */}
                     <div className="flex flex-col gap-[24px] items-start w-full px-[32px] pb-[32px] pt-[20px] bg-[#f0f1f3]">
                         <div className="flex justify-between items-start w-full">
-                            <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight flex-1 pr-4">
+                            <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight flex-1 pr-4 line-clamp-2 min-h-[50px]" title={product.title}>
                                 {product.title}
                             </h2>
                             <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap">
@@ -89,7 +101,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                             </span>
                         </div>
 
-                        <p className="text-[#888] text-[12px] leading-relaxed">
+                        <p className="text-[#888] text-[12px] leading-relaxed line-clamp-3 min-h-[54px]" title={product.description}>
                             {product.description || "Esta peça une design e conforto supremo, sendo ideal para adicionar sofisticação ao seu ambiente."}
                         </p>
 
@@ -121,11 +133,14 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                         {/* Actions */}
                         <div className="flex gap-[16px] w-full">
                             <button
-                                onClick={() => toggleFavorite(product.id).then(res => console.log('Favorited:', res))}
-                                className="flex-1 bg-[#e95a5a] text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] hover:bg-red-500 transition-colors font-medium cursor-pointer"
+                                onClick={handleToggleFavorite}
+                                className={cn(
+                                    "flex-1 text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] transition-colors font-medium cursor-pointer",
+                                    isFavorited ? "bg-red-600 hover:bg-red-700" : "bg-[#e95a5a] hover:bg-red-500"
+                                )}
                             >
-                                <Heart size={20} />
-                                Favoritar
+                                <Heart size={20} fill={isFavorited ? "currentColor" : "none"} />
+                                {isFavorited ? "Favoritado" : "Favoritar"}
                             </button>
                             {product.storePhone && product.showStorePhone && (
                                 <a href={`tel:${product.storePhone}`} className="flex-1 bg-[#003ba6] text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] hover:bg-[#002a78] transition-colors font-medium cursor-pointer text-decoration-none">

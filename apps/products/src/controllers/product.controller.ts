@@ -58,12 +58,21 @@ export class ProductController {
   async delete(@Param("id") id: string): Promise<Product> {
     return this.productService.delete(id);
   }
+  @Get("favorites")
+  @UseGuards(JwtAuthGuard)
+  async findFavorites(
+    @Req() req: any,
+    @Query("page") page: string = "1"
+  ): Promise<PaginatedResult<Product>> {
+    return this.productService.findFavorites(req.user.userId, +page);
+  }
+
   @Post(":id/favorite")
   @UseGuards(JwtAuthGuard)
   async toggleFavorite(
     @Param("id") id: string,
     @Req() req: any
   ): Promise<{ isFavorited: boolean }> {
-    return this.productService.toggleFavorite(req.user.id, id);
+    return this.productService.toggleFavorite(req.user.userId, id);
   }
 }

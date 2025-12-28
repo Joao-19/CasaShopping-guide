@@ -57,4 +57,22 @@ export class ProductGatewayController {
     const token = req.cookies["access_token"];
     return this.productGatewayService.delete(id, token);
   }
+
+  @Get("favorites")
+  async findFavorites(
+    @Req() req: Request,
+    @Query("page") page: string = "1"
+  ): Promise<PaginatedResult<Product>> {
+    const token = req.cookies["access_token"];
+    return this.productGatewayService.getFavorites(token, +page);
+  }
+
+  @Post(":id/favorite")
+  async toggleFavorite(
+    @Param("id") id: string,
+    @Req() req: Request
+  ): Promise<{ isFavorited: boolean }> {
+    const token = req.cookies["access_token"];
+    return this.productGatewayService.toggleFavorite(id, token);
+  }
 }
