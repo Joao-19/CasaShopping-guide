@@ -207,7 +207,7 @@ export class StorageService {
 
     const canonicalUri = `/${this.bucketName}`;
     const canonicalQuery = "cors=";
-    const payloadHash = sha256(corsConfig);
+    const payloadHash = "UNSIGNED-PAYLOAD"; // Fix for MinIO 501 Error
 
     const canonicalHeaders = `host:${host}:${port}\nx-amz-content-sha256:${payloadHash}\nx-amz-date:${amzDate}\n`;
     const signedHeaders = "host;x-amz-content-sha256;x-amz-date";
