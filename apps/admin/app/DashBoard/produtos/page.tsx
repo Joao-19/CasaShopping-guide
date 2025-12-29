@@ -86,20 +86,19 @@ export default function ProdutosPage() {
                                 <TableHead className="w-[300px]">Nome</TableHead>
                                 <TableHead>Preço</TableHead>
                                 <TableHead>Categorias</TableHead>
-                                <TableHead>Tags</TableHead>
                                 <TableHead className="text-right">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                    <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                                         Carregando produtos...
                                     </TableCell>
                                 </TableRow>
                             ) : (products || []).length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                    <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                                         Nenhum produto encontrado.
                                     </TableCell>
                                 </TableRow>
@@ -132,9 +131,6 @@ export default function ProdutosPage() {
                                                     </span>
                                                 ))}
                                             </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="text-sm text-gray-600">{product.tags || '-'}</div>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <button
