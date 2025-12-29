@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/auth.store";
+import { useFavorites } from "../composable/useFavorites";
 
 
 export function Toolbar() {
@@ -14,6 +15,8 @@ export function Toolbar() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
+    const { favoriteIds } = useFavorites();
+    const favoritesCount = mounted ? favoriteIds.length : 0;
 
     useEffect(() => {
         setMounted(true);
@@ -150,7 +153,7 @@ export function Toolbar() {
                                 alt="CasaShopping"
                                 className="h-[42px] w-auto object-contain"
                             />
-                            <nav className="hidden md:flex items-center gap-8">
+                            <nav className="hidden lg:flex items-center gap-8">
                                 <Link
                                     href="/"
                                     className="text-white font-semibold text-[16px] hover:opacity-80 transition-opacity"
@@ -171,16 +174,23 @@ export function Toolbar() {
                                 </Link>
                             </nav>
                         </div>
-                        <div className="flex items-center gap-2 md:gap-8">
+                        <div className="flex items-center gap-2 lg:gap-8">
                             <Link href="/favoritos" className="group flex items-center gap-2 hover:opacity-80 transition-opacity relative">
                                 <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20">
-                                    <IconHeart className="w-5 h-5 text-white" />
+                                    <svg className={`w-5 h-5 ${favoritesCount > 0 ? 'text-red-500 fill-red-500' : 'text-white'}`} viewBox="0 0 20 20" fill="none">
+                                        <path d="M6.25 2.91667C3.7187 2.91667 1.66667 4.96871 1.66667 7.5C1.66667 12.0833 7.08333 16.25 10 17.2192C12.9167 16.25 18.3333 12.0833 18.3333 7.5C18.3333 4.96871 16.2813 2.91667 13.75 2.91667C12.1999 2.91667 10.8295 3.68621 10 4.86408C9.17054 3.68621 7.80012 2.91667 6.25 2.91667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
                                 </div>
-                                <span className="hidden md:block text-white font-medium text-[14px]">
+                                <span className="hidden lg:block text-white font-medium text-[14px]">
                                     Meus Favoritos
                                 </span>
+                                {favoritesCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 lg:right-auto lg:left-6 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center animate-in zoom-in duration-300">
+                                        {favoritesCount > 99 ? '99+' : favoritesCount}
+                                    </span>
+                                )}
                             </Link>
-                            <div className="hidden md:flex items-center gap-3 cursor-pointer group" onClick={toggleDrawer}>
+                            <div className="hidden lg:flex items-center gap-3 cursor-pointer group" onClick={toggleDrawer}>
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 group-hover:border-white transition-colors flex items-center justify-center bg-white/10 backdrop-blur-md">
                                     <span className="text-white font-semibold text-sm">
                                         {getInitials(safeUser?.name || "V")}
@@ -195,7 +205,7 @@ export function Toolbar() {
                                     </span>
                                 </div>
                             </div>
-                            <button className="md:hidden p-2 hover:bg-white/10 rounded-full transition-colors" onClick={toggleDrawer}>
+                            <button className="lg:hidden p-2 hover:bg-white/10 rounded-full transition-colors" onClick={toggleDrawer}>
                                 <IconMenu className="text-white w-8 h-8" />
                             </button>
                         </div>
@@ -220,7 +230,7 @@ export function Toolbar() {
                                 className="h-[42px] w-auto object-contain"
                             />
                         </Link>
-                        <nav className="hidden md:flex items-center gap-8">
+                        <nav className="hidden lg:flex items-center gap-8">
                             <Link
                                 href="/"
                                 className="text-white/80 font-medium text-[16px] hover:text-white transition-colors"
@@ -241,16 +251,23 @@ export function Toolbar() {
                             </Link>
                         </nav>
                     </div>
-                    <div className="flex items-center sm:items-end gap-2 md:gap-8">
+                    <div className="flex items-center sm:items-end gap-2 lg:gap-8">
                         <Link href="/favoritos" className="group flex items-center gap-2 hover:opacity-80 transition-opacity relative">
-                            <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20 bg-[rgba(0,59,166,0)]">
-                                <IconFavorite className="w-5 h-5 text-white" strokeWidth={1.5} />
+                            <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20">
+                                <svg className={`w-5 h-5 ${favoritesCount > 0 ? 'text-red-500 fill-red-500' : 'text-white'}`} viewBox="0 0 20 20" fill="none">
+                                    <path d="M6.25 2.91667C3.7187 2.91667 1.66667 4.96871 1.66667 7.5C1.66667 12.0833 7.08333 16.25 10 17.2192C12.9167 16.25 18.3333 12.0833 18.3333 7.5C18.3333 4.96871 16.2813 2.91667 13.75 2.91667C12.1999 2.91667 10.8295 3.68621 10 4.86408C9.17054 3.68621 7.80012 2.91667 6.25 2.91667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
                             </div>
-                            <span className="hidden md:block text-white font-medium text-[14px]">
+                            <span className="hidden lg:block text-white font-medium text-[14px]">
                                 Meus Favoritos
                             </span>
+                            {favoritesCount > 0 && (
+                                <span className="absolute -top-1 -right-1 lg:right-auto lg:left-6 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center animate-in zoom-in duration-300">
+                                    {favoritesCount > 99 ? '99+' : favoritesCount}
+                                </span>
+                            )}
                         </Link>
-                        <div className="hidden md:flex items-center gap-3 cursor-pointer group bg-[rgba(0,59,166,0)]" onClick={toggleDrawer}>
+                        <div className="hidden lg:flex items-center gap-3 cursor-pointer group bg-[rgba(0,59,166,0)]" onClick={toggleDrawer}>
                             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 group-hover:border-white transition-colors flex items-center justify-center bg-white/10 backdrop-blur-md">
                                 <span className="text-white font-semibold text-sm">
                                     {getInitials(safeUser?.name || "V")}
@@ -265,7 +282,7 @@ export function Toolbar() {
                                 </span>
                             </div>
                         </div>
-                        <button className="md:hidden p-2 hover:bg-white/10 rounded-full transition-colors" onClick={toggleDrawer}>
+                        <button className="lg:hidden p-2 hover:bg-white/10 rounded-full transition-colors" onClick={toggleDrawer}>
                             <IconMenu className="text-white w-8 h-8" />
                         </button>
                     </div>

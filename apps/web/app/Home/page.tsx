@@ -7,7 +7,7 @@ import { Footer } from "../../components/Footer";
 
 export default function HomePage() {
     return (
-        <main className="w-full h-full flex flex-col flex-1">
+        <main className="w-full h-full flex flex-col flex-1 overflow-x-hidden">
             <div className="min-h-screen bg-[#f0f1f3] font-sans antialiased">
                 <Toolbar />
 
@@ -21,13 +21,13 @@ export default function HomePage() {
 
                 <div className="flex flex-col gap-16 pb-10">
                     <ProductShowcase
-                        title="Sala de estar"
-                        category="sala-de-estar"
+                        title="Sala"
+                        category="sala"
                     />
 
                     <ProductShowcase
-                        title="Decoração"
-                        category="decoracao"
+                        title="Escritório"
+                        category="escritorio"
                     />
                 </div>
 
