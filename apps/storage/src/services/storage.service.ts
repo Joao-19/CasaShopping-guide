@@ -56,6 +56,8 @@ export class StorageService {
       "http://localhost:9000"
     );
 
+    this.logger.log(`Using MinIO Public Endpoint: ${publicEndpoint}`);
+
     // In a real scenario, we might need a separate client for internal operations.
     // For now, we assume the signing acts for the public.
     this.s3Client = this.createS3Client(publicEndpoint);
