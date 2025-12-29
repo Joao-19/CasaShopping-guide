@@ -153,9 +153,9 @@ export default function ProdutosPage() {
                     ) : (
                         <>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
-                                {products.map((product) => (
+                                {products.map((product, index) => (
                                     <div
-                                        key={product.id}
+                                        key={`${product.id}-${index}`}
                                         className="h-[320px]"
                                         onClick={() => handleProductClick(product)}
                                     >
