@@ -87,6 +87,7 @@ export class ProductService {
   async findAll(
     storeId?: string,
     search?: string,
+    category?: string,
     isFeatured?: boolean,
     page: number = 1
   ): Promise<PaginatedResult<Product>> {
@@ -100,6 +101,10 @@ export class ProductService {
 
     if (isFeatured === true || isFeatured === false) {
       where.isFeatured = isFeatured;
+    }
+
+    if (category) {
+      where.categories = { has: category };
     }
 
     if (search) {

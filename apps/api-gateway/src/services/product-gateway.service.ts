@@ -50,6 +50,7 @@ export class ProductGatewayService {
   async findAll(
     storeId?: string,
     search?: string,
+    category?: string,
     token?: string,
     page: number = 1
   ): Promise<PaginatedResult<Product>> {
@@ -58,7 +59,7 @@ export class ProductGatewayService {
         this.httpService.get<PaginatedResult<Product>>(
           `${this.productsServiceUrl}/products`,
           {
-            params: { storeId, search, page },
+            params: { storeId, search, category, page },
             headers: {
               Authorization: `Bearer ${token}`,
             },

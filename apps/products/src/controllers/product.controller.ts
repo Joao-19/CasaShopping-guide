@@ -33,12 +33,14 @@ export class ProductController {
   async findAll(
     @Query("storeId") storeId?: string,
     @Query("search") search?: string,
+    @Query("category") category?: string,
     @Query("isFeatured") isFeatured?: string,
     @Query("page") page: string = "1"
   ): Promise<PaginatedResult<Product>> {
     return this.productService.findAll(
       storeId,
       search,
+      category,
       isFeatured ? isFeatured === "true" : undefined,
       +page
     );

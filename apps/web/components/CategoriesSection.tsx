@@ -1,6 +1,6 @@
 "use client";
 
-import { MediaCard } from "@repo/ui";
+import { MediaCard, usePopup } from "@repo/ui";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -8,6 +8,7 @@ import { useId } from "react";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { ProductListingDialog } from "./ProductListingDialog";
 
 const categories = [
     { id: 'sala', name: 'Sala', image: 'categories/room.avif' },
@@ -20,6 +21,11 @@ const categories = [
 
 export function CategoriesSection() {
     const uniqueId = useId().replace(/:/g, '');
+    const { showPopup } = usePopup();
+
+    const handleCategoryClick = (categoryId: string) => {
+        showPopup(<ProductListingDialog initialCategory={categoryId} />);
+    };
 
     return (
         <section>
@@ -48,6 +54,7 @@ export function CategoriesSection() {
                                     <MediaCard
                                         imageSrc={category.image}
                                         className="flex flex-col gap-[10px] w-full aspect-[231/306] items-center justify-center p-4 cursor-pointer transition-transform duration-300 hover:scale-[1.02]"
+                                        onClick={() => handleCategoryClick(category.id)}
                                     >
                                         <div className="flex flex-col items-center justify-center h-full">
                                             <p className="font-bold text-[20px] md:text-[24px] text-white font-sans drop-shadow-md text-center">

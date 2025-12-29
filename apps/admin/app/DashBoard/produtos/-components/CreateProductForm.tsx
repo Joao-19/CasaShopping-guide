@@ -24,6 +24,7 @@ import {
     rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableImage } from './SortableImage';
+import { CategoryMultiSelect } from './CategoryMultiSelect';
 
 interface CreateProductFormProps {
     onClose: () => void;
@@ -42,7 +43,7 @@ interface CreateProductFormContentProps {
         name: string;
         description: string;
         price: PriceTier;
-        categories: string;
+        categories: string[];
         tags: string;
         storeId: string;
         images: ImageState[];
@@ -53,7 +54,7 @@ interface CreateProductFormContentProps {
         setName: (v: string) => void;
         setDescription: (v: string) => void;
         setPrice: (v: PriceTier) => void;
-        setCategories: (v: string) => void;
+        setCategories: (v: string[]) => void;
         setTags: (v: string) => void;
         setStoreId: (v: string) => void;
         setImages: (v: ImageState[]) => void;
@@ -87,7 +88,7 @@ function CreateProductFormContent({
     const descriptionField = useFormField(data.description, [
         validator.rules.required,
     ]);
-    const categoriesField = useFormField(data.categories, [
+    const categoriesField = useFormField(data.categories.length > 0 ? 'valid' : '', [
         validator.rules.required,
     ]);
     const storeIfField = useFormField(data.storeId, [validator.rules.required]);
@@ -267,17 +268,17 @@ function CreateProductFormContent({
                     </select>
                 </div>
 
-                <BaseInput
-                    id="categories"
-                    label="Categorias (separadas por vírgula)"
-                    type="text"
-                    placeholder="Ex: Sala, Móveis"
-                    value={data.categories}
-                    onChange={(e) => handlers.setCategories(e.target.value)}
-                    error={categoriesField.error}
-                    onBlur={categoriesField.onBlur}
-                    required
-                />
+                <div className="mb-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Categorias <span className="text-red-500">*</span>
+                    </label>
+                    <CategoryMultiSelect
+                        value={data.categories}
+                        onChange={handlers.setCategories}
+                        error={categoriesField.error}
+                        onBlur={categoriesField.onBlur}
+                    />
+                </div>
             </div>
 
             {/* Tags */}
@@ -349,8 +350,8 @@ export function CreateProductForm({
     const [price, setPrice] = useState<PriceTier>(
         initialData?.price || PriceTier.MEDIUM
     );
-    const [categories, setCategories] = useState(
-        initialData?.categories.join(", ") || ""
+    const [categories, setCategories] = useState<string[]>(
+        initialData?.categories || []
     );
     const [tags, setTags] = useState(initialData?.tags || "");
     const [storeId, setStoreId] = useState(initialData?.storeId || "");
@@ -416,11 +417,8 @@ export function CreateProductForm({
 
 
 
-        // Prepare data
-        const categoryList = categories
-            .split(",")
-            .map((c) => c.trim())
-            .filter((c) => c.length > 0);
+        // Prepare data - categories is already an array
+        const categoryList = categories;
 
         const submissionData: CreateProductDto = {
             name,
