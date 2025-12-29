@@ -68,6 +68,10 @@ export function HighlightsSection() {
                 .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
             showStorePhone: product.showStorePhone,
             storePhone: product.store?.phone,
+            storeSite: product.store?.site,
+            storeInstagram: product.store?.instagramLink,
+            storeFacebook: product.store?.facebookLink,
+            storeYoutube: product.store?.youtubeLink,
         };
         showPopup(<ProductDetailsCard product={productDetails} />);
     };
