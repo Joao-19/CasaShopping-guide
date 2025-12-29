@@ -24,8 +24,6 @@ export class StorageService {
       endpoint: endpoint,
       forcePathStyle: true,
       maxAttempts: 3,
-      requestChecksumCalculation: "WHEN_REQUIRED",
-      responseChecksumValidation: "WHEN_REQUIRED",
       credentials: {
         accessKeyId: this.configService.getOrThrow<string>("MINIO_ROOT_USER"),
         secretAccessKey: this.configService.getOrThrow<string>(
