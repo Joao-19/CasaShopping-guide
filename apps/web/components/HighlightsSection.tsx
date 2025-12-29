@@ -113,15 +113,30 @@ export function HighlightsSection() {
             >
                 <div className="flex touch-pan-y will-change-transform">
                     {slidesData.map((product, index) => {
-                        const image = product.images?.[0]?.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost');
+                        const mediaPath = product.images?.[0]?.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost');
+
+                        // Detect if the media is a video
+                        const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+                        const isVideo = mediaPath && videoExtensions.some(ext => mediaPath.toLowerCase().includes(ext));
 
                         return (
                             <div className={slideClass} key={`${product.id}-${index}`}>
                                 <div onClick={() => handleProductClick(product)} className="w-full aspect-[231/306] relative rounded-[16px] overflow-hidden cursor-pointer group shadow-lg">
                                     <MediaCard
-                                        imageSrc={image || '/placeholder.png'}
+                                        imageSrc={isVideo ? undefined : (mediaPath || '/placeholder.png')}
+                                        videoSrc={isVideo ? mediaPath : undefined}
                                         className="w-full h-full"
                                     >
+                                        {/* Video indicator badge */}
+                                        {isVideo && (
+                                            <div className="absolute top-4 left-4 bg-black/60 text-white text-[10px] px-2 py-1 rounded flex items-center gap-1 z-20">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                                </svg>
+                                                Vídeo
+                                            </div>
+                                        )}
+
                                         {/* Gradient Overlay */}
                                         <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-80 transition-opacity" />
 

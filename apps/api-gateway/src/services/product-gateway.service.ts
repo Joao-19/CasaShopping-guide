@@ -51,6 +51,7 @@ export class ProductGatewayService {
     storeId?: string,
     search?: string,
     category?: string,
+    isFeatured?: string,
     token?: string,
     page: number = 1
   ): Promise<PaginatedResult<Product>> {
@@ -59,7 +60,7 @@ export class ProductGatewayService {
         this.httpService.get<PaginatedResult<Product>>(
           `${this.productsServiceUrl}/products`,
           {
-            params: { storeId, search, category, page },
+            params: { storeId, search, category, page, isFeatured },
             headers: {
               Authorization: `Bearer ${token}`,
             },

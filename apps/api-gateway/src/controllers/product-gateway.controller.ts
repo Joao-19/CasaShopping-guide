@@ -37,13 +37,15 @@ export class ProductGatewayController {
     @Query("storeId") storeId?: string,
     @Query("search") search?: string,
     @Query("category") category?: string,
-    @Query("page") page: string = "1"
+    @Query("page") page: string = "1",
+    @Query("isFeatured") isFeatured?: string
   ): Promise<PaginatedResult<Product>> {
     const token = req.cookies["access_token"];
     return this.productGatewayService.findAll(
       storeId,
       search,
       category,
+      isFeatured,
       token,
       +page
     );

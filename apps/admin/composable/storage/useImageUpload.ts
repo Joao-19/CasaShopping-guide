@@ -17,36 +17,40 @@ export function useImageUpload() {
       // Note: If token is HttpOnly, this will be undefined.
       // We proceed anyway and rely on 'withCredentials: true' for the browser to send cookies.
 
-      // 0. Compress Image
-      const options = {
-        maxSizeMB: 1, // Max 1MB
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-        fileType: "image/webp",
-      };
+      let finalFile = file;
 
-      let compressedFile = file;
-      try {
-        compressedFile = await imageCompression(file, options);
-        // Rename to .webp if converted
-        if (
-          compressedFile.type === "image/webp" &&
-          !file.name.endsWith(".webp")
-        ) {
-          const newName =
-            file.name.substring(0, file.name.lastIndexOf(".")) + ".webp";
-          compressedFile = new File([compressedFile], newName, {
-            type: "image/webp",
-          });
+      // Only compress images, skip compression for videos
+      const isVideo = file.type.startsWith("video/");
+
+      if (!isVideo) {
+        // Compress Image
+        const options = {
+          maxSizeMB: 1, // Max 1MB
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: "image/webp",
+        };
+
+        try {
+          finalFile = await imageCompression(file, options);
+          // Rename to .webp if converted
+          if (finalFile.type === "image/webp" && !file.name.endsWith(".webp")) {
+            const newName =
+              file.name.substring(0, file.name.lastIndexOf(".")) + ".webp";
+            finalFile = new File([finalFile], newName, {
+              type: "image/webp",
+            });
+          }
+        } catch (error) {
+          console.warn("Compression failed, using original file", error);
+          finalFile = file;
         }
-      } catch (error) {
-        console.warn("Compression failed, using original file", error);
       }
 
       // Sanitize filename (remove spaces and special chars)
       const sanitizeFilename = (name: string) =>
         name.replace(/[^a-zA-Z0-9.-]/g, "-");
-      const finalFilename = sanitizeFilename(compressedFile.name);
+      const finalFilename = sanitizeFilename(finalFile.name);
 
       // 1. Get Presigned URL
       const { data } = await axios.post(
@@ -54,8 +58,8 @@ export function useImageUpload() {
         {
           storeId,
           filename: finalFilename,
-          contentType: compressedFile.type,
-          contentLength: compressedFile.size,
+          contentType: finalFile.type,
+          contentLength: finalFile.size,
         },
         {
           withCredentials: true, // IMPORTANT: Send HttpOnly cookies
@@ -70,9 +74,9 @@ export function useImageUpload() {
       // and to ensure clean PUT request.
       const uploadResponse = await fetch(url, {
         method: "PUT",
-        body: compressedFile,
+        body: finalFile,
         headers: {
-          "Content-Type": compressedFile.type,
+          "Content-Type": finalFile.type,
         },
       });
 

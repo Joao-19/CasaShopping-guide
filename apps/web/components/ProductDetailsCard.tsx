@@ -72,15 +72,41 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                     className="w-full h-full"
                                     style={{ '--swiper-pagination-color': '#fff', '--swiper-pagination-bullet-inactive-color': '#fff', '--swiper-pagination-bullet-inactive-opacity': '0.5' } as any}
                                 >
-                                    {product.images.map((img, idx) => (
-                                        <SwiperSlide key={idx} className="w-full h-full">
-                                            <img
-                                                src={img}
-                                                alt={`${product.title} - ${idx + 1}`}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </SwiperSlide>
-                                    ))}
+                                    {product.images.map((img, idx) => {
+                                        const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+                                        const isVideo = videoExtensions.some(ext => img.toLowerCase().includes(ext));
+
+                                        return (
+                                            <SwiperSlide key={idx} className="w-full h-full">
+                                                {isVideo ? (
+                                                    <>
+                                                        <video
+                                                            src={img}
+                                                            className="w-full h-full object-cover"
+                                                            muted
+                                                            loop
+                                                            autoPlay
+                                                            playsInline
+                                                            controls
+                                                        />
+                                                        {/* Video indicator */}
+                                                        <div className="absolute top-3 left-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded flex items-center gap-1 z-10">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                                                <polygon points="5 3 19 12 5 21 5 3" />
+                                                            </svg>
+                                                            Vídeo
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <img
+                                                        src={img}
+                                                        alt={`${product.title} - ${idx + 1}`}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                )}
+                                            </SwiperSlide>
+                                        );
+                                    })}
                                     {product.images.length === 0 && (
                                         <SwiperSlide className="w-full h-full flex items-center justify-center bg-gray-200">
                                             <span className="text-gray-400 text-sm">Sem imagem</span>

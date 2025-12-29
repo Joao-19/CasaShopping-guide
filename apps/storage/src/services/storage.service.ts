@@ -291,15 +291,25 @@ export class StorageService {
     contentType: string,
     contentLength: number
   ) {
-    // Validate file size
-    const maxUploadSizeMb = this.configService.get<number>(
-      "MAX_UPLOAD_SIZE_MB",
+    // Validate file size based on content type
+    const isVideo = contentType.startsWith("video/");
+
+    const maxImageSizeMb = this.configService.get<number>(
+      "MAX_IMAGE_SIZE_MB",
       5
-    ); // Default 5MB
-    const maxSizeBytes = maxUploadSizeMb * 1024 * 1024;
+    ); // Default 5MB for images
+
+    const maxVideoSizeMb = this.configService.get<number>(
+      "MAX_VIDEO_SIZE_MB",
+      50
+    ); // Default 50MB for videos
+
+    const maxSizeMb = isVideo ? maxVideoSizeMb : maxImageSizeMb;
+    const maxSizeBytes = maxSizeMb * 1024 * 1024;
 
     if (contentLength > maxSizeBytes) {
-      throw new Error(`File size exceeds limit of ${maxUploadSizeMb}MB`);
+      const fileType = isVideo ? "Vídeo" : "Imagem";
+      throw new Error(`${fileType} excede o limite de ${maxSizeMb}MB`);
     }
 
     // FORCE PATH STRUCTURE: stores/{storeId}/{filename}

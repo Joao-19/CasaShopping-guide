@@ -7,9 +7,19 @@ interface SortableImageProps {
     preview: string;
     index: number;
     onRemove: () => void;
+    isVideo?: boolean;
 }
 
-export function SortableImage({ id, preview, index, onRemove }: SortableImageProps) {
+// Helper to detect if a URL is a video
+const isVideoUrl = (url: string): boolean => {
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+    const lowerUrl = url.toLowerCase();
+    // Check for video extensions or data:video MIME type
+    return videoExtensions.some(ext => lowerUrl.includes(ext)) ||
+        lowerUrl.startsWith('data:video/');
+};
+
+export function SortableImage({ id, preview, index, onRemove, isVideo = false }: SortableImageProps) {
     const {
         attributes,
         listeners,
@@ -26,6 +36,9 @@ export function SortableImage({ id, preview, index, onRemove }: SortableImagePro
         opacity: isDragging ? 0.5 : 1,
     };
 
+    // Use the isVideo prop passed from parent, or detect from URL for remote files
+    const showAsVideo = isVideo || isVideoUrl(preview);
+
     return (
         <div
             ref={setNodeRef}
@@ -34,12 +47,32 @@ export function SortableImage({ id, preview, index, onRemove }: SortableImagePro
             {...listeners}
             className="relative aspect-square rounded-lg border border-gray-200 overflow-hidden group bg-gray-50 cursor-grab active:cursor-grabbing hover:border-[#1A2B3C] transition-colors"
         >
-            <img
-                src={preview}
-                alt={`Produto ${index + 1}`}
-                className="object-cover w-full h-full pointer-events-none" // prevent img drag interfering with dnd
-            />
-            {/* Remove Button - needs to stop propagation to prevent dnd start */}
+            {showAsVideo ? (
+                <video
+                    src={preview}
+                    className="object-cover w-full h-full pointer-events-none"
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                />
+            ) : (
+                <img
+                    src={preview}
+                    alt={`Produto ${index + 1}`}
+                    className="object-cover w-full h-full pointer-events-none"
+                />
+            )}
+            {/* Video indicator badge */}
+            {showAsVideo && (
+                <div className="absolute top-1 left-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    Vídeo
+                </div>
+            )}
+            {/* Remove Button */}
             <button
                 type="button"
                 onPointerDown={(e) => e.stopPropagation()}
@@ -58,3 +91,4 @@ export function SortableImage({ id, preview, index, onRemove }: SortableImagePro
         </div>
     );
 }
+

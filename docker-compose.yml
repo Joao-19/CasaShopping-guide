@@ -124,6 +124,8 @@ services:
       - MINIO_ROOT_PASSWORD=${STORAGE_PASSWORD:-password123}
       - MINIO_BUCKET_NAME=casashopping
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - MAX_IMAGE_SIZE_MB=${MAX_IMAGE_SIZE_MB:-5}
+      - MAX_VIDEO_SIZE_MB=${MAX_VIDEO_SIZE_MB:-50}
     depends_on:
       - storage
     networks:

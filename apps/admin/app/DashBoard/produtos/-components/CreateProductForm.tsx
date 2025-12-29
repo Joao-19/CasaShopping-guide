@@ -182,6 +182,7 @@ function CreateProductFormContent({
                                     id={img.id!}
                                     preview={img.preview}
                                     index={index}
+                                    isVideo={img.file?.type.startsWith('video/') || false}
                                     onRemove={() => {
                                         const newImages = [...data.images];
                                         newImages.splice(index, 1);
@@ -195,7 +196,7 @@ function CreateProductFormContent({
                                 <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors">
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/*,video/mp4,video/webm,video/quicktime"
                                         multiple
                                         className="hidden"
                                         onChange={(e) => {
