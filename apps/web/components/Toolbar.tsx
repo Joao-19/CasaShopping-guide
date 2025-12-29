@@ -47,6 +47,15 @@ export function Toolbar() {
 
     const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
 
+    // Inline icon for products (box icon)
+    const ProductIcon = ({ className }: { className?: string }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+            <path d="m3.3 7 8.7 5 8.7-5" />
+            <path d="M12 22V12" />
+        </svg>
+    );
+
     const UserDrawerContent = () => (
         <div className="flex flex-col h-full bg-[#f0f1f3] p-6 justify-between">
             <div className="flex flex-col gap-8">
@@ -90,6 +99,15 @@ export function Toolbar() {
                             <div className="flex items-center gap-4 text-[#151515]">
                                 <IconStore className="size-[20px]" />
                                 <span className="text-base font-normal font-sans">Lojas</span>
+                            </div>
+                            <IconArrowRight className="size-6 group-hover:translate-x-1 transition-transform" stroke="#151515" />
+                        </button>
+                    </Link>
+                    <Link href="/produtos" onClick={() => setIsDrawerOpen(false)}>
+                        <button className="bg-[#e9ebef] w-full p-4 rounded-lg flex items-center justify-between group hover:bg-gray-200 transition-colors">
+                            <div className="flex items-center gap-4 text-[#151515]">
+                                <ProductIcon className="size-[20px]" />
+                                <span className="text-base font-normal font-sans">Produtos</span>
                             </div>
                             <IconArrowRight className="size-6 group-hover:translate-x-1 transition-transform" stroke="#151515" />
                         </button>
@@ -143,7 +161,13 @@ export function Toolbar() {
                                     href="/stores"
                                     className="text-white font-medium text-[16px] hover:opacity-80 transition-opacity"
                                 >
-                                    Loja
+                                    Lojas
+                                </Link>
+                                <Link
+                                    href="/produtos"
+                                    className="text-white font-medium text-[16px] hover:opacity-80 transition-opacity"
+                                >
+                                    Produtos
                                 </Link>
                             </nav>
                         </div>
@@ -205,9 +229,15 @@ export function Toolbar() {
                             </Link>
                             <Link
                                 href="/stores"
-                                className="text-white font-semibold text-[16px] transition-colors border-b-2 border-white pb-1"
+                                className={`text-white/80 font-medium text-[16px] hover:text-white transition-colors ${pathname === '/stores' ? 'font-semibold text-white border-b-2 border-white pb-1' : ''}`}
                             >
                                 Lojas
+                            </Link>
+                            <Link
+                                href="/produtos"
+                                className={`text-white/80 font-medium text-[16px] hover:text-white transition-colors ${pathname === '/produtos' ? 'font-semibold text-white border-b-2 border-white pb-1' : ''}`}
+                            >
+                                Produtos
                             </Link>
                         </nav>
                     </div>

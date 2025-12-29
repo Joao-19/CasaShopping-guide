@@ -281,7 +281,7 @@ function CreateProductFormContent({
                 </div>
             </div>
 
-            {/* Tags */}
+            {/* Tags - Disabled for now
             <BaseInput
                 id="tags"
                 label="Tags (opcional)"
@@ -290,6 +290,7 @@ function CreateProductFormContent({
                 value={data.tags}
                 onChange={(e) => handlers.setTags(e.target.value)}
             />
+            */}
 
             {/* Checkboxes */}
             <div className="flex flex-col gap-3 mt-4">
