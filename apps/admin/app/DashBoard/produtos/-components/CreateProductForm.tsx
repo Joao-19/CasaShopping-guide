@@ -25,6 +25,7 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableImage } from './SortableImage';
 import { CategoryMultiSelect } from './CategoryMultiSelect';
+import { StoreAutocomplete } from './StoreAutocomplete';
 
 interface CreateProductFormProps {
     onClose: () => void;
@@ -116,34 +117,19 @@ function CreateProductFormContent({
             {/* Store Selection */}
             <div className="mb-4">
                 <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Loja
+                    Loja <span className="text-red-500">*</span>
                 </Label>
                 {isEditing ? (
                     <div className="w-full px-4 py-2 border border-gray-100 bg-gray-50 rounded-lg text-sm text-gray-700 font-medium">
                         {stores.find(s => s.id === data.storeId)?.name || 'Loja não encontrada'}
                     </div>
                 ) : (
-                    <select
+                    <StoreAutocomplete
                         value={data.storeId}
-                        onChange={(e) => handlers.setStoreId(e.target.value)}
+                        onChange={handlers.setStoreId}
+                        error={storeIfField.error}
                         onBlur={storeIfField.onBlur}
-                        className={`w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-[#1A2B3C] bg-white ${storeIfField.error ? "border-red-500" : "border-gray-200"
-                            }`}
-                    >
-                        <option value="" disabled>
-                            Selecione uma loja
-                        </option>
-                        {stores.map((store) => (
-                            <option key={store.id} value={store.id}>
-                                {store.name}
-                            </option>
-                        ))}
-                    </select>
-                )}
-                {storeIfField.error && (
-                    <span className="text-xs text-red-500 mt-1">
-                        {storeIfField.error}
-                    </span>
+                    />
                 )}
             </div>
 
