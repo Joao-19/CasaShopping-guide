@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Search } from "lucide-react";
 import { Toolbar } from "../../components/Toolbar";
 import { Footer } from "../../components/Footer";
@@ -22,7 +22,8 @@ const categories = [
     { id: 'escritorio', name: 'Escritório' },
 ];
 
-export default function ProdutosPage() {
+// Inner component that uses useSearchParams
+function ProdutosContent() {
     const { showPopup } = usePopup();
     const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
     const { ref, inView } = useInView();
@@ -104,90 +105,111 @@ export default function ProdutosPage() {
     };
 
     return (
-        <main className="w-full h-full flex flex-col flex-1 bg-[#f0f1f3]">
-            <Toolbar />
-
-            <div className="flex-1 w-full min-h-screen">
-                <div className="max-w-7xl mx-auto px-6 py-8 w-full">
-                    {/* Header */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-                        <h1 className="text-3xl font-bold text-[#1A2B3C] font-sans">
-                            Nossos Produtos
-                        </h1>
-                        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                            {/* Search */}
-                            <div className="relative w-full sm:w-80">
-                                <input
-                                    type="text"
-                                    placeholder="Buscar por produto..."
-                                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:border-[#003BA6] focus:ring-1 focus:ring-[#003BA6] transition-all text-[#1A2B3C]"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-                            </div>
-                            {/* Category Filter */}
-                            <select
-                                value={selectedCategory}
-                                onChange={(e) => handleCategoryChange(e.target.value)}
-                                className="w-full sm:w-56 px-4 py-3 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:border-[#003BA6] focus:ring-1 focus:ring-[#003BA6] transition-all text-[#1A2B3C] bg-white cursor-pointer"
-                            >
-                                {categories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                ))}
-                            </select>
+        <div className="flex-1 w-full min-h-screen">
+            <div className="max-w-7xl mx-auto px-6 py-8 w-full">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+                    <h1 className="text-3xl font-bold text-[#1A2B3C] font-sans">
+                        Nossos Produtos
+                    </h1>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                        {/* Search */}
+                        <div className="relative w-full sm:w-80">
+                            <input
+                                type="text"
+                                placeholder="Buscar por produto..."
+                                className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:border-[#003BA6] focus:ring-1 focus:ring-[#003BA6] transition-all text-[#1A2B3C]"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
                         </div>
+                        {/* Category Filter */}
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => handleCategoryChange(e.target.value)}
+                            className="w-full sm:w-56 px-4 py-3 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:border-[#003BA6] focus:ring-1 focus:ring-[#003BA6] transition-all text-[#1A2B3C] bg-white cursor-pointer"
+                        >
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
                     </div>
+                </div>
 
-                    {/* Content */}
-                    {isLoading ? (
-                        <div className="flex justify-center items-center min-h-[400px]">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#003BA6]"></div>
+                {/* Content */}
+                {isLoading ? (
+                    <div className="flex justify-center items-center min-h-[400px]">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#003BA6]"></div>
+                    </div>
+                ) : products.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+                        <p className="text-lg text-gray-500 font-medium font-sans">
+                            Nenhum produto encontrado.
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
+                            {products.map((product, index) => (
+                                <div
+                                    key={`${product.id}-${index}`}
+                                    className="h-[320px]"
+                                    onClick={() => handleProductClick(product)}
+                                >
+                                    <ProductCardSwiper
+                                        title={product.title}
+                                        storeName={product.storeName}
+                                        price={product.price}
+                                        images={product.images}
+                                        isFavorited={isFavorited(product.id)}
+                                        onWishlistClick={() => toggleFav(product.id)}
+                                        className="h-full"
+                                    />
+                                </div>
+                            ))}
                         </div>
-                    ) : products.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-                            <p className="text-lg text-gray-500 font-medium font-sans">
-                                Nenhum produto encontrado.
-                            </p>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
-                                {products.map((product, index) => (
-                                    <div
-                                        key={`${product.id}-${index}`}
-                                        className="h-[320px]"
-                                        onClick={() => handleProductClick(product)}
-                                    >
-                                        <ProductCardSwiper
-                                            title={product.title}
-                                            storeName={product.storeName}
-                                            price={product.price}
-                                            images={product.images}
-                                            isFavorited={isFavorited(product.id)}
-                                            onWishlistClick={() => toggleFav(product.id)}
-                                            className="h-full"
-                                        />
-                                    </div>
-                                ))}
+
+                        {/* Load More Trigger */}
+                        {hasNextPage && (
+                            <div ref={ref} className="w-full flex justify-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#003BA6]"></div>
                             </div>
+                        )}
 
-                            {/* Load More Trigger */}
-                            {hasNextPage && (
-                                <div ref={ref} className="w-full flex justify-center py-8">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#003BA6]"></div>
-                                </div>
-                            )}
+                        {!hasNextPage && products.length > 0 && (
+                            <div className="w-full text-center py-8 text-gray-400">
+                                Você chegou ao fim da lista
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
 
-                            {!hasNextPage && products.length > 0 && (
-                                <div className="w-full text-center py-8 text-gray-400">
-                                    Você chegou ao fim da lista
-                                </div>
-                            )}
-                        </>
-                    )}
+// Loading fallback for Suspense
+function ProdutosLoading() {
+    return (
+        <div className="flex-1 w-full min-h-screen">
+            <div className="max-w-7xl mx-auto px-6 py-8 w-full">
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#003BA6]"></div>
                 </div>
             </div>
+        </div>
+    );
+}
+
+// Main page component with Suspense wrapper
+export default function ProdutosPage() {
+    return (
+        <main className="w-full h-full flex flex-col flex-1 bg-[#f0f1f3]">
+            <Toolbar />
+            <Suspense fallback={<ProdutosLoading />}>
+                <ProdutosContent />
+            </Suspense>
             <Footer />
         </main>
     );
