@@ -41,7 +41,7 @@ export function CategoriesSection() {
                                 nextEl: `.next-cat-${uniqueId}`,
                             }}
                             modules={[Navigation]}
-                            className="w-full pb-4! pl-4 md:pl-0"
+                            className="w-full py-4! pl-4 md:pl-0"
                         >
                             {categories.map((category) => (
                                 <SwiperSlide key={category.id} className="w-[55%] sm:w-[30%] lg:w-[30%] max-w-[300px]">
