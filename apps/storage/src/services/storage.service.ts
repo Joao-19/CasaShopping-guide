@@ -5,11 +5,12 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   CreateBucketCommand,
-  PutBucketCorsCommand,
-  PutBucketPolicyCommand,
   HeadBucketCommand,
+  PutBucketPolicyCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import * as http from "http";
+import * as crypto from "crypto";
 
 @Injectable()
 export class StorageService {
@@ -64,9 +65,6 @@ export class StorageService {
   private async ensureBucket() {
     try {
       this.logger.log(`Checking if bucket '${this.bucketName}' exists...`);
-      // We need to use an internal endpoint client here probably, but let's try the configured one.
-      // If configured one is public (localhost), and we are in docker, it breaks on init.
-      // So we should instantiate an INTERNAL client for init operations if running in docker.
 
       const internalEndpoint = this.configService.get<string>(
         "MINIO_INTERNAL_ENDPOINT",
@@ -81,7 +79,6 @@ export class StorageService {
           new HeadBucketCommand({ Bucket: this.bucketName })
         );
       } catch (error: any) {
-        // Retry with localhost if network error
         if (
           error.code === "ENOTFOUND" ||
           error.name === "TimeoutError" ||
@@ -103,48 +100,34 @@ export class StorageService {
               new HeadBucketCommand({ Bucket: this.bucketName })
             );
           } catch (retryError) {
-            this.logger.log(
-              `Bucket might not exist or localhost also failed. Proceeding to creation...`
-            );
+            // Ignore
           }
         } else {
-          this.logger.log(`Bucket '${this.bucketName}' not found. Creating...`);
+          // Bucket likely missing
         }
 
-        // Attempt creation using the (potentially updated) client
-        await internalClient.send(
-          new CreateBucketCommand({ Bucket: this.bucketName })
-        );
-        this.logger.log(`Bucket '${this.bucketName}' created/verified.`);
+        try {
+          await internalClient.send(
+            new CreateBucketCommand({ Bucket: this.bucketName })
+          );
+          this.logger.log(`Bucket '${this.bucketName}' created/verified.`);
+        } catch (e) {
+          // Ignore if exists
+        }
       }
 
-      // Configure CORS
-      this.logger.log(`Configuring CORS for bucket '${this.bucketName}'...`);
+      // Configure CORS MANUAL HTTP REQUEST to avoid SDK Checksum issues
+      this.logger.log(
+        `Configuring CORS for bucket '${this.bucketName}' via raw HTTP...`
+      );
       try {
-        await internalClient.send(
-          new PutBucketCorsCommand({
-            Bucket: this.bucketName,
-            CORSConfiguration: {
-              CORSRules: [
-                {
-                  AllowedHeaders: ["*"],
-                  AllowedMethods: ["PUT", "POST", "DELETE", "GET"],
-                  AllowedOrigins: ["*"],
-                  ExposeHeaders: ["ETag"],
-                  MaxAgeSeconds: 3000,
-                },
-              ],
-            },
-          })
-        );
+        await this.configureCorsManual(internalEndpoint);
+        this.logger.log(`CORS configured successfully.`);
       } catch (corsError) {
         this.logger.warn(
-          `Failed to configure CORS: ${(corsError as Error).message}`
+          `Failed to configure CORS manually: ${(corsError as Error).message}`
         );
-        // Continue - do not block service start
       }
-      this.logger.log(`CORS configured.`);
-      this.logger.log(`CORS configured.`);
 
       // Configure Bucket Policy (Public Read)
       this.logger.log(
@@ -177,21 +160,125 @@ export class StorageService {
         );
       }
     } catch (error) {
-      // Special handling for NotImplemented (AWS SDK v3 vs MinIO checksum issue)
-      if (
-        (error as any).name === "NotImplemented" ||
-        (error as any).Code === "NotImplemented"
-      ) {
-        this.logger.warn(
-          `CORS Configuration failed with NotImplemented. This is likely due to MinIO/SDK checksum mismatch. Continuing anyway (Manual CORS config might be needed).`
-        );
-      } else {
-        this.logger.error(
-          `Failed to ensure bucket/cors: ${(error as Error).message}`
-        );
-        // We decided to NOT throw, so the service starts.
-      }
+      this.logger.error(
+        `Failed to ensure bucket/cors: ${(error as Error).message}`
+      );
     }
+  }
+
+  // Manual CORS implementation to bypass SDK v3 checksum issues with MinIO
+  private async configureCorsManual(endpointUrl: string) {
+    const url = new URL(endpointUrl);
+    const host = url.hostname;
+    const port = parseInt(url.port) || 80;
+    const accessKey = this.configService.getOrThrow<string>("MINIO_ROOT_USER");
+    const secretKey = this.configService.getOrThrow<string>(
+      "MINIO_ROOT_PASSWORD"
+    );
+
+    const corsConfig = `
+<CORSConfiguration>
+  <CORSRule>
+    <AllowedHeader>*</AllowedHeader>
+    <AllowedMethod>GET</AllowedMethod>
+    <AllowedMethod>PUT</AllowedMethod>
+    <AllowedMethod>POST</AllowedMethod>
+    <AllowedMethod>DELETE</AllowedMethod>
+    <AllowedOrigin>*</AllowedOrigin>
+    <ExposeHeader>ETag</ExposeHeader>
+  </CORSRule>
+</CORSConfiguration>`.trim();
+
+    const method = "PUT";
+    const service = "s3";
+    const region = "us-east-1";
+
+    // Crypto helpers
+    const sha256 = (str: string) =>
+      crypto.createHash("sha256").update(str).digest("hex");
+    const hmac = (key: string | Buffer, str: string) =>
+      crypto.createHmac("sha256", key).update(str).digest();
+    const hmacHex = (key: string | Buffer, str: string) =>
+      crypto.createHmac("sha256", key).update(str).digest("hex");
+
+    const now = new Date();
+    const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "");
+    const dateStamp = amzDate.substr(0, 8);
+
+    const canonicalUri = `/${this.bucketName}`;
+    const canonicalQuery = "cors=";
+    const payloadHash = sha256(corsConfig);
+
+    const canonicalHeaders = `host:${host}:${port}\nx-amz-content-sha256:${payloadHash}\nx-amz-date:${amzDate}\n`;
+    const signedHeaders = "host;x-amz-content-sha256;x-amz-date";
+
+    const canonicalRequest = [
+      method,
+      canonicalUri,
+      canonicalQuery,
+      canonicalHeaders,
+      signedHeaders,
+      payloadHash,
+    ].join("\n");
+
+    const algorithm = "AWS4-HMAC-SHA256";
+    const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
+    const stringToSign = [
+      algorithm,
+      amzDate,
+      credentialScope,
+      sha256(canonicalRequest),
+    ].join("\n");
+
+    const kDate = hmac(`AWS4${secretKey}`, dateStamp);
+    const kRegion = hmac(kDate, region);
+    const kService = hmac(kRegion, service);
+    const kSigning = hmac(kService, "aws4_request");
+    const signature = hmacHex(kSigning, stringToSign);
+
+    const authorizationHeader = `${algorithm} Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
+    return new Promise<void>((resolve, reject) => {
+      const req = http.request(
+        {
+          hostname: host,
+          port: port,
+          path: `/${this.bucketName}?cors`,
+          method: method,
+          headers: {
+            Host: `${host}:${port}`,
+            "x-amz-date": amzDate,
+            "x-amz-content-sha256": payloadHash,
+            Authorization: authorizationHeader,
+            "Content-Type": "application/xml",
+            "Content-Length": Buffer.byteLength(corsConfig),
+          },
+        },
+        (res) => {
+          let body = "";
+          res.on("data", (chunk) => (body += chunk));
+          res.on("end", () => {
+            if (
+              res.statusCode &&
+              res.statusCode >= 200 &&
+              res.statusCode < 300
+            ) {
+              resolve();
+            } else {
+              reject(
+                new Error(
+                  `MinIO CORS failed with status ${res.statusCode}: ${body}`
+                )
+              );
+            }
+          });
+        }
+      );
+
+      req.on("error", reject);
+      req.write(corsConfig);
+      req.end();
+    });
   }
 
   async getUploadUrl(
