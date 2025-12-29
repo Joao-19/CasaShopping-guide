@@ -10,6 +10,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import * as http from "http";
+import * as https from "https";
 import * as crypto from "crypto";
 
 @Injectable()
@@ -170,7 +171,8 @@ export class StorageService {
   private async configureCorsManual(endpointUrl: string) {
     const url = new URL(endpointUrl);
     const host = url.hostname;
-    const port = parseInt(url.port) || 80;
+    const isHttps = url.protocol === "https:";
+    const port = parseInt(url.port) || (isHttps ? 443 : 80);
     const accessKey = this.configService.getOrThrow<string>("MINIO_ROOT_USER");
     const secretKey = this.configService.getOrThrow<string>(
       "MINIO_ROOT_PASSWORD"
@@ -238,8 +240,10 @@ export class StorageService {
 
     const authorizationHeader = `${algorithm} Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
 
+    const requestModule = isHttps ? https : http;
+
     return new Promise<void>((resolve, reject) => {
-      const req = http.request(
+      const req = requestModule.request(
         {
           hostname: host,
           port: port,
