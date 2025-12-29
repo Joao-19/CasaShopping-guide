@@ -286,10 +286,10 @@ export class StorageService {
   }
 
   async getUploadUrl(
-    storeId: string,
     filename: string,
     contentType: string,
-    contentLength: number
+    contentLength: number,
+    folder?: string
   ) {
     // Validate file size based on content type
     const isVideo = contentType.startsWith("video/");
@@ -312,8 +312,8 @@ export class StorageService {
       throw new Error(`${fileType} excede o limite de ${maxSizeMb}MB`);
     }
 
-    // FORCE PATH STRUCTURE: stores/{storeId}/{filename}
-    const key = `stores/${storeId}/${filename}`;
+    // Build key from folder + filename
+    const key = folder ? `${folder}/${filename}` : filename;
 
     const command = new PutObjectCommand({
       Bucket: this.bucketName,

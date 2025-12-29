@@ -1,19 +1,20 @@
 import React from 'react';
 import { cn } from '../lib/utils';
 
-type sizes = "small" | "medium" | "large" | "xl";
+type sizes = "small" | "medium" | "large" | "xl" | "extra-small";
 
 const sizeClasses: Record<sizes, string> = {
     small: "text-sm",
     medium: "text-base",
     large: "text-lg",
     xl: "text-xl",
+    "extra-small": "text-xs",
 };
 
 const colorClasses: Record<BaseTextProps['color'], string> = {
     black: "text-black",
     white: "text-white",
-    gray: "text-gray-500",
+    gray: "text-gray-400",
 };
 
 interface BaseTextProps {

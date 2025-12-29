@@ -714,6 +714,9 @@ importers:
       axios:
         specifier: ^1.13.2
         version: 1.13.2
+      browser-image-compression:
+        specifier: ^2.0.2
+        version: 2.0.2
       embla-carousel-auto-scroll:
         specifier: ^8.6.0
         version: 8.6.0(embla-carousel@8.6.0)

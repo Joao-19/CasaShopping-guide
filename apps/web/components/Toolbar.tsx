@@ -1,11 +1,12 @@
 "use client";
 
-import { IconHeart, Assets, Drawer, IconHome, IconStore, IconFavorite, IconLogout, IconArrowRight, IconArrowLeft, IconMenu } from "@repo/ui";
+import { IconHeart, Assets, Drawer, IconHome, IconStore, IconFavorite, IconLogout, IconArrowRight, IconArrowLeft, IconMenu, usePopup } from "@repo/ui";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/auth.store";
 import { useFavorites } from "../composable/useFavorites";
+import { ProfilePopup } from "./ProfilePopup";
 
 
 export function Toolbar() {
@@ -17,6 +18,7 @@ export function Toolbar() {
     const [mounted, setMounted] = useState(false);
     const { favoriteIds } = useFavorites();
     const favoritesCount = mounted ? favoriteIds.length : 0;
+    const { showPopup, hidePopup } = usePopup();
 
     useEffect(() => {
         setMounted(true);
@@ -59,6 +61,15 @@ export function Toolbar() {
         </svg>
     );
 
+    const getImageUrl = (imagePath: string | null | undefined) => {
+        if (!imagePath) return null;
+        if (imagePath.startsWith("http")) return imagePath;
+        const apiHost = process.env.NEXT_PUBLIC_API_HOST || "localhost";
+        return `http://${apiHost}:9000/casashopping/${imagePath}`;
+    };
+
+    const profileImageUrl = getImageUrl(safeUser?.profileImage);
+
     const UserDrawerContent = () => (
         <div className="flex flex-col h-full bg-[#f0f1f3] p-6 justify-between">
             <div className="flex flex-col gap-8">
@@ -76,15 +87,31 @@ export function Toolbar() {
                 </div>
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-[73px] h-[73px] rounded-full overflow-hidden border-2 border-white shadow-sm flex items-center justify-center bg-white">
-                        <span className="text-primary text-2xl font-bold">
-                            {getInitials(safeUser?.name || "Visitante")}
-                        </span>
+                        {profileImageUrl ? (
+                            <img
+                                src={profileImageUrl}
+                                alt="Foto de perfil"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <span className="text-primary text-2xl font-bold">
+                                {getInitials(safeUser?.name || "Visitante")}
+                            </span>
+                        )}
                     </div>
                     <div className="text-center">
                         <h3 className="text-primary text-2xl font-normal font-sans">
                             {safeUser?.name || "Visitante"}
                         </h3>
-                        <p className="text-[#7e8e9e] text-xs">Meu perfil</p>
+                        <button
+                            onClick={() => {
+                                setIsDrawerOpen(false);
+                                showPopup(<ProfilePopup onClose={hidePopup} />);
+                            }}
+                            className="text-[#7e8e9e] text-xs hover:text-primary hover:underline transition-colors cursor-pointer"
+                        >
+                            Meu perfil
+                        </button>
                     </div>
                 </div>
                 <div className="flex flex-col gap-4 mt-4">
@@ -192,9 +219,13 @@ export function Toolbar() {
                             </Link>
                             <div className="hidden lg:flex items-center gap-3 cursor-pointer group" onClick={toggleDrawer}>
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 group-hover:border-white transition-colors flex items-center justify-center bg-white/10 backdrop-blur-md">
-                                    <span className="text-white font-semibold text-sm">
-                                        {getInitials(safeUser?.name || "V")}
-                                    </span>
+                                    {profileImageUrl ? (
+                                        <img src={profileImageUrl} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-white font-semibold text-sm">
+                                            {getInitials(safeUser?.name || "V")}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex flex-col items-start">
                                     <span className="text-white font-semibold text-[14px] leading-tight group-hover:underline">
@@ -269,9 +300,13 @@ export function Toolbar() {
                         </Link>
                         <div className="hidden lg:flex items-center gap-3 cursor-pointer group bg-[rgba(0,59,166,0)]" onClick={toggleDrawer}>
                             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 group-hover:border-white transition-colors flex items-center justify-center bg-white/10 backdrop-blur-md">
-                                <span className="text-white font-semibold text-sm">
-                                    {getInitials(safeUser?.name || "V")}
-                                </span>
+                                {profileImageUrl ? (
+                                    <img src={profileImageUrl} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-white font-semibold text-sm">
+                                        {getInitials(safeUser?.name || "V")}
+                                    </span>
+                                )}
                             </div>
                             <div className="hidden md:flex flex-col items-start">
                                 <span className="text-white font-semibold text-[14px] leading-tight group-hover:underline">

@@ -26,6 +26,7 @@ interface ProductCardSwiperProps extends ComponentProps<"div"> {
     images: string[];
     onWishlistClick?: () => void;
     isFavorited?: boolean;
+    description?: string;
 }
 
 export function ProductCardSwiper({
@@ -36,6 +37,7 @@ export function ProductCardSwiper({
     className,
     onWishlistClick,
     isFavorited = false,
+    description,
     ...props
 }: ProductCardSwiperProps) {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -128,6 +130,9 @@ export function ProductCardSwiper({
                 </p>
                 <p className="font-normal text-[#7d8b99] text-[14px]">
                     {storeName}
+                </p>
+                <p className="font-normal text-[#7d8b99] text-[14px]">
+                    {description}
                 </p>
             </div>
         </div>

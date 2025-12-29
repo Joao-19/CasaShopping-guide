@@ -1,8 +1,13 @@
-import { Injectable, HttpException } from "@nestjs/common";
+import {
+  Injectable,
+  HttpException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { CreateUserDto, PaginatedResult } from "@repo/dtos";
 import { firstValueFrom } from "rxjs";
 import { ConfigService } from "@nestjs/config";
+import * as jwt from "jsonwebtoken";
 
 @Injectable()
 export class UserGatewayService {
@@ -59,6 +64,64 @@ export class UserGatewayService {
     } catch (error: any) {
       console.log(error);
 
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
+  async getMe(token: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<any>(`${this.usersServiceUrl}/user/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
+  async updateProfileImage(profileImage: string, token: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.patch<any>(
+          `${this.usersServiceUrl}/user/me/profile-image`,
+          { profileImage },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
+  async deleteMe(token: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.delete<any>(`${this.usersServiceUrl}/user/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      );
+      return response.data;
+    } catch (error: any) {
       throw new HttpException(
         error.response?.data || "Internal Server Error",
         error.response?.status || 500

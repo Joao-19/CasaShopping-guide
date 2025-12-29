@@ -19,6 +19,7 @@ model User {
   phone        String
   password     String // Senha Hasheada
   refreshToken String? @db.Text
+  profileImage String?
 
   // Auditoria
   createdAt DateTime @default(now())

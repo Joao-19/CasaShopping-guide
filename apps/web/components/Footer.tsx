@@ -1,4 +1,4 @@
-import { IconFacebook, IconInstagram, IconYoutube, Assets } from "@repo/ui";
+import { IconFacebook, IconInstagram, IconYoutube, Assets, BaseText } from "@repo/ui";
 
 export function Footer() {
     return (
@@ -50,9 +50,12 @@ export function Footer() {
                         </div>
                     </div>
                 </div>
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-white/50 text-xs font-sans">
-                    <p>© 2025 CasaShopping. Todos os direitos reservados.</p>
-                    <div className="flex gap-6"><a href="#" className="hover:text-white transition-colors">Política de Privacidade</a><a href="#" className="hover:text-white transition-colors">Termos de Uso</a></div>
+                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between text-white/50 text-xs font-sans">
+                    <BaseText text="© 2025 CasaShopping. Todos os direitos reservados." color="gray" size="extra-small" />
+                    <div className="flex">
+                        <BaseText text="Política de Privacidade" color="gray" size="extra-small" />
+                        <BaseText text="Termos de Uso" color="gray" size="extra-small" />
+                    </div>
                 </div>
             </div>
         </footer>

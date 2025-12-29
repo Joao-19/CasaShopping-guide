@@ -11,17 +11,18 @@ export class StorageController {
   async getUploadUrl(
     @Body()
     body: {
-      storeId: string;
+      storeId?: string;
+      folder?: string;
       filename: string;
       contentType: string;
       contentLength: number;
     }
   ) {
     return this.storageService.getUploadUrl(
-      body.storeId,
       body.filename,
       body.contentType,
-      body.contentLength
+      body.contentLength,
+      body.folder || (body.storeId ? `stores/${body.storeId}` : undefined)
     );
   }
 
