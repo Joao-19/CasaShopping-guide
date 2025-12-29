@@ -7,6 +7,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts, ProductWithStore, toggleFavorite } from "../Services/http/product.http";
 import { Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { usePopup } from "@repo/ui";
+import { useFavorites } from "@/composable/useFavorites";
 
 import { ProductDetailsCard } from "./ProductDetailsCard";
 
@@ -25,6 +26,7 @@ interface ProductShowcaseProps {
 export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: ProductShowcaseProps) {
     const uniqueId = useId().replace(/:/g, ''); // Sanitize ID for class selectors
     const { showPopup } = usePopup();
+    const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
     const {
         data,
         fetchNextPage,
@@ -127,12 +129,8 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                         storeName={product.storeName}
                                         price={product.price}
                                         images={product.images}
-                                        onWishlistClick={() => {
-                                            toggleFavorite(product.id).then((res) => {
-                                                console.log("Favorited:", res);
-                                                // TODO: Update local state or invalidate query when API supports isFavorited in list
-                                            });
-                                        }}
+                                        isFavorited={isFavorited(product.id)}
+                                        onWishlistClick={() => toggleFav(product.id)}
                                         className="cursor-[inherit]!"
                                     />
                                 </div>

@@ -96,3 +96,8 @@ export const getFavorites = async (params?: {
     // but here we are returning the raw page result.
   };
 };
+
+export const getFavoriteIds = async (): Promise<string[]> => {
+  const { data } = await http.get<{ ids: string[] }>("/products/favorites/ids");
+  return data.ids;
+};

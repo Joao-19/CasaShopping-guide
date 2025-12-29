@@ -3,13 +3,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { MediaCard, usePopup, formatPriceTier, IconHeart, BaseText } from "@repo/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getProducts, toggleFavorite } from "../Services/http/product.http";
+import { getProducts } from "../Services/http/product.http";
+import { useFavorites } from "@/composable/useFavorites";
 import { ProductDetailsCard } from "./ProductDetailsCard";
 import useEmblaCarousel from 'embla-carousel-react';
 import AutoScroll from 'embla-carousel-auto-scroll';
 
 export function HighlightsSection() {
     const { showPopup } = usePopup();
+    const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
 
     const [emblaRef, emblaApi] = useEmblaCarousel(
         { loop: true, dragFree: true, align: 'center', containScroll: false },
@@ -152,11 +154,11 @@ export function HighlightsSection() {
                                             <div
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    toggleFavorite(product.id).then(res => console.log('Favorited:', res));
+                                                    toggleFav(product.id);
                                                 }}
                                                 className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20"
                                             >
-                                                <IconHeart className="w-6 h-6 text-white" />
+                                                <IconHeart className={isFavorited(product.id) ? "w-6 h-6 text-red-500 fill-red-500" : "w-6 h-6 text-white"} />
                                             </div>
                                         </div>
                                     </MediaCard>

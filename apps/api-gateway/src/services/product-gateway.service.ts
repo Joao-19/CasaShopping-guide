@@ -159,6 +159,27 @@ export class ProductGatewayService {
     }
   }
 
+  async getFavoriteIds(token: string): Promise<{ ids: string[] }> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<{ ids: string[] }>(
+          `${this.productsServiceUrl}/products/favorites/ids`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
   async getFavorites(
     token: string,
     page: number = 1

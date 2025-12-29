@@ -58,6 +58,12 @@ export class ProductGatewayController {
     return this.productGatewayService.delete(id, token);
   }
 
+  @Get("favorites/ids")
+  async getFavoriteIds(@Req() req: Request): Promise<{ ids: string[] }> {
+    const token = req.cookies["access_token"];
+    return this.productGatewayService.getFavoriteIds(token);
+  }
+
   @Get("favorites")
   async findFavorites(
     @Req() req: Request,

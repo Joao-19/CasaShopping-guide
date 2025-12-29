@@ -1,10 +1,9 @@
 import { IconFavorite, IconArrowLeft, cn, formatPriceTier } from "@repo/ui";
-import { useState } from "react";
-import { toggleFavorite } from "../Services/http/product.http";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
+import { useFavorites } from "@/composable/useFavorites";
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -27,15 +26,12 @@ interface ProductDetailsCardProps {
 
 export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
     const { hidePopup } = usePopup();
-    const [isFavorited, setIsFavorited] = useState(product.isFavorited || false);
+    const { isFavorited, toggleFavorite } = useFavorites();
 
-    const handleToggleFavorite = async () => {
-        try {
-            const res = await toggleFavorite(product.id);
-            setIsFavorited(res.isFavorited);
-        } catch (error) {
-            console.error("Failed to toggle favorite", error);
-        }
+    const isProductFavorited = isFavorited(product.id);
+
+    const handleToggleFavorite = () => {
+        toggleFavorite(product.id);
     };
 
     return (
@@ -136,11 +132,11 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                 onClick={handleToggleFavorite}
                                 className={cn(
                                     "flex-1 text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] transition-colors font-medium cursor-pointer",
-                                    isFavorited ? "bg-red-600 hover:bg-red-700" : "bg-[#e95a5a] hover:bg-red-500"
+                                    isProductFavorited ? "bg-red-600 hover:bg-red-700" : "bg-[#e95a5a] hover:bg-red-500"
                                 )}
                             >
-                                <Heart size={20} fill={isFavorited ? "currentColor" : "none"} />
-                                {isFavorited ? "Favoritado" : "Favoritar"}
+                                <Heart size={20} fill={isProductFavorited ? "currentColor" : "none"} />
+                                {isProductFavorited ? "Favoritado" : "Favoritar"}
                             </button>
                             {product.storePhone && product.showStorePhone && (
                                 <a href={`tel:${product.storePhone}`} className="flex-1 bg-[#003ba6] text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] hover:bg-[#002a78] transition-colors font-medium cursor-pointer text-decoration-none">

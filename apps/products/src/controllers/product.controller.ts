@@ -58,6 +58,13 @@ export class ProductController {
   async delete(@Param("id") id: string): Promise<Product> {
     return this.productService.delete(id);
   }
+  @Get("favorites/ids")
+  @UseGuards(JwtAuthGuard)
+  async getFavoriteIds(@Req() req: any): Promise<{ ids: string[] }> {
+    const ids = await this.productService.getFavoriteIds(req.user.userId);
+    return { ids };
+  }
+
   @Get("favorites")
   @UseGuards(JwtAuthGuard)
   async findFavorites(

@@ -331,4 +331,12 @@ export class ProductService {
       },
     };
   }
+
+  async getFavoriteIds(userId: string): Promise<string[]> {
+    const favorites = await prisma.favorite.findMany({
+      where: { userId },
+      select: { productId: true },
+    });
+    return favorites.map((f) => f.productId);
+  }
 }
