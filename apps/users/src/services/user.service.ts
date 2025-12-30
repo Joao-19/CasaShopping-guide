@@ -74,4 +74,23 @@ export class UserService {
     });
     return { message: "User deleted successfully" };
   }
+
+  async getById(id: string) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) return null;
+
+    const { password, refreshToken, ...result } = user;
+    return result;
+  }
+
+  async updateProfileImage(id: string, profileImage: string) {
+    const user = await prisma.user.update({
+      where: { id },
+      data: { profileImage },
+    });
+    const { password, refreshToken, ...result } = user;
+    return result;
+  }
 }

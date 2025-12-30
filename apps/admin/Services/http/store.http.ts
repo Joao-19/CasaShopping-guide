@@ -20,15 +20,20 @@ export default {
   },
 
   // Placeholders for other methods
-  list(params?: { page?: number; search?: string }) {
+  list(params?: { page?: number; search?: string; limit?: number }) {
     return http
       .get<PaginatedResult<Store>>("stores", {
         params: {
           page: params?.page,
           search: params?.search,
+          limit: params?.limit,
         },
       })
       .then((res) => res.data);
+  },
+
+  getById(id: string) {
+    return http.get<Store>(`stores/${id}`).then((res) => res.data);
   },
 
   update(id: string, form: Partial<CreateStoreDto>) {

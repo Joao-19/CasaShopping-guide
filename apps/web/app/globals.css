@@ -6,11 +6,52 @@
   --color-primary: #003ba6;
   --color-primary-light: #0059b3;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
+  
+  --animate-zoomIn: zoomIn 0.2s ease-out forwards;
+  --animate-zoomOut: zoomOut 0.2s ease-in forwards;
+  --animate-fadeIn: fadeIn 0.3s ease-out forwards;
+  --animate-fadeOut: fadeOut 0.2s ease-in forwards;
+
+  @keyframes zoomIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.75);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes zoomOut {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.75);
+    }
+  }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
 }
 
 /* 3. Camada Base (Padronização de Títulos) */
 /* O @layer agora é nativo do CSS, o Tailwind entende ele */
 @layer base {
+  body {
+    @apply overflow-x-hidden;
+  }
+
   h1 {
     /* Você pode usar @apply ou CSS puro */
     @apply text-3xl md:text-4xl font-bold tracking-tight mb-4;
@@ -37,4 +78,23 @@
   .text-primary {
     color: var(--color-primary);
   }
+}
+
+.swiper-transition-linear .swiper-wrapper {
+  transition-timing-function: linear !important;
+}
+
+/* Ensure carousel receives hover events even with child elements */
+.highlights-carousel {
+  position: relative;
+}
+
+.highlights-carousel .swiper-slide {
+  pointer-events: auto;
+}
+
+/* Prevent autoplay direction change on drag */
+.highlights-carousel.swiper-paused .swiper-wrapper {
+  transition-duration: 600ms !important;
+  transition-timing-function: ease-out !important;
 }

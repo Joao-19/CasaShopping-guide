@@ -1,8 +1,22 @@
+"use client";
+
 import { useState, useCallback } from "react";
 import { AxiosError, AxiosResponse } from "axios";
-import { ApiError, ListResult } from "@/Services/http/http.type";
-import { useAuthStore } from "@/store/auth.store"; // Assuming this will be a React hook or context
-import axios from "@/Services/http/index";
+import { translateError } from "../errors";
+
+export interface ApiError {
+  message: string;
+  statusCode?: number;
+  [key: string]: any;
+}
+
+export interface ListResult<T> {
+  page: number;
+  total: number;
+  rows: T[];
+  totalPages: number;
+  pageSize: number;
+}
 
 export function useBaseHttp<Response, Form, DefaultValue>(
   api: (form: Form) => Promise<any>,
@@ -11,16 +25,12 @@ export function useBaseHttp<Response, Form, DefaultValue>(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [data, setData] = useState<Response | DefaultValue>(defaultValue);
-  const authStore = useAuthStore(); // Assuming useAuthStore is now a React hook
 
   const request = useCallback(
     async (form: Form): Promise<Response> => {
       setLoading(true);
       setError(null);
       try {
-        if (authStore.token) {
-          axios.defaults.headers.authorization = authStore.token;
-        }
         const res = await api(form);
         if (
           res &&
@@ -29,29 +39,29 @@ export function useBaseHttp<Response, Form, DefaultValue>(
           "headers" in res
         ) {
           const axiosRes = res as AxiosResponse<Response>;
-          if (axiosRes.headers.token) {
-            authStore.setToken(axiosRes.headers.token);
-          }
           setData(axiosRes.data);
           return axiosRes.data;
         }
         setData(res as Response);
         return res as Response;
       } catch (e) {
-        const apiError = e as AxiosError;
-        setError(
-          (apiError.response?.data ? apiError.response.data : e) as ApiError
-        );
-        if (apiError.response?.status === 401) {
-          authStore.setToken(null);
-          window.location.hash = "/login";
-        }
+        const axiosError = e as AxiosError;
+        const statusCode = axiosError.response?.status;
+        const responseData = axiosError.response?.data as any;
+
+        const apiError: ApiError = {
+          message: translateError(e),
+          statusCode,
+          ...(typeof responseData === "object" ? responseData : {}),
+        };
+
+        setError(apiError);
         throw e;
       } finally {
         setLoading(false);
       }
     },
-    [api, authStore]
+    [api]
   );
 
   return {
@@ -73,6 +83,7 @@ export function useHttpList<Response, Form>(
 ) {
   return useBaseHttp<Response, Form, Response[]>(api, []);
 }
+
 export function useHttpPaginate<Response, Form>(
   api: (
     form: Form

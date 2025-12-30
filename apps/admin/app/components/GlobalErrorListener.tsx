@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { eventBus } from '@/utils/eventBus';
+import { eventBus } from "@repo/api-client";
 import { ErrorPopup } from './ErrorPopup';
 
 export function GlobalErrorListener() {

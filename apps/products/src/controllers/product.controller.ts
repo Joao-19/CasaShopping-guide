@@ -8,6 +8,7 @@ import {
   Put,
   Param,
   Delete,
+  Req,
 } from "@nestjs/common";
 import { ProductService } from "@/services/product.service";
 import {
@@ -19,11 +20,11 @@ import {
 import { JwtAuthGuard } from "@repo/auth-guard";
 
 @Controller("products")
-@UseGuards(JwtAuthGuard)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productService.create(createProductDto);
   }
@@ -32,12 +33,21 @@ export class ProductController {
   async findAll(
     @Query("storeId") storeId?: string,
     @Query("search") search?: string,
+    @Query("category") category?: string,
+    @Query("isFeatured") isFeatured?: string,
     @Query("page") page: string = "1"
   ): Promise<PaginatedResult<Product>> {
-    return this.productService.findAll(storeId, search, +page);
+    return this.productService.findAll(
+      storeId,
+      search,
+      category,
+      isFeatured ? isFeatured === "true" : undefined,
+      +page
+    );
   }
 
   @Put(":id")
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param("id") id: string,
     @Body() updateProductDto: UpdateProductDto
@@ -46,7 +56,32 @@ export class ProductController {
   }
 
   @Delete(":id")
+  @UseGuards(JwtAuthGuard)
   async delete(@Param("id") id: string): Promise<Product> {
     return this.productService.delete(id);
+  }
+  @Get("favorites/ids")
+  @UseGuards(JwtAuthGuard)
+  async getFavoriteIds(@Req() req: any): Promise<{ ids: string[] }> {
+    const ids = await this.productService.getFavoriteIds(req.user.userId);
+    return { ids };
+  }
+
+  @Get("favorites")
+  @UseGuards(JwtAuthGuard)
+  async findFavorites(
+    @Req() req: any,
+    @Query("page") page: string = "1"
+  ): Promise<PaginatedResult<Product>> {
+    return this.productService.findFavorites(req.user.userId, +page);
+  }
+
+  @Post(":id/favorite")
+  @UseGuards(JwtAuthGuard)
+  async toggleFavorite(
+    @Param("id") id: string,
+    @Req() req: any
+  ): Promise<{ isFavorited: boolean }> {
+    return this.productService.toggleFavorite(req.user.userId, id);
   }
 }

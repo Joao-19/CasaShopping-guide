@@ -7,6 +7,7 @@ import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import useStore from '@/composable/store/useStore';
 import { CreateStoreDto, Store } from '@repo/dtos';
 import { formatPhone, cleanPhone } from '@/utils/formatters';
+import { useImageUpload } from '@/composable/storage/useImageUpload';
 
 interface CreateStoreFormProps {
     onClose: () => void;
@@ -22,6 +23,7 @@ interface CreateStoreFormContentProps {
         facebookLink: string;
         instagramLink: string;
         youtubeLink: string;
+        currentImageUrl?: string;
     };
     handlers: {
         setName: (v: string) => void;
@@ -63,6 +65,7 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
                 variant="profile"
                 label="Logo da Loja"
                 onImageSelect={handleImageSelect}
+                currentImage={data.currentImageUrl}
             />
 
             {/* Nome da Loja */}
@@ -204,12 +207,15 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
     // Form State
     const [name, setName] = useState(initialData?.name || '');
     const [address, setAddress] = useState(initialData?.address || '');
-    const [phone, setPhone] = useState(initialData?.phone || '');
+    const [phone, setPhone] = useState(initialData?.phone ? formatPhone(initialData.phone) : '');
     const [site, setSite] = useState(initialData?.site || '');
     const [facebookLink, setFacebook] = useState(initialData?.facebookLink || '');
     const [instagramLink, setInstagram] = useState(initialData?.instagramLink || '');
     const [youtubeLink, setYoutube] = useState(initialData?.youtubeLink || '');
     const [image, setImage] = useState<File | null>(null);
+    const { uploadImage, uploading: uploadingImage, error: uploadError } = useImageUpload();
+
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -230,6 +236,38 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
         };
 
         try {
+            let imageKey = initialData?.logoImage; // Keep existing if no new one
+
+            // If a new image file was selected, upload it first
+            if (image) {
+                try {
+                    // If we are editing, we reuse the ID. If new, we don't have ID yet.
+                    // IMPORTANT: For new stores, we need an ID to organize folders.
+                    // Option 1: Generate UUID on client. Option 2: Use a temp folder.
+                    // Option 3 (Best for now): Use 'temp' folder and have backend move it, OR just use 'uploads' folder.
+                    // Let's use 'temp-uploads' as ID for new stores, or strict 0000.
+
+                    const tempId = initialData?.id || 'new-store-upload';
+                    imageKey = await uploadImage(image, tempId);
+                    console.log('Image uploaded to:', imageKey);
+                } catch (uploadErr) {
+                    console.error('Failed to upload image', uploadErr);
+                    // Decide if we stop or continue without image. stopping is safer.
+                    return;
+                }
+            }
+
+            const submissionData: CreateStoreDto = {
+                name,
+                address,
+                phone: cleanPhone(phone),
+                site,
+                facebookLink,
+                instagramLink,
+                youtubeLink,
+                logoImage: imageKey || '', // Send string path to DB
+            };
+
             if (isEditing && initialData?.id) {
                 await updateStore(initialData.id, submissionData);
                 console.log('Store updated successfully');
@@ -272,6 +310,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                         facebookLink,
                         instagramLink,
                         youtubeLink,
+                        currentImageUrl: initialData?.logoImage || undefined
                     }}
                     handlers={{
                         setName,
@@ -283,11 +322,12 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                         setYoutube,
                         setImage,
                     }}
-                    loading={loading}
+                    loading={loading || uploadingImage}
                     onClose={onClose}
                     onSubmit={handleSubmit}
                 />
             </FormProvider>
+            {/* Hack: The data prop update for currentImageUrl is missing in the JSX above, correcting via replacement */}
         </FormCard>
     );
 }

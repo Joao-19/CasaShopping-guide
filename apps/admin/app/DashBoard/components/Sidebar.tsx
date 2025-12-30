@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Assets } from '@repo/ui';
 
 
 const menuItems = [
@@ -38,6 +39,18 @@ const menuItems = [
                 <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
                 <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+        ),
+    },
+    {
+        label: 'Personalização',
+        href: '/DashBoard/personalizacao',
+        icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-layout-dashboard" aria-hidden="true">
+                <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+                <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+                <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+                <rect width="7" height="5" x="3" y="16" rx="1"></rect>
             </svg>
         ),
     },
@@ -80,7 +93,7 @@ export function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
                 {/* Logo and Close Button */}
                 <div className="h-24 flex items-center justify-between px-6 border-b border-gray-100">
                     <img
-                        src="/logomarca_1.png"
+                        src={Assets.LogomarcaWhite.src}
                         alt="CasaShopping"
                         className="h-10 w-auto object-contain grayscale brightness-20"
                     />

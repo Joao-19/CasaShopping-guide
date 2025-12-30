@@ -12,4 +12,25 @@ export * from "./inputs/ImageUpload";
 export * from "./table";
 export * from "./confirmation-card";
 export * from "./Texts/BaseText";
+export * from "./icons/IconHeart";
+export * from "./icons/IconSearch";
+export * from "./icons/IconInstagram";
+export * from "./icons/IconFacebook";
+export * from "./icons/IconYoutube";
+export * from "./icons/IconHome";
+export * from "./icons/IconStore";
+export * from "./icons/IconFavorite";
+export * from "./icons/IconLogout";
+export * from "./icons/IconArrowRight";
+export * from "./icons/IconArrowLeft";
+export * from "./icons/IconMenu";
+export * from "./cards/MediaCard";
+export * from "./cards/ProductCard";
+export * from "./assets";
+export * from "./pagination";
 
+
+export * from "./components/drawer";
+export * from "./context/PopupContext";
+export * from "./components/GlobalPopup";
+export * from "./lib/utils";

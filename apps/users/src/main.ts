@@ -3,8 +3,19 @@ import { UserModule } from "@/modules/user.module";
 import { ConfigService } from "@nestjs/config";
 import { ValidationPipe } from "@nestjs/common";
 
-async function bootstrap() {
+const MAX_RETRIES = 10;
+const RETRY_DELAY_MS = 30000; // 30 seconds
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function bootstrap(retryCount = 0) {
   try {
+    console.log(
+      `[UsersService] Starting... (attempt ${retryCount + 1}/${MAX_RETRIES})`
+    );
+
     const app = await NestFactory.create(UserModule);
     app.useGlobalPipes(
       new ValidationPipe({
@@ -32,11 +43,21 @@ async function bootstrap() {
       credentials: true,
     });
 
-    await app.listen(port);
-
+    await app.listen(port, "0.0.0.0");
     console.log(`🚀 Users Service (NestJS) running on port ${port}`);
   } catch (error) {
-    console.error("Failed to start Users Service:", error);
+    console.error(`❌ Error starting Users Service:`, error);
+
+    if (retryCount < MAX_RETRIES - 1) {
+      console.log(
+        `⏳ Retrying in ${RETRY_DELAY_MS / 1000} seconds... (${retryCount + 1}/${MAX_RETRIES})`
+      );
+      await sleep(RETRY_DELAY_MS);
+      return bootstrap(retryCount + 1);
+    } else {
+      console.error(`💀 Max retries reached. Exiting.`);
+      process.exit(1);
+    }
   }
 }
 bootstrap();

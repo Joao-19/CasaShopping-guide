@@ -4,7 +4,7 @@ import { AuthController } from "../controllers/auth.controller";
 import { AuthService } from "@/services/auth.service";
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true })],
+  imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: ".env" })],
   controllers: [AuthController],
   providers: [AuthService],
 })

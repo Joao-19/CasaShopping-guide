@@ -55,12 +55,15 @@ services:
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3001}
       - STORE_SERVICE_URL=http://stores-service:3005
       - PRODUCTS_SERVICE_URL=http://products-service:3006
+      - STORAGE_SERVICE_URL=http://storage-service:3007
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - database
       - auth-service
       - users-service
       - stores-service
       - products-service
+      - storage-service
     networks:
       - casashopping-net
 
@@ -100,8 +103,33 @@ services:
     environment:
       - PORT=3004
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - database
+    networks:
+      - casashopping-net
+
+  # --- STORAGE SERVICE ---
+  storage-service:
+    image: joaovvv/casashopping-storage-service:latest
+    build:
+      context: .
+      dockerfile: apps/storage/Dockerfile
+    container_name: casashopping-storage-service
+    ports:
+      - "3007:3007"
+    environment:
+      - PORT=3007
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      - MINIO_INTERNAL_ENDPOINT=http://storage:9000
+      - MINIO_ROOT_USER=${STORAGE_USER:-admin}
+      - MINIO_ROOT_PASSWORD=${STORAGE_PASSWORD:-password123}
+      - MINIO_BUCKET_NAME=casashopping
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - MAX_IMAGE_SIZE_MB=${MAX_IMAGE_SIZE_MB:-5}
+      - MAX_VIDEO_SIZE_MB=${MAX_VIDEO_SIZE_MB:-50}
+    depends_on:
+      - storage
     networks:
       - casashopping-net
 
@@ -113,12 +141,14 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
     container_name: casashopping-web
     ports:
       - "3001:3001"
     environment:
       - PORT=3001
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
     depends_on:
       - api-gateway
     networks:
@@ -132,12 +162,14 @@ services:
       dockerfile: apps/admin/Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
     container_name: casashopping-admin
     ports:
       - "3002:3002"
     environment:
       - PORT=3002
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
     depends_on:
       - api-gateway
     networks:
@@ -158,6 +190,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
     depends_on:
       - database
     networks:
@@ -178,6 +211,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
     depends_on:
       - database
     networks:

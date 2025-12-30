@@ -5,6 +5,14 @@ export const formatPhone = (value: string): string => {
   // Limit to 11 digits
   const limited = numbers.substring(0, 11);
 
+  // Special mask for 0800
+  if (numbers.startsWith("0800")) {
+    if (limited.length <= 4) return limited;
+    if (limited.length <= 7)
+      return `${limited.substring(0, 4)} ${limited.substring(4)}`;
+    return `${limited.substring(0, 4)} ${limited.substring(4, 7)} ${limited.substring(7)}`;
+  }
+
   // Apply mask
   if (limited.length <= 2) return limited;
   if (limited.length <= 6)

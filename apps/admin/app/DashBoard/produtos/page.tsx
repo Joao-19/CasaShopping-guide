@@ -1,5 +1,5 @@
 'use client';
-import { usePopup } from '../../contexts/PopupContext';
+import { usePopup } from '@repo/ui';
 import { Header } from '../components';
 import useProduct from '@/composable/product/useProduct';
 import {
@@ -10,7 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from "@repo/ui/table";
-import { ConfirmationCard } from '@repo/ui';
+import { ConfirmationCard, formatPriceTier } from '@repo/ui';
 import { CreateProductForm } from './-components/CreateProductForm';
 
 export default function ProdutosPage() {
@@ -86,20 +86,19 @@ export default function ProdutosPage() {
                                 <TableHead className="w-[300px]">Nome</TableHead>
                                 <TableHead>Preço</TableHead>
                                 <TableHead>Categorias</TableHead>
-                                <TableHead>Tags</TableHead>
                                 <TableHead className="text-right">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                    <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                                         Carregando produtos...
                                     </TableCell>
                                 </TableRow>
                             ) : (products || []).length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                    <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                                         Nenhum produto encontrado.
                                     </TableCell>
                                 </TableRow>
@@ -121,7 +120,7 @@ export default function ProdutosPage() {
                                                 product.price === 'MEDIUM' ? 'bg-blue-100 text-blue-700' :
                                                     'bg-slate-100 text-slate-700'
                                                 }`}>
-                                                {product.price === 'LOW' ? '$' : product.price === 'MEDIUM' ? '$$' : '$$$'}
+                                                {formatPriceTier(product.price)}
                                             </span>
                                         </TableCell>
                                         <TableCell>
@@ -132,9 +131,6 @@ export default function ProdutosPage() {
                                                     </span>
                                                 ))}
                                             </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="text-sm text-gray-600">{product.tags || '-'}</div>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <button

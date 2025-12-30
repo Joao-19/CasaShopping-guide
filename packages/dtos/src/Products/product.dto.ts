@@ -1,16 +1,33 @@
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
+  Min,
+  Max,
 } from "class-validator";
+import { Type } from "class-transformer";
 
 export enum PriceTier {
   LOW = "LOW",
   MEDIUM = "MEDIUM",
   HIGH = "HIGH",
+}
+
+export class ProductImageDto {
+  @IsString()
+  @IsNotEmpty()
+  path!: string;
+
+  @IsInt()
+  @Min(0)
+  @Max(4)
+  index!: number;
 }
 
 export class CreateProductDto {
@@ -35,6 +52,20 @@ export class CreateProductDto {
 
   @IsUUID()
   storeId!: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageDto)
+  images?: ProductImageDto[];
+
+  @IsOptional()
+  @IsBoolean()
+  showStorePhone?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
 }
 
 export class UpdateProductDto {
@@ -64,6 +95,20 @@ export class UpdateProductDto {
   @IsOptional()
   @IsUUID()
   storeId?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageDto)
+  images?: ProductImageDto[];
+
+  @IsOptional()
+  @IsBoolean()
+  showStorePhone?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
 }
 
 export interface Product {
@@ -76,4 +121,15 @@ export interface Product {
   storeId: string;
   createdAt: Date;
   updatedAt: Date;
+  images?: ProductImage[];
+  showStorePhone: boolean;
+  isFeatured: boolean;
+}
+
+export interface ProductImage {
+  id: string;
+  path: string;
+  index: number;
+  productId: string;
+  createdAt: Date;
 }

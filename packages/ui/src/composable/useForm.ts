@@ -114,6 +114,7 @@ const validator = {
       const numbers = value.replace(/\D/g, "");
 
       if (numbers.length === 11) {
+        if (numbers.startsWith("0800")) return true;
         if (numbers[2] !== "9") {
           return "O 3 digito de um número celular deve ser 9.";
         }

@@ -4,9 +4,9 @@ export interface LoginForm {
   email: string;
   password: string;
 }
-export interface LoginResponse {
-  user: User;
-  token?: string; // Optional now
+export interface LoginResponse extends User {
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface RecoverPasswordRequestForm {
@@ -31,8 +31,7 @@ export interface RegisterForm {
   phone: string;
 }
 
-export interface RegisterResponse {
-  user: User;
+export interface RegisterResponse extends User {
   token: string;
 }
 
@@ -58,6 +57,9 @@ export default {
     return http
       .post<void>("user/recoverPassword", form)
       .then((res) => res.data);
+  },
+  logout() {
+    return http.post<void>("auth/logout").then((res) => res.data);
   },
   changePassword(form: ChangePasswordForm) {
     return http

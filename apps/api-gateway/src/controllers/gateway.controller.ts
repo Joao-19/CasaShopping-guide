@@ -39,7 +39,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    return user;
+    return { ...user, accessToken, refreshToken };
   }
 
   @Post("admin/login")
@@ -64,7 +64,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    return { ...user, accessToken };
+    return { ...user, accessToken, refreshToken };
   }
 
   @Post("logout")
@@ -77,17 +77,21 @@ export class AuthController {
   @Post("refresh")
   async refresh(
     @Req() req: Request,
+    @Body() body: any,
     @Res({ passthrough: true }) res: Response
   ) {
     const refreshTokenCookie = (req as any).cookies["refresh_token"];
+    const refreshTokenBody = body?.refreshToken;
 
-    if (!refreshTokenCookie) {
+    const tokenToUse = refreshTokenCookie || refreshTokenBody;
+
+    if (!tokenToUse) {
       throw new ConflictException("Refresh token não encontrado");
     }
 
     try {
       const { accessToken, refreshToken, user } =
-        await this.gatewayService.refreshToken(refreshTokenCookie);
+        await this.gatewayService.refreshToken(tokenToUse);
 
       res.cookie("access_token", accessToken, {
         httpOnly: true,
@@ -103,7 +107,7 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
-      return user;
+      return { ...user, accessToken, refreshToken };
     } catch (error) {
       res.clearCookie("access_token");
       res.clearCookie("refresh_token");

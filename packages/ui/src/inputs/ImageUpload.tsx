@@ -19,18 +19,33 @@ export function ImageUpload({
     className = ''
 }: ImageUploadProps) {
     const [preview, setPreview] = useState<string | null>(currentImage || null);
+    const [isVideo, setIsVideo] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFile = (file: File) => {
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setPreview(e.target?.result as string);
-            };
-            reader.readAsDataURL(file);
-            if (onImageSelect) onImageSelect(file);
+        const isImageFile = file.type.startsWith('image/');
+        const isVideoFile = file.type.startsWith('video/');
+
+        if (!isImageFile && !isVideoFile) {
+            alert('Por favor envie apenas imagens ou vídeos.');
+            return;
         }
+
+        // Block GIFs specifically
+        if (file.type === 'image/gif') {
+            alert('GIFs não são permitidos. Por favor envie apenas imagens estáticas (JPG, PNG, WebP) ou vídeos.');
+            return;
+        }
+
+        setIsVideo(isVideoFile);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setPreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+        if (onImageSelect) onImageSelect(file);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +77,28 @@ export function ImageUpload({
     const handleRemove = (e: React.MouseEvent) => {
         e.stopPropagation();
         setPreview(null);
+        setIsVideo(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const allowedTypes = "image/jpeg, image/png, image/webp, image/bmp, video/mp4, video/webm, video/quicktime";
+
+    const renderPreview = () => {
+        if (!preview) return null;
+
+        if (isVideo) {
+            return (
+                <video
+                    src={preview}
+                    className="w-full h-full object-cover"
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                />
+            );
+        }
+        return <img src={preview} alt="Preview" className="w-full h-full object-cover" />;
     };
 
     if (variant === 'profile') {
@@ -83,14 +119,14 @@ export function ImageUpload({
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept={allowedTypes}
                         onChange={handleChange}
                         className="hidden"
                     />
 
                     {preview ? (
                         <>
-                            <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                            {renderPreview()}
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera text-white">
                                     <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
@@ -144,14 +180,14 @@ export function ImageUpload({
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept={allowedTypes}
                     onChange={handleChange}
                     className="hidden"
                 />
 
                 {preview ? (
                     <>
-                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                        {renderPreview()}
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
                             <button className="text-white p-2 rounded-full hover:bg-white/20 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-refresh-cw">
@@ -184,13 +220,13 @@ export function ImageUpload({
                             </svg>
                         </div>
                         <BaseText
-                            text="Clique ou arraste a imagem"
+                            text="Clique ou arraste a imagem/vídeo"
                             size="small"
                             color="gray"
                             className="font-medium text-gray-700 text-center"
                         />
                         <BaseText
-                            text="SVG, PNG, JPG (max. 800x800px)"
+                            text="PNG, JPG, WebP, MP4, WebM"
                             size="small"
                             color="gray"
                             className="text-center mt-1"
@@ -201,3 +237,4 @@ export function ImageUpload({
         </div>
     );
 }
+

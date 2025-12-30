@@ -5,6 +5,7 @@ import {
   Get,
   Query,
   Delete,
+  Patch,
   Param,
   Req,
 } from "@nestjs/common";
@@ -30,6 +31,27 @@ export class UserGatewayController {
   ): Promise<PaginatedResult<any>> {
     const token = req.cookies["access_token"];
     return this.userGatewayService.findAll(+page, token, search);
+  }
+
+  @Get("me")
+  async getMe(@Req() req: Request): Promise<any> {
+    const token = req.cookies["access_token"];
+    return this.userGatewayService.getMe(token);
+  }
+
+  @Patch("me/profile-image")
+  async updateProfileImage(
+    @Body() body: { profileImage: string },
+    @Req() req: Request
+  ): Promise<any> {
+    const token = req.cookies["access_token"];
+    return this.userGatewayService.updateProfileImage(body.profileImage, token);
+  }
+
+  @Delete("me")
+  async deleteMe(@Req() req: Request): Promise<any> {
+    const token = req.cookies["access_token"];
+    return this.userGatewayService.deleteMe(token);
   }
 
   @Delete(":id")

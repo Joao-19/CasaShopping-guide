@@ -1,0 +1,343 @@
+[
+  {
+    "name": "Sofá 3 Lugares Milano",
+    "description": "Sofá moderno em linho cinza com pés de madeira, perfeito para salas de estar contemporâneas. Conforto e elegância em um só móvel.",
+    "category": "sala",
+    "price": "MEDIUM",
+    "tags": "sofá, sala, linho, moderno"
+  },
+  {
+    "name": "Poltrona Bergère Clássica",
+    "description": "Poltrona estofada em veludo verde esmeralda com acabamento capitonê. Uma peça atemporal para ambientes sofisticados.",
+    "category": "sala",
+    "price": "HIGH",
+    "tags": "poltrona, veludo, clássico"
+  },
+  {
+    "name": "Mesa de Centro Redonda",
+    "description": "Mesa de centro com tampo de mármore branco e base dourada. Design minimalista e luxuoso.",
+    "category": "sala",
+    "price": "HIGH",
+    "tags": "mesa, mármore, dourado"
+  },
+  {
+    "name": "Rack para TV 180cm",
+    "description": "Rack suspenso em MDF nogueira com portas de correr. Ideal para TVs de até 65 polegadas.",
+    "category": "sala",
+    "price": "MEDIUM",
+    "tags": "rack, tv, mdf"
+  },
+  {
+    "name": "Luminária de Piso Arc",
+    "description": "Luminária de piso com haste curvada em metal preto fosco e cúpula em tecido bege.",
+    "category": "sala",
+    "price": "LOW",
+    "tags": "luminária, piso, decoração"
+  },
+  {
+    "name": "Tapete Shaggy 200x300",
+    "description": "Tapete felpudo em tons de creme, super macio e confortável. Adiciona aconchego a qualquer ambiente.",
+    "category": "sala",
+    "price": "MEDIUM",
+    "tags": "tapete, shaggy, decoração"
+  },
+  {
+    "name": "Estante Modular Industrial",
+    "description": "Estante em metal preto com prateleiras de madeira rústica. Estilo industrial para livros e objetos decorativos.",
+    "category": "sala",
+    "price": "MEDIUM",
+    "tags": "estante, industrial, metal"
+  },
+  {
+    "name": "Conjunto de Puffs Cairo",
+    "description": "Kit com 2 puffs redondos em tecido bouclé off-white. Versáteis e elegantes.",
+    "category": "sala",
+    "price": "LOW",
+    "tags": "puff, bouclé, kit"
+  },
+
+  {
+    "name": "Cama Box Queen Premium",
+    "description": "Cama box com colchão de molas ensacadas e pillow top. Máximo conforto para suas noites de sono.",
+    "category": "quarto",
+    "price": "HIGH",
+    "tags": "cama, queen, molas"
+  },
+  {
+    "name": "Guarda-Roupa 6 Portas",
+    "description": "Guarda-roupa amplo em MDF branco com espelho. 6 portas e 4 gavetas para organização completa.",
+    "category": "quarto",
+    "price": "HIGH",
+    "tags": "guarda-roupa, espelho, organização"
+  },
+  {
+    "name": "Cômoda Retrô 5 Gavetas",
+    "description": "Cômoda em madeira carvalho com pés palito. Design retrô que combina com decorações modernas.",
+    "category": "quarto",
+    "price": "MEDIUM",
+    "tags": "cômoda, retrô, madeira"
+  },
+  {
+    "name": "Criado-Mudo Suspenso",
+    "description": "Criado-mudo com gaveta em laca branca. Instalação flutuante para visual clean.",
+    "category": "quarto",
+    "price": "LOW",
+    "tags": "criado-mudo, suspenso, laca"
+  },
+  {
+    "name": "Cabeceira Estofada King",
+    "description": "Cabeceira de cama king size em suede cinza com capitonê. Sofisticação para seu quarto.",
+    "category": "quarto",
+    "price": "MEDIUM",
+    "tags": "cabeceira, king, suede"
+  },
+  {
+    "name": "Penteadeira com Espelho",
+    "description": "Penteadeira em MDF rosa blush com espelho oval e banqueta inclusa. Charme e funcionalidade.",
+    "category": "quarto",
+    "price": "MEDIUM",
+    "tags": "penteadeira, espelho, rosa"
+  },
+  {
+    "name": "Abajur de Mesa Cristal",
+    "description": "Abajur com base em cristal transparente e cúpula em seda marfim. Iluminação aconchegante.",
+    "category": "quarto",
+    "price": "LOW",
+    "tags": "abajur, cristal, iluminação"
+  },
+  {
+    "name": "Colchão Solteiro Ortopédico",
+    "description": "Colchão de espuma D45 com camada de viscoelástico. Ideal para coluna saudável.",
+    "category": "quarto",
+    "price": "MEDIUM",
+    "tags": "colchão, ortopédico, solteiro"
+  },
+
+  {
+    "name": "Armário Aéreo 80cm",
+    "description": "Armário de banheiro suspenso com espelho frontal. Em MDF branco resistente à umidade.",
+    "category": "banheiro",
+    "price": "LOW",
+    "tags": "armário, espelho, mdf"
+  },
+  {
+    "name": "Gabinete com Cuba",
+    "description": "Gabinete de banheiro completo com cuba de apoio em louça branca e torneira monocomando.",
+    "category": "banheiro",
+    "price": "MEDIUM",
+    "tags": "gabinete, cuba, banheiro"
+  },
+  {
+    "name": "Espelheira Iluminada LED",
+    "description": "Espelho de banheiro com iluminação LED embutida e função antiembaçante. Moderno e prático.",
+    "category": "banheiro",
+    "price": "HIGH",
+    "tags": "espelho, led, antiembaçante"
+  },
+  {
+    "name": "Prateleira Nicho Triplo",
+    "description": "Conjunto de 3 nichos em MDF branco para organização de produtos de banheiro.",
+    "category": "banheiro",
+    "price": "LOW",
+    "tags": "nicho, prateleira, organização"
+  },
+  {
+    "name": "Toalheiro de Piso",
+    "description": "Toalheiro vertical em aço inox escovado. Elegante e prático para secagem de toalhas.",
+    "category": "banheiro",
+    "price": "LOW",
+    "tags": "toalheiro, inox, banheiro"
+  },
+  {
+    "name": "Lixeira Inox Sensor",
+    "description": "Lixeira automática com sensor de abertura. Capacidade de 12 litros em aço inox.",
+    "category": "banheiro",
+    "price": "MEDIUM",
+    "tags": "lixeira, sensor, automática"
+  },
+  {
+    "name": "Bancada de Granito",
+    "description": "Bancada para banheiro em granito preto São Gabriel. Elegância e durabilidade.",
+    "category": "banheiro",
+    "price": "HIGH",
+    "tags": "bancada, granito, preto"
+  },
+  {
+    "name": "Kit Acessórios Banheiro",
+    "description": "Kit 5 peças: saboneteira, porta-escovas, toalheiro, porta-papel e gancho. Em inox.",
+    "category": "banheiro",
+    "price": "LOW",
+    "tags": "kit, acessórios, inox"
+  },
+
+  {
+    "name": "Mesa de Jantar 6 Lugares",
+    "description": "Mesa retangular em madeira maciça de carvalho com acabamento natural. Para refeições em família.",
+    "category": "cozinha",
+    "price": "HIGH",
+    "tags": "mesa, jantar, madeira"
+  },
+  {
+    "name": "Cadeiras Eames Kit 4",
+    "description": "Conjunto de 4 cadeiras em polipropileno branco com pés de madeira. Design escandinavo.",
+    "category": "cozinha",
+    "price": "MEDIUM",
+    "tags": "cadeiras, eames, kit"
+  },
+  {
+    "name": "Armário de Cozinha Modulado",
+    "description": "Módulo aéreo e base com 6 portas em MDF branco. Ideal para cozinhas compactas.",
+    "category": "cozinha",
+    "price": "MEDIUM",
+    "tags": "armário, cozinha, modulado"
+  },
+  {
+    "name": "Ilha Central Gourmet",
+    "description": "Ilha de cozinha com tampo de granito e rodízios. Gavetas e prateleiras para armazenamento.",
+    "category": "cozinha",
+    "price": "HIGH",
+    "tags": "ilha, gourmet, granito"
+  },
+  {
+    "name": "Banquetas Altas Kit 2",
+    "description": "Par de banquetas altas para bancada em couro sintético caramelo. Base em metal preto.",
+    "category": "cozinha",
+    "price": "MEDIUM",
+    "tags": "banqueta, couro, kit"
+  },
+  {
+    "name": "Cristaleira Clássica",
+    "description": "Cristaleira em madeira escura com portas de vidro e iluminação interna. Para taças e louças finas.",
+    "category": "cozinha",
+    "price": "HIGH",
+    "tags": "cristaleira, vidro, madeira"
+  },
+  {
+    "name": "Lixeira Seletiva 3 Divisões",
+    "description": "Lixeira para coleta seletiva em aço inox com 3 compartimentos coloridos.",
+    "category": "cozinha",
+    "price": "LOW",
+    "tags": "lixeira, reciclagem, inox"
+  },
+  {
+    "name": "Porta-Temperos Giratório",
+    "description": "Suporte giratório para temperos em inox com 16 potes de vidro. Organização gourmet.",
+    "category": "cozinha",
+    "price": "LOW",
+    "tags": "temperos, organização, vidro"
+  },
+
+  {
+    "name": "Conjunto de Jardim 4 Peças",
+    "description": "Mesa redonda com 4 cadeiras em alumínio trançado bege. Resistente a sol e chuva.",
+    "category": "area-externa",
+    "price": "HIGH",
+    "tags": "jardim, alumínio, externo"
+  },
+  {
+    "name": "Espreguiçadeira Reclinável",
+    "description": "Espreguiçadeira em fibra sintética com almofada impermeável. 5 posições de recline.",
+    "category": "area-externa",
+    "price": "MEDIUM",
+    "tags": "espreguiçadeira, piscina, externo"
+  },
+  {
+    "name": "Ombrelone 3 Metros",
+    "description": "Ombrelone de jardim com manivela e inclinação ajustável. Proteção UV para áreas externas.",
+    "category": "area-externa",
+    "price": "MEDIUM",
+    "tags": "ombrelone, jardim, sol"
+  },
+  {
+    "name": "Banco de Jardim em Madeira",
+    "description": "Banco de jardim para 2 pessoas em madeira eucalipto tratada. Rústico e acolhedor.",
+    "category": "area-externa",
+    "price": "LOW",
+    "tags": "banco, jardim, eucalipto"
+  },
+  {
+    "name": "Churrasqueira de Inox",
+    "description": "Churrasqueira portátil em aço inox com regulagem de altura. Ideal para varandas.",
+    "category": "area-externa",
+    "price": "MEDIUM",
+    "tags": "churrasqueira, inox, portátil"
+  },
+  {
+    "name": "Floreira Vertical",
+    "description": "Floreira vertical em madeira com 5 nichos para vasos. Jardim vertical estiloso.",
+    "category": "area-externa",
+    "price": "LOW",
+    "tags": "floreira, vertical, plantas"
+  },
+  {
+    "name": "Fonte de Água Decorativa",
+    "description": "Fonte de água em resina com LED. Design cascata para relaxamento e decoração.",
+    "category": "area-externa",
+    "price": "MEDIUM",
+    "tags": "fonte, água, led"
+  },
+  {
+    "name": "Pergolado de Madeira 3x3m",
+    "description": "Estrutura de pergolado em madeira tratada. Sombra natural para áreas de lazer.",
+    "category": "area-externa",
+    "price": "HIGH",
+    "tags": "pergolado, madeira, sombra"
+  },
+
+  {
+    "name": "Escrivaninha Home Office",
+    "description": "Escrivaninha em L com prateleiras e gavetas. MDF branco, ideal para trabalho remoto.",
+    "category": "escritorio",
+    "price": "MEDIUM",
+    "tags": "escrivaninha, home office, mdf"
+  },
+  {
+    "name": "Cadeira Ergonômica Premium",
+    "description": "Cadeira de escritório com apoio lombar ajustável, braços 4D e tela respirável.",
+    "category": "escritorio",
+    "price": "HIGH",
+    "tags": "cadeira, ergonômica, lombar"
+  },
+  {
+    "name": "Estante de Livros 180cm",
+    "description": "Estante alta com 5 prateleiras abertas em MDF nogueira. Organização para seu acervo.",
+    "category": "escritorio",
+    "price": "MEDIUM",
+    "tags": "estante, livros, organização"
+  },
+  {
+    "name": "Gaveteiro Móvel 3 Gavetas",
+    "description": "Gaveteiro com rodízios em MDF branco. Organização extra sob a escrivaninha.",
+    "category": "escritorio",
+    "price": "LOW",
+    "tags": "gaveteiro, rodízios, organização"
+  },
+  {
+    "name": "Luminária de Mesa Articulada",
+    "description": "Luminária LED com braço articulado e intensidade ajustável. Iluminação focada.",
+    "category": "escritorio",
+    "price": "LOW",
+    "tags": "luminária, led, articulada"
+  },
+  {
+    "name": "Quadro Cortiça 60x90cm",
+    "description": "Quadro de cortiça com moldura de madeira. Ideal para organização visual e lembretes.",
+    "category": "escritorio",
+    "price": "LOW",
+    "tags": "cortiça, quadro, organização"
+  },
+  {
+    "name": "Mesa de Reuniões 8 Lugares",
+    "description": "Mesa oval para reuniões em MDF carvalho. Elegante para ambientes corporativos.",
+    "category": "escritorio",
+    "price": "HIGH",
+    "tags": "mesa, reuniões, corporativo"
+  },
+  {
+    "name": "Armário Arquivo 4 Gavetas",
+    "description": "Arquivo em aço com 4 gavetas para pastas suspensas. Fechadura para segurança.",
+    "category": "escritorio",
+    "price": "MEDIUM",
+    "tags": "arquivo, aço, gavetas"
+  }
+]

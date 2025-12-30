@@ -10,11 +10,6 @@ export const translateError = (error: any): string => {
   // Check for response data message or tag
   const tag = error.response?.data?.message || error.message || "";
 
-  // Check for specific status codes
-  if (error.response?.status === 400) {
-    return "Houve um erro na validação do formulário, por favor revise os dados.";
-  }
-
   // Map of error tags to Portuguese messages
   const errorMap: Record<string, string> = {
     // Auth
@@ -33,8 +28,17 @@ export const translateError = (error: any): string => {
     "Internal Server Error": "Erro interno no servidor.",
   };
 
-  // Return translated message if found, otherwise return default
-  return errorMap[tag] || defaultMessage;
+  // Return translated message if found
+  if (errorMap[tag]) {
+    return errorMap[tag];
+  }
+
+  // If we have a backend message (that isn't generic "Bad Request" default), use it
+  if (tag && tag !== "Bad Request") {
+    return tag;
+  }
+
+  return defaultMessage;
 };
 
 export const VALIDATION_MESSAGES = {
