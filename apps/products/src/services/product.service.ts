@@ -45,6 +45,8 @@ export class ProductService {
         categories: data.categories,
         tags: data.tags,
         storeId: data.storeId,
+        showStorePhone: data.showStorePhone ?? false,
+        isFeatured: data.isFeatured ?? false,
         images: {
           create: data.images?.map((img) => ({
             path: img.path,
