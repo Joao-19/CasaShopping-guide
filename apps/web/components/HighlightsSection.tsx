@@ -76,6 +76,14 @@ export function HighlightsSection() {
         showPopup(<ProductDetailsCard product={productDetails} />);
     };
 
+    // Ensure play starts
+    useEffect(() => {
+        const autoScroll = emblaApi?.plugins()?.autoScroll;
+        if (autoScroll && !autoScroll.isPlaying()) {
+            autoScroll.play();
+        }
+    }, [emblaApi, products]);
+
     // Manual Pause/Resume for instant response
     const handleMouseEnter = useCallback(() => {
         const autoScroll = emblaApi?.plugins()?.autoScroll;
@@ -94,7 +102,7 @@ export function HighlightsSection() {
     // - SM: 30%
     // - LG: 35%
     // - XL: 25%
-    const slideClass = "flex-[0_0_55%] sm:flex-[0_0_30%] lg:flex-[0_0_30%] xl:flex-[0_0_30%] max-w-[400px] pl-4 sm:pl-6 lg:pl-8 min-w-0 relative";
+    const slideClass = "flex-[0_0_70%] sm:flex-[0_0_40%] lg:flex-[0_0_30%] xl:flex-[0_0_30%] max-w-[400px] pl-4 sm:pl-6 lg:pl-8 min-w-0 relative";
 
     return (
         <section className="rounded-[24px] py-10 bg-[rgb(236,236,238)] relative overflow-visible">
@@ -121,7 +129,7 @@ export function HighlightsSection() {
 
                         return (
                             <div className={slideClass} key={`${product.id}-${index}`}>
-                                <div onClick={() => handleProductClick(product)} className="w-full aspect-[231/306] relative rounded-[16px] overflow-hidden cursor-pointer group shadow-lg">
+                                <div onClick={() => handleProductClick(product)} className="w-full aspect-[231/306] relative rounded-[16px] overflow-hidden cursor-pointer group shadow-lg backface-hidden transform-gpu">
                                     <MediaCard
                                         imageSrc={isVideo ? undefined : (mediaPath || '/placeholder.png')}
                                         videoSrc={isVideo ? mediaPath : undefined}
@@ -169,13 +177,14 @@ export function HighlightsSection() {
                                         </div>
 
                                         {/* Heart Icon Top Right */}
-                                        <div className="absolute top-4 right-4 flex gap-2">
+                                        <div className="absolute top-4 right-4 flex gap-2 z-50">
                                             <div
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     toggleFav(product.id);
                                                 }}
-                                                className="w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20 cursor-pointer bg-white/10 hover:bg-white/20"
+                                                style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}
+                                                className="w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer bg-black/20 hover:bg-black/40 backface-hidden"
                                             >
                                                 <IconHeart className={isFavorited(product.id) ? "w-6 h-6 text-red-500 fill-red-500" : "w-6 h-6 text-white"} />
                                             </div>

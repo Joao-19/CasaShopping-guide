@@ -49,7 +49,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
     };
 
     return (
-        <div className="relative w-full max-w-[390px] mx-auto bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col h-full">
+        <div className="relative w-[92vw] max-w-[420px] mx-auto bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col h-full">
             <div className="flex-1 overflow-hidden relative">
                 {/* Sliding Container */}
                 <div

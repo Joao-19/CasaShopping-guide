@@ -57,7 +57,7 @@ export default function FavoritesPage() {
                         Erro ao carregar favoritos. Tente novamente mais tarde.
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         {data?.pages.map((page, pageIndex) =>
                             page.data.map((product: any, productIndex: number) => {
                                 const mappedProduct = {
@@ -80,7 +80,6 @@ export default function FavoritesPage() {
                                         isFavorited={isFavorited(mappedProduct.id)}
                                         onWishlistClick={() => toggleFav(mappedProduct.id)}
                                         className="cursor-[inherit]!"
-                                        description={mappedProduct.description}
                                     />
                                 );
                             })

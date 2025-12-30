@@ -30,11 +30,12 @@ function ProdutosContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    // Get initial category from URL
+    // Get initial values from URL
     const initialCategory = searchParams.get('categoria') || '';
+    const initialSearch = searchParams.get('search') || '';
 
-    const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [searchTerm, setSearchTerm] = useState(initialSearch);
+    const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
     const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
     // Debounce search input

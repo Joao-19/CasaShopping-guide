@@ -82,7 +82,7 @@ export function ProductCardSwiper({
     };
 
     return (
-        <div className={cn("flex flex-col gap-3 w-full cursor-pointer group h-full", className)} {...props}>
+        <div className={cn("flex flex-col gap-3 w-full cursor-pointer group/card h-full", className)} {...props}>
             <div className="relative aspect-square w-full rounded-[12px] overflow-hidden shadow-sm bg-linear-to-br from-gray-200 via-gray-300 to-gray-200">
 
                 <Swiper
@@ -96,7 +96,7 @@ export function ProductCardSwiper({
                         images.map((img, idx) => (
                             <SwiperSlide key={idx} className="w-full h-full">
                                 {renderMedia(img, idx)}
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+                                <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors pointer-events-none" />
                             </SwiperSlide>
                         ))
                     ) : (
@@ -112,7 +112,7 @@ export function ProductCardSwiper({
                 </div>
 
                 {/* Wishlist Button */}
-                <div className="absolute top-3 right-3 transition-opacity opacity-0 group-hover:opacity-100 z-10">
+                <div className="absolute top-3 right-3 z-10">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -125,7 +125,7 @@ export function ProductCardSwiper({
                 </div>
             </div>
             <div className="flex flex-col gap-1">
-                <p className="font-semibold text-[#162e47] text-[16px] leading-tight line-clamp-2 group-hover:text-[#162e47]/80 transition-colors">
+                <p className="font-semibold text-[#162e47] text-[16px] leading-tight line-clamp-2 group-hover/card:text-[#162e47]/80 transition-colors">
                     {title}
                 </p>
                 <p className="font-normal text-[#7d8b99] text-[14px]">

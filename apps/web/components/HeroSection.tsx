@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { getProducts } from "../Services/http/product.http";
 import { ProductDetailsCard } from "./ProductDetailsCard";
+import { useRouter } from "next/navigation";
 
 export function HeroSection() {
     const backGroundVideoLink = "/DEFAULT_BACKGROUND.webm";
@@ -13,6 +14,14 @@ export function HeroSection() {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { showPopup } = usePopup();
+    const router = useRouter();
+
+    const handleSearch = () => {
+        if (query.trim()) {
+            router.push(`/produtos?search=${encodeURIComponent(query.trim())}`);
+            setIsOpen(false);
+        }
+    };
 
     // Debounce logic
     useEffect(() => {
@@ -21,7 +30,7 @@ export function HeroSection() {
                 setIsLoading(true);
                 setIsOpen(true);
                 try {
-                    const response = await getProducts({ search: query, limit: 5 });
+                    const response = await getProducts({ search: query, limit: 10 });
                     const products = Array.isArray(response) ? response : response.data;
                     setResults(products);
                 } catch (error) {
@@ -89,17 +98,21 @@ export function HeroSection() {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 onFocus={() => { if (results.length > 0) setIsOpen(true) }}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             />
                             {isLoading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
-                            <button className="bg-[rgb(0,59,166)] text-white px-4 md:px-6 py-2 rounded-[8px] font-semibold hover:bg-[#002a78] transition-colors text-sm md:text-base shrink-0">
+                            <button
+                                onClick={handleSearch}
+                                className="bg-[rgb(0,59,166)] text-white px-4 md:px-6 py-2 rounded-[8px] font-semibold hover:bg-[#002a78] transition-colors text-sm md:text-base shrink-0"
+                            >
                                 Buscar
                             </button>
                         </div>
 
                         {/* Search Results Dropdown */}
                         {isOpen && results.length > 0 && (
-                            <div className="absolute cursor top-full left-0 right-0 mt-4 bg-white rounded-2xl shadow-xl overflow-hidden py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-                                <ul>
+                            <div className="absolute top-full left-0 right-0 mt-4 bg-white rounded-2xl shadow-xl overflow-hidden py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                <ul className="max-h-[380px] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
                                     {results.map((product) => (
                                         <li key={product.id}>
                                             <button

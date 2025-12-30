@@ -45,12 +45,12 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         initialPageParam: 1,
     });
 
-    const products = data?.pages.flatMap((page) => page.data.map((p: ProductWithStore) => ({
+    const baseProducts = data?.pages.flatMap((page) => page.data.map((p: ProductWithStore) => ({
         id: p.id,
         title: p.name,
         storeName: p.store?.name || "Loja",
         price: p.price,
-        description: p.description, // Added description mapper if available
+        description: p.description,
         images: p.images?.sort((a, b) => a.index - b.index)
             .map((img) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
         showStorePhone: p.showStorePhone,
@@ -60,6 +60,11 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         storeFacebook: p.store?.facebookLink,
         storeYoutube: p.store?.youtubeLink,
     }))) || [];
+
+    // Triple data if list is short to ensure Centered Loop has enough buffer
+    const products = baseProducts.length > 0 && baseProducts.length < 10
+        ? [...baseProducts, ...baseProducts, ...baseProducts]
+        : baseProducts;
 
     const handleProductClick = (product: any) => {
         showPopup(<ProductDetailsCard product={product} />);
@@ -90,12 +95,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                     </div>
                 </div>
             ) : (
-                <div className="relative group w-full md:max-w-7xl md:mx-auto md:px-8">
+                <div className="relative group/showcase max-w-7xl mx-auto px-8">
                     <Swiper
                         grabCursor={true}
                         spaceBetween={16}
-                        slidesPerView={2.5}
-                        centeredSlides={false}
+                        slidesPerView={1.2}
+                        centeredSlides={true}
+                        centeredSlidesBounds={false}
                         loop={true}
                         navigation={{
                             prevEl: `.prev-${uniqueId}`,
@@ -109,25 +115,24 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                         }}
                         breakpoints={{
                             640: {
-                                slidesPerView: 2,
-                                centeredSlides: false,
+                                slidesPerView: 2.2,
                                 spaceBetween: 24,
                             },
                             768: {
-                                slidesPerView: 3,
+                                slidesPerView: 3.2,
                             },
                             1024: {
-                                slidesPerView: 4,
+                                slidesPerView: 4.2,
                             },
                             1280: {
-                                slidesPerView: 5,
+                                slidesPerView: 5.2,
                             },
                         }}
-                        className="w-full pb-10! px-4 md:px-0 pl-8 md:pl-0"
+                        className="w-full py-12!"
                     >
-                        {products.map((product) => (
-                            <SwiperSlide key={product.id}>
-                                <div onClick={() => handleProductClick(product)}>
+                        {products.map((product, index) => (
+                            <SwiperSlide key={`${product.id}-${index}`} className="h-auto! flex items-center justify-center">
+                                <div onClick={() => handleProductClick(product)} className="transition-transform duration-300 hover:scale-[1.05] backface-hidden transform-gpu w-full">
                                     <ProductCardSwiper
                                         title={product.title}
                                         storeName={product.storeName}
@@ -149,15 +154,15 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                         )}
                     </Swiper>
 
-                    {/* Custom Navigation Buttons - Adjusted Position */}
+                    {/* Custom Navigation Buttons */}
                     <button
-                        className={`prev-${uniqueId} absolute left-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        className={`prev-${uniqueId} absolute -left-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
                     </button>
                     <button
-                        className={`next-${uniqueId} absolute right-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300`}
+                        className={`next-${uniqueId} absolute -right-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-10 h-10" strokeWidth={1.5} />
