@@ -141,12 +141,14 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
     container_name: casashopping-web
     ports:
       - "3001:3001"
     environment:
       - PORT=3001
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
     depends_on:
       - api-gateway
     networks:
@@ -160,12 +162,14 @@ services:
       dockerfile: apps/admin/Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
     container_name: casashopping-admin
     ports:
       - "3002:3002"
     environment:
       - PORT=3002
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
     depends_on:
       - api-gateway
     networks:

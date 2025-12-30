@@ -63,7 +63,9 @@ export function Toolbar() {
 
     const getImageUrl = (imagePath: string | null | undefined) => {
         if (!imagePath) return null;
-        if (imagePath.startsWith("http")) return imagePath;
+        if (imagePath.startsWith("http")) {
+            return imagePath.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost');
+        }
         const apiHost = process.env.NEXT_PUBLIC_API_HOST || "localhost";
         return `http://${apiHost}:9000/casashopping/${imagePath}`;
     };

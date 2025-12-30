@@ -21,6 +21,8 @@ COPY --from=turbo-builder /app/out/full/ .
 
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_API_HOST
+ENV NEXT_PUBLIC_API_HOST=$NEXT_PUBLIC_API_HOST
 
 RUN corepack enable
 RUN npm install -g turbo
