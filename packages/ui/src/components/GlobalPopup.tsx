@@ -33,11 +33,15 @@ export function GlobalPopup() {
     if (!isVisible) return null;
 
     return (
-        <div
-            className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-all duration-200 ${isClosing ? 'animate-fadeOut' : 'animate-fadeIn'
-                }`}
-            onClick={hidePopup}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Backdrop with Blur - Isolated to prevent artifacts */}
+            <div
+                className={`absolute inset-0 bg-black/80 transition-opacity duration-200 ${isClosing ? 'animate-fadeOut' : 'animate-fadeIn'
+                    }`}
+                onClick={hidePopup}
+            />
+
+            {/* Content Content */}
             <div
                 className={`relative z-50 p-4 ${isClosing ? 'animate-zoomOut' : 'animate-zoomIn'
                     }`}

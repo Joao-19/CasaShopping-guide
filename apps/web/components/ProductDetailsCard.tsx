@@ -82,12 +82,11 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                                     <>
                                                         <video
                                                             src={img}
-                                                            className="w-full h-full object-cover"
+                                                            className="w-full h-full object-cover pointer-events-none"
                                                             muted
                                                             loop
                                                             autoPlay
                                                             playsInline
-                                                            controls
                                                         />
                                                         {/* Video indicator */}
                                                         <div className="absolute top-3 left-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded flex items-center gap-1 z-10">

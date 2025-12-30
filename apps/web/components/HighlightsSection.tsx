@@ -119,7 +119,7 @@ export function HighlightsSection() {
                 onMouseLeave={handleMouseLeave}
                 onTouchEnd={handleMouseLeave} // Ensure resume on touch lift
             >
-                <div className="flex touch-pan-y will-change-transform">
+                <div className="flex touch-pan-y">
                     {slidesData.map((product, index) => {
                         const mediaPath = product.images?.[0]?.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost');
 
@@ -129,7 +129,7 @@ export function HighlightsSection() {
 
                         return (
                             <div className={slideClass} key={`${product.id}-${index}`}>
-                                <div onClick={() => handleProductClick(product)} className="w-full aspect-[231/306] relative rounded-[16px] overflow-hidden cursor-pointer group shadow-lg backface-hidden transform-gpu">
+                                <div onClick={() => handleProductClick(product)} className="w-full aspect-[231/306] relative rounded-[16px] overflow-hidden cursor-pointer group shadow-lg">
                                     <MediaCard
                                         imageSrc={isVideo ? undefined : (mediaPath || '/placeholder.png')}
                                         videoSrc={isVideo ? mediaPath : undefined}
@@ -183,8 +183,7 @@ export function HighlightsSection() {
                                                     e.stopPropagation();
                                                     toggleFav(product.id);
                                                 }}
-                                                style={{ transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}
-                                                className="w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer bg-black/20 hover:bg-black/40 backface-hidden"
+                                                className="w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer bg-black/20 hover:bg-black/40"
                                             >
                                                 <IconHeart className={isFavorited(product.id) ? "w-6 h-6 text-red-500 fill-red-500" : "w-6 h-6 text-white"} />
                                             </div>
