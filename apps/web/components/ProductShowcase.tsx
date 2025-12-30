@@ -72,7 +72,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
     return (
         <section>
-            <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 w-full">
+            <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row md:items-center justify-between w-full">
                 <div className="flex items-center gap-4">
                     <h2 className="text-[#162e47] text-[28px] font-bold font-sans">{title}</h2>
                 </div>

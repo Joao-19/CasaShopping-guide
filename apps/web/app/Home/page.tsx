@@ -13,13 +13,13 @@ export default function HomePage() {
 
                 <HeroSection />
 
-                <div className="max-w-7xl mx-auto px-8 flex flex-col mt-16">
+                <div className="max-w-7xl mx-auto px-8 flex flex-col mt-16 mb-16">
                     <CategoriesSection />
 
                     <HighlightsSection />
                 </div>
 
-                <div className="flex flex-col gap-16 pb-10">
+                <div className="flex flex-col">
                     <ProductShowcase
                         title="Sala"
                         category="sala"
