@@ -129,8 +129,8 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                         className="w-full py-12!"
                     >
                         {products.map((product, index) => (
-                            <SwiperSlide key={`${product.id}-${index}`} className="h-auto! flex items-center justify-center">
-                                <div onClick={() => handleProductClick(product)} className="transition-transform duration-300 hover:scale-[1.05] backface-hidden transform-gpu w-full">
+                            <SwiperSlide key={`${product.id}-${index}`} className="h-auto! flex items-center justify-center p-2">
+                                <div onClick={() => handleProductClick(product)} className="transition-transform duration-300 hover:scale-[1.05] backface-hidden transform-gpu w-full relative hover:z-10">
                                     <ProductCardSwiper
                                         title={product.title}
                                         storeName={product.storeName}
@@ -154,13 +154,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
                     {/* Custom Navigation Buttons */}
                     <button
-                        className={`prev-${uniqueId} absolute -left-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
+                        className={`prev-${uniqueId} absolute -left-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
                     </button>
                     <button
-                        className={`next-${uniqueId} absolute -right-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
+                        className={`next-${uniqueId} absolute -right-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-10 h-10" strokeWidth={1.5} />
