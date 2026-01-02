@@ -48,6 +48,12 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
         setShowStoreDetails(false);
     };
 
+    const ensureAbsoluteUrl = (url: string | null | undefined) => {
+        if (!url) return undefined;
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return `https://${url}`;
+    };
+
     return (
         <div className="relative w-[92vw] max-w-[420px] mx-auto bg-[#f0f1f3] rounded-[16px] overflow-hidden shadow-2xl flex flex-col h-full">
             <div className="flex-1 overflow-hidden relative">
@@ -244,7 +250,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                 <div className="flex gap-4">
                                     {product.storeSite && (
                                         <a
-                                            href={product.storeSite}
+                                            href={ensureAbsoluteUrl(product.storeSite)}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex-1 bg-[#003ba6] text-white h-[48px] rounded-[8px] font-sans text-[16px] flex items-center justify-center hover:bg-[#002a78] transition-colors no-underline"
@@ -280,17 +286,17 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                             {/* Social Media Icons */}
                             <div className="flex justify-center gap-8 mt-2">
                                 {product.storeInstagram && (
-                                    <a href={product.storeInstagram} target="_blank" rel="noopener noreferrer">
+                                    <a href={ensureAbsoluteUrl(product.storeInstagram)} target="_blank" rel="noopener noreferrer">
                                         <IconInstagram className="size-[30px] text-[#003ba6] hover:opacity-70 transition-opacity" />
                                     </a>
                                 )}
                                 {product.storeFacebook && (
-                                    <a href={product.storeFacebook} target="_blank" rel="noopener noreferrer">
+                                    <a href={ensureAbsoluteUrl(product.storeFacebook)} target="_blank" rel="noopener noreferrer">
                                         <IconFacebook className="size-[30px] text-[#003ba6] hover:opacity-70 transition-opacity" />
                                     </a>
                                 )}
                                 {product.storeYoutube && (
-                                    <a href={product.storeYoutube} target="_blank" rel="noopener noreferrer">
+                                    <a href={ensureAbsoluteUrl(product.storeYoutube)} target="_blank" rel="noopener noreferrer">
                                         <IconYoutube className="size-[30px] text-[#003ba6] hover:opacity-70 transition-opacity" />
                                     </a>
                                 )}

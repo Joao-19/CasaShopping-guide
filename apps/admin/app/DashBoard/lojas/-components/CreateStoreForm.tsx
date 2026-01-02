@@ -47,13 +47,12 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
     // Form Fields with Validation
     const nameField = useFormField(data.name, [validator.rules.required]);
     const addressField = useFormField(data.address, [validator.rules.required]);
-    const siteField = useFormField(data.site, []);
-
     // Optional fields
     const phoneField = useFormField(data.phone, [validator.rules.phone]);
-    const facebookField = useFormField(data.facebookLink, [validator.rules.url]);
-    const instagramField = useFormField(data.instagramLink, [validator.rules.url]);
-    const youtubeField = useFormField(data.youtubeLink, [validator.rules.url]);
+    const facebookField = useFormField(data.facebookLink, []);
+    const instagramField = useFormField(data.instagramLink, []);
+    const youtubeField = useFormField(data.youtubeLink, []);
+    const siteField = useFormField(data.site, []);
 
     const handleImageSelect = (file: File) => {
         handlers.setImage(file);
