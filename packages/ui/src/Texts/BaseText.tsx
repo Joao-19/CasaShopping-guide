@@ -22,9 +22,10 @@ interface BaseTextProps {
     size?: sizes;
     color: "black" | "white" | "gray"; // TODO Add theme colors here!
     className?: string;
+    bold?: boolean;
 }
 
-export const BaseText: React.FC<BaseTextProps> = ({ text, size = "medium", color, className }) => {
+export const BaseText: React.FC<BaseTextProps> = ({ text, size = "medium", color, className, bold }) => {
     return (
         <div
             className={cn(
@@ -36,6 +37,7 @@ export const BaseText: React.FC<BaseTextProps> = ({ text, size = "medium", color
                 "p-0 m-0",
                 sizeClasses[size],
                 colorClasses[color],
+                bold ? "font-bold" : "font-normal",
                 className
             )}>
                 {text || ""}

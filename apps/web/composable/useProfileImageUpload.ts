@@ -25,8 +25,9 @@ export function useProfileImageUpload() {
       let compressedFile: File;
       try {
         compressedFile = await imageCompression(file, options);
-        // Rename to profile_{userId}.webp
-        const filename = `profile_${userId}.webp`;
+        // Rename to profile_{userId}_{timestamp}.webp to bust cache
+        const timestamp = Date.now();
+        const filename = `profile_${userId}_${timestamp}.webp`;
         compressedFile = new File([compressedFile], filename, {
           type: "image/webp",
         });

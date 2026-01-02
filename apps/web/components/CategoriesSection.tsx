@@ -42,14 +42,13 @@ export function CategoriesSection() {
             <div className="relative group/categories max-w-7xl mx-auto">
                 <Swiper
                     grabCursor={true}
-                    spaceBetween={16}
-                    slidesPerView={1.2}
-                    centeredSlides={true}
+                    spaceBetween={6}
+                    centeredSlides={false}
                     breakpoints={{
-                        640: { slidesPerView: 2.2, spaceBetween: 24 },
-                        768: { slidesPerView: 2.5 },
-                        1024: { slidesPerView: 3.8 },
-                        1280: { slidesPerView: 4 },
+                        0: { slidesPerView: 2, spaceBetween: 2 },
+                        480: { slidesPerView: 3, spaceBetween: 12 },
+                        768: { slidesPerView: 3, spaceBetween: 12 },
+                        1024: { slidesPerView: 4, spaceBetween: 12 },
                     }}
                     loop={true}
                     navigation={{
@@ -60,10 +59,10 @@ export function CategoriesSection() {
                     className="w-full py-8! md:px-2!"
                 >
                     {categories.map((category, index) => (
-                        <SwiperSlide key={`${category.id}-${index}`} className="h-auto! flex items-center justify-center">
+                        <SwiperSlide key={`${category.id}-${index}`} className="h-auto! flex items-center justify-center p-2">
                             <MediaCard
                                 imageSrc={category.image}
-                                className="flex flex-col gap-[10px] w-full aspect-[231/306] items-center justify-center p-4 cursor-pointer transition-transform duration-300 hover:scale-[1.05] backface-hidden transform-gpu"
+                                className="flex flex-col gap-[10px] w-full aspect-[231/306] items-center justify-center p-4 cursor-pointer transition-transform duration-300 hover:scale-[1.05] relative hover:z-10 backface-hidden transform-gpu"
                                 onClick={() => handleCategoryClick(category.id)}
                             >
                                 <div className="flex flex-col items-center justify-center h-full">

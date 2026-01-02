@@ -99,8 +99,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                     <Swiper
                         grabCursor={true}
                         spaceBetween={16}
-                        slidesPerView={1.2}
-                        centeredSlides={true}
+                        centeredSlides={false}
                         centeredSlidesBounds={false}
                         loop={true}
                         navigation={{
@@ -114,9 +113,8 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                             }
                         }}
                         breakpoints={{
-                            640: {
-                                slidesPerView: 2.2,
-                                spaceBetween: 24,
+                            340: {
+                                slidesPerView: 2.5,
                             },
                             768: {
                                 slidesPerView: 3.2,
