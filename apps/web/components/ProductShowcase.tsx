@@ -114,7 +114,8 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                         }}
                         breakpoints={{
                             340: {
-                                slidesPerView: 2.5,
+                                slidesPerView: 2.1,
+                                spaceBetween: 2,
                             },
                             768: {
                                 slidesPerView: 3.2,
