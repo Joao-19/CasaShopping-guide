@@ -113,7 +113,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                             }
                         }}
                         breakpoints={{
-                            340: {
+                            0: {
                                 slidesPerView: 2.1,
                                 spaceBetween: 2,
                             },
