@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getFavoriteIds, toggleFavorite } from "@/Services/http/product.http";
+import { useAuthStore } from "@/store/auth.store";
 
 /**
  * Global hook to manage favorites state across the entire app.
@@ -9,10 +10,17 @@ export function useFavorites() {
   const queryClient = useQueryClient();
 
   // Fetch the list of favorite IDs
+  const { user } = useAuthStore();
+  const isGuest = user?.isGuest;
+
   const { data: favoriteIds = [], isLoading } = useQuery({
-    queryKey: ["favorites-ids"],
-    queryFn: getFavoriteIds,
+    queryKey: ["favorites-ids", isGuest], // Include isGuest to force refetch/cache separation
+    queryFn: async () => {
+      if (isGuest) return [];
+      return getFavoriteIds();
+    },
     staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !isGuest, // Don't fetch if guest
   });
 
   // Mutation to toggle favorite status

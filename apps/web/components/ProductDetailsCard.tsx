@@ -1,6 +1,8 @@
 import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, formatPriceTier } from "@repo/ui";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
+import { LoginRequiredPopup } from "./LoginRequiredPopup";
+import { useAuthStore } from "@/store/auth.store";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { useFavorites } from "@/composable/useFavorites";
@@ -30,13 +32,18 @@ interface ProductDetailsCardProps {
 }
 
 export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
-    const { hidePopup } = usePopup();
+    const { hidePopup, showPopup } = usePopup();
     const { isFavorited, toggleFavorite } = useFavorites();
+    const { user } = useAuthStore();
     const [showStoreDetails, setShowStoreDetails] = useState(false);
 
     const isProductFavorited = isFavorited(product.id);
 
     const handleToggleFavorite = () => {
+        if (user?.isGuest) {
+            showPopup(<LoginRequiredPopup onClose={hidePopup} />);
+            return;
+        }
         toggleFavorite(product.id);
     };
 

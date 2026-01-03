@@ -10,6 +10,8 @@ import { usePopup } from "@repo/ui";
 import { useFavorites } from "@/composable/useFavorites";
 
 import { ProductDetailsCard } from "./ProductDetailsCard";
+import { LoginRequiredPopup } from "./LoginRequiredPopup";
+import { useAuthStore } from "@/store/auth.store";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -25,8 +27,9 @@ interface ProductShowcaseProps {
 
 export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: ProductShowcaseProps) {
     const uniqueId = useId().replace(/:/g, ''); // Sanitize ID for class selectors
-    const { showPopup } = usePopup();
+    const { showPopup, hidePopup } = usePopup();
     const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
+    const { user } = useAuthStore();
     const {
         data,
         fetchNextPage,
@@ -138,7 +141,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                         price={product.price}
                                         images={product.images}
                                         isFavorited={isFavorited(product.id)}
-                                        onWishlistClick={() => toggleFav(product.id)}
+                                        onWishlistClick={() => {
+                                            if (user?.isGuest) {
+                                                showPopup(<LoginRequiredPopup onClose={hidePopup} />);
+                                                return;
+                                            }
+                                            toggleFav(product.id);
+                                        }}
                                         className="cursor-[inherit]!"
                                     />
                                 </div>
