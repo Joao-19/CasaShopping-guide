@@ -30,6 +30,15 @@ export function Toolbar() {
 
 
     const handleLogout = async () => {
+        if (user?.isGuest) {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("authUser");
+            setUser(null);
+            router.push("/login");
+            return;
+        }
+
         try {
             await import("@/Services/http/auth.http").then((m) => m.default.logout());
         } catch (error) {
