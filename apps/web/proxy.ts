@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // 1. Defina APENAS as rotas que NÃO precisam de auth
-// Removi a barra '/' daqui, pois queremos proteger a home
 const publicRoutes = ["/login", "/register", "/", "/stores", "/produtos"];
 
 export function proxy(request: NextRequest) {

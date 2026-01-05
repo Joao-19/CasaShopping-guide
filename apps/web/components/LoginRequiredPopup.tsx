@@ -57,7 +57,7 @@ export function LoginRequiredPopup({ onClose }: LoginRequiredPopupProps) {
                 </Button>
             </CardContent>
             <CardFooter className="justify-center border-t pt-4">
-                <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-sm">
+                <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-sm cursor-pointer">
                     Continuar navegando como visitante
                 </button>
             </CardFooter>
