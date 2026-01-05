@@ -27,7 +27,7 @@ const http = createApiClient({
       // localStorage.removeItem("refreshToken");
       // localStorage.removeItem("authUser");
       // window.location.href = "/login";
-      alert("Sessão expirada. Verifique o console antes de recarregar.");
+      // alert("Sessão expirada. Verifique o console antes de recarregar.");
     }
   },
 });

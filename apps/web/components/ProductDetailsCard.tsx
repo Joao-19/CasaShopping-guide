@@ -1,6 +1,8 @@
 import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, formatPriceTier } from "@repo/ui";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
+import { LoginRequiredPopup } from "./LoginRequiredPopup";
+import { useAuthStore } from "@/store/auth.store";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { useFavorites } from "@/composable/useFavorites";
@@ -30,13 +32,18 @@ interface ProductDetailsCardProps {
 }
 
 export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
-    const { hidePopup } = usePopup();
+    const { hidePopup, showPopup } = usePopup();
     const { isFavorited, toggleFavorite } = useFavorites();
+    const { user } = useAuthStore();
     const [showStoreDetails, setShowStoreDetails] = useState(false);
 
     const isProductFavorited = isFavorited(product.id);
 
     const handleToggleFavorite = () => {
+        if (user?.isGuest) {
+            showPopup(<LoginRequiredPopup onClose={hidePopup} />);
+            return;
+        }
         toggleFavorite(product.id);
     };
 
@@ -46,6 +53,12 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
 
     const handleBackToProduct = () => {
         setShowStoreDetails(false);
+    };
+
+    const ensureAbsoluteUrl = (url: string | null | undefined) => {
+        if (!url) return undefined;
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return `https://${url}`;
     };
 
     return (
@@ -244,7 +257,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                 <div className="flex gap-4">
                                     {product.storeSite && (
                                         <a
-                                            href={product.storeSite}
+                                            href={ensureAbsoluteUrl(product.storeSite)}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex-1 bg-[#003ba6] text-white h-[48px] rounded-[8px] font-sans text-[16px] flex items-center justify-center hover:bg-[#002a78] transition-colors no-underline"
@@ -280,17 +293,17 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                             {/* Social Media Icons */}
                             <div className="flex justify-center gap-8 mt-2">
                                 {product.storeInstagram && (
-                                    <a href={product.storeInstagram} target="_blank" rel="noopener noreferrer">
+                                    <a href={ensureAbsoluteUrl(product.storeInstagram)} target="_blank" rel="noopener noreferrer">
                                         <IconInstagram className="size-[30px] text-[#003ba6] hover:opacity-70 transition-opacity" />
                                     </a>
                                 )}
                                 {product.storeFacebook && (
-                                    <a href={product.storeFacebook} target="_blank" rel="noopener noreferrer">
+                                    <a href={ensureAbsoluteUrl(product.storeFacebook)} target="_blank" rel="noopener noreferrer">
                                         <IconFacebook className="size-[30px] text-[#003ba6] hover:opacity-70 transition-opacity" />
                                     </a>
                                 )}
                                 {product.storeYoutube && (
-                                    <a href={product.storeYoutube} target="_blank" rel="noopener noreferrer">
+                                    <a href={ensureAbsoluteUrl(product.storeYoutube)} target="_blank" rel="noopener noreferrer">
                                         <IconYoutube className="size-[30px] text-[#003ba6] hover:opacity-70 transition-opacity" />
                                     </a>
                                 )}

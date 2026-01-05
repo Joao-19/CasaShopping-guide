@@ -7,6 +7,8 @@ import { usePopup } from "@repo/ui";
 import { ProductDetailsCard } from "../../components/ProductDetailsCard";
 import { ProductCardSwiper } from "../../components/ProductCardSwiper";
 import { useFavorites } from "../../composable/useFavorites";
+import { useAuthStore } from "@/store/auth.store";
+import { LoginRequiredPopup } from "../../components/LoginRequiredPopup";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts, ProductWithStore } from "../../Services/http/product.http";
 import { useInView } from "react-intersection-observer";
@@ -24,8 +26,9 @@ const categories = [
 
 // Inner component that uses useSearchParams
 function ProdutosContent() {
-    const { showPopup } = usePopup();
+    const { showPopup, hidePopup } = usePopup();
     const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
+    const { user } = useAuthStore();
     const { ref, inView } = useInView();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -164,7 +167,13 @@ function ProdutosContent() {
                                         price={product.price}
                                         images={product.images}
                                         isFavorited={isFavorited(product.id)}
-                                        onWishlistClick={() => toggleFav(product.id)}
+                                        onWishlistClick={() => {
+                                            if (user?.isGuest) {
+                                                showPopup(<LoginRequiredPopup onClose={hidePopup} />);
+                                                return;
+                                            }
+                                            toggleFav(product.id);
+                                        }}
                                         className="h-full"
                                     />
                                 </div>

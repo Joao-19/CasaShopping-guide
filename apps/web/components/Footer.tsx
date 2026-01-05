@@ -1,4 +1,10 @@
-import { IconFacebook, IconInstagram, IconYoutube, Assets, BaseText } from "@repo/ui";
+"use client";
+
+import { IconFacebook, IconInstagram, IconYoutube, Assets } from "@repo/ui";
+
+function goTo(url: string) {
+    window.location.href = url;
+}
 
 export function Footer() {
     return (
@@ -20,10 +26,9 @@ export function Footer() {
                     <div className="flex flex-col gap-4">
                         <h3 className="text-white font-bold text-lg font-sans">Institucional</h3>
                         <ul className="flex flex-col gap-3 text-white/70 text-sm font-sans">
-                            <li><button className="hover:text-white transition-colors">Sobre o CasaShopping</button></li>
-                            <li><button className="hover:text-white transition-colors">Lojas</button></li>
-                            <li><button className="hover:text-white transition-colors">Blog</button></li>
-                            <li><button className="hover:text-white transition-colors">Trabalhe Conosco</button></li>
+                            <li><button className="hover:text-white transition-colors cursor-pointer">Sobre o CasaShopping</button></li>
+                            <li><button className="hover:text-white transition-colors cursor-pointer" onClick={() => goTo("/stores")}>Lojas</button></li>
+                            <li><button className="hover:text-white transition-colors cursor-pointer">Trabalhe Conosco</button></li>
                         </ul>
                     </div>
                     <div className="flex flex-col gap-4">
@@ -51,10 +56,10 @@ export function Footer() {
                     </div>
                 </div>
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between text-white/50 text-xs font-sans">
-                    <BaseText text="© 2025 CasaShopping. Todos os direitos reservados." color="gray" size="extra-small" />
-                    <div className="flex">
-                        <BaseText text="Política de Privacidade" color="gray" size="extra-small" />
-                        <BaseText text="Termos de Uso" color="gray" size="extra-small" />
+                    <span className="text-gray-400">© {new Date().getFullYear()} CasaShopping. Todos os direitos reservados.</span>
+                    <div className="flex gap-6 mt-4 md:mt-0">
+                        <span className="text-gray-400 whitespace-nowrap cursor-pointer hover:text-white transition-colors">Política de Privacidade</span>
+                        <span className="text-gray-400 whitespace-nowrap cursor-pointer hover:text-white transition-colors">Termos de Uso</span>
                     </div>
                 </div>
             </div>

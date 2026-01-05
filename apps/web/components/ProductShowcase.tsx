@@ -10,6 +10,8 @@ import { usePopup } from "@repo/ui";
 import { useFavorites } from "@/composable/useFavorites";
 
 import { ProductDetailsCard } from "./ProductDetailsCard";
+import { LoginRequiredPopup } from "./LoginRequiredPopup";
+import { useAuthStore } from "@/store/auth.store";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -25,8 +27,9 @@ interface ProductShowcaseProps {
 
 export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: ProductShowcaseProps) {
     const uniqueId = useId().replace(/:/g, ''); // Sanitize ID for class selectors
-    const { showPopup } = usePopup();
+    const { showPopup, hidePopup } = usePopup();
     const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
+    const { user } = useAuthStore();
     const {
         data,
         fetchNextPage,
@@ -99,8 +102,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                     <Swiper
                         grabCursor={true}
                         spaceBetween={16}
-                        slidesPerView={1.2}
-                        centeredSlides={true}
+                        centeredSlides={false}
                         centeredSlidesBounds={false}
                         loop={true}
                         navigation={{
@@ -114,9 +116,9 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                             }
                         }}
                         breakpoints={{
-                            640: {
-                                slidesPerView: 2.2,
-                                spaceBetween: 24,
+                            0: {
+                                slidesPerView: 2.1,
+                                spaceBetween: 2,
                             },
                             768: {
                                 slidesPerView: 3.2,
@@ -131,15 +133,21 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                         className="w-full py-12!"
                     >
                         {products.map((product, index) => (
-                            <SwiperSlide key={`${product.id}-${index}`} className="h-auto! flex items-center justify-center">
-                                <div onClick={() => handleProductClick(product)} className="transition-transform duration-300 hover:scale-[1.05] backface-hidden transform-gpu w-full">
+                            <SwiperSlide key={`${product.id}-${index}`} className="h-auto! flex items-center justify-center p-2">
+                                <div onClick={() => handleProductClick(product)} className="transition-transform duration-300 hover:scale-[1.05] backface-hidden transform-gpu w-full relative hover:z-10">
                                     <ProductCardSwiper
                                         title={product.title}
                                         storeName={product.storeName}
                                         price={product.price}
                                         images={product.images}
                                         isFavorited={isFavorited(product.id)}
-                                        onWishlistClick={() => toggleFav(product.id)}
+                                        onWishlistClick={() => {
+                                            if (user?.isGuest) {
+                                                showPopup(<LoginRequiredPopup onClose={hidePopup} />);
+                                                return;
+                                            }
+                                            toggleFav(product.id);
+                                        }}
                                         className="cursor-[inherit]!"
                                     />
                                 </div>
@@ -156,13 +164,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
                     {/* Custom Navigation Buttons */}
                     <button
-                        className={`prev-${uniqueId} absolute -left-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
+                        className={`prev-${uniqueId} absolute -left-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
                     </button>
                     <button
-                        className={`next-${uniqueId} absolute -right-4 top-1/2 -translate-y-1/2 -mt-5 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
+                        className={`next-${uniqueId} absolute -right-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-10 h-10" strokeWidth={1.5} />

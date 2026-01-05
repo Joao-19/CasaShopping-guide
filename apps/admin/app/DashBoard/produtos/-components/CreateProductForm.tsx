@@ -341,7 +341,12 @@ export function CreateProductForm({
     const [categories, setCategories] = useState<string[]>(
         initialData?.categories || []
     );
-    const [tags, setTags] = useState(initialData?.tags || "");
+    const [tags, setTags] = useState(() => {
+        const t = initialData?.tags;
+        if (Array.isArray(t)) return t.join(' ');
+        if (typeof t === 'string') return t;
+        return "";
+    });
     const [storeId, setStoreId] = useState(initialData?.storeId || "");
     const [images, setImages] = useState<ImageState[]>(
         initialData?.images?.map((img: ProductImage) => ({
@@ -413,7 +418,7 @@ export function CreateProductForm({
             description,
             price,
             categories: categoryList,
-            tags: tags || undefined, // Send undefined if empty string
+            tags: tags && typeof tags === 'string' ? tags : undefined, // Send undefined if empty string
             storeId,
             images: finalImages,
             showStorePhone,

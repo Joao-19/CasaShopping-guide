@@ -33,6 +33,9 @@ export class CreateUserDto {
   phone!: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(9, { message: "A senha deve ter no mínimo 9 caracteres." })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z]).*$/, {
+    message: "A senha deve conter letras maiúsculas e minúsculas.",
+  })
   password!: string;
 }

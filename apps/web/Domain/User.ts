@@ -4,4 +4,5 @@ export default interface User {
   email: string;
   profileImage?: string;
   createdAt: Date;
+  isGuest?: boolean;
 }

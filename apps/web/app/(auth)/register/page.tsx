@@ -44,7 +44,13 @@ const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterForm
 
     const nameField = useFormField(name, [validator.rules.required]);
     const emailField = useFormField(email, [validator.rules.required, validator.rules.email]);
-    const passwordField = useFormField(password, [validator.rules.required]);
+    const passwordField = useFormField(password, [
+        validator.rules.required,
+        validator.rules.min(9),
+        (value: string) =>
+            (/[a-z]/.test(value) && /[A-Z]/.test(value)) ||
+            "Senha deve ter maiúsculas e minúsculas",
+    ]);
     const phoneField = useFormField(phone, []);
 
     return (

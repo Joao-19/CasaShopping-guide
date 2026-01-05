@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // 1. Defina APENAS as rotas que NÃO precisam de auth
-// Removi a barra '/' daqui, pois queremos proteger a home
-const publicRoutes = ["/login", "/register"];
+const publicRoutes = ["/login", "/register", "/", "/stores", "/produtos"];
 
 export function proxy(request: NextRequest) {
   // Tenta pegar o token
@@ -25,9 +24,10 @@ export function proxy(request: NextRequest) {
 
   // --- CENÁRIO 2: Usuário LOGADO tentando acessar rota de LOGIN ---
   // Se ele já tem token e tenta entrar no login ou register
-  if (isPublicRoute && token) {
+  const isAuthRoute = ["/login", "/register"].includes(pathname);
+
+  if (isAuthRoute && token) {
     // Redireciona para o Dashboard (Home)
-    // ATENÇÃO: Verifique se você quer mandar para '/home' ou '/'
     return NextResponse.redirect(new URL("/", request.url));
   }
 

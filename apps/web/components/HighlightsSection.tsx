@@ -8,10 +8,13 @@ import { useFavorites } from "@/composable/useFavorites";
 import { ProductDetailsCard } from "./ProductDetailsCard";
 import useEmblaCarousel from 'embla-carousel-react';
 import AutoScroll from 'embla-carousel-auto-scroll';
+import { LoginRequiredPopup } from "./LoginRequiredPopup";
+import { useAuthStore } from "@/store/auth.store";
 
 export function HighlightsSection() {
-    const { showPopup } = usePopup();
+    const { showPopup, hidePopup } = usePopup();
     const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
+    const { user } = useAuthStore();
 
     const [emblaRef, emblaApi] = useEmblaCarousel(
         { loop: true, dragFree: true, align: 'center', containScroll: false },
@@ -181,6 +184,10 @@ export function HighlightsSection() {
                                             <div
                                                 onClick={(e) => {
                                                     e.stopPropagation();
+                                                    if (user?.isGuest) {
+                                                        showPopup(<LoginRequiredPopup onClose={hidePopup} />);
+                                                        return;
+                                                    }
                                                     toggleFav(product.id);
                                                 }}
                                                 className="w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer bg-black/20 hover:bg-black/40"

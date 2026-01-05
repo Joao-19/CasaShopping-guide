@@ -1,5 +1,6 @@
 "use client";
 
+import { BaseText } from "@repo/ui";
 import { useRouter } from "next/navigation";
 
 interface SecondaryToolbarProps {
@@ -14,7 +15,7 @@ export function SecondaryToolbar({ title }: SecondaryToolbarProps) {
             <div className="max-w-7xl mx-auto flex items-center gap-4">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg transition-colors group"
+                    className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-full transition-colors group"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -32,9 +33,8 @@ export function SecondaryToolbar({ title }: SecondaryToolbarProps) {
                         <path d="m12 19-7-7 7-7"></path>
                         <path d="M19 12H5"></path>
                     </svg>
-                    <span className="font-medium text-sm group-hover:underline">Voltar</span>
                 </button>
-                <h1 className="text-xl font-bold">{title}</h1>
+                <BaseText color="white" bold text={title || "Voltar"} size="xl" />
             </div>
         </header>
     );

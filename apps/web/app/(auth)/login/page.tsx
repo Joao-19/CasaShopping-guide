@@ -22,6 +22,7 @@ import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import { Assets } from "@repo/ui";
 import { usePopup } from "@repo/ui/context/PopupContext";
 import { ForgotPasswordPopup } from "@/components/ForgotPasswordPopup";
+import { useAuthStore } from "@/store/auth.store";
 
 interface LoginFormProps {
     formData: {
@@ -34,9 +35,10 @@ interface LoginFormProps {
     };
     loading: boolean;
     onSubmit: (e: React.FormEvent) => void;
+    onGuestLogin: () => void;
 }
 
-const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps) => {
+const LoginForm = ({ formData, setFormData, loading, onSubmit, onGuestLogin }: LoginFormProps) => {
     const validator = useValidator();
     const { email, password } = formData;
     const { setEmail, setPassword } = setFormData;
@@ -83,6 +85,15 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
                 {loading ? "Entrando..." : "Entrar"}
             </Button>
 
+            <Button
+                type="button"
+                variant="outline"
+                onClick={onGuestLogin}
+                className="w-full h-11 border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg font-semibold mt-3 active:scale-[0.98] transition-all"
+            >
+                Entrar como Visitante
+            </Button>
+
             <div className="flex justify-center mt-6">
                 <button
                     type="button"
@@ -97,8 +108,9 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
 };
 
 const LoginPage = () => {
-    const router = useRouter();
+    const router = useRouter(); // Restored
     const { login, loading } = useLogin();
+    const { setGuest } = useAuthStore();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { FormProvider, validateAll } = useForm();
@@ -118,6 +130,11 @@ const LoginPage = () => {
         } catch (error) {
             console.error("Login failed", error);
         }
+    };
+
+    const handleGuestLogin = async () => {
+        await setGuest();
+        router.push("/");
     };
 
     return (
@@ -167,6 +184,7 @@ const LoginPage = () => {
                                     setFormData={{ setEmail, setPassword }}
                                     loading={loading}
                                     onSubmit={handleLogin}
+                                    onGuestLogin={handleGuestLogin}
                                 />
                             </FormProvider>
                         </CardContent>
@@ -175,6 +193,7 @@ const LoginPage = () => {
                             <div className="text-center text-sm text-gray-600">
                                 Não tem uma conta?
                             </div>
+
 
                             <Link href="/register" className="font-bold text-primary hover:underline">
                                 Cadastre-se grátis

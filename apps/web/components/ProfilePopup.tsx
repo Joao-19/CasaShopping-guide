@@ -46,6 +46,7 @@ export function ProfilePopup({ onClose }: ProfilePopupProps) {
                 const updatedUser = await uploadProfileImage(file, user.id);
                 if (updatedUser?.profileImage) {
                     setProfileImage(updatedUser.profileImage);
+                    setImageVersion(Date.now()); // Force cache-bust for new image
                     // Update user in auth store
                     setUser({ ...user, profileImage: updatedUser.profileImage });
                 }
@@ -95,12 +96,14 @@ export function ProfilePopup({ onClose }: ProfilePopupProps) {
         );
     };
 
-    // Build image URL
+    // Build image URL with cache-busting parameter
+    const [imageVersion, setImageVersion] = useState(Date.now());
+
     const getImageUrl = (imagePath: string | null) => {
         if (!imagePath) return null;
-        if (imagePath.startsWith("http")) return imagePath;
+        if (imagePath.startsWith("http")) return `${imagePath}?v=${imageVersion}`;
         const apiHost = process.env.NEXT_PUBLIC_API_HOST || "localhost";
-        return `http://${apiHost}:9000/casashopping/${imagePath}`;
+        return `http://${apiHost}:9000/casashopping/${imagePath}?v=${imageVersion}`;
     };
 
     const imageUrl = getImageUrl(profileImage);
