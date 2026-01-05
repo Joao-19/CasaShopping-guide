@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/auth.store";
+import useLogin from "@/composable/login/useLogin";
 import { useFavorites } from "../composable/useFavorites";
 import { ProfilePopup } from "./ProfilePopup";
 import { LoginRequiredPopup } from "./LoginRequiredPopup";
@@ -29,35 +30,16 @@ export function Toolbar() {
     const safeUser = mounted ? user : null;
 
 
-    const handleLogout = async () => {
-        if (user?.isGuest) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("authUser");
-            setUser(null);
-            router.push("/login");
-            return;
-        }
-
-        try {
-            await import("@/Services/http/auth.http").then((m) => m.default.logout());
-        } catch (error) {
-            console.warn("Logout backend call failed (offline?), forcing local logout.", error);
-        } finally {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("authUser");
-            setUser(null);
-            router.push("/login");
-        }
-    };
+    const { logout } = useLogin();
 
     const getInitials = (name: string) => {
         if (!name) return "V";
         const names = name.trim().split(" ");
         if (names.length === 0) return "";
         if (names.length === 1) return names[0] ? names[0].charAt(0).toUpperCase() : "";
-        return names[0] && names[1] ? (names[0].charAt(0) + names[1].charAt(0)).toUpperCase() : "";
+        const first = names[0];
+        const last = names[names.length - 1];
+        return (first && last ? first.charAt(0) + last.charAt(0) : "V").toUpperCase();
     };
 
     const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
@@ -176,7 +158,7 @@ export function Toolbar() {
                         </div>
                         <IconArrowRight className="size-6 group-hover:translate-x-1 transition-transform" stroke="#151515" />
                     </button>
-                    <button onClick={handleLogout} className="bg-[#e9ebef] w-full p-4 rounded-lg flex items-center justify-between group hover:bg-gray-200 transition-colors">
+                    <button onClick={logout} className="bg-[#e9ebef] w-full p-4 rounded-lg flex items-center justify-between group hover:bg-gray-200 transition-colors">
                         <div className="flex items-center gap-4 text-[#151515]">
                             <IconLogout className="size-[20px]" />
                             <span className="text-base font-normal font-sans">Sair</span>

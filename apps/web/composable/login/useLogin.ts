@@ -24,8 +24,46 @@ const useLogin = () => {
     }
   };
 
+  const logout = async () => {
+    const user = authStore.user;
+    const isGuest =
+      user?.isGuest ||
+      user?.id === "guest" ||
+      !localStorage.getItem("accessToken");
+
+    // 1. API Logout (for authenticated users)
+    if (!isGuest) {
+      try {
+        await authHttp.logout();
+      } catch (error) {
+        console.warn("Backend logout failed", error);
+      }
+    }
+
+    // 2. Session Cookie Cleanup (Server Route)
+    try {
+      await authHttp.destroySession();
+    } catch (e) {
+      console.error("Failed to call server logout", e);
+    }
+
+    // 3. Local Cleanup
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("authUser");
+
+    // 4. Store Cleanup
+    authStore.setUser(null);
+
+    // 5. Hard Redirect
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  };
+
   return {
     login,
+    logout,
     loading,
     error,
     data,

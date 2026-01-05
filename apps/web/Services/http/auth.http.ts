@@ -66,4 +66,12 @@ export default {
       .post<void>("customers/password/change", form)
       .then((res) => res.data);
   },
+  destroySession() {
+    return fetch("/api/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  },
 };
