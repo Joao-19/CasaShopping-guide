@@ -40,7 +40,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
     const isProductFavorited = isFavorited(product.id);
 
     const handleToggleFavorite = () => {
-        if (user?.isGuest) {
+        if (!user || user.isGuest) {
             showPopup(<LoginRequiredPopup onClose={hidePopup} />);
             return;
         }

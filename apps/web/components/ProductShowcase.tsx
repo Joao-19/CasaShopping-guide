@@ -142,7 +142,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                         images={product.images}
                                         isFavorited={isFavorited(product.id)}
                                         onWishlistClick={() => {
-                                            if (user?.isGuest) {
+                                            if (!user || user.isGuest) {
                                                 showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                                 return;
                                             }

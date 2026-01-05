@@ -184,7 +184,7 @@ export function HighlightsSection() {
                                             <div
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (user?.isGuest) {
+                                                    if (!user || user.isGuest) {
                                                         showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                                         return;
                                                     }
