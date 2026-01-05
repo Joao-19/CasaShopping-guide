@@ -164,13 +164,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
                     {/* Custom Navigation Buttons */}
                     <button
-                        className={`prev-${uniqueId} absolute -left-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
+                        className={`prev-${uniqueId} p-2 absolute -left-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 md:flex items-center justify-center text-gray-400 hover:text-gray-800  transition-all cursor-pointer opacity-100 duration-300`}
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
                     </button>
                     <button
-                        className={`next-${uniqueId} absolute -right-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
+                        className={`next-${uniqueId} absolute -right-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 md:flex items-center justify-center text-gray-400 hover:text-gray-800 transition-all cursor-pointer opacity-100 duration-300`}
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-10 h-10" strokeWidth={1.5} />

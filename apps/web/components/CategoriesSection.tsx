@@ -2,14 +2,14 @@
 
 import { MediaCard, BaseText } from "@repo/ui";
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Navigation, Pagination } from 'swiper/modules';
 import { useId } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 const categoriesData = [
     { id: 'sala', name: 'Sala', image: 'categories/room.avif' },
@@ -51,12 +51,14 @@ export function CategoriesSection() {
                         1024: { slidesPerView: 4, spaceBetween: 12 },
                     }}
                     loop={true}
-                    navigation={{
-                        prevEl: `.prev-cat-${uniqueId}`,
-                        nextEl: `.next-cat-${uniqueId}`,
+                    pagination={{
+                        dynamicBullets: true
                     }}
-                    modules={[Navigation]}
+                    modules={[Navigation, Pagination]}
                     className="w-full py-8! md:px-2!"
+                    style={{
+                        "--swiper-pagination-color": "var(--color-primary)",
+                    } as React.CSSProperties}
                 >
                     {categories.map((category, index) => (
                         <SwiperSlide key={`${category.id}-${index}`} className="h-auto! flex items-center justify-center p-2">
@@ -74,20 +76,6 @@ export function CategoriesSection() {
                         </SwiperSlide>
                     ))}
                 </Swiper>
-
-                {/* Custom Navigation Buttons */}
-                <button
-                    className={`prev-cat-${uniqueId} absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all cursor-pointer opacity-0 group-hover/categories:opacity-100 duration-300 bg-white/90 backdrop-blur-sm rounded-full shadow-lg`}
-                    aria-label="Categoria anterior"
-                >
-                    <ChevronLeft className="w-6 h-6" strokeWidth={2} />
-                </button>
-                <button
-                    className={`next-cat-${uniqueId} absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all cursor-pointer opacity-0 group-hover/categories:opacity-100 duration-300 bg-white/90 backdrop-blur-sm rounded-full shadow-lg`}
-                    aria-label="Próxima categoria"
-                >
-                    <ChevronRight className="w-6 h-6" strokeWidth={2} />
-                </button>
             </div>
         </section>
     );

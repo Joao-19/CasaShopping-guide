@@ -14,8 +14,11 @@ export default function HomePage() {
                 <HeroSection />
 
                 <div className="max-w-7xl mx-auto px-8 flex flex-col mt-16 mb-16">
+
                     <CategoriesSection />
 
+                </div>
+                <div className="max-w-7xl mx-auto px-8 flex flex-col mt-16 mb-16">
                     <HighlightsSection />
                 </div>
 
