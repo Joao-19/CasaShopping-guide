@@ -16,4 +16,12 @@ export default {
   delete(id: string) {
     return http.delete(`users/${id}`).then((res) => res.data);
   },
+
+  export() {
+    return http
+      .get("users/export", {
+        responseType: "blob",
+      })
+      .then((res) => res.data);
+  },
 };

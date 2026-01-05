@@ -8,10 +8,11 @@ import {
   Patch,
   Param,
   Req,
+  Res,
 } from "@nestjs/common";
 import { UserGatewayService } from "../services/user-gateway.service";
 import { CreateUserDto, PaginatedResult } from "@repo/dtos";
-import { Request } from "express";
+import { Request, Response } from "express";
 
 @Controller("users")
 export class UserGatewayController {
@@ -46,6 +47,19 @@ export class UserGatewayController {
   ): Promise<any> {
     const token = req.cookies["access_token"];
     return this.userGatewayService.updateProfileImage(body.profileImage, token);
+  }
+
+  @Get("export")
+  async export(@Req() req: Request, @Res() res: Response): Promise<any> {
+    const token = req.cookies["access_token"];
+    const stream = await this.userGatewayService.export(token);
+
+    res.set({
+      "Content-Type": "text/csv",
+      "Content-Disposition": `attachment; filename="usuarios-${new Date().toISOString().split("T")[0]}.csv"`,
+    });
+
+    stream.pipe(res);
   }
 
   @Delete("me")

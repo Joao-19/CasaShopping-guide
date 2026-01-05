@@ -30,6 +30,24 @@ export default function useUser() {
     },
   });
 
+  const exportUsers = async () => {
+    try {
+      const blob = await userHttp.export();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `usuarios-${new Date().toISOString().split("T")[0]}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error("Failed to export users", error);
+    }
+  };
+
   return {
     users,
     loading,
@@ -40,5 +58,6 @@ export default function useUser() {
     search,
     setSearch,
     meta,
+    exportUsers,
   };
 }

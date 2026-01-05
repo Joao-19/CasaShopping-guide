@@ -110,8 +110,13 @@ export const createApiClient = (
       // Translate message
       const message = translateError(error);
 
-      // Emit global error event
-      eventBus.emit("api-error", message);
+      // Emit global error event ONLY if it is not a refresh request
+      // We don't want to spam toast errors when background refresh fails (user might be guest)
+      const isRefreshRequest = originalRequest.url?.includes(refreshUrl);
+
+      if (!isRefreshRequest) {
+        eventBus.emit("api-error", message);
+      }
 
       return Promise.reject(error);
     }
