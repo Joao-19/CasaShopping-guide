@@ -32,6 +32,26 @@ export default function HomePage() {
                         title="Escritório"
                         category="escritorio"
                     />
+
+                    <ProductShowcase
+                        title="Quarto"
+                        category="quarto"
+                    />
+
+                    <ProductShowcase
+                        title="Banheiro"
+                        category="banheiro"
+                    />
+
+                    <ProductShowcase
+                        title="Cozinha"
+                        category="cozinha"
+                    />
+
+                    <ProductShowcase
+                        title="Area-Externa"
+                        category="area-externa"
+                    />
                 </div>
 
                 <Footer />
