@@ -75,7 +75,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
     return (
         <section>
-            <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row md:items-center justify-between w-full">
+            <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row md:items-center justify-between w-full ">
                 <div className="flex items-center gap-4">
                     <h2 className="text-[#162e47] text-[28px] font-bold font-sans">{title}</h2>
                 </div>
@@ -86,7 +86,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                     <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                 </div>
             ) : products.length === 0 ? (
-                <div className="w-full flex justify-center px-8">
+                <div className="w-full flex justify-center px-8 py-20">
                     <div className="max-w-7xl w-full flex flex-col items-center justify-center py-20 bg-white/50 rounded-2xl border border-dashed border-gray-200">
                         <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                             <Sparkles className="w-8 h-8 text-gray-300" />
