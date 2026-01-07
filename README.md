@@ -19,6 +19,21 @@ O sistema é composto por múltiplos módulos integrados em uma estrutura **Mono
 | `products-service` | Gestão de produtos, categorias e favoritos   | 3006  |
 | `storage-service`  | Upload de imagens (S3/MinIO)                 | 3007  |
 
+## ✨ Principais Funcionalidades
+
+### Storefront (Web)
+
+- **Modo Visitante (Guest Mode)**: Navegação completa por produtos e lojas sem necessidade de login.
+- **Vitrine Virtual**: Destaques, carrosséis de categorias e busca avançada.
+- **Favoritos**: Usuários logados podem salvar produtos.
+- **Preço Sob Consulta**: Suporte a produtos sem preço exibido publicamente.
+
+### Painel Administrativo
+
+- **Gestão de Lojas**: Cadastro e edição de informações de lojas.
+- **Catálogo de Produtos**: Criação, edição e inativação de produtos.
+- **Upload de Mídia**: Integração com Storage Service para imagens de produtos e logos.
+
 ### Diagrama de Arquitetura
 
 ```mermaid
@@ -126,6 +141,10 @@ docker-compose up -d --build
 ```
 
 Isso irá criar e iniciar todos os containers (banco, storage, serviços e frontends).
+
+> [!IMPORTANT]
+> **Configuração do MinIO (Local/Dev)**:
+> Para que o upload de imagens funcione corretamente localmente, pode ser necessário configurar o CORS no bucket do MinIO. Certifique-se de que a variável `MINIO_PUBLIC_ENDPOINT` esteja apontando para o IP/domínio correto acessível pelo navegador, não apenas `localhost` se estiver testando em rede ou mobile.
 
 ---
 
