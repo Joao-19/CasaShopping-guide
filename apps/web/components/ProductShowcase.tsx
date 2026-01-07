@@ -62,6 +62,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         storeInstagram: p.store?.instagramLink,
         storeFacebook: p.store?.facebookLink,
         storeYoutube: p.store?.youtubeLink,
+        whatsapp: p.store?.whatsapp,
     }))) || [];
 
     // Triple data if list is short to ensure Centered Loop has enough buffer

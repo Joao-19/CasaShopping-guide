@@ -28,6 +28,7 @@ interface ProductDetailsCardProps {
         storeInstagram?: string | null;
         storeFacebook?: string | null;
         storeYoutube?: string | null;
+        whatsapp?: string | null;
     };
 }
 
@@ -187,21 +188,41 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex gap-[16px] w-full">
+                                <div className="flex gap-[8px] w-full items-center">
                                     <button
                                         onClick={handleToggleFavorite}
                                         className={cn(
-                                            "flex-1 text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] transition-colors font-medium cursor-pointer",
+                                            "flex-grow text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] transition-colors font-medium",
                                             isProductFavorited ? "bg-red-600 hover:bg-red-700" : "bg-[#e95a5a] hover:bg-red-500"
                                         )}
                                     >
                                         <Heart size={20} fill={isProductFavorited ? "currentColor" : "none"} />
                                         {isProductFavorited ? "Favoritado" : "Favoritar"}
                                     </button>
-                                    {product.storePhone && product.showStorePhone && (
-                                        <a href={`tel:${product.storePhone}`} className="flex-1 bg-[#003ba6] text-white h-[48px] rounded-[8px] flex items-center justify-center gap-[8px] hover:bg-[#002a78] transition-colors font-medium cursor-pointer text-decoration-none">
-                                            <Phone size={20} />
-                                            Ligar
+
+                                    {product.whatsapp && (
+                                        <a
+                                            href={`https://wa.me/55${product.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Fiquei interessado(a) no produto ${product.title} e gostaria de mais informações.`)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-[48px] h-[48px] bg-[#5b9745] text-white rounded-[8px] flex items-center justify-center hover:bg-[#4a7a38] transition-colors shrink-0"
+                                            title="WhatsApp"
+                                        >
+                                            <svg className="size-[24px]" fill="white" viewBox="0 0 24 24">
+                                                <path d="M19.05 4.91C18.1331 3.98411 17.041 3.24997 15.8375 2.75036C14.634 2.25076 13.3431 1.99568 12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91ZM12.04 20.15C10.56 20.15 9.11 19.75 7.84 19L7.54 18.82L4.42 19.64L5.25 16.6L5.05 16.29C4.22755 14.9771 3.79092 13.4593 3.79 11.91C3.79 7.37 7.49 3.67 12.03 3.67C14.23 3.67 16.3 4.53 17.85 6.09C18.6176 6.85386 19.2259 7.76254 19.6396 8.76333C20.0533 9.76411 20.2642 10.8371 20.26 11.92C20.28 16.46 16.58 20.15 12.04 20.15ZM16.56 13.99C16.31 13.87 15.09 13.27 14.87 13.18C14.64 13.1 14.48 13.06 14.31 13.3C14.14 13.55 13.67 14.11 13.53 14.27C13.39 14.44 13.24 14.46 12.99 14.33C12.74 14.21 11.94 13.94 11 13.1C10.26 12.44 9.77 11.63 9.62 11.38C9.48 11.13 9.6 11 9.73 10.87C9.84 10.76 9.98 10.58 10.1 10.44C10.22 10.3 10.27 10.19 10.35 10.03C10.43 9.86 10.39 9.72 10.33 9.6C10.27 9.48 9.77 8.26 9.57 7.76C9.37 7.28 9.16 7.34 9.01 7.33H8.53C8.36 7.33 8.1 7.39 7.87 7.64C7.65 7.89 7.01 8.49 7.01 9.71C7.01 10.93 7.9 12.11 8.02 12.27C8.14 12.44 9.77 14.94 12.25 16.01C12.84 16.27 13.3 16.42 13.66 16.53C14.25 16.72 14.79 16.69 15.22 16.63C15.7 16.56 16.69 16.03 16.89 15.45C17.1 14.87 17.1 14.38 17.03 14.27C16.96 14.16 16.81 14.11 16.56 13.99Z" fill="white"></path>
+                                            </svg>
+                                        </a>
+                                    )}
+
+                                    {product.storePhone && (
+                                        <a
+                                            href={`tel:${product.storePhone}`}
+                                            className="w-[48px] h-[48px] bg-[#003ba6] text-white rounded-[8px] flex items-center justify-center hover:bg-[#002a78] transition-colors shrink-0"
+                                            title="Ligar"
+                                        >
+                                            <svg className="size-[22px]" fill="none" viewBox="0 0 22 22">
+                                                <path d="M7.78988 3.52267C8.1229 3.52267 8.42971 3.70326 8.59137 3.99442L9.71263 6.0142C9.85944 6.27866 9.86636 6.59853 9.73106 6.86909L8.65086 9.02953C8.65086 9.02953 8.9639 10.6389 10.274 11.949C11.5841 13.2591 13.1881 13.5668 13.1881 13.5668L15.3482 12.4867C15.6189 12.3513 15.939 12.3584 16.2036 12.5054L18.2291 13.6316C18.52 13.7933 18.7004 14.0999 18.7004 14.4327V16.7581C18.7004 17.9423 17.6004 18.7976 16.4784 18.4189C14.1739 17.6414 10.5968 16.1609 8.32948 13.8935C6.06215 11.6263 4.58164 8.04911 3.80406 5.74466C3.42547 4.62261 4.28076 3.52267 5.46494 3.52267H7.78988Z" stroke="white" strokeLinejoin="round" strokeWidth="1.2"></path>
+                                            </svg>
                                         </a>
                                     )}
                                 </div>

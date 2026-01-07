@@ -4,6 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { getFavorites } from "@/Services/http/product.http";
 import { ProductDetailsCard } from "@/components/ProductDetailsCard";
 import { useInView } from "react-intersection-observer";
+import { usePopup } from "@repo/ui";
 import { SecondaryToolbar } from "@/components/SecondaryToolbar";
 import { Footer } from "@/components/Footer";
 import { useEffect } from "react";
@@ -14,6 +15,7 @@ import { useFavorites } from "@/composable/useFavorites";
 export default function FavoritesPage() {
     const { ref, inView } = useInView();
     const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
+    const { showPopup } = usePopup();
 
     const {
         data,
@@ -62,25 +64,38 @@ export default function FavoritesPage() {
                             page.data.map((product: any, productIndex: number) => {
                                 const mappedProduct = {
                                     ...product,
+                                    title: product.name,
                                     storeName: product.store?.name || "Loja",
                                     storeLogo: product.store?.logoImage,
                                     storePhone: product.store?.phone,
+                                    storeSite: product.store?.site,
+                                    storeInstagram: product.store?.instagramLink,
+                                    storeFacebook: product.store?.facebookLink,
+                                    storeYoutube: product.store?.youtubeLink,
+                                    whatsapp: product.store?.whatsapp,
                                     // Ensure images are sorted and URLs are correct if needed (though backend handles some)
                                     images: product.images?.sort((a: any, b: any) => a.index - b.index)
                                         .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
                                     isFavorited: true,
                                 };
                                 return (
-                                    <ProductCardSwiper
+                                    <div
                                         key={`${product.id}-${pageIndex}-${productIndex}`}
-                                        title={mappedProduct.title}
-                                        storeName={mappedProduct.storeName}
-                                        price={mappedProduct.price}
-                                        images={mappedProduct.images}
-                                        isFavorited={isFavorited(mappedProduct.id)}
-                                        onWishlistClick={() => toggleFav(mappedProduct.id)}
-                                        className="cursor-[inherit]!"
-                                    />
+                                        onClick={() => showPopup(<ProductDetailsCard product={mappedProduct} />)}
+                                        className="cursor-pointer"
+                                    >
+                                        <ProductCardSwiper
+                                            title={mappedProduct.title}
+                                            storeName={mappedProduct.storeName}
+                                            price={mappedProduct.price}
+                                            images={mappedProduct.images}
+                                            isFavorited={isFavorited(mappedProduct.id)}
+                                            onWishlistClick={() => {
+                                                toggleFav(mappedProduct.id);
+                                            }}
+                                            className="cursor-[inherit]!"
+                                        />
+                                    </div>
                                 );
                             })
                         )}

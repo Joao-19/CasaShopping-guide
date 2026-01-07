@@ -8,6 +8,8 @@ import useStore from '@/composable/store/useStore';
 import { CreateStoreDto, Store } from '@repo/dtos';
 import { formatPhone, cleanPhone } from '@/utils/formatters';
 import { useImageUpload } from '@/composable/storage/useImageUpload';
+import { FaWhatsapp } from "react-icons/fa";
+import { HiOutlinePhone } from "react-icons/hi";
 
 interface CreateStoreFormProps {
     onClose: () => void;
@@ -23,6 +25,7 @@ interface CreateStoreFormContentProps {
         facebookLink: string;
         instagramLink: string;
         youtubeLink: string;
+        whatsapp?: string;
         currentImageUrl?: string;
     };
     handlers: {
@@ -33,6 +36,7 @@ interface CreateStoreFormContentProps {
         setFacebook: (v: string) => void;
         setInstagram: (v: string) => void;
         setYoutube: (v: string) => void;
+        setWhatsapp: (v: string) => void;
         setImage: (v: File) => void;
     };
     loading: boolean;
@@ -53,6 +57,7 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
     const instagramField = useFormField(data.instagramLink, []);
     const youtubeField = useFormField(data.youtubeLink, []);
     const siteField = useFormField(data.site, []);
+    const whatsappField = useFormField(data.whatsapp, []);
 
     const handleImageSelect = (file: File) => {
         handlers.setImage(file);
@@ -93,6 +98,10 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
                     error={addressField.error}
                     onBlur={addressField.onBlur}
                 />
+            </div>
+
+            {/* Phone and WhatsApp inputs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <BaseInput
                     id="phone"
                     label="Telefone"
@@ -102,27 +111,25 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
                     onChange={(e) => handlers.setPhone(formatPhone(e.target.value))}
                     error={phoneField.error}
                     onBlur={phoneField.onBlur}
+                    startIcon={
+                        <HiOutlinePhone />
+                    }
+                />
+                {/* Site */}
+                <BaseInput
+                    id="whatsapp"
+                    label="WhatsApp"
+                    type="tel"
+                    placeholder="(00) 0000-0000"
+                    value={data.whatsapp}
+                    onChange={(e) => handlers.setWhatsapp(formatPhone(e.target.value))}
+                    error={whatsappField.error}
+                    onBlur={whatsappField.onBlur}
+                    startIcon={
+                        <FaWhatsapp />
+                    }
                 />
             </div>
-
-            {/* Site */}
-            <BaseInput
-                id="site"
-                label="Site"
-                type="url"
-                placeholder="https://www.loja.com.br"
-                value={data.site}
-                onChange={(e) => handlers.setSite(e.target.value)}
-                error={siteField.error}
-                onBlur={siteField.onBlur}
-                startIcon={
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe text-gray-400" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
-                        <path d="M2 12h20"></path>
-                    </svg>
-                }
-            />
 
             {/* Redes Sociais */}
             <div className="">
@@ -211,6 +218,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
     const [facebookLink, setFacebook] = useState(initialData?.facebookLink || '');
     const [instagramLink, setInstagram] = useState(initialData?.instagramLink || '');
     const [youtubeLink, setYoutube] = useState(initialData?.youtubeLink || '');
+    const [whatsapp, setWhatsapp] = useState(initialData?.whatsapp ? formatPhone(initialData.whatsapp) : '');
     const [image, setImage] = useState<File | null>(null);
     const { uploadImage, uploading: uploadingImage, error: uploadError } = useImageUpload();
 
@@ -221,31 +229,12 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
 
         if (!validateAll()) return;
 
-        // Prepare data for submission
-        const submissionData: CreateStoreDto = {
-            name,
-            address,
-            phone: cleanPhone(phone),
-            site,
-            facebookLink,
-            instagramLink,
-            youtubeLink,
-            // Only send image if it's a new file (not string url from initialData)
-            image: image
-        };
-
         try {
             let imageKey = initialData?.logoImage; // Keep existing if no new one
 
             // If a new image file was selected, upload it first
             if (image) {
                 try {
-                    // If we are editing, we reuse the ID. If new, we don't have ID yet.
-                    // IMPORTANT: For new stores, we need an ID to organize folders.
-                    // Option 1: Generate UUID on client. Option 2: Use a temp folder.
-                    // Option 3 (Best for now): Use 'temp' folder and have backend move it, OR just use 'uploads' folder.
-                    // Let's use 'temp-uploads' as ID for new stores, or strict 0000.
-
                     const tempId = initialData?.id || 'new-store-upload';
                     imageKey = await uploadImage(image, tempId);
                     console.log('Image uploaded to:', imageKey);
@@ -264,6 +253,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 facebookLink,
                 instagramLink,
                 youtubeLink,
+                whatsapp: cleanPhone(whatsapp), // Add whatsapp here
                 logoImage: imageKey || '', // Send string path to DB
             };
 
@@ -309,6 +299,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                         facebookLink,
                         instagramLink,
                         youtubeLink,
+                        whatsapp,
                         currentImageUrl: initialData?.logoImage || undefined
                     }}
                     handlers={{
@@ -320,6 +311,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                         setInstagram,
                         setYoutube,
                         setImage,
+                        setWhatsapp,
                     }}
                     loading={loading || uploadingImage}
                     onClose={onClose}

@@ -55,6 +55,17 @@ export class CreateStoreDto {
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   youtubeLink?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => {
+    if (!value) return null;
+    return value.replace(/\D/g, "");
+  })
+  @Matches(/^(\d{10,11})$/, {
+    message: "Invalid phone number (10 or 11 digits).",
+  })
+  whatsapp?: string | null;
 }
 
 export class UpdateStoreDto {
@@ -103,6 +114,17 @@ export class UpdateStoreDto {
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   youtubeLink?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => {
+    if (!value) return null;
+    return value.replace(/\D/g, "");
+  })
+  @Matches(/^(\d{10,11})$/, {
+    message: "Invalid phone number (10 or 11 digits).",
+  })
+  whatsapp?: string | null;
 }
 
 export interface Store {
@@ -115,6 +137,7 @@ export interface Store {
   facebookLink?: string | null;
   instagramLink?: string | null;
   youtubeLink?: string | null;
+  whatsapp: string | null;
   createdAt: Date;
   modifiedAt: Date;
   deletedAt?: Date | null;

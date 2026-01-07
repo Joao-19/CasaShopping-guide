@@ -85,6 +85,7 @@ export function ProductListingDialog({ initialCategory }: ProductListingDialogPr
         storeInstagram: p.store?.instagramLink,
         storeFacebook: p.store?.facebookLink,
         storeYoutube: p.store?.youtubeLink,
+        whatsapp: p.store?.whatsapp,
     }))) || [];
 
     const handleProductClick = (product: any) => {

@@ -61,6 +61,7 @@ model Store {
   facebookLink  String?
   instagramLink String?
   youtubeLink   String?
+  whatsapp      String?
 
   createdAt  DateTime  @default(now())
   modifiedAt DateTime  @updatedAt
