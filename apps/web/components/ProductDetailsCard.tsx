@@ -29,6 +29,7 @@ interface ProductDetailsCardProps {
         storeFacebook?: string | null;
         storeYoutube?: string | null;
         whatsapp?: string | null;
+        storeAddress?: string;
     };
 }
 
@@ -269,8 +270,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
 
                             {/* Store Address */}
                             <div className="text-center text-[#888] text-[12px] font-sans leading-relaxed px-4">
-                                <p>Avenida Ayrton Senna, 2150 - Barra da Tijuca, Rio de Janeiro - RJ, 22775-900.</p>
-                                <p>Casa Shopping - Bloco F Loja F</p>
+                                <p>{product.storeAddress || "Endereço não disponível"}</p>
                             </div>
 
                             {/* Action Buttons */}
@@ -290,8 +290,8 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                         <a
                                             href={`tel:${product.storePhone}`}
                                             className={`text-white h-[48px] rounded-[8px] flex items-center justify-center transition-colors no-underline ${product.storeSite
-                                                    ? "w-[48px] bg-[#003ba6] hover:bg-[#002a78] shrink-0"
-                                                    : "flex-1 bg-[#003ba6] hover:bg-[#002a78] gap-2 font-sans text-[16px]"
+                                                ? "w-[48px] bg-[#003ba6] hover:bg-[#002a78] shrink-0"
+                                                : "flex-1 bg-[#003ba6] hover:bg-[#002a78] gap-2 font-sans text-[16px]"
                                                 }`}
                                             title="Ligar"
                                         >

@@ -8,7 +8,7 @@ interface StoreDetailsCardProps {
         logoImage?: string;
         address: string;
         phone?: string;
-        website?: string;
+        site?: string;
         whatsapp?: string;
         facebookLink?: string | null;
         instagramLink?: string | null;
@@ -59,6 +59,10 @@ export function StoreDetailsCard({ store }: StoreDetailsCardProps) {
                 </div>
             </div>
 
+            <div className="text-center px-4">
+                <h2 className="text-[#1A2B3C] font-bold text-xl font-sans">{store.name}</h2>
+            </div>
+
             <div className="text-center text-[#888] text-[12px] font-sans leading-relaxed px-4">
                 <p>{store.address}</p>
                 {/* <p>Casa Shopping - Bloco F Loja F</p> */}
@@ -67,9 +71,9 @@ export function StoreDetailsCard({ store }: StoreDetailsCardProps) {
 
             <div className="flex flex-col gap-4 w-full">
                 <div className="flex gap-4">
-                    {store.website && (
+                    {store.site && (
                         <a
-                            href={store.website}
+                            href={store.site}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-1 bg-[#003ba6] text-white h-[48px] rounded-[8px] font-sans text-[16px] flex items-center justify-center hover:bg-[#002a78] transition-colors"
@@ -81,14 +85,14 @@ export function StoreDetailsCard({ store }: StoreDetailsCardProps) {
                     {store.phone && (
                         <a
                             href={`tel:${store.phone}`}
-                            className={`text-white h-[48px] rounded-[8px] flex items-center justify-center transition-colors no-underline ${store.website
+                            className={`text-white h-[48px] rounded-[8px] flex items-center justify-center transition-colors no-underline ${store.site && store.whatsapp
                                 ? "w-[48px] bg-[#003ba6] hover:bg-[#002a78] shrink-0"
                                 : "flex-1 bg-[#003ba6] hover:bg-[#002a78] gap-2 font-sans text-[16px]"
                                 }`}
                             title="Ligar"
                         >
                             <Phone className="size-[20px]" />
-                            {!store.website && "Ligar"}
+                            {!(store.site && store.whatsapp) && "Ligar"}
                         </a>
                     )}
 
