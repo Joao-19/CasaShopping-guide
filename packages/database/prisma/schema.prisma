@@ -61,6 +61,7 @@ model Store {
   facebookLink  String?
   instagramLink String?
   youtubeLink   String?
+  whatsapp      String?
 
   createdAt  DateTime  @default(now())
   modifiedAt DateTime  @updatedAt
@@ -118,6 +119,7 @@ enum PriceTier {
   LOW
   MEDIUM
   HIGH
+  ON_REQUEST
 }
 
 model Category {

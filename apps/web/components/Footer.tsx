@@ -6,6 +6,24 @@ function goTo(url: string) {
     window.location.href = url;
 }
 
+const socialMedias = {
+    instagram: "https://www.instagram.com/casashopping",
+    facebook: "https://www.facebook.com/casashopping",
+    youtube: "https://www.youtube.com/channel/UCNqTUUVRsKOKE64_xkW0K-Q",
+};
+
+const links = {
+    sobre: "https://www.casashopping.com/sobre/",
+    trabalheConosco: "https://www.casashopping.com/contato/",
+    faleConosco: "https://www.casashopping.com/contato/",
+    // politicaPrivacidade: "https://www.casashopping.com.br/politica-privacidade",
+    // termosUso: "https://www.casashopping.com.br/termos-de-uso",
+}
+
+function openNewTab(url: string) {
+    window.open(url, "_blank");
+}
+
 export function Footer() {
     return (
         <footer className="bg-[rgb(0,59,166)] pt-16 pb-8 mt-20">
@@ -26,16 +44,15 @@ export function Footer() {
                     <div className="flex flex-col gap-4">
                         <h3 className="text-white font-bold text-lg font-sans">Institucional</h3>
                         <ul className="flex flex-col gap-3 text-white/70 text-sm font-sans">
-                            <li><button className="hover:text-white transition-colors cursor-pointer">Sobre o CasaShopping</button></li>
-                            <li><button className="hover:text-white transition-colors cursor-pointer" onClick={() => goTo("/stores")}>Lojas</button></li>
-                            <li><button className="hover:text-white transition-colors cursor-pointer">Trabalhe Conosco</button></li>
+                            <li><button onClick={() => openNewTab(links.sobre)} className="hover:text-white transition-colors cursor-pointer">Sobre o CasaShopping</button></li>
+                            <li><button onClick={() => goTo("/stores")} className="hover:text-white transition-colors cursor-pointer">Lojas</button></li>
+                            <li><button onClick={() => openNewTab(links.trabalheConosco)} className="hover:text-white transition-colors cursor-pointer">Trabalhe Conosco</button></li>
                         </ul>
                     </div>
                     <div className="flex flex-col gap-4">
                         <h3 className="text-white font-bold text-lg font-sans">Ajuda</h3>
                         <ul className="flex flex-col gap-3 text-white/70 text-sm font-sans">
-                            <li><button className="hover:text-white transition-colors">Fale Conosco</button></li>
-                            <li><button className="hover:text-white transition-colors">Perguntas Frequentes</button></li>
+                            <li><button onClick={() => openNewTab(links.faleConosco)} className="hover:text-white transition-colors">Fale Conosco</button></li>
                             <li><button className="hover:text-white transition-colors">Política de Privacidade</button></li>
                             <li><button className="hover:text-white transition-colors">Termos de Uso</button></li>
                         </ul>
@@ -43,13 +60,13 @@ export function Footer() {
                     <div className="flex flex-col gap-4">
                         <h3 className="text-white font-bold text-lg font-sans">Redes Sociais</h3>
                         <div className="flex gap-4">
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white">
+                            <a onClick={() => openNewTab(socialMedias.instagram)} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white">
                                 <IconInstagram className="w-5 h-5" />
                             </a>
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white">
+                            <a onClick={() => openNewTab(socialMedias.facebook)} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white">
                                 <IconFacebook className="w-5 h-5" />
                             </a>
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white">
+                            <a onClick={() => openNewTab(socialMedias.youtube)} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white">
                                 <IconYoutube className="w-5 h-5" />
                             </a>
                         </div>

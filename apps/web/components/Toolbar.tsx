@@ -100,7 +100,7 @@ export function Toolbar() {
                         <button
                             onClick={() => {
                                 setIsDrawerOpen(false);
-                                if (safeUser?.isGuest) {
+                                if (!safeUser || safeUser.isGuest) {
                                     showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                     return;
                                 }
@@ -213,7 +213,7 @@ export function Toolbar() {
                         <div className="flex items-center gap-2 lg:gap-8">
                             <button
                                 onClick={() => {
-                                    if (safeUser?.isGuest) {
+                                    if (!safeUser || safeUser.isGuest) {
                                         showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                     } else {
                                         router.push("/favoritos");
@@ -238,7 +238,7 @@ export function Toolbar() {
                             <div
                                 className="hidden lg:flex items-center gap-3 cursor-pointer group"
                                 onClick={() => {
-                                    if (safeUser?.isGuest) {
+                                    if (!safeUser || safeUser.isGuest) {
                                         showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                         return;
                                     }
@@ -312,7 +312,7 @@ export function Toolbar() {
                     <div className="flex items-center sm:items-end gap-2 lg:gap-8">
                         <button
                             onClick={() => {
-                                if (safeUser?.isGuest) {
+                                if (!safeUser || safeUser.isGuest) {
                                     showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                 } else {
                                     router.push("/favoritos");
@@ -337,7 +337,7 @@ export function Toolbar() {
                         <div
                             className="hidden lg:flex items-center gap-3 cursor-pointer group bg-[rgba(0,59,166,0)]"
                             onClick={() => {
-                                if (safeUser?.isGuest) {
+                                if (!safeUser || safeUser.isGuest) {
                                     showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                     return;
                                 }

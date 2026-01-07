@@ -118,9 +118,10 @@ export default function ProdutosPage() {
                                         <TableCell>
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.price === 'HIGH' ? 'bg-purple-100 text-purple-700' :
                                                 product.price === 'MEDIUM' ? 'bg-blue-100 text-blue-700' :
-                                                    'bg-slate-100 text-slate-700'
+                                                    product.price === 'ON_REQUEST' ? 'bg-gray-100 text-gray-700' :
+                                                        'bg-slate-100 text-slate-700'
                                                 }`}>
-                                                {formatPriceTier(product.price)}
+                                                {product.price === 'ON_REQUEST' ? 'Sem Valor' : formatPriceTier(product.price)}
                                             </span>
                                         </TableCell>
                                         <TableCell>
@@ -205,7 +206,7 @@ export default function ProdutosPage() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
         </>
     );
 }

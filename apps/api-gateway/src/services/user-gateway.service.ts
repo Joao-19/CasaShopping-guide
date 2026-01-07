@@ -146,4 +146,24 @@ export class UserGatewayService {
       );
     }
   }
+
+  async export(token: string): Promise<any> {
+    try {
+      const response = await this.httpService.axiosRef.get(
+        `${this.usersServiceUrl}/user/export`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "stream",
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
 }

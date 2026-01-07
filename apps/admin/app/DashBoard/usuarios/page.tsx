@@ -16,7 +16,7 @@ import { UserResponseDto } from '@repo/dtos';
 
 export default function UsuariosPage() {
     const { showPopup, hidePopup } = usePopup();
-    const { users, loading, deleteUser, search, setSearch, page, setPage, meta } = useUser();
+    const { users, loading, deleteUser, search, setSearch, page, setPage, meta, exportUsers } = useUser();
 
     const formatPhoneNumber = (value: string | null | undefined) => {
         if (!value) return '-';
@@ -61,7 +61,17 @@ export default function UsuariosPage() {
             <div className="space-y-6">
                 <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <h2 className="text-xl font-bold text-[#1A2B3C]">Gerenciar Usuários</h2>
-                    {/* Create button removed as per requirements (only list and delete) */}
+                    <button
+                        onClick={exportUsers}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#1A2B3C] text-white rounded-lg hover:bg-[#2C3E50] transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" x2="12" y1="15" y2="3"></line>
+                        </svg>
+                        <span>Exportar</span>
+                    </button>
                 </div>
 
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4">

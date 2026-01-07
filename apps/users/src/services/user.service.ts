@@ -93,4 +93,34 @@ export class UserService {
     const { password, refreshToken, ...result } = user;
     return result;
   }
+
+  async *exportUsers() {
+    const batchSize = 1000;
+    let skip = 0;
+
+    // Header row
+    yield "nome;email;telefone\n";
+
+    while (true) {
+      const users = await prisma.user.findMany({
+        take: batchSize,
+        skip: skip,
+        orderBy: { name: "asc" },
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+        },
+      });
+
+      if (users.length === 0) break;
+
+      for (const user of users) {
+        const line = `${user.name};${user.email};${user.phone || ""}\n`;
+        yield line;
+      }
+
+      skip += batchSize;
+    }
+  }
 }

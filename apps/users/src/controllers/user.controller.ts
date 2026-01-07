@@ -9,7 +9,9 @@ import {
   Param,
   Headers,
   UnauthorizedException,
+  Res,
 } from "@nestjs/common";
+import { Response } from "express";
 import { UserService } from "@/services/user.service";
 import { ConfigService } from "@nestjs/config";
 import * as jwt from "jsonwebtoken";
@@ -49,9 +51,24 @@ export class UserController {
     }
   }
 
-  @Post("register")
   async register(@Body() data: any) {
     return this.userService.register(data);
+  }
+
+  @Get("export")
+  async export(@Res() res: Response) {
+    const stream = this.userService.exportUsers();
+
+    res.set({
+      "Content-Type": "text/csv",
+      "Content-Disposition": `attachment; filename="users-${new Date().toISOString().split("T")[0]}.csv"`,
+    });
+
+    for await (const chunk of stream) {
+      res.write(chunk);
+    }
+
+    res.end();
   }
 
   @Get()

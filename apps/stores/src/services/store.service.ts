@@ -30,6 +30,7 @@ export class StoreService {
         facebookLink: data.facebookLink,
         instagramLink: data.instagramLink,
         youtubeLink: data.youtubeLink,
+        whatsapp: data.whatsapp,
         logoImage: data.logoImage,
       },
     });

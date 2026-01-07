@@ -62,6 +62,8 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         storeInstagram: p.store?.instagramLink,
         storeFacebook: p.store?.facebookLink,
         storeYoutube: p.store?.youtubeLink,
+        whatsapp: p.store?.whatsapp,
+        storeAddress: p.store?.address,
     }))) || [];
 
     // Triple data if list is short to ensure Centered Loop has enough buffer
@@ -75,7 +77,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
     return (
         <section>
-            <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row md:items-center justify-between w-full">
+            <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row md:items-center justify-between w-full ">
                 <div className="flex items-center gap-4">
                     <h2 className="text-[#162e47] text-[28px] font-bold font-sans">{title}</h2>
                 </div>
@@ -86,7 +88,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                     <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                 </div>
             ) : products.length === 0 ? (
-                <div className="w-full flex justify-center px-8">
+                <div className="w-full flex justify-center px-8 py-20">
                     <div className="max-w-7xl w-full flex flex-col items-center justify-center py-20 bg-white/50 rounded-2xl border border-dashed border-gray-200">
                         <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                             <Sparkles className="w-8 h-8 text-gray-300" />
@@ -142,7 +144,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                         images={product.images}
                                         isFavorited={isFavorited(product.id)}
                                         onWishlistClick={() => {
-                                            if (user?.isGuest) {
+                                            if (!user || user.isGuest) {
                                                 showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                                 return;
                                             }
@@ -164,13 +166,13 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
 
                     {/* Custom Navigation Buttons */}
                     <button
-                        className={`prev-${uniqueId} absolute -left-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
+                        className={`prev-${uniqueId} p-2 absolute -left-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 md:flex items-center justify-center text-gray-400 hover:text-gray-800  transition-all cursor-pointer opacity-100 duration-300`}
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-10 h-10" strokeWidth={1.5} />
                     </button>
                     <button
-                        className={`next-${uniqueId} absolute -right-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 hidden md:flex items-center justify-center text-gray-300 hover:text-gray-500 disabled:opacity-0 transition-all cursor-pointer opacity-0 group-hover/showcase:opacity-100 duration-300`}
+                        className={`next-${uniqueId} absolute -right-4 top-[40%] -translate-y-1/2 z-20 w-12 h-12 md:flex items-center justify-center text-gray-400 hover:text-gray-800 transition-all cursor-pointer opacity-100 duration-300`}
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-10 h-10" strokeWidth={1.5} />

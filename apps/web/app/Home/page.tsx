@@ -14,8 +14,11 @@ export default function HomePage() {
                 <HeroSection />
 
                 <div className="max-w-7xl mx-auto px-8 flex flex-col mt-16 mb-16">
+
                     <CategoriesSection />
 
+                </div>
+                <div className="max-w-7xl mx-auto px-8 flex flex-col mt-16 mb-16">
                     <HighlightsSection />
                 </div>
 
@@ -28,6 +31,26 @@ export default function HomePage() {
                     <ProductShowcase
                         title="Escritório"
                         category="escritorio"
+                    />
+
+                    <ProductShowcase
+                        title="Quarto"
+                        category="quarto"
+                    />
+
+                    <ProductShowcase
+                        title="Banheiro"
+                        category="banheiro"
+                    />
+
+                    <ProductShowcase
+                        title="Cozinha"
+                        category="cozinha"
+                    />
+
+                    <ProductShowcase
+                        title="Area-Externa"
+                        category="area-externa"
                     />
                 </div>
 

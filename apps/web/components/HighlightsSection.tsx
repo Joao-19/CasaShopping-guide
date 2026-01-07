@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { MediaCard, usePopup, formatPriceTier, IconHeart, BaseText } from "@repo/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts } from "../Services/http/product.http";
@@ -75,6 +75,7 @@ export function HighlightsSection() {
             storeInstagram: product.store?.instagramLink,
             storeFacebook: product.store?.facebookLink,
             storeYoutube: product.store?.youtubeLink,
+            whatsapp: product.store?.whatsapp,
         };
         showPopup(<ProductDetailsCard product={productDetails} />);
     };
@@ -154,12 +155,14 @@ export function HighlightsSection() {
                                         {/* Content Bottom */}
                                         <div className="absolute bottom-6 left-6 right-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                                             {/* Price Tier $$$ */}
-                                            <BaseText
-                                                text={formatPriceTier(product.price || 'MEDIUM')}
-                                                color="white"
-                                                size="large"
-                                                className="font-bold mb-1"
-                                            />
+                                            {formatPriceTier(product.price || 'MEDIUM') && (
+                                                <BaseText
+                                                    text={formatPriceTier(product.price || 'MEDIUM')}
+                                                    color="white"
+                                                    size="large"
+                                                    className="font-bold mb-1"
+                                                />
+                                            )}
 
                                             {/* Title */}
                                             {/* Using BaseText for Title with line-clamp */}
@@ -184,7 +187,7 @@ export function HighlightsSection() {
                                             <div
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (user?.isGuest) {
+                                                    if (!user || user.isGuest) {
                                                         showPopup(<LoginRequiredPopup onClose={hidePopup} />);
                                                         return;
                                                     }

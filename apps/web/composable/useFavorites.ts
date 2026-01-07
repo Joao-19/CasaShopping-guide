@@ -11,7 +11,7 @@ export function useFavorites() {
 
   // Fetch the list of favorite IDs
   const { user } = useAuthStore();
-  const isGuest = user?.isGuest;
+  const isGuest = !user || user.isGuest;
 
   const { data: favoriteIds = [], isLoading } = useQuery({
     queryKey: ["favorites-ids", isGuest], // Include isGuest to force refetch/cache separation

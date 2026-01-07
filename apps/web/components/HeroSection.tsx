@@ -7,7 +7,10 @@ import { ProductDetailsCard } from "./ProductDetailsCard";
 import { useRouter } from "next/navigation";
 
 export function HeroSection() {
-    const backGroundVideoLink = "/DEFAULT_BACKGROUND.webm";
+    const backGroundVideoLink = "/backgroundsHome/MudaTudoCamapnhaWEB.mp4";
+    const backGroundImageLink = "/backgroundsHome/FUNDO.jpg";
+    const mobileBackGroundImageLink = "/backgroundsHome/FUNDO-MOBILE.jpg";
+    const mobileBackGroundVideoLink = "/backgroundsHome/DEFAULT_BACKGROUND.webm";
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +18,12 @@ export function HeroSection() {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { showPopup } = usePopup();
     const router = useRouter();
+
+    const homeText = {
+        // title: "Encontre o melhor da decoração e design para o seu lar.",
+        title: "Liquidação muda tudo",
+        subtitle: "Encontre o melhor da decoração e design para o seu lar."
+    };
 
     const handleSearch = () => {
         if (query.trim()) {
@@ -77,12 +86,53 @@ export function HeroSection() {
     return (
         <div className="relative h-[600px] md:h-[800px] w-full">
             <div className="absolute inset-0">
-                <video src={backGroundVideoLink} className="w-full h-full object-cover" loop playsInline autoPlay muted />
+                {/* Desktop Background */}
+                <div className="hidden md:block absolute inset-0">
+                    {backGroundVideoLink ? (
+                        <video
+                            src={backGroundVideoLink}
+                            poster={backGroundImageLink}
+                            className="w-full h-full object-cover"
+                            loop
+                            playsInline
+                            autoPlay
+                            muted
+                        />
+                    ) : (
+                        <img
+                            src={backGroundImageLink}
+                            alt="Background"
+                            className="w-full h-full object-cover"
+                        />
+                    )}
+                </div>
+
+                {/* Mobile Background */}
+                <div className="block md:hidden absolute inset-0">
+                    {mobileBackGroundVideoLink ? (
+                        <video
+                            src={mobileBackGroundVideoLink}
+                            poster={mobileBackGroundImageLink}
+                            className="w-full h-full object-cover"
+                            loop
+                            playsInline
+                            autoPlay
+                            muted
+                        />
+                    ) : (
+                        <img
+                            src={mobileBackGroundImageLink}
+                            alt="Background Mobile"
+                            className="w-full h-full object-cover"
+                        />
+                    )}
+                </div>
                 <div className="absolute inset-0 bg-linear-to-r from-[#0d1b2a]/90 via-[#0d1b2a]/40 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-48 bg-linear-to-t from-[#f0f1f3] to-transparent z-10 pointer-events-none"></div>
             </div>
             <div className="absolute inset-0 max-w-7xl mx-auto px-4 md:px-8 flex flex-col justify-center pt-20">
                 <div className="max-w-3xl">
-                    <h1 className="text-white text-4xl md:text-[56px] leading-[1.1] font-sans mb-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
+                    <h1 className="text-white text-4xl md:text-[42px] leading-[1.1] font-sans mb-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
                         <span className="font-bold block text-[rgb(255,255,255)]">Encontre o melhor </span>
                         <span className="font-light">da decoração e design para o seu lar.</span>
                     </h1>
@@ -132,10 +182,11 @@ export function HeroSection() {
                                                     <span className="text-base font-medium text-[#162e47] truncate">{product.name}</span>
                                                     <div className="flex items-center justify-between w-full mt-1">
                                                         <span className="text-sm text-gray-400 truncate flex-1">{product.store?.name || "Loja"}</span>
-                                                        {product.price && (
+                                                        {product.price && formatPriceTier(product.price) && (
                                                             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${product.price === 'HIGH' ? 'bg-purple-100 text-purple-700' :
                                                                 product.price === 'MEDIUM' ? 'bg-blue-100 text-blue-700' :
-                                                                    'bg-slate-100 text-slate-700'
+                                                                    product.price === 'ON_REQUEST' ? 'hidden' : // Should be handled by formatPriceTier check but safe to add
+                                                                        'bg-slate-100 text-slate-700'
                                                                 }`}>
                                                                 {formatPriceTier(product.price)}
                                                             </span>
