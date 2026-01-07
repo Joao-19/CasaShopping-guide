@@ -7,7 +7,7 @@ import { ProductDetailsCard } from "./ProductDetailsCard";
 import { useRouter } from "next/navigation";
 
 export function HeroSection() {
-    const backGroundVideoLink = "/backgroundsHome/DEFAULT_BACKGROUND.webm";
+    const backGroundVideoLink = "/backgroundsHome/MudaTudoCamapnhaWEB.mp4";
     const backGroundImageLink = "/backgroundsHome/FUNDO.jpg";
     const mobileBackGroundImageLink = "/backgroundsHome/FUNDO-MOBILE.jpg";
     const mobileBackGroundVideoLink = "/backgroundsHome/DEFAULT_BACKGROUND.webm";
@@ -132,7 +132,7 @@ export function HeroSection() {
             </div>
             <div className="absolute inset-0 max-w-7xl mx-auto px-4 md:px-8 flex flex-col justify-center pt-20">
                 <div className="max-w-3xl">
-                    <h1 className="text-white text-4xl md:text-[56px] leading-[1.1] font-sans mb-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
+                    <h1 className="text-white text-4xl md:text-[42px] leading-[1.1] font-sans mb-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
                         <span className="font-bold block text-[rgb(255,255,255)]">Encontre o melhor </span>
                         <span className="font-light">da decoração e design para o seu lar.</span>
                     </h1>

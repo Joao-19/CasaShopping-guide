@@ -131,6 +131,25 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
                 />
             </div>
 
+            {/* Site */}
+            <BaseInput
+                id="site"
+                label="Site"
+                type="url"
+                placeholder="https://www.loja.com.br"
+                value={data.site}
+                onChange={(e) => handlers.setSite(e.target.value)}
+                error={siteField.error}
+                onBlur={siteField.onBlur}
+                startIcon={
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe text-gray-400" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                        <path d="M2 12h20"></path>
+                    </svg>
+                }
+            />
+
             {/* Redes Sociais */}
             <div className="">
                 <Label className="block text-sm font-semibold text-gray-700 mb-2">Redes Sociais</Label>

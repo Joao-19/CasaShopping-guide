@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { MediaCard, usePopup, formatPriceTier, IconHeart, BaseText } from "@repo/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts } from "../Services/http/product.http";
@@ -75,6 +75,7 @@ export function HighlightsSection() {
             storeInstagram: product.store?.instagramLink,
             storeFacebook: product.store?.facebookLink,
             storeYoutube: product.store?.youtubeLink,
+            whatsapp: product.store?.whatsapp,
         };
         showPopup(<ProductDetailsCard product={productDetails} />);
     };
