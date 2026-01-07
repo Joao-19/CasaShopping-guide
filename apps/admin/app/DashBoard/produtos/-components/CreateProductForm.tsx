@@ -252,6 +252,7 @@ function CreateProductFormContent({
                         <option value={PriceTier.LOW}>Baixo ($)</option>
                         <option value={PriceTier.MEDIUM}>Médio ($$)</option>
                         <option value={PriceTier.HIGH}>Alto ($$$)</option>
+                        <option value={PriceTier.ON_REQUEST}>Sem Valor</option>
                     </select>
                 </div>
 

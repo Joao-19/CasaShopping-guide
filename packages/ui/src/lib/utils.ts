@@ -11,5 +11,6 @@ export function formatPriceTier(tier: string | undefined | null): string {
   if (upperTier === "LOW") return "$";
   if (upperTier === "MEDIUM") return "$$";
   if (upperTier === "HIGH") return "$$$";
+  if (upperTier === "ON_REQUEST") return "";
   return "$$$";
 }

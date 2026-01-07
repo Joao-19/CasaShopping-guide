@@ -17,6 +17,7 @@ export enum PriceTier {
   LOW = "LOW",
   MEDIUM = "MEDIUM",
   HIGH = "HIGH",
+  ON_REQUEST = "ON_REQUEST",
 }
 
 export class ProductImageDto {

@@ -119,6 +119,7 @@ enum PriceTier {
   LOW
   MEDIUM
   HIGH
+  ON_REQUEST
 }
 
 model Category {

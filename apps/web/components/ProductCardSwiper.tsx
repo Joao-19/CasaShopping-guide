@@ -100,9 +100,11 @@ export function ProductCardSwiper({
                 </Swiper>
 
                 {/* Price Tag */}
-                <div className="absolute bottom-3 right-3 font-bold text-white text-sm bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">
-                    {formatPriceTier(price as string)}
-                </div>
+                {formatPriceTier(price as string) && (
+                    <div className="absolute bottom-3 right-3 font-bold text-white text-sm bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">
+                        {formatPriceTier(price as string)}
+                    </div>
+                )}
 
                 {/* Wishlist Button */}
                 <div className="absolute top-3 right-3 z-10">

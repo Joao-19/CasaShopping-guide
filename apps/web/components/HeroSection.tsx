@@ -182,10 +182,11 @@ export function HeroSection() {
                                                     <span className="text-base font-medium text-[#162e47] truncate">{product.name}</span>
                                                     <div className="flex items-center justify-between w-full mt-1">
                                                         <span className="text-sm text-gray-400 truncate flex-1">{product.store?.name || "Loja"}</span>
-                                                        {product.price && (
+                                                        {product.price && formatPriceTier(product.price) && (
                                                             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${product.price === 'HIGH' ? 'bg-purple-100 text-purple-700' :
                                                                 product.price === 'MEDIUM' ? 'bg-blue-100 text-blue-700' :
-                                                                    'bg-slate-100 text-slate-700'
+                                                                    product.price === 'ON_REQUEST' ? 'hidden' : // Should be handled by formatPriceTier check but safe to add
+                                                                        'bg-slate-100 text-slate-700'
                                                                 }`}>
                                                                 {formatPriceTier(product.price)}
                                                             </span>
