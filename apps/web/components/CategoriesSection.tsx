@@ -16,7 +16,7 @@ const categoriesData = [
     { id: 'quarto', name: 'Quarto', image: 'categories/Quarto.jpeg' },
     { id: 'banheiro', name: 'Banheiro', image: 'categories/bathroom.avif' },
     { id: 'cozinha', name: 'Cozinha', image: 'categories/kitchen.avif' },
-    { id: 'area-externa', name: 'Área Externa', image: 'categories/Area_externa.jpeg' },
+    { id: 'area-externa', name: 'Área Externa', image: 'categories/Area_Externa.jpeg' },
     { id: 'escritorio', name: 'Escritório', image: 'categories/Escritorio.jpeg' },
 ];
 
