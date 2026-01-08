@@ -10,7 +10,12 @@ import {
   Req,
 } from "@nestjs/common";
 import { StoreGatewayService } from "../services/store-gateway.service";
-import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
+import {
+  CreateStoreDto,
+  UpdateStoreDto,
+  Store,
+  PaginatedResult,
+} from "@repo/dtos";
 import { Request } from "express";
 
 @Controller("stores")
@@ -51,7 +56,7 @@ export class StoreGatewayController {
   @Put(":id")
   async update(
     @Param("id") id: string,
-    @Body() updateStoreDto: Partial<CreateStoreDto>,
+    @Body() updateStoreDto: UpdateStoreDto,
     @Req() req: Request
   ): Promise<Store> {
     const token = req.cookies["access_token"];
