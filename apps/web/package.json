@@ -11,6 +11,7 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@nestjs/swagger": "^11.2.4",
     "@repo/api-client": "workspace:^",
     "@repo/dtos": "workspace:*",
     "@repo/ui": "workspace:*",
