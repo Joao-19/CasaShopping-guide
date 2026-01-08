@@ -17,12 +17,26 @@ import {
   PaginatedResult,
 } from "@repo/dtos";
 import { Request } from "express";
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+} from "@nestjs/swagger";
 
+@ApiTags("Stores")
 @Controller("stores")
 export class StoreGatewayController {
   constructor(private readonly storeGatewayService: StoreGatewayService) {}
 
   @Post()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Create a new store" })
+  @ApiResponse({
+    status: 201,
+    description: "The store has been successfully created.",
+  })
   async create(
     @Body() createStoreDto: CreateStoreDto,
     @Req() req: Request
@@ -32,6 +46,11 @@ export class StoreGatewayController {
   }
 
   @Get()
+  @ApiOperation({ summary: "Retrieve all stores with pagination and search" })
+  @ApiResponse({ status: 200, description: "Return paginated stores." })
+  @ApiQuery({ name: "page", required: false })
+  @ApiQuery({ name: "search", required: false })
+  @ApiQuery({ name: "limit", required: false })
   async findAll(
     @Query("page") page: string = "1",
     @Req() req: Request,
@@ -48,12 +67,24 @@ export class StoreGatewayController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Delete a store" })
+  @ApiResponse({
+    status: 200,
+    description: "The store has been successfully deleted.",
+  })
   async delete(@Param("id") id: string, @Req() req: Request): Promise<Store> {
     const token = req.cookies["access_token"];
     return this.storeGatewayService.delete(id, token);
   }
 
   @Put(":id")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update a store" })
+  @ApiResponse({
+    status: 200,
+    description: "The store has been successfully updated.",
+  })
   async update(
     @Param("id") id: string,
     @Body() updateStoreDto: UpdateStoreDto,
