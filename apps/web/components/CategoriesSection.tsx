@@ -13,11 +13,11 @@ import 'swiper/css/pagination';
 
 const categoriesData = [
     { id: 'sala', name: 'Sala', image: 'categories/room.avif' },
-    { id: 'quarto', name: 'Quarto', image: 'categories/bedroom.avif' },
+    { id: 'quarto', name: 'Quarto', image: 'categories/Quarto.jpeg' },
     { id: 'banheiro', name: 'Banheiro', image: 'categories/bathroom.avif' },
     { id: 'cozinha', name: 'Cozinha', image: 'categories/kitchen.avif' },
-    { id: 'area-externa', name: 'Área Externa', image: 'categories/outdoor.avif' },
-    { id: 'escritorio', name: 'Escritório', image: 'categories/office.avif' },
+    { id: 'area-externa', name: 'Área Externa', image: 'categories/Area_externa.jpeg' },
+    { id: 'escritorio', name: 'Escritório', image: 'categories/Escritorio.jpeg' },
 ];
 
 const categories = [...categoriesData, ...categoriesData, ...categoriesData];
