@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+import path from 'path';
+
 const nextConfig = {
     allowedDevOrigins: ["192.168.0.13"],
     output: "standalone",
@@ -24,6 +26,10 @@ const nextConfig = {
                 port: '9000',
             },
         ],
+    },
+    webpack: (config) => {
+        config.resolve.alias['@nestjs/swagger'] = path.resolve('utils/swagger-shim.ts');
+        return config;
     },
 };
 
