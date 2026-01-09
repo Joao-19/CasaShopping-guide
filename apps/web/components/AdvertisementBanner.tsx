@@ -29,7 +29,7 @@ export function AdvertisementBanner({
             'block';
 
     const content = (
-        <div className={`w-full relative rounded-2xl overflow-hidden shadow-sm aspect-32/9 max-w-[1920px] max-h-[180px] ${className}`}>
+        <div className={`w-full relative rounded-2xl overflow-hidden aspect-32/9 max-w-[1920px] max-h-[180px] ${className}`}>
             {isVideo ? (
                 <video
                     src={src}

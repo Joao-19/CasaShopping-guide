@@ -5,14 +5,16 @@ import { Navigation } from 'swiper/modules';
 import { useQuery } from "@tanstack/react-query";
 import storeService from "../Services/http/store.http";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
 import { useId } from "react";
+import { usePopup } from "@repo/ui";
+import { StoreDetailsCard } from "./StoreDetailsCard";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 
 export function StoresSection() {
     const uniqueId = useId().replace(/:/g, '');
+    const { showPopup } = usePopup();
 
     const { data: stores, isLoading } = useQuery({
         queryKey: ['stores'],
@@ -61,11 +63,20 @@ export function StoresSection() {
                             slidesPerView: 7.5,
                         },
                     }}
-                    className="w-full py-4"
+                    className="w-full py-14!"
                 >
                     {stores.map((store) => (
                         <SwiperSlide key={store.id} className="flex! flex-col items-center justify-center group/card cursor-pointer">
-                            <Link href={`/lojista/${store.id}`} className="flex flex-col items-center gap-3 w-full">
+                            <div onClick={() => showPopup(<StoreDetailsCard store={{
+                                ...store,
+                                logoImage: store.logoImage ?? undefined,
+                                phone: store.phone ?? undefined,
+                                site: store.site ?? undefined,
+                                whatsapp: store.whatsapp ?? undefined,
+                                facebookLink: store.facebookLink ?? null,
+                                instagramLink: store.instagramLink ?? null,
+                                youtubeLink: store.youtubeLink ?? null
+                            }} />)} className="flex flex-col items-center gap-3 w-full cursor-pointer">
                                 <div className="relative w-24 h-24 md:w-24 md:h-24 rounded-full overflow-hidden border border-gray-100 shadow-sm transition-all duration-300 group-hover/card:shadow-md group-hover/card:scale-105 bg-white flex items-center justify-center">
                                     {store.logoImage ? (
                                         <img
@@ -80,7 +91,7 @@ export function StoresSection() {
                                     )}
                                 </div>
                                 <span className="text-sm md:text-base font-medium text-[#1A2B3C] text-center line-clamp-2 max-w-[120px] group-hover/card:text-[#003BA6] transition-colors">{store.name}</span>
-                            </Link>
+                            </div>
                         </SwiperSlide>
                     ))}
                 </Swiper>
