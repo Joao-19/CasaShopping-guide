@@ -76,7 +76,8 @@ export function HeroSection() {
             price: product.price,
             description: product.description,
             images: product.images?.sort((a: any, b: any) => a.index - b.index)
-                .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || []
+                .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
+            storeAddress: product.store?.address
         };
 
         showPopup(<ProductDetailsCard product={formattedProduct} />);
