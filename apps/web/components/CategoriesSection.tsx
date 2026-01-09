@@ -10,6 +10,7 @@ import Link from "next/link";
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const categoriesData = [
     { id: 'sala', name: 'Sala', image: 'categories/room.avif' },
@@ -34,9 +35,6 @@ export function CategoriesSection() {
         <section>
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <h2 className="text-[rgb(22,46,71)] text-[28px] font-bold font-sans">Categorias</h2>
-                <Link href="/produtos" className="hover:opacity-80 transition-opacity">
-                    <BaseText text="Ver todas" color="gray" size="medium" className="font-medium" />
-                </Link>
             </div>
 
             <div className="relative group/categories max-w-7xl mx-auto">
@@ -52,7 +50,11 @@ export function CategoriesSection() {
                     }}
                     loop={true}
                     pagination={{
-                        dynamicBullets: true
+                        dynamicBullets: true,
+                    }}
+                    navigation={{
+                        nextEl: `#next-${uniqueId}`,
+                        prevEl: `#prev-${uniqueId}`,
                     }}
                     modules={[Navigation, Pagination]}
                     className="w-full py-8! md:px-2!"
@@ -76,6 +78,21 @@ export function CategoriesSection() {
                         </SwiperSlide>
                     ))}
                 </Swiper>
+
+                <button
+                    id={`prev-${uniqueId}`}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-0 group-hover/categories:opacity-100"
+                    aria-label="Previous slide"
+                >
+                    <ChevronLeft size={24} />
+                </button>
+                <button
+                    id={`next-${uniqueId}`}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-0 group-hover/categories:opacity-100"
+                    aria-label="Next slide"
+                >
+                    <ChevronRight size={24} />
+                </button>
             </div>
         </section>
     );

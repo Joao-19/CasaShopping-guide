@@ -84,7 +84,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
             </div>
 
             {isLoading ? (
-                <div className="flex items-center justify-center p-12 w-full">
+                <div className="flex items-center justify-center px-12 w-full">
                     <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                 </div>
             ) : products.length === 0 ? (
@@ -132,7 +132,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                 slidesPerView: 5.2,
                             },
                         }}
-                        className="w-full py-12!"
+                        className="w-full py-4!"
                     >
                         {products.map((product, index) => (
                             <SwiperSlide key={`${product.id}-${index}`} className="h-auto! flex items-center justify-center p-2">

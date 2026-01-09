@@ -15,22 +15,52 @@ export class AuthService implements OnModuleInit {
   constructor(private configService: ConfigService) {}
 
   async register(data: any) {
+    console.log(
+      `[AuthService] Registering user: ${data.email}, Name: ${data.name}`
+    );
+    const email = data.email.toLowerCase();
+
     const userExists = await prisma.user.findUnique({
-      where: { email: data.email },
+      where: { email },
     });
 
+    console.log(
+      `[AuthService] Check if user exists (${email}):`,
+      userExists ? "FOUND" : "NOT FOUND"
+    );
+
     if (userExists) {
-      throw new ConflictException("Email já cadastrado");
+      console.warn(
+        `[AuthService] Conflict: User already exists with ID: ${userExists.id}`
+      );
+      throw new ConflictException("Este e-mail já está cadastrado.");
     }
 
     const passwordHash = await bcrypt.hash(data.password, 6);
 
-    const newUser = await prisma.user.create({
-      data: { ...data, password: passwordHash },
-    });
+    try {
+      console.log(`[AuthService] Attempting to create user in DB...`);
+      const newUser = await prisma.user.create({
+        data: { ...data, email, password: passwordHash },
+      });
+      console.log(`[AuthService] User created successfully: ${newUser.id}`);
 
-    const { password, ...result } = newUser;
-    return result;
+      const { password, ...result } = newUser;
+      return result;
+    } catch (error: any) {
+      console.error(`[AuthService] Creation Error:`, error);
+      if (error.code === "P2002") {
+        const field = error.meta?.target?.[0];
+        console.warn(
+          `[AuthService] Unique Constraint Violation on field: ${field}`
+        );
+        if (field === "email") {
+          throw new ConflictException("Este e-mail já está cadastrado.");
+        }
+        throw new ConflictException(`O ${field} informado já está em uso.`);
+      }
+      throw error;
+    }
   }
 
   async validateUser(email: string, pass: string): Promise<any> {

@@ -146,9 +146,9 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                             </div>
 
                             {/* Info Section */}
-                            <div className="flex flex-col gap-[24px] items-start w-full px-[32px] pb-[32px] pt-[20px] bg-[#f0f1f3]">
+                            <div className="flex flex-col gap-2 items-start w-full px-[32px] pb-[32px] pt-[20px] bg-[#f0f1f3]">
                                 <div className="flex justify-between items-start w-full">
-                                    <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight flex-1 pr-4 line-clamp-2 min-h-[50px]" title={product.title}>
+                                    <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight flex-1 pr-4 line-clamp-2 min-h-[25px]" title={product.title}>
                                         {product.title}
                                     </h2>
                                     <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap">

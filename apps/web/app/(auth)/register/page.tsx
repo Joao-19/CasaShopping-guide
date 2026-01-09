@@ -143,7 +143,8 @@ const RegisterPage = () => {
             router.push("/login");
         } catch (error: any) {
             console.error("Registration error:", error);
-            toast.error(error.message || "Ocorreu um erro ao tentar registrar.");
+            const errorMessage = error.response?.data?.message || error.message || "Ocorreu um erro ao tentar registrar.";
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

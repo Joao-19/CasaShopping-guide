@@ -10,7 +10,7 @@ export function HeroSection() {
     const backGroundVideoLink = "/backgroundsHome/MudaTudoCamapnhaWEB.mp4";
     const backGroundImageLink = "/backgroundsHome/FUNDO.jpg";
     const mobileBackGroundImageLink = "/backgroundsHome/FUNDO-MOBILE.jpg";
-    const mobileBackGroundVideoLink = "/backgroundsHome/DEFAULT_BACKGROUND.webm";
+    const mobileBackGroundVideoLink = "/backgroundsHome/MudaTudoCamapnhaMOBILE.mp4";
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
