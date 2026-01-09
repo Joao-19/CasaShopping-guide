@@ -148,11 +148,11 @@ export default function StoresPage() {
 
 
     return (
-        <main className="w-full h-full flex flex-col flex-1 bg-[#f0f1f3]">
+        <main className="w-full h-full flex flex-col flex-1 bg-[#f0f1f3] overflow-x-hidden">
             <Toolbar />
 
             {/* Add padding-top to account for fixed header (100px) */}
-            <div className="flex-1 w-full min-h-screen">
+            <div className="flex-1 w-full min-h-screen pt-28 md:pt-32">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
                         <h1 className="text-3xl font-bold text-[#1A2B3C] font-sans">

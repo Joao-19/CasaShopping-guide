@@ -215,7 +215,7 @@ export function HeroSection() {
                     type="image"
                     alt="Oferta Especial"
                     withoutWrapper={true}
-                    displayMode="all"
+                    displayMode="mobile"
                 />
             </div>
         </div>

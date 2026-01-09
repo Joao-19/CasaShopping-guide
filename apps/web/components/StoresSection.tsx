@@ -43,6 +43,7 @@ export function StoresSection() {
                         prevEl: `#prev-${uniqueId}`,
                         nextEl: `#next-${uniqueId}`,
                     }}
+                    centeredSlides={true}
                     spaceBetween={24}
                     slidesPerView={3.5}
                     loop={true}
@@ -86,7 +87,7 @@ export function StoresSection() {
 
                 <button
                     id={`prev-${uniqueId}`}
-                    className="absolute left-0 top-1/2 -translate-y-[calc(50%+16px)] z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-0 group-hover/stores:opacity-100"
+                    className="absolute -left-5 top-1/2 -translate-y-[calc(50%+16px)] z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-100"
                     aria-label="Previous slide"
                 >
                     <ChevronLeft size={24} />
@@ -94,7 +95,7 @@ export function StoresSection() {
 
                 <button
                     id={`next-${uniqueId}`}
-                    className="absolute right-0 top-1/2 -translate-y-[calc(50%+16px)] z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-0 group-hover/stores:opacity-100"
+                    className="absolute -right-5 top-1/2 -translate-y-[calc(50%+16px)] z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-100"
                     aria-label="Next slide"
                 >
                     <ChevronRight size={24} />
