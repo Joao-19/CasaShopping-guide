@@ -81,14 +81,14 @@ export function CategoriesSection() {
 
                 <button
                     id={`prev-${uniqueId}`}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-0 group-hover/categories:opacity-100"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-100 group-hover/categories:opacity-100"
                     aria-label="Previous slide"
                 >
                     <ChevronLeft size={24} />
                 </button>
                 <button
                     id={`next-${uniqueId}`}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-0 group-hover/categories:opacity-100"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-[40px] h-[40px] flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg text-[#1A2B3C] hover:bg-white hover:scale-110 transition-all disabled:opacity-0 disabled:cursor-default opacity-100 group-hover/categories:opacity-100"
                     aria-label="Next slide"
                 >
                     <ChevronRight size={24} />
