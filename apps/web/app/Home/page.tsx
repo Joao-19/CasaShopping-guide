@@ -5,6 +5,7 @@ import { HighlightsSection } from "../../components/HighlightsSection";
 import { ProductShowcase } from "../../components/ProductShowcase";
 import { Footer } from "../../components/Footer";
 import { AdvertisementBanner } from "../../components/AdvertisementBanner";
+import { StoresSection } from "../../components/StoresSection";
 
 export default function HomePage() {
     return (
@@ -15,6 +16,10 @@ export default function HomePage() {
                 <HeroSection />
 
                 <div className="max-w-7xl mx-auto px-8 flex flex-col mt-8 md:mt-16 mb-16">
+
+                    <StoresSection />
+
+                    <div className="mt-16" />
 
                     <CategoriesSection />
 
