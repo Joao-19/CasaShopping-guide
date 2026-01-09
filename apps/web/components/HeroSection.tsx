@@ -132,8 +132,8 @@ export function HeroSection() {
                 <div className="absolute inset-0 bg-linear-to-r from-[#0d1b2a]/90 via-[#0d1b2a]/40 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 h-48 bg-linear-to-t from-[#f0f1f3] to-transparent z-10 pointer-events-none"></div>
             </div>
-            <div className="absolute inset-0 mx-auto px-4 md:px-8 flex flex-col justify-center pt-20 w-full">
-                <div className="max-w-3xl w-full">
+            <div className="absolute inset-0 max-w-7xl mx-auto px-4 md:px-8 flex flex-col justify-center pt-20">
+                <div className="max-w-3xl w-full group">
                     <h1 className="text-white text-4xl md:text-[42px] leading-[1.1] font-sans mb-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
                         <span className="font-bold block text-[rgb(255,255,255)]">Encontre o melhor </span>
                         <span className="font-light">da decoração e design para o seu lar.</span>
