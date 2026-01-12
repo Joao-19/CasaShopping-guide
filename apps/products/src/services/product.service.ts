@@ -64,14 +64,12 @@ export class ProductService {
 
   private transformProduct(product: any): any {
     if (product.images) {
-      let baseUrl = process.env.STORAGE_URL;
+      const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
+      const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
 
-      if (!baseUrl) {
-        const publicEndpoint =
-          process.env.MINIO_PUBLIC_ENDPOINT || "http://localhost:9000";
-        const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
-        baseUrl = `${publicEndpoint}/${bucketName}`;
-      }
+      let baseUrl = publicEndpoint
+        ? `${publicEndpoint}/${bucketName}`
+        : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
 
       const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 
