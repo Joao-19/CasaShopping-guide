@@ -101,8 +101,23 @@ export function ProfilePopup({ onClose }: ProfilePopupProps) {
 
     const getImageUrl = (imagePath: string | null) => {
         if (!imagePath) return null;
-        if (imagePath.startsWith("http")) return `${imagePath}?v=${imageVersion}`;
+
         const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL || "http://localhost:9000/casashopping";
+
+        if (imagePath.startsWith("http")) {
+            if (imagePath.includes("localhost:9000")) {
+                try {
+                    const storageUrlObj = new URL(storageUrl);
+                    // Replace http://localhost:9000 with the new origin
+                    const newUrl = imagePath.replace("http://localhost:9000", storageUrlObj.origin);
+                    return `${newUrl}?v=${imageVersion}`;
+                } catch (e) {
+                    return `${imagePath}?v=${imageVersion}`;
+                }
+            }
+            return `${imagePath}?v=${imageVersion}`;
+        }
+
         const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
         return `${storageUrl}/${cleanPath}?v=${imageVersion}`;
     };
