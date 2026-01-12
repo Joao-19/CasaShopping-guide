@@ -15,7 +15,7 @@ import { useAuthStore } from "@/store/auth.store";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { useId } from "react";
+import { useId, useState, useEffect } from "react";
 
 interface ProductShowcaseProps {
     title: string;
@@ -66,14 +66,56 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
         storeAddress: p.store?.address,
     }))) || [];
 
-    // Triple data if list is short to ensure Centered Loop has enough buffer
-    const products = baseProducts.length > 0 && baseProducts.length < 10
-        ? [...baseProducts, ...baseProducts, ...baseProducts]
-        : baseProducts;
+    const products = baseProducts;
 
     const handleProductClick = (product: any) => {
         showPopup(<ProductDetailsCard product={product} />);
     };
+
+    const isClient = typeof window !== 'undefined';
+    const [shouldLoop, setShouldLoop] = useState(false);
+
+    // Breakpoints configuration
+    const breakpoints = {
+        0: {
+            slidesPerView: 2.1,
+            spaceBetween: 2,
+        },
+        768: {
+            slidesPerView: 3.2,
+        },
+        1024: {
+            slidesPerView: 4.2,
+        },
+        1280: {
+            slidesPerView: 5.2,
+        },
+    };
+
+    useEffect(() => {
+        if (!isClient) return;
+
+        const handleResize = () => {
+            const width = window.innerWidth;
+            let currentSlidesPerView = 2.1; // Default for 0 breakpoint
+
+            if (width >= 1280) {
+                currentSlidesPerView = 5.2;
+            } else if (width >= 1024) {
+                currentSlidesPerView = 4.2;
+            } else if (width >= 768) {
+                currentSlidesPerView = 3.2;
+            }
+
+            setShouldLoop(products.length > currentSlidesPerView);
+        };
+
+        // Initial check
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [products.length, isClient]);
 
     return (
         <section className="mb-6">
@@ -102,11 +144,12 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
             ) : (
                 <div className="relative group/showcase max-w-7xl mx-auto px-8">
                     <Swiper
+                        key={shouldLoop ? 'loop' : 'no-loop'} // Force re-render when loop mode changes
                         grabCursor={true}
                         spaceBetween={16}
                         centeredSlides={false}
                         centeredSlidesBounds={false}
-                        loop={true}
+                        loop={shouldLoop}
                         navigation={{
                             prevEl: `.prev-${uniqueId}`,
                             nextEl: `.next-${uniqueId}`,
@@ -117,21 +160,7 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
                                 fetchNextPage();
                             }
                         }}
-                        breakpoints={{
-                            0: {
-                                slidesPerView: 2.1,
-                                spaceBetween: 2,
-                            },
-                            768: {
-                                slidesPerView: 3.2,
-                            },
-                            1024: {
-                                slidesPerView: 4.2,
-                            },
-                            1280: {
-                                slidesPerView: 5.2,
-                            },
-                        }}
+                        breakpoints={breakpoints}
                         className="w-full py-4!"
                     >
                         {products.map((product, index) => (
