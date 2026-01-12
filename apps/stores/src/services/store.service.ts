@@ -40,8 +40,15 @@ export class StoreService {
 
   private transformStore(store: Store): Store {
     if (store.logoImage && !store.logoImage.startsWith("http")) {
-      const baseUrl =
-        process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+      let baseUrl = process.env.STORAGE_URL;
+
+      if (!baseUrl) {
+        const publicEndpoint =
+          process.env.MINIO_PUBLIC_ENDPOINT || "http://localhost:9000";
+        const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
+        baseUrl = `${publicEndpoint}/${bucketName}`;
+      }
+
       const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
       const cleanKey = store.logoImage.startsWith("/")
         ? store.logoImage.slice(1)
