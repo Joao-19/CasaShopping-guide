@@ -102,6 +102,12 @@ export class UserController {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
+      if (error.code === "P2025") {
+        throw new HttpException(
+          "User not found (Token mismatch)",
+          HttpStatus.CONFLICT
+        );
+      }
       console.error("[UserController] Error updating profile image:", error);
       throw new HttpException(
         error.message || "Internal Server Error",
