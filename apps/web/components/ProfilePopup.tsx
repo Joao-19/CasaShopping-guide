@@ -102,8 +102,9 @@ export function ProfilePopup({ onClose }: ProfilePopupProps) {
     const getImageUrl = (imagePath: string | null) => {
         if (!imagePath) return null;
         if (imagePath.startsWith("http")) return `${imagePath}?v=${imageVersion}`;
-        const apiHost = process.env.NEXT_PUBLIC_API_HOST || "localhost";
-        return `http://${apiHost}:9000/casashopping/${imagePath}?v=${imageVersion}`;
+        const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL || "http://localhost:9000/casashopping";
+        const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+        return `${storageUrl}/${cleanPath}?v=${imageVersion}`;
     };
 
     const imageUrl = getImageUrl(profileImage);
