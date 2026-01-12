@@ -15,6 +15,8 @@ import { Response } from "express";
 import { UserService } from "@/services/user.service";
 import { ConfigService } from "@nestjs/config";
 import * as jwt from "jsonwebtoken";
+import { UpdateProfileImageDto } from "@repo/dtos";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 @Controller("user")
 export class UserController {
@@ -88,10 +90,24 @@ export class UserController {
   @Patch("me/profile-image")
   async updateProfileImage(
     @Headers("authorization") authHeader: string,
-    @Body() body: { profileImage: string }
+    @Body() body: UpdateProfileImageDto
   ) {
-    const userId = this.getUserIdFromToken(authHeader);
-    return this.userService.updateProfileImage(userId, body.profileImage);
+    try {
+      const userId = this.getUserIdFromToken(authHeader);
+      return await this.userService.updateProfileImage(
+        userId,
+        body.profileImage
+      );
+    } catch (error: any) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      console.error("[UserController] Error updating profile image:", error);
+      throw new HttpException(
+        error.message || "Internal Server Error",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   @Delete("me")

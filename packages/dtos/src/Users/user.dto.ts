@@ -39,3 +39,9 @@ export class CreateUserDto {
   })
   password!: string;
 }
+
+export class UpdateProfileImageDto {
+  @IsString()
+  @IsNotEmpty()
+  profileImage!: string;
+}

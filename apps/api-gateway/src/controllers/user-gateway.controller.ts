@@ -11,7 +11,11 @@ import {
   Res,
 } from "@nestjs/common";
 import { UserGatewayService } from "../services/user-gateway.service";
-import { CreateUserDto, PaginatedResult } from "@repo/dtos";
+import {
+  CreateUserDto,
+  PaginatedResult,
+  UpdateProfileImageDto,
+} from "@repo/dtos";
 import { Request, Response } from "express";
 import {
   ApiTags,
@@ -68,7 +72,7 @@ export class UserGatewayController {
   @ApiOperation({ summary: "Update profile image" })
   @ApiResponse({ status: 200, description: "Profile image updated." })
   async updateProfileImage(
-    @Body() body: { profileImage: string },
+    @Body() body: UpdateProfileImageDto,
     @Req() req: Request
   ): Promise<any> {
     const token = req.cookies["access_token"];
