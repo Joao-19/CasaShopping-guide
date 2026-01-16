@@ -76,6 +76,7 @@ export function HighlightsSection() {
             storeFacebook: product.store?.facebookLink,
             storeYoutube: product.store?.youtubeLink,
             whatsapp: product.store?.whatsapp,
+            storeAddress: product.store?.address,
         };
         showPopup(<ProductDetailsCard product={productDetails} />);
     };

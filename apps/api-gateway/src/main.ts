@@ -4,6 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { AppModule } from "./App.module";
 import cookieParser from "cookie-parser";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 30000; // 30 seconds
@@ -48,6 +49,18 @@ async function bootstrap(retryCount = 0) {
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
       credentials: true,
     });
+
+    if (process.env.NODE_ENV !== "production") {
+      const config = new DocumentBuilder()
+        .setTitle("CasaShopping API")
+        .setDescription("API Gateway documentation")
+        .setVersion("1.0")
+        .addBearerAuth()
+        .build();
+      const document = SwaggerModule.createDocument(app, config);
+      SwaggerModule.setup("docs", app, document);
+      console.log(`📄 Swagger running at http://localhost:${port}/docs`);
+    }
 
     await app.listen(port, "0.0.0.0");
     console.log(`🚀 API Gateway (NestJS) rodando na porta ${port}`);

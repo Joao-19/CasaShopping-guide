@@ -64,8 +64,13 @@ export class ProductService {
 
   private transformProduct(product: any): any {
     if (product.images) {
-      const baseUrl =
-        process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+      const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
+      const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
+
+      let baseUrl = publicEndpoint
+        ? `${publicEndpoint}/${bucketName}`
+        : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+
       const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 
       product.images = product.images.map((img: any) => {

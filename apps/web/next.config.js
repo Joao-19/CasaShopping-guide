@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+import path from 'path';
 
 const nextConfig = {
     reactStrictMode: true,
@@ -24,6 +25,10 @@ const nextConfig = {
                 port: '9000',
             },
         ],
+    },
+    webpack: (config) => {
+        config.resolve.alias['@nestjs/swagger'] = path.resolve('utils/swagger-shim.ts');
+        return config;
     },
 };
 

@@ -23,7 +23,7 @@ const StoreCard = ({ store }: { store: any }) => {
     return (
         <div
             onClick={() => showPopup(<StoreDetailsCard store={store} />)}
-            className="bg-white rounded-2xl p-6 flex flex-col items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group border border-gray-100"
+            className="bg-white rounded-2xl p-4 md:p-6 flex flex-col items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group border border-gray-100"
         >
             <div className="w-24 h-24 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-colors">
                 {!imgError && store.logoImage && store.logoImage.length > 2 ? (
@@ -148,12 +148,12 @@ export default function StoresPage() {
 
 
     return (
-        <main className="w-full h-full flex flex-col flex-1 bg-[#f0f1f3]">
+        <main className="w-full h-full flex flex-col flex-1 bg-[#f0f1f3] overflow-x-hidden">
             <Toolbar />
 
             {/* Add padding-top to account for fixed header (100px) */}
-            <div className="flex-1 w-full min-h-screen">
-                <div className="max-w-7xl mx-auto px-6 py-8 w-full">
+            <div className="flex-1 w-full min-h-screen pt-28 md:pt-32">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
                         <h1 className="text-3xl font-bold text-[#1A2B3C] font-sans">
                             Nossas Lojas
@@ -182,7 +182,7 @@ export default function StoresPage() {
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 mb-12">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 mb-12">
                                 {stores.map((store) => (
                                     <StoreCard key={store.id} store={store} />
                                 ))}

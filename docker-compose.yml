@@ -142,6 +142,7 @@ services:
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+        - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
     container_name: casashopping-web
     ports:
       - "3001:3001"
@@ -149,6 +150,7 @@ services:
       - PORT=3001
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
       - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+      - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
     depends_on:
       - api-gateway
     networks:
@@ -191,6 +193,8 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
       - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
       - database
     networks:
@@ -212,6 +216,8 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
       - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
       - database
     networks:

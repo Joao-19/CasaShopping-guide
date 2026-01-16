@@ -55,11 +55,27 @@ export function Toolbar() {
 
     const getImageUrl = (imagePath: string | null | undefined) => {
         if (!imagePath) return null;
+
+        const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL || "http://localhost:9000/casashopping";
+
+        // Handle legacy absolute URLs stored in DB
         if (imagePath.startsWith("http")) {
-            return imagePath.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost');
+            if (imagePath.includes("localhost:9000")) {
+                // Determine origin from storageUrl
+                try {
+                    const storageUrlObj = new URL(storageUrl);
+                    // Replace http://localhost:9000 with the new origin (e.g. http://129.x.x.x:9000)
+                    // We preserve the rest of the path including bucket
+                    return imagePath.replace("http://localhost:9000", storageUrlObj.origin);
+                } catch (e) {
+                    return imagePath;
+                }
+            }
+            return imagePath;
         }
-        const apiHost = process.env.NEXT_PUBLIC_API_HOST || "localhost";
-        return `http://${apiHost}:9000/casashopping/${imagePath}`;
+
+        const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+        return `${storageUrl}/${cleanPath}`;
     };
 
     const profileImageUrl = getImageUrl(safeUser?.profileImage);
