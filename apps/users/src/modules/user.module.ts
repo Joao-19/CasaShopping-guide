@@ -5,6 +5,8 @@ import { ConfigModule } from "@nestjs/config";
 import { PassportModule } from "@nestjs/passport";
 import { AuthGuardModule } from "@repo/auth-guard";
 
+import { HealthController } from "../controllers/health.controller";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -13,7 +15,7 @@ import { AuthGuardModule } from "@repo/auth-guard";
     PassportModule,
     AuthGuardModule,
   ],
-  controllers: [UserController],
+  controllers: [UserController, HealthController],
   providers: [UserService],
 })
 export class UserModule {}

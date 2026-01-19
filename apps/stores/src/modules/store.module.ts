@@ -5,13 +5,15 @@ import { StoreService } from "@/services/store.service";
 import { PassportModule } from "@nestjs/passport";
 import { AuthGuardModule } from "@repo/auth-guard";
 
+import { HealthController } from "../controllers/health.controller";
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PassportModule,
     AuthGuardModule,
   ],
-  controllers: [StoreController],
+  controllers: [StoreController, HealthController],
   providers: [StoreService],
 })
 export class StoreModule {}

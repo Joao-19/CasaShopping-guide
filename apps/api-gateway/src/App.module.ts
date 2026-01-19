@@ -9,6 +9,8 @@ import { HttpModule } from "@nestjs/axios";
 
 import { PassportModule } from "@nestjs/passport";
 
+import { HealthController } from "./controllers/health.controller";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,7 +24,7 @@ import { PassportModule } from "@nestjs/passport";
     HttpModule,
     PassportModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [],
 })
 export class AppModule {}
