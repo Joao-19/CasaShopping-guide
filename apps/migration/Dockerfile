@@ -12,7 +12,7 @@ COPY packages/database/prisma ./prisma
 RUN npm install prisma@5.22.0
 
 # Script de entrada
-COPY init-db.sh .
+COPY apps/migration/init-db.sh .
 RUN chmod +x init-db.sh
 
 ENTRYPOINT ["./init-db.sh"]

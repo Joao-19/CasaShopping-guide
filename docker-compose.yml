@@ -76,12 +76,20 @@ services:
       - STORAGE_SERVICE_URL=http://storage-service:3007
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - database
-      - auth-service
-      - users-service
-      - stores-service
-      - products-service
-      - storage-service
+      database:
+        condition: service_started
+      auth-service:
+        condition: service_started
+      users-service:
+        condition: service_started
+      stores-service:
+        condition: service_started
+      products-service:
+        condition: service_started
+      storage-service:
+        condition: service_started
+      db-migration:
+        condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
@@ -114,7 +122,10 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_NAME=${ADMIN_NAME}
     depends_on:
-      - database
+      database:
+        condition: service_started
+      db-migration:
+        condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
@@ -141,7 +152,10 @@ services:
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - database
+      database:
+        condition: service_started
+      db-migration:
+        condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
@@ -251,7 +265,10 @@ services:
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
-      - database
+      database:
+        condition: service_started
+      db-migration:
+        condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
@@ -283,7 +300,10 @@ services:
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
-      - database
+      database:
+        condition: service_started
+      db-migration:
+        condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:

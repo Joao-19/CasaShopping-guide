@@ -22,7 +22,7 @@ async function importStores() {
             throw new Error(`Falha no login: ${authResponse.statusText}`);
         }
 
-        const authData = await authResponse.json();
+        const authData = await authResponse.json(); 
         token = authData.accessToken;
         console.log('✅ Login realizado com sucesso!');
     } catch (error) {
