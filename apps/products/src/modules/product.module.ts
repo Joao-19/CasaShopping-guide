@@ -7,13 +7,15 @@ import { CategoryService } from "@/services/category.service";
 import { PassportModule } from "@nestjs/passport";
 import { AuthGuardModule } from "@repo/auth-guard";
 
+import { HealthController } from "../controllers/health.controller";
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PassportModule,
     AuthGuardModule,
   ],
-  controllers: [ProductController, CategoryController],
+  controllers: [ProductController, CategoryController, HealthController],
   providers: [ProductService, CategoryService],
 })
 export class ProductModule {}

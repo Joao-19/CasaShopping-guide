@@ -1,7 +1,12 @@
 import { createApiClient } from "@repo/api-client";
 
 const http = createApiClient({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  baseURL:
+    typeof window === "undefined"
+      ? process.env.INTERNAL_API_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://localhost:3000"
+      : process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
   getToken: () => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("accessToken");
