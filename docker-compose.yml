@@ -21,6 +21,19 @@ services:
       timeout: 5s
       retries: 5
 
+  # --- MIGRATION (AUTO-INIT) ---
+  db-migration:
+    build:
+      context: .
+      dockerfile: apps/migration/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - casashopping-net
+
   # --- STORAGE ---
   storage:
     image: minio/minio:latest
