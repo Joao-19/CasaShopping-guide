@@ -1,4 +1,6 @@
 #!/bin/sh
+set -e
+
 echo "Aguardando Banco de Dados..."
 # Loop simples esperando a porta 5432 (poderia usar wait-for-it, mas sleep resolve para MVP)
 sleep 10

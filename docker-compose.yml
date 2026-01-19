@@ -82,6 +82,8 @@ services:
       - stores-service
       - products-service
       - storage-service
+      - db-migration:
+          condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
@@ -115,6 +117,8 @@ services:
       - ADMIN_NAME=${ADMIN_NAME}
     depends_on:
       - database
+      - db-migration:
+          condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
@@ -142,6 +146,8 @@ services:
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - database
+      - db-migration:
+          condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
@@ -252,6 +258,8 @@ services:
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
       - database
+      - db-migration:
+          condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
@@ -284,6 +292,8 @@ services:
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
       - database
+      - db-migration:
+          condition: service_completed_successfully
     networks:
       - casashopping-net
     healthcheck:
