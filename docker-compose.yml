@@ -70,7 +70,7 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:3003
       - USERS_SERVICE_URL=http://users-service:3004
       - STORES_SERVICE_URL=http://stores-service:3005
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002,http://172.245.190.165}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
       - STORE_SERVICE_URL=http://stores-service:3005
       - PRODUCTS_SERVICE_URL=http://products-service:3006
       - STORAGE_SERVICE_URL=http://storage-service:3007
@@ -185,7 +185,7 @@ services:
       - MINIO_ROOT_USER=${STORAGE_USER:-admin}
       - MINIO_ROOT_PASSWORD=${STORAGE_PASSWORD:-password123}
       - MINIO_BUCKET_NAME=casashopping
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002,http://172.245.190.165}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
       - MAX_IMAGE_SIZE_MB=${MAX_IMAGE_SIZE_MB:-5}
       - MAX_VIDEO_SIZE_MB=${MAX_VIDEO_SIZE_MB:-50}
     depends_on:
@@ -271,7 +271,7 @@ services:
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002,http://172.245.190.165}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
       - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
@@ -308,6 +308,7 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
       - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
+      - STORAGE_SERVICE_URL=http://storage-service:3007
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
