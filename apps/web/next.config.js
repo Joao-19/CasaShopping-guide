@@ -13,6 +13,7 @@ const nextConfig = {
     allowedDevOrigins: ["192.168.0.13", "172.245.190.165"],
     output: "standalone",
     basePath: process.env.BASE_PATH || undefined,
+    trailingSlash: true,
     images: {
         remotePatterns: [
             {
