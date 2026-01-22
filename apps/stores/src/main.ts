@@ -13,7 +13,7 @@ async function sleep(ms: number) {
 async function bootstrap(retryCount = 0) {
   try {
     console.log(
-      `[StoresService] Starting... (attempt ${retryCount + 1}/${MAX_RETRIES})`
+      `[StoresService] Starting... (attempt ${retryCount + 1}/${MAX_RETRIES})`,
     );
 
     const app = await NestFactory.create(StoreModule);
@@ -22,7 +22,7 @@ async function bootstrap(retryCount = 0) {
         transform: true,
         whitelist: true,
         forbidNonWhitelisted: true,
-      })
+      }),
     );
     const configService = app.get(ConfigService);
 
@@ -35,10 +35,16 @@ async function bootstrap(retryCount = 0) {
 
     const origins = corsOrigin.includes(",")
       ? corsOrigin.split(",").map((origin) => origin.trim())
-      : corsOrigin;
+      : [corsOrigin];
 
     app.enableCors({
-      origin: origins,
+      origin: (requestOrigin: any, callback: any) => {
+        if (!requestOrigin || origins.includes(requestOrigin)) {
+          callback(null, true);
+        } else {
+          callback(null, false);
+        }
+      },
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
       credentials: true,
     });
@@ -50,7 +56,7 @@ async function bootstrap(retryCount = 0) {
 
     if (retryCount < MAX_RETRIES - 1) {
       console.log(
-        `⏳ Retrying in ${RETRY_DELAY_MS / 1000} seconds... (${retryCount + 1}/${MAX_RETRIES})`
+        `⏳ Retrying in ${RETRY_DELAY_MS / 1000} seconds... (${retryCount + 1}/${MAX_RETRIES})`,
       );
       await sleep(RETRY_DELAY_MS);
       return bootstrap(retryCount + 1);

@@ -1,5 +1,7 @@
 import { createApiClient } from "@repo/api-client";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/casashopping";
+
 const http = createApiClient({
   baseURL:
     typeof window === "undefined"
@@ -38,7 +40,7 @@ const http = createApiClient({
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("authUser");
-        window.location.href = "/login";
+        window.location.href = `${basePath}/login`;
       }
     }
   },

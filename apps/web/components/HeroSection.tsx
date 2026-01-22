@@ -8,10 +8,11 @@ import { useRouter } from "next/navigation";
 import { AdvertisementBanner } from "./AdvertisementBanner";
 
 export function HeroSection() {
-    const backGroundVideoLink = "/backgroundsHome/MudaTudoCamapnhaWEB.mp4";
-    const backGroundImageLink = "/backgroundsHome/FUNDO.jpg";
-    const mobileBackGroundImageLink = "/backgroundsHome/FUNDO-MOBILE.jpg";
-    const mobileBackGroundVideoLink = "/backgroundsHome/MudaTudoCamapnhaMOBILE.mp4";
+    const basePath = process.env.BASE_PATH || "";
+    const backGroundVideoLink = `${basePath}/backgroundsHome/MudaTudoCamapnhaWEB.mp4`;
+    const backGroundImageLink = `${basePath}/backgroundsHome/FUNDO.jpg`;
+    const mobileBackGroundImageLink = `${basePath}/backgroundsHome/FUNDO-MOBILE.jpg`;
+    const mobileBackGroundVideoLink = `${basePath}/backgroundsHome/MudaTudoCamapnhaMOBILE.mp4`;
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -211,7 +212,7 @@ export function HeroSection() {
                 </div>
 
                 <AdvertisementBanner
-                    src="/promotionalMidia/OFERTA.jpg"
+                    src={`${process.env.BASE_PATH || ""}/promotionalMidia/OFERTA.jpg`}
                     type="image"
                     alt="Oferta Especial"
                     withoutWrapper={true}

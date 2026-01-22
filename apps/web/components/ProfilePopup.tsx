@@ -90,7 +90,8 @@ export function ProfilePopup({ onClose }: ProfilePopupProps) {
                     hidePopup();
 
                     // Force redirect with full page reload
-                    window.location.href = "/login";
+                    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/casashopping";
+                    window.location.href = `${basePath}/login`;
                 }}
             />
         );

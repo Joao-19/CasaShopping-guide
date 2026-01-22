@@ -142,7 +142,7 @@ const LoginPage = () => {
             {/* Background Image */}
             <div className="fixed inset-0 z-0">
                 <img
-                    src="/login-bg.webp"
+                    src={`${process.env.BASE_PATH || ""}/login-bg.webp`}
                     alt="Interior Background"
                     className="w-full h-full object-cover"
                 />

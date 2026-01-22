@@ -17,7 +17,7 @@ export class StoreService {
 
     if (existingStore) {
       throw new ConflictException(
-        `A store with name "${data.name}" already exists.`
+        `A store with name "${data.name}" already exists.`,
       );
     }
 
@@ -59,7 +59,7 @@ export class StoreService {
   async findAll(
     page: number = 1,
     search?: string,
-    limit?: number
+    limit?: number,
   ): Promise<PaginatedResult<Store>> {
     const MAX_LIMIT = 25;
     const DEFAULT_LIMIT = 15;
@@ -102,6 +102,31 @@ export class StoreService {
   }
 
   async delete(id: string): Promise<Store> {
+    // First, delete all products associated with this store
+    const products = await prisma.product.findMany({
+      where: { storeId: id },
+      include: { images: true },
+    });
+
+    // Delete product images from storage and database
+    for (const product of products) {
+      for (const img of product.images) {
+        await this.deleteFileFromStorage(img.path);
+      }
+    }
+
+    // Delete products from database (this will cascade delete images and favorites)
+    await prisma.product.deleteMany({
+      where: { storeId: id },
+    });
+
+    // Get store to delete its logo
+    const store = await prisma.store.findUnique({ where: { id } });
+    if (store?.logoImage) {
+      await this.deleteFileFromStorage(store.logoImage);
+    }
+
+    // Soft delete the store
     return prisma.store.update({
       where: { id },
       data: { deletedAt: new Date() },
@@ -123,7 +148,7 @@ export class StoreService {
 
       if (duplicateName) {
         throw new ConflictException(
-          `A store with name "${data.name}" already exists.`
+          `A store with name "${data.name}" already exists.`,
         );
       }
     }
@@ -172,7 +197,7 @@ export class StoreService {
 
       if (!response.ok) {
         console.error(
-          `Failed to delete file ${key} from storage: ${response.statusText}`
+          `Failed to delete file ${key} from storage: ${response.statusText}`,
         );
       }
     } catch (error) {
