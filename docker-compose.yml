@@ -241,6 +241,7 @@ services:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
         - BASE_PATH=${ADMIN_BASE_PATH:-/admin}
+        - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-/admin}
     container_name: casashopping-admin
     ports:
       - "3002:3002"
@@ -248,6 +249,7 @@ services:
       - PORT=3002
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
       - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+      - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-/admin}
       - HOSTNAME=0.0.0.0
     depends_on:
       - api-gateway

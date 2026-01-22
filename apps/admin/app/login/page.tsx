@@ -80,13 +80,15 @@ const LoginForm = ({ formData, setFormData, loading, onSubmit }: LoginFormProps)
     );
 };
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
+
 const BACKGROUND_IMAGES = [
-    "/Login/close-up-keyboard-glasses-with-executives-background.jpg",
-    "/Login/office-desktop-with-laptop-analytics.jpg",
-    "/Login/office-working-desktop-xa.jpg",
-    "/Login/tochscreen-documents-with-charts.jpg",
-    "/Login/top-view-desk-concept-with-laptop.jpg",
-    "/Login/workplace-objects.jpg"
+    `${basePath}/Login/close-up-keyboard-glasses-with-executives-background.jpg`,
+    `${basePath}/Login/office-desktop-with-laptop-analytics.jpg`,
+    `${basePath}/Login/office-working-desktop-xa.jpg`,
+    `${basePath}/Login/tochscreen-documents-with-charts.jpg`,
+    `${basePath}/Login/top-view-desk-concept-with-laptop.jpg`,
+    `${basePath}/Login/workplace-objects.jpg`
 ];
 
 const LoginPage = () => {
