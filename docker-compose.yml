@@ -92,6 +92,7 @@ services:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+      - web-proxy
     healthcheck:
       test:
         [
