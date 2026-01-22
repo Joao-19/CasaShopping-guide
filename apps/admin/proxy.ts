@@ -1,40 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const basePath = process.env.BASE_PATH || "/admin";
-
-// 1. Define ONLY the routes that DO NOT need auth
-// Removed '/' from here, as we want to protect the home
-const publicRoutes = ["/login"];
+// TEMPORARIAMENTE DESABILITADO para evitar loops de redirect
+// TODO: Reimplementar lógica de auth com basePath correto
 
 export function proxy(request: NextRequest) {
-  // Try to get the token
-  // Using 'access_token' to match the web app pattern, assuming backend sets same cookie name or gateway handles it
-  const token = request.cookies.get("access_token")?.value;
-
-  // Get current path (remove basePath for comparison)
-  const { pathname } = request.nextUrl;
-  const pathWithoutBase = pathname.replace(basePath, "") || "/";
-
-  // Check if current route is in the public list
-  const isPublicRoute = publicRoutes.includes(pathWithoutBase);
-
-  // --- SCENARIO 1: Unlogged user trying to access PRIVATE route ---
-  // If not public (e.g. / or /dashboard) and no token
-  if (!isPublicRoute && !token) {
-    // Redirect to login
-    const loginUrl = new URL(`${basePath}/login`, request.url);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // --- SCENARIO 2: Logged user trying to access LOGIN route ---
-  // If has token and tries to enter login
-  if (isPublicRoute && token) {
-    // Redirect to Dashboard (Home)
-    return NextResponse.redirect(new URL(`${basePath}/`, request.url));
-  }
-
-  // If passed all checks, allow access
+  // Libera todas as rotas por enquanto
   return NextResponse.next();
 }
 
