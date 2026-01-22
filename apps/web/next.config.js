@@ -10,8 +10,9 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
-    allowedDevOrigins: ["192.168.0.13"],
+    allowedDevOrigins: ["192.168.0.13", "172.245.190.165"],
     output: "standalone",
+    basePath: process.env.BASE_PATH || undefined,
     images: {
         remotePatterns: [
             {

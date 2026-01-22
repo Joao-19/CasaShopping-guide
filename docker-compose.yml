@@ -70,14 +70,14 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:3003
       - USERS_SERVICE_URL=http://users-service:3004
       - STORES_SERVICE_URL=http://stores-service:3005
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3001}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002,http://172.245.190.165}
       - STORE_SERVICE_URL=http://stores-service:3005
       - PRODUCTS_SERVICE_URL=http://products-service:3006
       - STORAGE_SERVICE_URL=http://storage-service:3007
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
       database:
-        condition: service_started
+      condition: service_started
       auth-service:
         condition: service_started
       users-service:
@@ -184,7 +184,7 @@ services:
       - MINIO_ROOT_USER=${STORAGE_USER:-admin}
       - MINIO_ROOT_PASSWORD=${STORAGE_PASSWORD:-password123}
       - MINIO_BUCKET_NAME=casashopping
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002,http://172.245.190.165}
       - MAX_IMAGE_SIZE_MB=${MAX_IMAGE_SIZE_MB:-5}
       - MAX_VIDEO_SIZE_MB=${MAX_VIDEO_SIZE_MB:-50}
     depends_on:
@@ -211,6 +211,7 @@ services:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
         - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
+        - BASE_PATH=${WEB_BASE_PATH:-/casashopping}
     container_name: casashopping-web
     ports:
       - "3001:3001"
@@ -220,10 +221,12 @@ services:
       - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
       - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
       - INTERNAL_API_URL=http://api-gateway:3000
+      - HOSTNAME=0.0.0.0
     depends_on:
       - api-gateway
     networks:
       - casashopping-net
+      - web-proxy
 
   # --- ADMIN APP ---
   admin:
@@ -234,6 +237,7 @@ services:
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+        - BASE_PATH=${ADMIN_BASE_PATH:-/admin}
     container_name: casashopping-admin
     ports:
       - "3002:3002"
@@ -241,10 +245,12 @@ services:
       - PORT=3002
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
       - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+      - HOSTNAME=0.0.0.0
     depends_on:
       - api-gateway
     networks:
       - casashopping-net
+      - web-proxy
 
   # --- STORES SERVICE ---
   stores-service:
@@ -260,7 +266,7 @@ services:
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002,http://172.245.190.165}
       - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
@@ -322,3 +328,5 @@ volumes:
 networks:
   casashopping-net:
     driver: bridge
+  web-proxy:
+    external: true
