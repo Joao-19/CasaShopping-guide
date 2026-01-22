@@ -57,7 +57,9 @@ const useLogin = () => {
 
     // 5. Hard Redirect
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      const basePath =
+        process.env.NEXT_PUBLIC_BASE_PATH || process.env.BASE_PATH || "";
+      window.location.href = `${basePath}/login`;
     }
   };
 

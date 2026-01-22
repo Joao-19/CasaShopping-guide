@@ -38,7 +38,9 @@ const http = createApiClient({
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("authUser");
-        window.location.href = "/login";
+        const basePath =
+          process.env.NEXT_PUBLIC_BASE_PATH || process.env.BASE_PATH || "";
+        window.location.href = `${basePath}/login`;
       }
     }
   },
