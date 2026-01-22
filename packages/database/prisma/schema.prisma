@@ -82,7 +82,7 @@ model Product {
   tags        String?
 
   storeId        String
-  store          Store          @relation(fields: [storeId], references: [id])
+  store          Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
   showStorePhone Boolean        @default(false)
   isFeatured     Boolean        @default(false)
   images         ProductImage[]

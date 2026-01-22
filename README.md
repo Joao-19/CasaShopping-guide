@@ -177,14 +177,70 @@ casashopping-guide/
 
 Consulte os arquivos `.env.example` em cada diretório para ver as variáveis necessárias. As principais são:
 
-| Variável                | Descrição                            |
-| ----------------------- | ------------------------------------ |
-| `DATABASE_URL`          | String de conexão do PostgreSQL      |
-| `JWT_SECRET`            | Secret para assinatura de tokens JWT |
-| `MINIO_PUBLIC_ENDPOINT` | Endpoint público do MinIO/S3         |
-| `NEXT_PUBLIC_API_URL`   | URL do API Gateway para os frontends |
+| Variável                | Descrição                                       |
+| ----------------------- | ----------------------------------------------- |
+| `DATABASE_URL`          | String de conexão do PostgreSQL                 |
+| `JWT_SECRET`            | Secret para assinatura de tokens JWT            |
+| `MINIO_PUBLIC_ENDPOINT` | Endpoint público do MinIO/S3                    |
+| `NEXT_PUBLIC_API_URL`   | URL do API Gateway para os frontends            |
+| `WEB_BASE_PATH`         | Base path do frontend web (ex: `/casashopping`) |
+| `ADMIN_BASE_PATH`       | Base path do painel admin (ex: `/admin`)        |
+| `NEXT_PUBLIC_BASE_PATH` | Base path público para redirects no client-side |
+| `CORS_ORIGIN`           | Origens permitidas para CORS                    |
 
 ---
+
+## 🌐 Deploy com Nginx (Reverse Proxy)
+
+Quando usando Nginx como reverse proxy, configure as locations para cada serviço:
+
+```nginx
+server {
+    listen 80;
+    server_name seu-ip-ou-dominio;
+    resolver 127.0.0.11 valid=10s;
+
+    # Rota padrão (opcional - pode apontar para outro serviço ou retornar 404)
+    location / {
+        return 404;
+    }
+
+    # API Gateway - IMPORTANTE: NÃO usar variáveis no proxy_pass para /api/
+    # Isso evita problemas de URI rewriting
+    location /api/ {
+        proxy_pass http://casashopping-gateway:3000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Frontend Web (Catálogo)
+    location /casashopping/ {
+        set $upstream_web casashopping-web;
+        proxy_pass http://$upstream_web:3001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Painel Administrativo
+    location /admin/ {
+        set $upstream_admin casashopping-admin;
+        proxy_pass http://$upstream_admin:3002;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+> [!IMPORTANT]
+>
+> - O Nginx deve estar na mesma rede Docker que os containers (`web-proxy`)
+> - Configure `NEXT_PUBLIC_API_URL` para usar o proxy (ex: `http://seu-ip/api`) para evitar CORS
+> - O `resolver 127.0.0.11` é necessário quando usando variáveis no `proxy_pass` dentro do Docker
+> - Para `/api/`, **não use variáveis** no `proxy_pass` para evitar problemas de URI rewriting
 
 ## 📄 Documentação Adicional
 
