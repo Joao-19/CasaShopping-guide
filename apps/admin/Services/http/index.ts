@@ -1,5 +1,7 @@
 import { createApiClient } from "@repo/api-client";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
+
 const getBaseUrl = () => {
   const url = process.env.NEXT_PUBLIC_API_URL;
   if (url) {
@@ -21,7 +23,7 @@ const http = createApiClient({
   onRefreshFail: () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("authAdmin");
-      window.location.href = "/login";
+      window.location.href = `${basePath}/login`;
     }
   },
 });
