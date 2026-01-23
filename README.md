@@ -134,7 +134,83 @@ graph TD
 
 ## 🐳 Deploy com Docker
 
-Para subir todo o ambiente com Docker Compose:
+### Configuração do Ambiente
+
+Antes de iniciar o deploy, é necessário configurar as variáveis de ambiente:
+
+**1. Copie o arquivo de exemplo para criar seu arquivo de configuração:**
+
+```bash
+cp .env.example .env
+```
+
+**2. Edite o arquivo `.env` com os valores do seu ambiente:**
+
+```bash
+# Linux/macOS
+nano .env
+
+# Windows (PowerShell)
+notepad .env
+```
+
+**3. Configure as variáveis conforme seu ambiente de deploy:**
+
+| Grupo               | Variáveis                                                         | Descrição                                           |
+| ------------------- | ----------------------------------------------------------------- | --------------------------------------------------- |
+| **CORS/API**        | `CORS_ORIGIN`, `NEXT_PUBLIC_API_URL`                              | URLs permitidas e endpoint da API                   |
+| **Banco de Dados**  | `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DATABASE_URL`               | Credenciais PostgreSQL                              |
+| **Autenticação**    | `JWT_SECRET`, `REFRESH_TOKEN_SECRET`                              | Secrets para tokens (use valores únicos e seguros!) |
+| **Admin Inicial**   | `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`                     | Credenciais do primeiro admin                       |
+| **Storage (MinIO)** | `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_PUBLIC_ENDPOINT` | Configuração de upload de imagens                   |
+| **Base Paths**      | `WEB_BASE_PATH`, `ADMIN_BASE_PATH`                                | Caminhos de acesso (ex: `/casashopping`)            |
+
+> [!WARNING]
+> **Segurança**: Nunca utilize os valores padrão do `.env.example` em produção. Sempre gere secrets únicos para `JWT_SECRET` e `REFRESH_TOKEN_SECRET`, e altere todas as senhas!
+
+<details>
+<summary><strong>📋 Exemplo de configuração para Produção</strong></summary>
+
+```env
+# CORS - Use o IP/domínio do seu servidor
+CORS_ORIGIN=http://SEU_IP_OU_DOMINIO/casashopping,http://SEU_IP_OU_DOMINIO/admin
+NEXT_PUBLIC_API_URL=http://SEU_IP_OU_DOMINIO/api
+INTERNAL_API_URL=http://api-gateway:3000
+
+# Banco de Dados - Use senhas fortes!
+DB_USER=casashopping_user
+DB_PASSWORD=SuaSenhaForte123!
+DB_NAME=casashopping
+DATABASE_URL="postgresql://casashopping_user:SuaSenhaForte123!@database:5432/casashopping?schema=public"
+
+# JWT - Gere secrets únicos (ex: openssl rand -base64 32)
+JWT_SECRET="seu-secret-unico-aqui"
+JWT_EXPIRES_IN="15m"
+REFRESH_TOKEN_SECRET="outro-secret-unico-aqui"
+REFRESH_TOKEN_EXPIRES_IN="7d"
+
+# Admin Inicial
+ADMIN_EMAIL=admin@seudominio.com
+ADMIN_PASSWORD=SenhaAdminForte123!
+ADMIN_NAME=Administrador
+
+# MinIO
+MINIO_ROOT_USER=minio_admin
+MINIO_ROOT_PASSWORD=SenhaMinioForte123!
+MINIO_BUCKET_NAME=casashopping
+MINIO_PUBLIC_ENDPOINT=http://SEU_IP_OU_DOMINIO:9000
+MINIO_INTERNAL_ENDPOINT=http://storage:9000
+
+# Base Paths
+WEB_BASE_PATH=/casashopping
+ADMIN_BASE_PATH=/admin
+```
+
+</details>
+
+### Iniciando os Containers
+
+Após configurar o `.env`, execute:
 
 ```bash
 docker-compose up -d --build
@@ -142,9 +218,16 @@ docker-compose up -d --build
 
 Isso irá criar e iniciar todos os containers (banco, storage, serviços e frontends).
 
+> [!TIP]
+> **Verificando o status**: Use `docker-compose ps` para verificar se todos os containers estão rodando corretamente.
+
 > [!IMPORTANT]
-> **Configuração do MinIO (Local/Dev)**:
-> Para que o upload de imagens funcione corretamente localmente, pode ser necessário configurar o CORS no bucket do MinIO. Certifique-se de que a variável `MINIO_PUBLIC_ENDPOINT` esteja apontando para o IP/domínio correto acessível pelo navegador, não apenas `localhost` se estiver testando em rede ou mobile.
+> **Configuração do MinIO**:
+> Para que o upload de imagens funcione corretamente, certifique-se de que:
+>
+> - A variável `MINIO_PUBLIC_ENDPOINT` aponte para o IP/domínio acessível pelo navegador do usuário
+> - A porta 9000 esteja liberada no firewall
+> - O CORS esteja configurado corretamente no bucket (para ambientes atrás de proxy)
 
 ---
 
@@ -191,6 +274,24 @@ Consulte os arquivos `.env.example` em cada diretório para ver as variáveis ne
 ---
 
 ## 🌐 Deploy com Nginx (Reverse Proxy)
+
+O Nginx atua como porta de entrada para todas as requisições externas.
+
+### Entendendo o Fluxo de Requisição (Client vs Server)
+
+É crucial entender a diferença entre as variáveis de API para configuração correta:
+
+1.  **Requisições do Navegador (Client-Side)**:
+    - O usuário acessa o site pelo navegador.
+    - O navegador faz requisições AJAX para `NEXT_PUBLIC_API_URL`.
+    - **Portanto**: `NEXT_PUBLIC_API_URL` deve apontar para o **IP Público/Domínio** do Nginx (ex: `http://casashopping.com.br/api`), que fará o proxy reverso para o container `api-gateway`.
+
+2.  **Requisições do Servidor (Server-Side / SSR)**:
+    - O próprio container do Next.js precisa buscar dados antes de renderizar a página.
+    - Ele usa `INTERNAL_API_URL` para falar diretamente com o container da API via rede interna do Docker.
+    - **Valor Padrão**: `http://api-gateway:3000` (já configurado no Docker Compose, não precisa alterar).
+
+### Configuração do Nginx
 
 Quando usando Nginx como reverse proxy, configure as locations para cada serviço:
 

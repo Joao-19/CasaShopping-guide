@@ -1,18 +1,15 @@
 import { createApiClient } from "@repo/api-client";
 
 const getBaseUrl = () => {
-  const url = process.env.NEXT_PUBLIC_API_URL;
-  if (url) {
-    console.log("Build/Runtime: Using NEXT_PUBLIC_API_URL:", url);
-    return url;
+  // 1. Prioridade: Variável de ambiente (Build time ou Runtime se suportado)
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
   }
-  if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
-    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-      return `${protocol}//${hostname}:3000`;
-    }
-  }
-  console.log("Build/Runtime: Fallback to localhost:3000");
+
+  // 2. Fallback Seguro: Se estiver no navegador, tentar '/api' relativo se estamos servindo do mesmo domínio
+  // Mas como o Admin roda na porta 3002 e a API na 3000 (ou Nginx), melhor manter o default
+
+  // 3. Padrão Seguro
   return "http://localhost:3000";
 };
 
