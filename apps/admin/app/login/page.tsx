@@ -98,7 +98,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState("");
     const [backgroundImage, setBackgroundImage] = useState("");
     const { FormProvider, validateAll } = useForm();
-    const webUrl = useRedirectUrl(process.env.NEXT_PUBLIC_WEB_URL, 3001);
+    const webUrl = useRedirectUrl(process.env.NEXT_PUBLIC_WEB_URL, "/casashopping/");
 
     useEffect(() => {
         const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
@@ -111,13 +111,23 @@ const LoginPage = () => {
         if (!validateAll()) return;
 
         try {
-            await login({
+            const response = await login({
                 email,
                 password,
             });
-            router.push("/DashBoard/lojas/");
-        } catch (error) {
+
+            console.log("Login response:", response);
+
+            if (response && response.user) {
+                router.push("/DashBoard/lojas/");
+            } else {
+                console.error("Login response missing user:", response);
+                alert("Erro: Resposta do servidor inválida");
+            }
+        } catch (error: any) {
             console.error("Login failed", error);
+            const message = error?.response?.data?.message || error?.message || "Erro ao fazer login";
+            alert(message);
         }
     };
 
