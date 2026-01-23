@@ -1,6 +1,83 @@
+# Dependencies - be very explicit for Windows compatibility
 node_modules
-.git
+node_modules/
+**/node_modules
+**/node_modules/
+packages/*/node_modules
+packages/*/node_modules/
+apps/*/node_modules
+apps/*/node_modules/
+
+# Build outputs
 .next
+.next/
+**/.next
+**/.next/
 dist
+dist/
+**/dist
+**/dist/
 .turbo
+.turbo/
+**/.turbo
+**/.turbo/
 coverage
+coverage/
+
+# Git
+.git
+.git/
+
+# IDE and editors
+.vscode
+.vscode/
+.idea
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (secrets)
+.env
+.env.*
+!.env.example
+
+# Documentation
+*.md
+docs/
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+**/__tests__
+**/test
+**/tests
+
+# Misc
+.DS_Store
+Thumbs.db
+*.tgz
+*.tar.gz
+
+# Docker files themselves
+docker-compose*.yml
+Dockerfile
+
+# Scripts not needed in build
+scripts/
+*.sh
+!apps/migration/init-db.sh
+
+# License
+license
+LICENSE
+
+# Prisma generated (will be regenerated in container)
+packages/database/generated
+**/generated

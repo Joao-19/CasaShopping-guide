@@ -2,16 +2,16 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Instalar OpenSSL para o Prisma
-RUN apt-get update -y && apt-get install -y openssl
+# Install OpenSSL and Prisma in single optimized layer
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends openssl && \
+    rm -rf /var/lib/apt/lists/* && \
+    npm install prisma@5.22.0
 
-# Copiar schema e arquivos necessários
+# Copy schema and necessary files
 COPY packages/database/prisma ./prisma
 
-# Instalar apenas o prisma CLIENT e CLI
-RUN npm install prisma@5.22.0
-
-# Script de entrada
+# Entry script
 COPY apps/migration/init-db.sh .
 RUN chmod +x init-db.sh
 
