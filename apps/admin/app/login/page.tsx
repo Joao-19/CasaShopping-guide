@@ -98,7 +98,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState("");
     const [backgroundImage, setBackgroundImage] = useState("");
     const { FormProvider, validateAll } = useForm();
-    const webUrl = useRedirectUrl(process.env.NEXT_PUBLIC_WEB_URL, "/casashopping/");
+    const webUrl = useRedirectUrl(process.env.NEXT_PUBLIC_WEB_URL, "/");
 
     useEffect(() => {
         const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);

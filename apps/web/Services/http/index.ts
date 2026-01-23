@@ -1,6 +1,6 @@
 import { createApiClient } from "@repo/api-client";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/casashopping";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const http = createApiClient({
   baseURL:

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export const useRedirectUrl = (
   envUrl: string | undefined,
-  targetPath: string = "/casashopping",
+  targetPath: string = "",
 ) => {
   const [url, setUrl] = useState(envUrl || "");
 
