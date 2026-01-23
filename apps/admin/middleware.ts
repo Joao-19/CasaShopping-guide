@@ -13,9 +13,12 @@ export async function middleware(request: NextRequest) {
   // Debug log (remover em produção se necessário)
   console.log(`[Middleware] Pathname: ${pathname}`);
 
-  // 1. Se for rota pública, deixa passar
+  // 1. Se for rota pública ou raiz, deixa passar
   // O pathname já vem SEM o basePath quando configurado no next.config
-  if (publicPaths.some((path) => pathname.startsWith(path))) {
+  if (
+    pathname === "/" ||
+    publicPaths.some((path) => pathname.startsWith(path))
+  ) {
     return NextResponse.next();
   }
 

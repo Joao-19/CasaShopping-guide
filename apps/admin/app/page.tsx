@@ -1,6 +1,18 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminHome() {
-  // Redireciona para o DashBoard - o middleware vai verificar autenticação
-  redirect("/DashBoard/lojas");
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/DashBoard/lojas");
+  }, [router]);
+
+  return (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      <p>Carregando...</p>
+    </div>
+  );
 }
