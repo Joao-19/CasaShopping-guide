@@ -212,8 +212,8 @@ services:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
         - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
-        - BASE_PATH=${WEB_BASE_PATH:-/casashopping}
-        - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-/casashopping}
+        - BASE_PATH=${WEB_BASE_PATH:-/}
+        - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-/}
     container_name: casashopping-web
     ports:
       - "3001:3001"
@@ -222,7 +222,7 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
       - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
       - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
-      - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-/casashopping}
+      - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-/}
       - INTERNAL_API_URL=http://api-gateway:3000
       - HOSTNAME=0.0.0.0
     depends_on:
