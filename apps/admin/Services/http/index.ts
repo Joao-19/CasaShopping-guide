@@ -23,7 +23,7 @@ const http = createApiClient({
   onRefreshFail: () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("authAdmin");
-      window.location.href = `${basePath}/login`;
+      window.location.href = `${basePath}/login/`;
     }
   },
 });

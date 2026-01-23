@@ -33,7 +33,7 @@ export default function DashboardLayout({
             Cookies.remove('refreshToken', { path: '/' });
 
             // Redireciona e atualiza (Next.js já considera o basePath do next.config)
-            router.push('/login');
+            router.push('/login/');
             router.refresh();
         }
     };

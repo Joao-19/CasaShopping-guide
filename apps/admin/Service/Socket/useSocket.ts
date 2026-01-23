@@ -92,7 +92,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
           );
           setAuthToken(null);
           const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
-          window.location.href = `${basePath}/login`;
+          window.location.href = `${basePath}/login/`;
         }
       });
 
