@@ -15,19 +15,27 @@ const useLogin = () => {
     try {
       const response = await http.request(form);
 
-      if (response && response.user) {
-        authStore.setUser(response.user);
+      // API pode retornar user diretamente ou aninhado em response.user
+      const resp = response as any;
+      const user = resp?.user || (resp?.id ? resp : null);
+      const accessToken = resp?.accessToken;
+      const refreshToken = resp?.refreshToken;
+
+      if (user) {
+        authStore.setUser(user);
 
         // Salva tokens nos cookies para o Middleware validar
-        if (response.accessToken) {
-          Cookies.set("token", response.accessToken, { path: "/" });
-          Cookies.set("accessToken", response.accessToken, { path: "/" });
+        if (accessToken) {
+          Cookies.set("token", accessToken, { path: "/" });
+          Cookies.set("accessToken", accessToken, { path: "/" });
         }
-        if (response.refreshToken) {
-          Cookies.set("refreshToken", response.refreshToken, { path: "/" });
+        if (refreshToken) {
+          Cookies.set("refreshToken", refreshToken, { path: "/" });
         }
       }
-      return response;
+
+      // Retorna o objeto com user para manter compatibilidade
+      return { user, accessToken, refreshToken };
     } catch (error) {
       throw error;
     }
