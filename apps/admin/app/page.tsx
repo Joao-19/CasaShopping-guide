@@ -1,18 +1,9 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-
+// Redirect is handled by next.config.js redirects
+// This page is just a fallback
 export default function AdminHome() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/DashBoard/lojas");
-  }, [router]);
-
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-      <p>Carregando...</p>
+      <p>Redirecionando...</p>
     </div>
   );
 }

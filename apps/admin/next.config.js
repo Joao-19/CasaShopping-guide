@@ -6,6 +6,15 @@ const nextConfig = {
     output: "standalone",
     basePath: process.env.BASE_PATH || undefined,
     trailingSlash: true,
+    async redirects() {
+        return [
+            {
+                source: "/",
+                destination: "/DashBoard/lojas/",
+                permanent: false,
+            },
+        ];
+    },
     transpilePackages: ["@repo/ui", "@repo/dtos", "@repo/database", "@repo/api-client"],
     typescript: {
         ignoreBuildErrors: true,
