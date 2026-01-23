@@ -48,12 +48,12 @@ export function useSocket(config: SocketConfig): UseSocketResult {
       setIsConnected: (connected: boolean) => void,
       setSocket: (socket: Socket | null) => void,
       socketRef: React.MutableRefObject<Socket | null>,
-      setAuthToken: (token: string | null) => void
+      setAuthToken: (token: string | null) => void,
     ) => {
       setLoading(true);
       setError(null);
       console.log(
-        `useSocket: Tentando conectar a ${connectionUrl} com token: ${token ? "Sim" : "Não"}`
+        `useSocket: Tentando conectar a ${connectionUrl} com token: ${token ? "Sim" : "Não"}`,
       );
 
       const newSocket = io(connectionUrl, {
@@ -88,10 +88,11 @@ export function useSocket(config: SocketConfig): UseSocketResult {
         setSocket(null);
         if (err.message === "Authentication error") {
           console.log(
-            "useSocket: Erro de autenticação, limpando token e redirecionando."
+            "useSocket: Erro de autenticação, limpando token e redirecionando.",
           );
           setAuthToken(null);
-          window.location.href = "/login";
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
+          window.location.href = `${basePath}/login/`;
         }
       });
 
@@ -100,7 +101,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
       socketRef.current = newSocket;
       return newSocket;
     },
-    [setAuthToken]
+    [setAuthToken],
   );
 
   useEffect(() => {
@@ -120,7 +121,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
         setIsConnected,
         setSocket,
         socketRef,
-        setAuthToken
+        setAuthToken,
       );
     }
     // Se autoConnect for false, mas um socket já existir (por exemplo, após uma conexão manual),
@@ -171,7 +172,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
       } else {
         const err = new Error(
           "useSocket: Socket não está conectado. Não foi possível emitir o evento: " +
-            event
+            event,
         );
         console.warn(err.message);
         setEmitError(err);
@@ -188,7 +189,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
       } else {
         console.warn(
           "useSocket: Socket não está conectado. Não foi possível registrar o ouvinte para o evento:",
-          event
+          event,
         );
       }
       return () => {
@@ -197,7 +198,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
         }
       };
     },
-    []
+    [],
   );
 
   const off = useCallback(
@@ -206,7 +207,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
         socketRef.current.off(event, listener);
       }
     },
-    []
+    [],
   );
 
   // Funções para controle manual da conexão
@@ -227,7 +228,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
         setIsConnected,
         setSocket,
         socketRef,
-        setAuthToken
+        setAuthToken,
       );
     }
   }, [

@@ -6,7 +6,8 @@ export interface LoginForm {
 }
 export interface LoginResponse {
   user: Admin;
-  token?: string; // Optional now
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface RecoverPasswordRequestForm {

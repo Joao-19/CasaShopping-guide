@@ -17,14 +17,15 @@ import {
   UpdateProductDto,
   PaginatedResult,
 } from "@repo/dtos";
-import { JwtAuthGuard } from "@repo/auth-guard";
+import { JwtAuthGuard, Roles, RolesGuard } from "@repo/auth-guard";
 
 @Controller("products")
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productService.create(createProductDto);
   }
@@ -35,28 +36,30 @@ export class ProductController {
     @Query("search") search?: string,
     @Query("category") category?: string,
     @Query("isFeatured") isFeatured?: string,
-    @Query("page") page: string = "1"
+    @Query("page") page: string = "1",
   ): Promise<PaginatedResult<Product>> {
     return this.productService.findAll(
       storeId,
       search,
       category,
       isFeatured ? isFeatured === "true" : undefined,
-      +page
+      +page,
     );
   }
 
   @Put(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async update(
     @Param("id") id: string,
-    @Body() updateProductDto: UpdateProductDto
+    @Body() updateProductDto: UpdateProductDto,
   ): Promise<Product> {
     return this.productService.update(id, updateProductDto);
   }
 
   @Delete(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async delete(@Param("id") id: string): Promise<Product> {
     return this.productService.delete(id);
   }
@@ -71,7 +74,7 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   async findFavorites(
     @Req() req: any,
-    @Query("page") page: string = "1"
+    @Query("page") page: string = "1",
   ): Promise<PaginatedResult<Product>> {
     return this.productService.findFavorites(req.user.userId, +page);
   }
@@ -80,7 +83,7 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   async toggleFavorite(
     @Param("id") id: string,
-    @Req() req: any
+    @Req() req: any,
   ): Promise<{ isFavorited: boolean }> {
     return this.productService.toggleFavorite(req.user.userId, id);
   }

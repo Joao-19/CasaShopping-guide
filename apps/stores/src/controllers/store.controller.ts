@@ -16,14 +16,15 @@ import {
   UpdateStoreDto,
   PaginatedResult,
 } from "@repo/dtos";
-import { JwtAuthGuard } from "@repo/auth-guard";
+import { JwtAuthGuard, Roles, RolesGuard } from "@repo/auth-guard";
 
 @Controller("stores")
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async create(@Body() createStoreDto: CreateStoreDto): Promise<Store> {
     return this.storeService.create(createStoreDto);
   }
@@ -32,22 +33,24 @@ export class StoreController {
   async findAll(
     @Query("page") page: string = "1",
     @Query("search") search?: string,
-    @Query("limit") limit?: string
+    @Query("limit") limit?: string,
   ): Promise<PaginatedResult<Store>> {
     return this.storeService.findAll(+page, search, limit ? +limit : undefined);
   }
 
   @Delete(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async delete(@Param("id") id: string): Promise<Store> {
     return this.storeService.delete(id);
   }
 
   @Put(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async update(
     @Param("id") id: string,
-    @Body() updateStoreDto: UpdateStoreDto
+    @Body() updateStoreDto: UpdateStoreDto,
   ): Promise<Store> {
     return this.storeService.update(id, updateStoreDto);
   }

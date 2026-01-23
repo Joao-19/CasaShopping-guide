@@ -2,24 +2,23 @@ import { useState, useEffect } from "react";
 
 export const useRedirectUrl = (
   envUrl: string | undefined,
-  targetPort: number
+  targetPath: string = "",
 ) => {
   const [url, setUrl] = useState(envUrl || "");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const hostname = window.location.hostname;
-      const isDevIP =
-        process.env.NODE_ENV === "development" &&
-        hostname !== "localhost" &&
-        hostname !== "127.0.0.1";
+      const protocol = window.location.protocol;
       const isMissingEnv = !envUrl;
 
-      if (isDevIP || isMissingEnv) {
-        setUrl(`${window.location.protocol}//${hostname}:${targetPort}`);
+      if (isMissingEnv) {
+        // Use same host with basePath for production (behind nginx proxy)
+        // For local dev with ports, set NEXT_PUBLIC_WEB_URL properly
+        setUrl(`${protocol}//${hostname}${targetPath}`);
       }
     }
-  }, [envUrl, targetPort]);
+  }, [envUrl, targetPath]);
 
   return url;
 };

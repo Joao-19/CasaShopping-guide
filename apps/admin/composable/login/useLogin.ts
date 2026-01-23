@@ -4,6 +4,7 @@ import Admin from "@/Domain/User";
 import authHttp, { LoginForm } from "@/Services/http/auth.http";
 import { useAuthStore } from "@/store/auth.store";
 import { useHttp } from "@repo/api-client";
+import Cookies from "js-cookie";
 
 const useLogin = () => {
   const http = useHttp(authHttp.login);
@@ -13,11 +14,28 @@ const useLogin = () => {
   const login = async (form: LoginForm) => {
     try {
       const response = await http.request(form);
-      // Backend returns the user object directly now
-      if (response) {
-        authStore.setUser(response as unknown as Admin);
+
+      // API pode retornar user diretamente ou aninhado em response.user
+      const resp = response as any;
+      const user = resp?.user || (resp?.id ? resp : null);
+      const accessToken = resp?.accessToken;
+      const refreshToken = resp?.refreshToken;
+
+      if (user) {
+        authStore.setUser(user);
+
+        // Salva tokens nos cookies para o Middleware validar
+        if (accessToken) {
+          Cookies.set("token", accessToken, { path: "/" });
+          Cookies.set("accessToken", accessToken, { path: "/" });
+        }
+        if (refreshToken) {
+          Cookies.set("refreshToken", refreshToken, { path: "/" });
+        }
       }
-      return response;
+
+      // Retorna o objeto com user para manter compatibilidade
+      return { user, accessToken, refreshToken };
     } catch (error) {
       throw error;
     }

@@ -6,7 +6,7 @@ import axios from "@/Services/http/index";
 
 export function useBaseHttp<Response, Form, DefaultValue>(
   api: (form: Form) => Promise<any>,
-  defaultValue: DefaultValue
+  defaultValue: DefaultValue,
 ) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -40,18 +40,19 @@ export function useBaseHttp<Response, Form, DefaultValue>(
       } catch (e) {
         const apiError = e as AxiosError;
         setError(
-          (apiError.response?.data ? apiError.response.data : e) as ApiError
+          (apiError.response?.data ? apiError.response.data : e) as ApiError,
         );
         if (apiError.response?.status === 401) {
           authStore.setToken(null);
-          window.location.hash = "/login";
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
+          window.location.href = `${basePath}/login/`;
         }
         throw e;
       } finally {
         setLoading(false);
       }
     },
-    [api, authStore]
+    [api, authStore],
   );
 
   return {
@@ -63,22 +64,22 @@ export function useBaseHttp<Response, Form, DefaultValue>(
 }
 
 export function useHttp<Response, Form>(
-  api: (form: Form) => Promise<AxiosResponse<Response>> | Promise<Response>
+  api: (form: Form) => Promise<AxiosResponse<Response>> | Promise<Response>,
 ) {
   return useBaseHttp<Response, Form, Response | null>(api, null);
 }
 
 export function useHttpList<Response, Form>(
-  api: (form: Form) => Promise<AxiosResponse<Response>> | Promise<Response>
+  api: (form: Form) => Promise<AxiosResponse<Response>> | Promise<Response>,
 ) {
   return useBaseHttp<Response, Form, Response[]>(api, []);
 }
 export function useHttpPaginate<Response, Form>(
   api: (
-    form: Form
+    form: Form,
   ) =>
     | Promise<AxiosResponse<ListResult<Response>>>
-    | Promise<ListResult<Response>>
+    | Promise<ListResult<Response>>,
 ) {
   return useBaseHttp<ListResult<Response>, Form, ListResult<Response>>(api, {
     page: 0,

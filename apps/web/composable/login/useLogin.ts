@@ -57,7 +57,7 @@ const useLogin = () => {
 
     // 5. Hard Redirect
     if (typeof window !== "undefined") {
-      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/casashopping";
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
       window.location.href = `${basePath}/login`;
     }
   };

@@ -1,9 +1,9 @@
-import DashBoard from "./DashBoard/page";
-
+// Redirect is handled by next.config.js redirects
+// This page is just a fallback
 export default function AdminHome() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
-      <DashBoard />
-    </main>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      <p>Redirecionando...</p>
+    </div>
   );
 }
