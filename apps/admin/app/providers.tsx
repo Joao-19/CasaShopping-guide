@@ -3,7 +3,7 @@
 import "reflect-metadata";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, ReactNode } from "react";
-import { PopupProvider, GlobalPopup } from "@repo/ui";
+import { PopupProvider, GlobalPopup, Toaster } from "@repo/ui";
 import { GlobalErrorListener } from "./components/GlobalErrorListener";
 
 export default function Providers({ children }: { children: ReactNode }) {
@@ -15,6 +15,7 @@ export default function Providers({ children }: { children: ReactNode }) {
                 <GlobalErrorListener />
                 {children}
                 <GlobalPopup />
+                <Toaster position="top-right" richColors />
             </PopupProvider>
         </QueryClientProvider>
     );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ImageUpload, BaseText, Button, Label, FormCard } from '@repo/ui';
+import { ImageUpload, BaseText, Button, Label, FormCard, toast } from '@repo/ui';
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import useStore from '@/composable/store/useStore';
@@ -259,9 +259,14 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                     console.log('Image uploaded to:', imageKey);
                 } catch (uploadErr) {
                     console.error('Failed to upload image', uploadErr);
-                    // Decide if we stop or continue without image. stopping is safer.
+                    toast.error('Erro ao fazer upload da imagem. Tente novamente.');
                     return;
                 }
+            } else if (!isEditing) {
+                // For new stores, image is recommended but not required
+                // If you want to make it required, uncomment below:
+                // toast.warning('Por favor, adicione uma imagem para a loja.');
+                // return;
             }
 
             const submissionData: CreateStoreDto = {
@@ -284,8 +289,10 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 console.log('Store created successfully');
             }
             onClose();
+            toast.success(isEditing ? 'Loja atualizada com sucesso!' : 'Loja criada com sucesso!');
         } catch (error) {
             console.error('Failed to save store', error);
+            toast.error('Erro ao salvar a loja. Verifique os dados e tente novamente.');
         }
     };
 
