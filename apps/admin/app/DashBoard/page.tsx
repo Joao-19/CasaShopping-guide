@@ -1,15 +1,6 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 export default function DashBoardPage() {
-    const router = useRouter();
-
-    useEffect(() => {
-        // Redireciona para a página de lojas como padrão
-        router.replace('/DashBoard/lojas');
-    }, [router]);
-
-    return null;
+    // Redireciona para a página de lojas como padrão
+    redirect("/DashBoard/lojas");
 }

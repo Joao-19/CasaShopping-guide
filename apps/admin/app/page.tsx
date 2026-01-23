@@ -1,9 +1,6 @@
-import DashBoard from "./DashBoard/page";
+import { redirect } from "next/navigation";
 
 export default function AdminHome() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
-      <DashBoard />
-    </main>
-  );
+  // Redireciona para o DashBoard - o middleware vai verificar autenticação
+  redirect("/DashBoard/lojas");
 }

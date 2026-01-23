@@ -15,9 +15,7 @@ export async function middleware(request: NextRequest) {
 
   // 1. Se for rota pública, deixa passar
   // O pathname já vem SEM o basePath quando configurado no next.config
-  if (
-    publicPaths.some((path) => pathname.startsWith(path) || pathname === "/")
-  ) {
+  if (publicPaths.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
   }
 
