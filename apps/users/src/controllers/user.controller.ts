@@ -16,13 +16,19 @@ import { UserService } from "@/services/user.service";
 import { ConfigService } from "@nestjs/config";
 import * as jwt from "jsonwebtoken";
 import { UpdateProfileImageDto } from "@repo/dtos";
-import { HttpException, HttpStatus } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  UseGuards,
+  Request as Req,
+} from "@nestjs/common";
+import { JwtAuthGuard, Roles, RolesGuard } from "@repo/auth-guard";
 
 @Controller("user")
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   private getUserIdFromToken(authHeader: string): string {
@@ -58,6 +64,8 @@ export class UserController {
   }
 
   @Get("export")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async export(@Res() res: Response) {
     const stream = this.userService.exportUsers();
 
@@ -74,9 +82,11 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async findAll(
     @Query("page") page: string = "1",
-    @Query("search") search?: string
+    @Query("search") search?: string,
   ) {
     return this.userService.findAll(+page, search);
   }
@@ -90,13 +100,13 @@ export class UserController {
   @Patch("me/profile-image")
   async updateProfileImage(
     @Headers("authorization") authHeader: string,
-    @Body() body: UpdateProfileImageDto
+    @Body() body: UpdateProfileImageDto,
   ) {
     try {
       const userId = this.getUserIdFromToken(authHeader);
       return await this.userService.updateProfileImage(
         userId,
-        body.profileImage
+        body.profileImage,
       );
     } catch (error: any) {
       if (error instanceof UnauthorizedException) {
@@ -105,13 +115,13 @@ export class UserController {
       if (error.code === "P2025") {
         throw new HttpException(
           "User not found (Token mismatch)",
-          HttpStatus.CONFLICT
+          HttpStatus.CONFLICT,
         );
       }
       console.error("[UserController] Error updating profile image:", error);
       throw new HttpException(
         error.message || "Internal Server Error",
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -123,6 +133,8 @@ export class UserController {
   }
 
   @Delete(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async delete(@Param("id") id: string) {
     return this.userService.delete(id);
   }
