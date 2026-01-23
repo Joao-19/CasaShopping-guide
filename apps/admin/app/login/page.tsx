@@ -115,7 +115,7 @@ const LoginPage = () => {
                 email,
                 password,
             });
-            router.push("/");
+            router.push("/DashBoard/lojas/");
         } catch (error) {
             console.error("Login failed", error);
         }
