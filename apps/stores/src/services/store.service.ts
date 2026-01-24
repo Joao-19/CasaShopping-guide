@@ -35,8 +35,6 @@ export class StoreService {
       },
     });
 
-    console.log("Store Service Logic - Saved to DB:", store);
-
     return this.transformStore(store);
   }
 

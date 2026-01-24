@@ -26,7 +26,6 @@ export class StoreController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("admin")
   async create(@Body() createStoreDto: CreateStoreDto): Promise<Store> {
-    console.log("Store Service Controller - Received Data:", createStoreDto);
     return this.storeService.create(createStoreDto);
   }
 
