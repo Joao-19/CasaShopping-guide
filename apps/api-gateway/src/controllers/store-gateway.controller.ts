@@ -39,7 +39,7 @@ export class StoreGatewayController {
   })
   async create(
     @Body() createStoreDto: CreateStoreDto,
-    @Req() req: Request
+    @Req() req: Request,
   ): Promise<Store> {
     const token = req.cookies["access_token"];
     return this.storeGatewayService.create(createStoreDto, token);
@@ -55,14 +55,14 @@ export class StoreGatewayController {
     @Query("page") page: string = "1",
     @Req() req: Request,
     @Query("search") search?: string,
-    @Query("limit") limit?: string
+    @Query("limit") limit?: string,
   ): Promise<PaginatedResult<Store>> {
     const token = req.cookies["access_token"];
     return this.storeGatewayService.findAll(
       +page,
       token,
       search,
-      limit ? +limit : undefined
+      limit ? +limit : undefined,
     );
   }
 
@@ -88,7 +88,7 @@ export class StoreGatewayController {
   async update(
     @Param("id") id: string,
     @Body() updateStoreDto: UpdateStoreDto,
-    @Req() req: Request
+    @Req() req: Request,
   ): Promise<Store> {
     const token = req.cookies["access_token"];
     return this.storeGatewayService.update(id, updateStoreDto, token);

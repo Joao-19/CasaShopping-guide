@@ -13,7 +13,8 @@ export default {
       facebookLink: form.facebookLink,
       instagramLink: form.instagramLink,
       youtubeLink: form.youtubeLink,
-      // image will be handled later
+      whatsapp: form.whatsapp,
+      logoImage: form.logoImage,
     };
 
     return http.post<Store>("stores", payload).then((res) => res.data);

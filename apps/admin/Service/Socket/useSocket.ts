@@ -91,7 +91,7 @@ export function useSocket(config: SocketConfig): UseSocketResult {
             "useSocket: Erro de autenticação, limpando token e redirecionando.",
           );
           setAuthToken(null);
-          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
           window.location.href = `${basePath}/login/`;
         }
       });
