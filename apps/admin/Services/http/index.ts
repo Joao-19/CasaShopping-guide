@@ -1,6 +1,6 @@
 import { createApiClient } from "@repo/api-client";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const getBaseUrl = () => {
   const url = process.env.NEXT_PUBLIC_API_URL;
