@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 // Rotas públicas que não precisam de autenticação (SEM o basePath, pois Next.js já remove)
 const publicPaths = ["/login", "/Login", "/public"];

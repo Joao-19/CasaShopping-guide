@@ -44,7 +44,7 @@ export function useBaseHttp<Response, Form, DefaultValue>(
         );
         if (apiError.response?.status === 401) {
           authStore.setToken(null);
-          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/admin";
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
           window.location.href = `${basePath}/login/`;
         }
         throw e;
