@@ -41,6 +41,7 @@ export class StoreGatewayController {
     @Body() createStoreDto: CreateStoreDto,
     @Req() req: Request,
   ): Promise<Store> {
+    console.log("Gateway - Raw Body:", req.body);
     console.log("Gateway - Received Store Data:", createStoreDto);
     const token = req.cookies["access_token"];
     return this.storeGatewayService.create(createStoreDto, token);
