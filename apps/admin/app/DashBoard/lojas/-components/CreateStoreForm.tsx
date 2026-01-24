@@ -281,6 +281,8 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 logoImage: imageKey || '', // Send string path to DB
             };
 
+            console.log('Frontend - Submitting Store Data:', submissionData);
+
             if (isEditing && initialData?.id) {
                 await updateStore(initialData.id, submissionData);
                 console.log('Store updated successfully');
