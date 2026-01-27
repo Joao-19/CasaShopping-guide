@@ -98,6 +98,8 @@ function ProdutosContent() {
             .map((img) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
         showStorePhone: p.showStorePhone,
         storePhone: p.store?.phone,
+        storeLogo: p.store?.logoImage,
+        storeAddress: p.store?.address,
         storeSite: p.store?.site,
         storeInstagram: p.store?.instagramLink,
         storeFacebook: p.store?.facebookLink,

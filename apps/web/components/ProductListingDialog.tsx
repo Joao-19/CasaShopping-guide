@@ -81,6 +81,7 @@ export function ProductListingDialog({ initialCategory }: ProductListingDialogPr
             .map((img) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
         showStorePhone: p.showStorePhone,
         storePhone: p.store?.phone,
+        storeLogo: p.store?.logoImage,
         storeSite: p.store?.site,
         storeInstagram: p.store?.instagramLink,
         storeFacebook: p.store?.facebookLink,

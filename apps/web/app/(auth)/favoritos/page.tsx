@@ -68,6 +68,7 @@ export default function FavoritesPage() {
                                     storeName: product.store?.name || "Loja",
                                     storeLogo: product.store?.logoImage,
                                     storePhone: product.store?.phone,
+                                    storeAddress: product.store?.address,
                                     storeSite: product.store?.site,
                                     storeInstagram: product.store?.instagramLink,
                                     storeFacebook: product.store?.facebookLink,
