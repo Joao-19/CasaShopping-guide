@@ -11,7 +11,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Debug log (remover em produção se necessário)
-  console.log(`[Middleware] Pathname: ${pathname}`);
+  console.log(`[Middleware] PROCESSING: ${pathname}`);
+  console.log(
+    `[Middleware] Cookies received keys:`,
+    request.cookies.getAll().map((c) => c.name),
+  );
 
   // 1. Se for rota pública ou raiz, deixa passar
   // O pathname já vem SEM o basePath quando configurado no next.config
@@ -19,6 +23,7 @@ export async function middleware(request: NextRequest) {
     pathname === "/" ||
     publicPaths.some((path) => pathname.startsWith(path))
   ) {
+    console.log(`[Middleware] Skipping public path: ${pathname}`);
     return NextResponse.next();
   }
 
@@ -36,18 +41,26 @@ export async function middleware(request: NextRequest) {
     request.cookies.get("token")?.value ||
     request.cookies.get("accessToken")?.value;
 
+  console.log(`[Middleware] Token match: ${!!token}`);
+
   const loginUrl = new URL(`${basePath}/login`, request.url);
 
   if (!token) {
-    console.log("[Middleware] Sem token, redirecionando para login");
+    console.log(
+      "[Middleware] Sem token, redirecionando para login. Url:",
+      loginUrl.toString(),
+    );
     return NextResponse.redirect(loginUrl);
   }
 
   // 4. Valida o Token e verifica Role
   try {
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || "changeme_secret",
+    const secretKey = process.env.JWT_SECRET || "changeme_secret";
+    console.log(
+      `[Middleware] Using secret: ${secretKey.slice(0, 3)}... (Length: ${secretKey.length})`,
     );
+
+    const secret = new TextEncoder().encode(secretKey);
 
     const { payload } = await jwtVerify(token, secret);
 

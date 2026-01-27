@@ -18,7 +18,7 @@ async function sleep(ms: number) {
 async function bootstrap(retryCount = 0) {
   try {
     console.log(
-      `[AuthService] Starting... (attempt ${retryCount + 1}/${MAX_RETRIES})`
+      `[AuthService] Starting... (attempt ${retryCount + 1}/${MAX_RETRIES})`,
     );
 
     const app = await NestFactory.create(AuthModule);
@@ -40,6 +40,12 @@ async function bootstrap(retryCount = 0) {
       credentials: true,
     });
 
+    const jwtSecret =
+      configService.get<string>("JWT_SECRET") || "changeme_secret";
+    console.log(
+      `[AuthService] Using JWT_SECRET: ${jwtSecret.slice(0, 3)}... (Length: ${jwtSecret.length})`,
+    );
+
     await app.listen(port, "0.0.0.0");
     console.log(`🚀 Auth Service (NestJS) rodando na porta ${port}`);
   } catch (error) {
@@ -47,7 +53,7 @@ async function bootstrap(retryCount = 0) {
 
     if (retryCount < MAX_RETRIES - 1) {
       console.log(
-        `⏳ Retrying in ${RETRY_DELAY_MS / 1000} seconds... (${retryCount + 1}/${MAX_RETRIES})`
+        `⏳ Retrying in ${RETRY_DELAY_MS / 1000} seconds... (${retryCount + 1}/${MAX_RETRIES})`,
       );
       await sleep(RETRY_DELAY_MS);
       return bootstrap(retryCount + 1);

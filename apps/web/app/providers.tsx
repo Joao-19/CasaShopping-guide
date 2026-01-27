@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { PopupProvider, GlobalPopup } from "@repo/ui";
+import { PopupProvider, GlobalPopup, Toaster } from "@repo/ui";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(() => new QueryClient());
@@ -13,6 +13,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <PopupProvider>
                 {children}
                 <GlobalPopup />
+                <Toaster position="top-right" richColors />
             </PopupProvider>
         </QueryClientProvider>
     );

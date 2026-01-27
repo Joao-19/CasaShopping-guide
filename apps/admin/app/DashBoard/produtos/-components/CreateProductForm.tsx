@@ -324,6 +324,9 @@ function CreateProductFormContent({
     );
 }
 
+import { useQuery } from "@tanstack/react-query";
+import storeHttp from "@/Services/http/store.http";
+
 export function CreateProductForm({
     onClose,
     initialData,
@@ -332,6 +335,13 @@ export function CreateProductForm({
     const { stores } = useStore(); // Fetch stores for dropdown
     const { FormProvider, validateAll, isValid } = useForm();
     const isEditing = !!initialData;
+
+    // Fetch specific store if editing, to ensure we have the name even if it's not in the first page of 'stores'
+    const { data: currentStore } = useQuery({
+        queryKey: ['store', initialData?.storeId],
+        queryFn: () => storeHttp.getById(initialData!.storeId),
+        enabled: !!initialData?.storeId,
+    });
 
     // Form State
     const [name, setName] = useState(initialData?.name || "");
@@ -498,7 +508,7 @@ export function CreateProductForm({
                     loading={loading || uploadingImage}
                     onClose={onClose}
                     onSubmit={handleSubmit}
-                    stores={stores || []}
+                    stores={currentStore ? [...stores, currentStore] : stores}
                     isEditing={isEditing}
                     images={images}
                     uploadingImage={uploadingImage}

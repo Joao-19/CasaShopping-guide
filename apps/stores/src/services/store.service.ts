@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from "@nestjs/common";
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from "@nestjs/common";
 import { prisma } from "@repo/database";
 import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
 
@@ -44,7 +48,7 @@ export class StoreService {
       const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
 
       let baseUrl = publicEndpoint
-        ? `${publicEndpoint}/${bucketName}`
+        ? `${publicEndpoint.replace(/\/$/, "")}/${bucketName}`
         : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
 
       const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
@@ -101,35 +105,58 @@ export class StoreService {
     };
   }
 
+  async findOne(id: string): Promise<Store> {
+    const store = await prisma.store.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+    });
+
+    if (!store) {
+      throw new NotFoundException(`Store with ID ${id} not found`);
+    }
+
+    return this.transformStore(store);
+  }
+
   async delete(id: string): Promise<Store> {
-    // First, delete all products associated with this store
-    const products = await prisma.product.findMany({
-      where: { storeId: id },
-      include: { images: true },
-    });
+    return prisma.$transaction(async (tx) => {
+      // 1. Find all products to delete images from storage
+      const products = await tx.product.findMany({
+        where: { storeId: id },
+        include: { images: true },
+      });
 
-    // Delete product images from storage and database
-    for (const product of products) {
-      for (const img of product.images) {
-        await this.deleteFileFromStorage(img.path);
+      // 2. Delete images from storage (non-transactional side effect, but necessary)
+      for (const product of products) {
+        for (const img of product.images) {
+          await this.deleteFileFromStorage(img.path);
+        }
       }
-    }
 
-    // Delete products from database (this will cascade delete images and favorites)
-    await prisma.product.deleteMany({
-      where: { storeId: id },
-    });
+      // 3. Delete products
+      // This explicit deleteMany triggers the deletion of products.
+      // Because `Product` has `onDelete: Cascade` relations with `ProductImage` and `Favorite` in schema.prisma,
+      // the database (Postgres) will handle deleting those children automatically IF foreign keys are set up correctly.
+      // If Prisma is managing the relation, `deleteMany` might NOT cascade automatically in all cases without middleware,
+      // but here we are relying on the database or explicit cleanup if needed.
+      // Given the schema, cascade should work at DB level.
+      await tx.product.deleteMany({
+        where: { storeId: id },
+      });
 
-    // Get store to delete its logo
-    const store = await prisma.store.findUnique({ where: { id } });
-    if (store?.logoImage) {
-      await this.deleteFileFromStorage(store.logoImage);
-    }
+      // 4. Get store to delete logo
+      const store = await tx.store.findUnique({ where: { id } });
+      if (store?.logoImage) {
+        await this.deleteFileFromStorage(store.logoImage);
+      }
 
-    // Soft delete the store
-    return prisma.store.update({
-      where: { id },
-      data: { deletedAt: new Date() },
+      // 5. Soft delete the store
+      return tx.store.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      });
     });
   }
 

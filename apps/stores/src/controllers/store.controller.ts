@@ -38,6 +38,11 @@ export class StoreController {
     return this.storeService.findAll(+page, search, limit ? +limit : undefined);
   }
 
+  @Get(":id")
+  async findOne(@Param("id") id: string): Promise<Store> {
+    return this.storeService.findOne(id);
+  }
+
   @Delete(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("admin")
