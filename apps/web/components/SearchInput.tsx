@@ -21,16 +21,12 @@ export function SearchInput({ variant = "solid" }: SearchInputProps) {
 
     // Debounce logic
     useEffect(() => {
-        console.log("SearchInput: useEffect triggered, query:", query);
         const timer = setTimeout(async () => {
             if (query.trim().length >= 1) { // Changed to ≥ 1 for testing
-                console.log("SearchInput: Calling API with search:", query);
                 setIsLoading(true);
                 setIsOpen(true);
                 try {
                     const response = await getProducts({ search: query, limit: 5 });
-                    console.log("SearchInput: API Response:", response);
-                    // Handle both array and paginated response just in case, though http service handles it
                     const products = Array.isArray(response) ? response : response.data;
                     setResults(products);
                 } catch (error) {
@@ -50,7 +46,6 @@ export function SearchInput({ variant = "solid" }: SearchInputProps) {
 
     // Close on click outside
     useEffect(() => {
-        console.log("SearchInput: Component MOUNTED");
         function handleClickOutside(event: MouseEvent) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
@@ -82,7 +77,6 @@ export function SearchInput({ variant = "solid" }: SearchInputProps) {
         <div
             className="relative w-[300px] z-[9999] pointer-events-auto border-4 border-red-500"
             ref={wrapperRef}
-            onClick={() => console.log("SearchInput: Wrapper CLICKED")}
         >
             <div className={`flex items-center px-4 py-2 rounded-full border ${bgColor} transition-colors focus-within:bg-white focus-within:text-[#162e47] focus-within:border-transparent group`}>
                 <IconSearch className={`w-5 h-5 mr-2 ${iconColor} group-focus-within:text-[#162e47]`} />
@@ -90,14 +84,12 @@ export function SearchInput({ variant = "solid" }: SearchInputProps) {
                     type="text"
                     onClick={(e) => {
                         e.stopPropagation();
-                        console.log("SearchInput: Input CLICKED");
                     }}
                     style={{ cursor: 'text' }}
                     placeholder="Buscar por nome ou categoria..."
                     className="bg-transparent border-none outline-none text-sm w-full placeholder:text-inherit"
                     value={query}
                     onChange={(e) => {
-                        console.log("SearchInput: onChange val=", e.target.value);
                         setQuery(e.target.value);
                     }}
                     onFocus={() => { if (results.length > 0) setIsOpen(true) }}

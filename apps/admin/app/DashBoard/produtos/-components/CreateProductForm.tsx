@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BaseText, Button, Label, FormCard } from "@repo/ui";
+import { BaseText, Button, Label, FormCard, toast } from "@repo/ui";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import useProduct from "@/composable/product/useProduct";
@@ -441,14 +441,14 @@ export function CreateProductForm({
                 // For update, we use UpdateProductDto which is Partial<CreateProductDto>
                 // Use type assertion or ensure hook accepts it
                 await updateProduct(initialData.id, submissionData);
-                console.log("Product updated successfully");
             } else {
                 await createProduct(submissionData);
-                console.log("Product created successfully");
             }
             onClose();
+            toast.success(isEditing ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!');
         } catch (error) {
             console.error("Failed to save product", error);
+            toast.error('Erro ao salvar o produto. Verifique os dados e tente novamente.');
         }
     };
 

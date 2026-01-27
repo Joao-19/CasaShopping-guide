@@ -24,18 +24,10 @@ const useLogin = () => {
       if (user) {
         authStore.setUser(user);
 
-        // Debug logs
-        console.log(
-          "[useLogin] User found, setting cookies. AccessToken:",
-          !!accessToken,
-        );
-
         // Salva tokens nos cookies para o Middleware validar
         if (accessToken) {
           Cookies.set("token", accessToken, { path: "/" });
           Cookies.set("accessToken", accessToken, { path: "/" });
-          console.log("[useLogin] Cookies 'token' and 'accessToken' set.");
-          console.log("[useLogin] Current Document Cookies:", document.cookie);
         }
         if (refreshToken) {
           Cookies.set("refreshToken", refreshToken, { path: "/" });

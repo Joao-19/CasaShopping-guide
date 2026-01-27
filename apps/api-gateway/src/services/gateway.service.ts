@@ -8,7 +8,7 @@ export class GatewayService {
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {
     this.AUTH_SERVICE_URL =
       this.configService?.get<string>("AUTH_SERVICE_URL") ||
@@ -16,18 +16,16 @@ export class GatewayService {
   }
 
   async register(data: any) {
-    console.log("[Gateway] Register called");
     console.log(
       "[Gateway] AUTH_SERVICE_URL env:",
-      this.configService.get<string>("AUTH_SERVICE_URL")
+      this.configService.get<string>("AUTH_SERVICE_URL"),
     );
     console.log(
       "[Gateway] Class property AUTH_SERVICE_URL:",
-      this.AUTH_SERVICE_URL
+      this.AUTH_SERVICE_URL,
     );
 
     const targetUrl = `${this.AUTH_SERVICE_URL}/auth/register`;
-    console.log(`[Gateway] Sending POST request to: ${targetUrl}`);
 
     try {
       const response = await this.httpService.axiosRef.post(targetUrl, data);
@@ -38,7 +36,7 @@ export class GatewayService {
         console.error("[Gateway] Upstream status:", error.response.status);
         console.error("[Gateway] Upstream data:", error.response.data);
         throw new ConflictException(
-          error.response.data.message || "Erro no registro"
+          error.response.data.message || "Erro no registro",
         );
       }
       throw error;
@@ -48,7 +46,7 @@ export class GatewayService {
     try {
       const response = await this.httpService.axiosRef.post(
         `${this.AUTH_SERVICE_URL}/auth/login`,
-        data
+        data,
       );
       return response.data;
     } catch (error: any) {
@@ -56,7 +54,7 @@ export class GatewayService {
 
       if (error.response) {
         throw new ConflictException(
-          error.response.data.message || "Erro no login"
+          error.response.data.message || "Erro no login",
         );
       }
       throw error;
@@ -67,13 +65,13 @@ export class GatewayService {
     try {
       const response = await this.httpService.axiosRef.post(
         `${this.AUTH_SERVICE_URL}/auth/admin/login`,
-        data
+        data,
       );
       return response.data;
     } catch (error: any) {
       if (error.response) {
         throw new ConflictException(
-          error.response.data.message || "Erro no login de administrador"
+          error.response.data.message || "Erro no login de administrador",
         );
       }
       throw error;
@@ -83,13 +81,13 @@ export class GatewayService {
     try {
       const response = await this.httpService.axiosRef.post(
         `${this.AUTH_SERVICE_URL}/auth/refresh`,
-        { refreshToken }
+        { refreshToken },
       );
       return response.data;
     } catch (error: any) {
       if (error.response) {
         throw new ConflictException(
-          error.response.data.message || "Erro ao atualizar token"
+          error.response.data.message || "Erro ao atualizar token",
         );
       }
       throw error;

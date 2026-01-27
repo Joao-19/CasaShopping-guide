@@ -68,8 +68,6 @@ export function Sidebar({ onLogout, isOpen = false, onClose }: SidebarProps) {
     const handleLogout = () => {
         if (onLogout) {
             onLogout();
-        } else {
-            console.log('Logout');
         }
     };
 

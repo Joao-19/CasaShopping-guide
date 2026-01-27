@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { usePopup } from '@repo/ui';
+import { usePopup, toast } from '@repo/ui';
 import { CreateStoreForm } from './-components/CreateStoreForm';
 import { Header } from '../components';
 import useStore from '@/composable/store/useStore';
@@ -40,8 +40,13 @@ export default function LojasPage() {
         showPopup(
             <ConfirmationCard
                 onConfirm={async () => {
-                    await deleteStore(id);
-                    hidePopup();
+                    try {
+                        await deleteStore(id);
+                        toast.success('Loja removida com sucesso!');
+                        hidePopup();
+                    } catch (error) {
+                        toast.error('Erro ao remover a loja.');
+                    }
                 }}
                 onCancel={hidePopup}
                 title="Excluir Loja"

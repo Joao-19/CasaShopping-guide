@@ -256,7 +256,6 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 try {
                     const tempId = initialData?.id || 'new-store-upload';
                     imageKey = await uploadImage(image, tempId);
-                    console.log('Image uploaded to:', imageKey);
                 } catch (uploadErr) {
                     console.error('Failed to upload image', uploadErr);
                     toast.error('Erro ao fazer upload da imagem. Tente novamente.');
@@ -283,15 +282,12 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
 
             if (isEditing && initialData?.id) {
                 await updateStore(initialData.id, submissionData);
-                console.log('Store updated successfully');
             } else {
                 await createStore(submissionData);
-                console.log('Store created successfully');
             }
             onClose();
             toast.success(isEditing ? 'Loja atualizada com sucesso!' : 'Loja criada com sucesso!');
         } catch (error) {
-            console.error('Failed to save store', error);
             toast.error('Erro ao salvar a loja. Verifique os dados e tente novamente.');
         }
     };
