@@ -6,6 +6,7 @@
     "NEXT_PUBLIC_API_URL",
     "NEXT_PUBLIC_API_HOST",
     "NEXT_PUBLIC_STORAGE_URL",
+    "NEXT_PUBLIC_WEB_URL",
     "NODE_ENV"
   ],
   "tasks": {
@@ -22,8 +23,7 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true,
-      "dependsOn": ["^dev"]
+      "persistent": true
     }
   }
 }

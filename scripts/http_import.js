@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 // CONFIGURAÇÃO
-const API_URL = process.env.API_URL || 'http://localhost:3000'; // Ajuste para a URL de produção se necessário
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@casashopping.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const API_URL = 'https://guiadecompras.casashopping.com/api'; // Ajuste para a URL de produção se necessário
+const ADMIN_EMAIL = 'admin@casashopping.com';
+const ADMIN_PASSWORD = 'changeme_admin_password';
 const FILE_PATH = path.join("C:/Users/jjjoa/Downloads", 'Infos de lojas.txt');
 
 async function importStores() {
@@ -26,6 +26,7 @@ async function importStores() {
         token = authData.accessToken;
         console.log('✅ Login realizado com sucesso!');
     } catch (error) {
+        console.log(error)
         console.error('❌ Erro crítico no login:', error.message);
         return;
     }

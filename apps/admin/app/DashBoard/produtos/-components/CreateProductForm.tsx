@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BaseText, Button, Label, FormCard } from "@repo/ui";
+import { BaseText, Button, Label, FormCard, toast } from "@repo/ui";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import useProduct from "@/composable/product/useProduct";
@@ -324,6 +324,9 @@ function CreateProductFormContent({
     );
 }
 
+import { useQuery } from "@tanstack/react-query";
+import storeHttp from "@/Services/http/store.http";
+
 export function CreateProductForm({
     onClose,
     initialData,
@@ -332,6 +335,13 @@ export function CreateProductForm({
     const { stores } = useStore(); // Fetch stores for dropdown
     const { FormProvider, validateAll, isValid } = useForm();
     const isEditing = !!initialData;
+
+    // Fetch specific store if editing, to ensure we have the name even if it's not in the first page of 'stores'
+    const { data: currentStore } = useQuery({
+        queryKey: ['store', initialData?.storeId],
+        queryFn: () => storeHttp.getById(initialData!.storeId),
+        enabled: !!initialData?.storeId,
+    });
 
     // Form State
     const [name, setName] = useState(initialData?.name || "");
@@ -431,14 +441,14 @@ export function CreateProductForm({
                 // For update, we use UpdateProductDto which is Partial<CreateProductDto>
                 // Use type assertion or ensure hook accepts it
                 await updateProduct(initialData.id, submissionData);
-                console.log("Product updated successfully");
             } else {
                 await createProduct(submissionData);
-                console.log("Product created successfully");
             }
             onClose();
+            toast.success(isEditing ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!');
         } catch (error) {
             console.error("Failed to save product", error);
+            toast.error('Erro ao salvar o produto. Verifique os dados e tente novamente.');
         }
     };
 
@@ -498,7 +508,7 @@ export function CreateProductForm({
                     loading={loading || uploadingImage}
                     onClose={onClose}
                     onSubmit={handleSubmit}
-                    stores={stores || []}
+                    stores={currentStore ? [...stores, currentStore] : stores}
                     isEditing={isEditing}
                     images={images}
                     uploadingImage={uploadingImage}

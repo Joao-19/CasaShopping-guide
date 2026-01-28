@@ -49,6 +49,7 @@ services:
       - minio_data:/data
     networks:
       - casashopping-net
+      - web-proxy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -240,6 +241,7 @@ services:
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+        - NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-http://localhost:3001}
         - BASE_PATH=${ADMIN_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
     container_name: casashopping-admin
@@ -249,6 +251,7 @@ services:
       - PORT=3002
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
       - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+      - NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-http://localhost:3001}
       - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
       - JWT_SECRET=${JWT_SECRET:-changeme_secret}
       - HOSTNAME=0.0.0.0

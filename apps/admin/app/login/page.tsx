@@ -19,7 +19,7 @@ import BaseInput from "@repo/ui/inputs/BaseInput";
 import useLogin from "@/composable/login/useLogin";
 import { useRedirectUrl } from "@/composable/useRedirectUrl";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
-import { Assets } from "@repo/ui";
+import { Assets, toast } from "@repo/ui";
 
 
 interface LoginFormProps {
@@ -119,15 +119,16 @@ const LoginPage = () => {
             console.log("Login response:", response);
 
             if (response && response.user) {
+                console.log("[LoginPage] Redirecting to dashboard...");
                 router.push("/DashBoard/lojas/");
             } else {
                 console.error("Login response missing user:", response);
-                alert("Erro: Resposta do servidor inválida");
+                toast.error("Erro: Resposta do servidor inválida");
             }
         } catch (error: any) {
             console.error("Login failed", error);
             const message = error?.response?.data?.message || error?.message || "Erro ao fazer login";
-            alert(message);
+            toast.error(message);
         }
     };
 

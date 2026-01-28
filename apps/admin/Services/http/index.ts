@@ -18,10 +18,28 @@ const getBaseUrl = () => {
   return "http://localhost:3000";
 };
 
+import Cookies from "js-cookie";
+
 const http = createApiClient({
   baseURL: getBaseUrl(),
+  getRefreshToken: () => Cookies.get("refreshToken") || null,
+  onTokenRefreshed: (data) => {
+    Cookies.set("accessToken", data.accessToken);
+    Cookies.set("refreshToken", data.refreshToken);
+    // Optional: Update 'tokens' cookie if validation logic relies on it
+    Cookies.set(
+      "tokens",
+      JSON.stringify({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      }),
+    );
+  },
   onRefreshFail: () => {
     if (typeof window !== "undefined") {
+      Cookies.remove("accessToken");
+      Cookies.remove("refreshToken");
+      Cookies.remove("tokens");
       localStorage.removeItem("authAdmin");
       window.location.href = `${basePath}/login/`;
     }

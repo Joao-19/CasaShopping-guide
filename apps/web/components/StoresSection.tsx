@@ -18,8 +18,8 @@ export function StoresSection() {
 
     const { data: stores, isLoading } = useQuery({
         queryKey: ['stores'],
-        queryFn: () => storeService.list({ limit: 20 }),
-        select: (data) => data.data
+        queryFn: () => storeService.list({ limit: 100 }),
+        select: (data) => data.data.sort((a, b) => a.name.localeCompare(b.name))
     });
 
     if (isLoading) {

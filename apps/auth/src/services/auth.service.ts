@@ -16,7 +16,7 @@ export class AuthService implements OnModuleInit {
 
   async register(data: any) {
     console.log(
-      `[AuthService] Registering user: ${data.email}, Name: ${data.name}`
+      `[AuthService] Registering user: ${data.email}, Name: ${data.name}`,
     );
     const email = data.email.toLowerCase();
 
@@ -26,12 +26,12 @@ export class AuthService implements OnModuleInit {
 
     console.log(
       `[AuthService] Check if user exists (${email}):`,
-      userExists ? "FOUND" : "NOT FOUND"
+      userExists ? "FOUND" : "NOT FOUND",
     );
 
     if (userExists) {
       console.warn(
-        `[AuthService] Conflict: User already exists with ID: ${userExists.id}`
+        `[AuthService] Conflict: User already exists with ID: ${userExists.id}`,
       );
       throw new ConflictException("Este e-mail já está cadastrado.");
     }
@@ -52,7 +52,7 @@ export class AuthService implements OnModuleInit {
       if (error.code === "P2002") {
         const field = error.meta?.target?.[0];
         console.warn(
-          `[AuthService] Unique Constraint Violation on field: ${field}`
+          `[AuthService] Unique Constraint Violation on field: ${field}`,
         );
         if (field === "email") {
           throw new ConflictException("Este e-mail já está cadastrado.");
@@ -78,7 +78,7 @@ export class AuthService implements OnModuleInit {
   async onModuleInit() {
     const retryInterval = this.configService.get<number>(
       "DB_RETRY_INTERVAL",
-      30000
+      30000,
     );
 
     while (true) {
@@ -90,7 +90,7 @@ export class AuthService implements OnModuleInit {
           `❌ Erro ao conectar ao banco. Tentando novamente em ${
             retryInterval / 1000
           }s...`,
-          error instanceof Error ? error.message : error
+          error instanceof Error ? error.message : error,
         );
         await new Promise((resolve) => setTimeout(resolve, retryInterval));
       }
@@ -144,9 +144,9 @@ export class AuthService implements OnModuleInit {
       {
         expiresIn: this.configService.get<string>(
           "JWT_EXPIRES_IN",
-          "15m"
+          "15m",
         ) as jwt.SignOptions["expiresIn"],
-      }
+      },
     );
 
     const refreshToken = jwt.sign(
@@ -155,9 +155,9 @@ export class AuthService implements OnModuleInit {
       {
         expiresIn: this.configService.get<string>(
           "REFRESH_TOKEN_EXPIRES_IN",
-          "7d"
+          "7d",
         ) as jwt.SignOptions["expiresIn"],
-      }
+      },
     );
 
     const refreshHash = await bcrypt.hash(refreshToken, 6);
@@ -183,9 +183,9 @@ export class AuthService implements OnModuleInit {
       {
         expiresIn: this.configService.get<string>(
           "JWT_EXPIRES_IN",
-          "15m"
+          "15m",
         ) as jwt.SignOptions["expiresIn"],
-      }
+      },
     );
 
     const refreshToken = jwt.sign(
@@ -194,9 +194,9 @@ export class AuthService implements OnModuleInit {
       {
         expiresIn: this.configService.get<string>(
           "REFRESH_TOKEN_EXPIRES_IN",
-          "7d"
+          "7d",
         ) as jwt.SignOptions["expiresIn"],
-      }
+      },
     );
 
     const refreshHash = await bcrypt.hash(refreshToken, 6);
@@ -204,12 +204,6 @@ export class AuthService implements OnModuleInit {
     await prisma.admin.update({
       where: { id: admin.id },
       data: { refreshToken: refreshHash },
-    });
-
-    console.log(11111111111, {
-      accessToken,
-      refreshToken,
-      user: admin,
     });
 
     return {
@@ -222,7 +216,7 @@ export class AuthService implements OnModuleInit {
     try {
       const payload = jwt.verify(
         token,
-        this.configService.getOrThrow<string>("REFRESH_TOKEN_SECRET")
+        this.configService.getOrThrow<string>("REFRESH_TOKEN_SECRET"),
       ) as any;
 
       if (payload.role === "admin") {
@@ -236,7 +230,7 @@ export class AuthService implements OnModuleInit {
 
         const isRefreshTokenValid = await bcrypt.compare(
           token,
-          admin.refreshToken
+          admin.refreshToken,
         );
 
         if (!isRefreshTokenValid) {
@@ -255,7 +249,7 @@ export class AuthService implements OnModuleInit {
 
         const isRefreshTokenValid = await bcrypt.compare(
           token,
-          user.refreshToken
+          user.refreshToken,
         );
 
         if (!isRefreshTokenValid) {

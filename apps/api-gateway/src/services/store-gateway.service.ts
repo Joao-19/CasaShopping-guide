@@ -10,7 +10,7 @@ export class StoreGatewayService {
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {
     this.storesServiceUrl =
       this.configService.getOrThrow<string>("STORE_SERVICE_URL");
@@ -29,14 +29,14 @@ export class StoreGatewayService {
           createStoreDto,
           {
             headers,
-          }
-        )
+          },
+        ),
       );
       return response.data;
     } catch (error: any) {
       throw new HttpException(
         error.response?.data || "Internal Server Error",
-        error.response?.status || 500
+        error.response?.status || 500,
       );
     }
   }
@@ -45,7 +45,7 @@ export class StoreGatewayService {
     page: number,
     token: string,
     search?: string,
-    limit?: number
+    limit?: number,
   ): Promise<PaginatedResult<Store>> {
     try {
       const headers: any = {};
@@ -59,14 +59,35 @@ export class StoreGatewayService {
           {
             params: { page, search, limit },
             headers,
-          }
-        )
+          },
+        ),
       );
       return response.data;
     } catch (error: any) {
       throw new HttpException(
         error.response?.data || "Internal Server Error",
-        error.response?.status || 500
+        error.response?.status || 500,
+      );
+    }
+  }
+
+  async findOne(id: string, token: string): Promise<Store> {
+    try {
+      const headers: any = {};
+      if (token && token !== "undefined" && token !== "null") {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await firstValueFrom(
+        this.httpService.get<Store>(`${this.storesServiceUrl}/stores/${id}`, {
+          headers,
+        }),
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500,
       );
     }
   }
@@ -83,14 +104,14 @@ export class StoreGatewayService {
           `${this.storesServiceUrl}/stores/${id}`,
           {
             headers,
-          }
-        )
+          },
+        ),
       );
       return response.data;
     } catch (error: any) {
       throw new HttpException(
         error.response?.data || "Internal Server Error",
-        error.response?.status || 500
+        error.response?.status || 500,
       );
     }
   }
@@ -98,7 +119,7 @@ export class StoreGatewayService {
   async update(
     id: string,
     updateStoreDto: Partial<CreateStoreDto>,
-    token: string
+    token: string,
   ): Promise<Store> {
     try {
       const headers: any = {};
@@ -112,14 +133,14 @@ export class StoreGatewayService {
           updateStoreDto,
           {
             headers,
-          }
-        )
+          },
+        ),
       );
       return response.data;
     } catch (error: any) {
       throw new HttpException(
         error.response?.data || "Internal Server Error",
-        error.response?.status || 500
+        error.response?.status || 500,
       );
     }
   }

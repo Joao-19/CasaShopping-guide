@@ -66,6 +66,15 @@ export class StoreGatewayController {
     );
   }
 
+  @Get(":id")
+  @ApiOperation({ summary: "Retrieve a store by ID" })
+  @ApiResponse({ status: 200, description: "Return the store." })
+  @ApiResponse({ status: 404, description: "Store not found." })
+  async findOne(@Param("id") id: string, @Req() req: Request): Promise<Store> {
+    const token = req.cookies["access_token"];
+    return this.storeGatewayService.findOne(id, token);
+  }
+
   @Delete(":id")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Delete a store" })

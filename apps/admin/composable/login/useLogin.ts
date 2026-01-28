@@ -32,6 +32,8 @@ const useLogin = () => {
         if (refreshToken) {
           Cookies.set("refreshToken", refreshToken, { path: "/" });
         }
+      } else {
+        console.warn("[useLogin] User not found in response:", resp);
       }
 
       // Retorna o objeto com user para manter compatibilidade

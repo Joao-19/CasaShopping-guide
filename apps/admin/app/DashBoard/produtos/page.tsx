@@ -1,5 +1,5 @@
 'use client';
-import { usePopup } from '@repo/ui';
+import { usePopup, toast } from '@repo/ui';
 import { Header } from '../components';
 import useProduct from '@/composable/product/useProduct';
 import {
@@ -30,8 +30,13 @@ export default function ProdutosPage() {
         showPopup(
             <ConfirmationCard
                 onConfirm={async () => {
-                    await deleteProduct(id);
-                    hidePopup();
+                    try {
+                        await deleteProduct(id);
+                        toast.success('Produto excluído com sucesso!');
+                        hidePopup();
+                    } catch (error) {
+                        toast.error('Erro ao excluir o produto.');
+                    }
                 }}
                 onCancel={hidePopup}
                 title="Excluir Produto"
