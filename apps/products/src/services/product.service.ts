@@ -29,7 +29,7 @@ export class ProductService {
 
     if (existingProduct) {
       throw new ConflictException(
-        "Product with this name already exists in this store"
+        "Product with this name already exists in this store",
       );
     }
 
@@ -96,7 +96,7 @@ export class ProductService {
     search?: string,
     category?: string,
     isFeatured?: boolean,
-    page: number = 1
+    page: number = 1,
   ): Promise<PaginatedResult<Product>> {
     const take = 15;
     const skip = (page - 1) * take;
@@ -133,6 +133,7 @@ export class ProductService {
           store: {
             select: {
               name: true,
+              logoImage: true,
               address: true,
               phone: true,
               site: true,
@@ -149,7 +150,7 @@ export class ProductService {
 
     return {
       data: products.map((p) =>
-        this.transformProduct(p)
+        this.transformProduct(p),
       ) as unknown as Product[],
       meta: {
         total,
@@ -208,7 +209,7 @@ export class ProductService {
     if (data.images && existingProduct.images) {
       const newPaths = new Set(data.images.map((img) => img.path));
       const imagesToDelete = existingProduct.images.filter(
-        (img) => !newPaths.has(img.path)
+        (img) => !newPaths.has(img.path),
       );
 
       for (const img of imagesToDelete) {
@@ -243,7 +244,7 @@ export class ProductService {
   }
   async toggleFavorite(
     userId: string,
-    productId: string
+    productId: string,
   ): Promise<{ isFavorited: boolean }> {
     const existingProduct = await prisma.product.findUnique({
       where: { id: productId },
@@ -294,7 +295,7 @@ export class ProductService {
 
       if (!response.ok) {
         console.error(
-          `Failed to delete file ${key} from storage: ${response.statusText}`
+          `Failed to delete file ${key} from storage: ${response.statusText}`,
         );
       }
     } catch (error) {
@@ -303,7 +304,7 @@ export class ProductService {
   }
   async findFavorites(
     userId: string,
-    page: number = 1
+    page: number = 1,
   ): Promise<PaginatedResult<Product>> {
     const take = 15;
     const skip = (page - 1) * take;
@@ -327,6 +328,7 @@ export class ProductService {
           store: {
             select: {
               name: true,
+              logoImage: true,
               address: true,
               phone: true,
               site: true,
@@ -343,7 +345,7 @@ export class ProductService {
 
     return {
       data: products.map((p) =>
-        this.transformProduct(p)
+        this.transformProduct(p),
       ) as unknown as Product[],
       meta: {
         total,

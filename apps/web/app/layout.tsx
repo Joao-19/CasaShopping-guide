@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Guia de Compras",
+  title: "Guia Casashopping",
   description: "Casa Shopping Guia de Compras",
 };
 
