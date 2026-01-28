@@ -2,7 +2,7 @@
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import storeService from "../Services/http/store.http";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useId } from "react";
@@ -16,11 +16,24 @@ export function StoresSection() {
     const uniqueId = useId().replace(/:/g, '');
     const { showPopup } = usePopup();
 
-    const { data: stores, isLoading } = useQuery({
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isLoading
+    } = useInfiniteQuery({
         queryKey: ['stores'],
-        queryFn: () => storeService.list({ limit: 100 }),
-        select: (data) => data.data.sort((a, b) => a.name.localeCompare(b.name))
+        queryFn: ({ pageParam = 1 }) => storeService.list({ page: pageParam as number, limit: 20 }),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) => {
+            if (lastPage.meta.page < lastPage.meta.lastPage) {
+                return lastPage.meta.page + 1;
+            }
+            return undefined;
+        },
     });
+
+    const stores = data?.pages.flatMap((page) => page.data) || [];
 
     if (isLoading) {
         return (
@@ -45,10 +58,15 @@ export function StoresSection() {
                         prevEl: `#prev-${uniqueId}`,
                         nextEl: `#next-${uniqueId}`,
                     }}
-                    centeredSlides={true}
+                    centeredSlides={false}
                     spaceBetween={24}
                     slidesPerView={3.5}
-                    loop={true}
+                    loop={!hasNextPage}
+                    onReachEnd={() => {
+                        if (hasNextPage) {
+                            fetchNextPage();
+                        }
+                    }}
                     breakpoints={{
                         640: {
                             slidesPerView: 4.5,
