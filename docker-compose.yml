@@ -6,7 +6,7 @@ services:
     image: postgres:15-alpine
     container_name: casashopping-db
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER:-admin}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-admin123}
@@ -39,8 +39,8 @@ services:
     image: minio/minio:latest
     container_name: casashopping-storage
     ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9001:9001"
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: ${STORAGE_USER:-admin}
       MINIO_ROOT_PASSWORD: ${STORAGE_PASSWORD:-password123}
@@ -64,7 +64,7 @@ services:
       dockerfile: apps/api-gateway/Dockerfile
     container_name: casashopping-gateway
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
     environment:
       - PORT=3000
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
@@ -112,7 +112,7 @@ services:
       dockerfile: apps/auth/Dockerfile
     container_name: casashopping-auth
     ports:
-      - "127.0.0.1:3003:3003"
+      - "3003:3003"
     environment:
       - PORT=3003
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
@@ -148,7 +148,7 @@ services:
       dockerfile: apps/users/Dockerfile
     container_name: casashopping-users
     ports:
-      - "127.0.0.1:3004:3004"
+      - "3004:3004"
     environment:
       - PORT=3004
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
@@ -178,7 +178,7 @@ services:
       dockerfile: apps/storage/Dockerfile
     container_name: casashopping-storage-service
     ports:
-      - "127.0.0.1:3007:3007"
+      - "3007:3007"
     environment:
       - PORT=3007
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
@@ -217,7 +217,7 @@ services:
         - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
     container_name: casashopping-web
     ports:
-      - "127.0.0.1:3001:3001"
+      - "3001:3001"
     environment:
       - PORT=3001
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
@@ -246,7 +246,7 @@ services:
         - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
     container_name: casashopping-admin
     ports:
-      - "127.0.0.1:3002:3002"
+      - "3002:3002"
     environment:
       - PORT=3002
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
@@ -269,7 +269,7 @@ services:
       dockerfile: apps/stores/Dockerfile
     container_name: casashopping-stores
     ports:
-      - "127.0.0.1:3005:3005"
+      - "3005:3005"
     environment:
       - PORT=3005
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
@@ -304,7 +304,7 @@ services:
       dockerfile: apps/products/Dockerfile
     container_name: casashopping-products
     ports:
-      - "127.0.0.1:3006:3006"
+      - "3006:3006"
     environment:
       - PORT=3006
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
