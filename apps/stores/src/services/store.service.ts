@@ -194,9 +194,12 @@ export class StoreService {
       data: updateData,
     });
 
-    // Cleanup old image if changed
+    // Cleanup old image if changed or removed
+    // We check if data.logoImage is explicitly set (meaning it's part of the update)
+    // and if it's different from the existing one.
+    // If data.logoImage is "" (empty string), it means removal.
     if (
-      data.logoImage &&
+      data.logoImage !== undefined &&
       existingStore.logoImage &&
       data.logoImage !== existingStore.logoImage
     ) {

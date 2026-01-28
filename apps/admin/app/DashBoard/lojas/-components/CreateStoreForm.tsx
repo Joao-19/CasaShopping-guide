@@ -38,6 +38,7 @@ interface CreateStoreFormContentProps {
         setYoutube: (v: string) => void;
         setWhatsapp: (v: string) => void;
         setImage: (v: File) => void;
+        onRemoveImage?: () => void;
     };
     loading: boolean;
     onClose: () => void;
@@ -65,12 +66,27 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
 
     return (
         <div className="">
-            <ImageUpload
-                variant="profile"
-                label="Logo da Loja"
-                onImageSelect={handleImageSelect}
-                currentImage={data.currentImageUrl}
-            />
+            <div className="relative w-fit mx-auto">
+                <ImageUpload
+                    variant="profile"
+                    label="Logo da Loja"
+                    onImageSelect={handleImageSelect}
+                    currentImage={data.currentImageUrl}
+                />
+                {handlers.onRemoveImage && data.currentImageUrl && (
+                    <button
+                        type="button"
+                        onClick={handlers.onRemoveImage}
+                        className="absolute top-0 right-0 -mr-2 -mt-2 p-1.5 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-full transition-colors shadow-sm"
+                        title="Remover logo"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                        </svg>
+                    </button>
+                )}
+            </div>
 
             {/* Nome da Loja */}
             <BaseInput
@@ -239,6 +255,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
     const [youtubeLink, setYoutube] = useState(initialData?.youtubeLink || '');
     const [whatsapp, setWhatsapp] = useState(initialData?.whatsapp ? formatPhone(initialData.whatsapp) : '');
     const [image, setImage] = useState<File | null>(null);
+    const [imageRemoved, setImageRemoved] = useState(false);
     const { uploadImage, uploading: uploadingImage, error: uploadError } = useImageUpload();
 
 
@@ -266,6 +283,11 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 // If you want to make it required, uncomment below:
                 // toast.warning('Por favor, adicione uma imagem para a loja.');
                 // return;
+            }
+
+            // If explicitly removed and not replaced, set to empty string
+            if (imageRemoved && !image) {
+                imageKey = '';
             }
 
             const submissionData: CreateStoreDto = {
@@ -322,7 +344,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                         instagramLink,
                         youtubeLink,
                         whatsapp,
-                        currentImageUrl: initialData?.logoImage || undefined
+                        currentImageUrl: imageRemoved ? undefined : (image ? URL.createObjectURL(image) : (initialData?.logoImage || undefined))
                     }}
                     handlers={{
                         setName,
@@ -332,8 +354,15 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                         setFacebook,
                         setInstagram,
                         setYoutube,
-                        setImage,
                         setWhatsapp,
+                        setImage: (file: File) => {
+                            setImage(file);
+                            setImageRemoved(false);
+                        },
+                        onRemoveImage: () => {
+                            setImage(null);
+                            setImageRemoved(true);
+                        }
                     }}
                     loading={loading || uploadingImage}
                     onClose={onClose}

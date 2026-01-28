@@ -23,6 +23,10 @@ export function ImageUpload({
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    React.useEffect(() => {
+        setPreview(currentImage || null);
+    }, [currentImage]);
+
     const handleFile = (file: File) => {
         const isImageFile = file.type.startsWith('image/');
         const isVideoFile = file.type.startsWith('video/');
