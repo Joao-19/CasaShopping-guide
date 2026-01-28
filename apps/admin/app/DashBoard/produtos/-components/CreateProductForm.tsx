@@ -374,7 +374,7 @@ export function CreateProductForm({
         e.preventDefault();
 
         if (images.length === 0) {
-            alert("Adicione pelo menos uma imagem"); // Simple validation
+            toast.warning("Adicione pelo menos uma imagem");
             return;
         }
 
