@@ -63,16 +63,16 @@ export class ProductService {
   }
 
   private transformProduct(product: any): any {
+    const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
+    const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
+
+    let baseUrl = publicEndpoint
+      ? `${publicEndpoint}/${bucketName}`
+      : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+
+    const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+
     if (product.images) {
-      const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
-      const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
-
-      let baseUrl = publicEndpoint
-        ? `${publicEndpoint}/${bucketName}`
-        : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
-
-      const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-
       product.images = product.images.map((img: any) => {
         if (!img.path.startsWith("http")) {
           const cleanKey = img.path.startsWith("/")
@@ -85,6 +85,18 @@ export class ProductService {
       // Sort by index
       product.images.sort((a: any, b: any) => a.index - b.index);
     }
+
+    if (
+      product.store &&
+      product.store.logoImage &&
+      !product.store.logoImage.startsWith("http")
+    ) {
+      const cleanKey = product.store.logoImage.startsWith("/")
+        ? product.store.logoImage.slice(1)
+        : product.store.logoImage;
+      product.store.logoImage = `${cleanBase}/${cleanKey}`;
+    }
+
     if (product.tags && typeof product.tags === "string") {
       product.tags = product.tags.split(",").map((tag: string) => tag.trim());
     }
