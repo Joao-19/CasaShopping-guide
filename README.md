@@ -175,18 +175,69 @@ casashopping-guide/
 
 ## 🔐 Variáveis de Ambiente
 
-Consulte os arquivos `.env.example` em cada diretório para ver as variáveis necessárias. As principais são:
+O arquivo `.env` é fundamental para a configuração dos serviços. Abaixo está a descrição detalhada de cada variável presente no `.env.example`:
 
-| Variável                | Descrição                                       |
-| ----------------------- | ----------------------------------------------- |
-| `DATABASE_URL`          | String de conexão do PostgreSQL                 |
-| `JWT_SECRET`            | Secret para assinatura de tokens JWT            |
-| `MINIO_PUBLIC_ENDPOINT` | Endpoint público do MinIO/S3                    |
-| `NEXT_PUBLIC_API_URL`   | URL do API Gateway para os frontends            |
-| `WEB_BASE_PATH`         | Base path do frontend web (ex: `/casashopping`) |
-| `ADMIN_BASE_PATH`       | Base path do painel admin (ex: `/admin`)        |
-| `NEXT_PUBLIC_BASE_PATH` | Base path público para redirects no client-side |
-| `CORS_ORIGIN`           | Origens permitidas para CORS                    |
+### 🌐 Configuração de Rede e CORS
+
+| Variável              | Descrição                                                               | Exemplo                                       |
+| :-------------------- | :---------------------------------------------------------------------- | :-------------------------------------------- |
+| `CORS_ORIGIN`         | Lista de origens permitidas para acessar a API (separadas por vírgula). | `http://localhost:3000,http://localhost:3001` |
+| `NEXT_PUBLIC_API_URL` | URL pública do API Gateway usada pelos frontends (Web e Admin).         | `http://localhost:3000`                       |
+| `NEXT_PUBLIC_WEB_URL` | URL pública da aplicação Web (Storefront).                              | `http://localhost:3001`                       |
+| `INTERNAL_API_URL`    | URL interna para comunicação entre containers Docker.                   | `http://api-gateway:3000`                     |
+
+### 🐳 Configuração do Banco de Dados (Docker)
+
+| Variável           | Descrição                                | Exemplo        |
+| :----------------- | :--------------------------------------- | :------------- |
+| `DB_USER`          | Usuário do PostgreSQL criado via Docker. | `admin`        |
+| `DB_PASSWORD`      | Senha do PostgreSQL.                     | `admin123`     |
+| `DB_NAME`          | Nome do banco de dados principal.        | `casashopping` |
+| `STORAGE_USER`     | (Reservado para uso futuro).             | `admin`        |
+| `STORAGE_PASSWORD` | (Reservado para uso futuro).             | `password123`  |
+
+### 🗄️ Prisma / Banco de Dados
+
+| Variável       | Descrição                                     | Exemplo                                         |
+| :------------- | :-------------------------------------------- | :---------------------------------------------- |
+| `DATABASE_URL` | String de conexão completa para o Prisma ORM. | `postgresql://admin:admin123@localhost:5432...` |
+
+### 🔑 Autenticação (JWT)
+
+| Variável                   | Descrição                                                         | Exemplo                   |
+| :------------------------- | :---------------------------------------------------------------- | :------------------------ |
+| `JWT_SECRET`               | Chave secreta para assinar Access Tokens. **Altere em produção.** | `changeme_secret`         |
+| `JWT_EXPIRES_IN`           | Tempo de expiração do Access Token.                               | `15m`                     |
+| `REFRESH_TOKEN_SECRET`     | Chave secreta para assinar Refresh Tokens.                        | `changeme_refresh_secret` |
+| `REFRESH_TOKEN_EXPIRES_IN` | Tempo de expiração do Refresh Token.                              | `7d`                      |
+
+### 👤 Credenciais do Admin Inicial
+
+| Variável         | Descrição                                              | Exemplo                   |
+| :--------------- | :----------------------------------------------------- | :------------------------ |
+| `ADMIN_EMAIL`    | Email do primeiro administrador criado ao rodar seeds. | `admin@casashopping.com`  |
+| `ADMIN_PASSWORD` | Senha inicial do administrador.                        | `changeme_admin_password` |
+| `ADMIN_NAME`     | Nome de exibição do administrador.                     | `Admin`                   |
+
+### ☁️ Armazenamento (MinIO / S3)
+
+| Variável                  | Descrição                                     | Exemplo                              |
+| :------------------------ | :-------------------------------------------- | :----------------------------------- |
+| `MINIO_ROOT_USER`         | Usuário raiz do servidor MinIO.               | `admin`                              |
+| `MINIO_ROOT_PASSWORD`     | Senha raiz do servidor MinIO.                 | `password123`                        |
+| `MINIO_BUCKET_NAME`       | Nome do bucket S3 onde arquivos serão salvos. | `casashopping`                       |
+| `MINIO_PUBLIC_ENDPOINT`   | URL acessível publicamente (navegador).       | `http://localhost:9000`              |
+| `MINIO_INTERNAL_ENDPOINT` | URL interna (Docker) para upload via backend. | `http://localhost:9000`              |
+| `STORAGE_URL`             | URL base para construir links de imagens.     | `http://localhost:9000/casashopping` |
+
+### 🛣️ Caminhos e Rotas
+
+| Variável                | Descrição                                        | Exemplo                 |
+| :---------------------- | :----------------------------------------------- | :---------------------- |
+| `WEB_BASE_PATH`         | Prefixo da URL para o aplicativo Web (Loja).     | `/casashopping`         |
+| `ADMIN_BASE_PATH`       | Prefixo da URL para o Painel Administrativo.     | `/admin`                |
+| `NEXT_PUBLIC_BASE_PATH` | Base path público para redirects no client-side. | `""` (vazio) ou `/base` |
+| `NEXT_PUBLIC_ADMIN_URL` | URL pública do Admin (usada no Web App).         | `http://localhost:3002` |
 
 ---
 
