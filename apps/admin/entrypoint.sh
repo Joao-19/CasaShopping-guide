@@ -20,7 +20,7 @@ replace_env() {
 
 echo "Starting deployment script for Admin App..."
 
-TARGET_DIR="/app/.next"
+TARGET_DIR="/app/apps/admin"
 
 echo "Replacing environment variables in $TARGET_DIR..."
 

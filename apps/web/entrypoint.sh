@@ -20,7 +20,8 @@ replace_env() {
 
 echo "Starting deployment script for Web App..."
 
-TARGET_DIR="/app/.next"
+# Next.js standalone output puts things in apps/web/.next
+TARGET_DIR="/app/apps/web"
 
 echo "Replacing environment variables in $TARGET_DIR..."
 
