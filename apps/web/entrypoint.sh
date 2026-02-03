@@ -20,9 +20,6 @@ replace_env() {
 
 echo "Starting deployment script for Web App..."
 
-# List of files to search.
-# We mostly care about static JS files and the server.js/server start files if they contain leaked constants.
-# Next.js standalone output puts things in .next/server and .next/static
 TARGET_DIR="/app/.next"
 
 echo "Replacing environment variables in $TARGET_DIR..."
@@ -38,5 +35,4 @@ done
 echo "Environment variable replacement complete."
 echo "Starting Next.js..."
 
-# Exec the passed command (usually "node apps/web/server.js")
 exec "$@"
