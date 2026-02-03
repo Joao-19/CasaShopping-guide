@@ -20,15 +20,15 @@ COPY --from=installer /app/ .
 COPY --from=turbo-builder /app/out/full/ .
 
 ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=APP_NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_API_HOST
-ENV NEXT_PUBLIC_API_HOST=$NEXT_PUBLIC_API_HOST
+ENV NEXT_PUBLIC_API_HOST=APP_NEXT_PUBLIC_API_HOST
 ARG NEXT_PUBLIC_STORAGE_URL
-ENV NEXT_PUBLIC_STORAGE_URL=$NEXT_PUBLIC_STORAGE_URL
+ENV NEXT_PUBLIC_STORAGE_URL=APP_NEXT_PUBLIC_STORAGE_URL
 ARG BASE_PATH
 ENV BASE_PATH=$BASE_PATH
 ARG NEXT_PUBLIC_BASE_PATH
-ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
+ENV NEXT_PUBLIC_BASE_PATH=APP_NEXT_PUBLIC_BASE_PATH
 
 RUN corepack enable
 RUN npm install -g turbo
@@ -44,4 +44,9 @@ COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/public ./apps/web/public
 
+# Copy entrypoint script
+COPY --chown=nextjs:nodejs apps/web/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
 CMD ["node", "apps/web/server.js"]
