@@ -26,6 +26,10 @@ services:
     build:
       context: .
       dockerfile: apps/migration/Dockerfile
+    image: joaovvv/casashopping-migration:latest
+    container_name: casashopping-migration
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
     depends_on:
@@ -63,6 +67,8 @@ services:
       context: .
       dockerfile: apps/api-gateway/Dockerfile
     container_name: casashopping-gateway
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3000:3000"
     environment:
@@ -111,6 +117,8 @@ services:
       context: .
       dockerfile: apps/auth/Dockerfile
     container_name: casashopping-auth
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3003:3003"
     environment:
@@ -147,6 +155,8 @@ services:
       context: .
       dockerfile: apps/users/Dockerfile
     container_name: casashopping-users
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3004:3004"
     environment:
@@ -177,6 +187,8 @@ services:
       context: .
       dockerfile: apps/storage/Dockerfile
     container_name: casashopping-storage-service
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3007:3007"
     environment:
@@ -216,6 +228,8 @@ services:
         - BASE_PATH=${WEB_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
     container_name: casashopping-web
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3001:3001"
     environment:
@@ -245,6 +259,8 @@ services:
         - BASE_PATH=${ADMIN_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
     container_name: casashopping-admin
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3002:3002"
     environment:
@@ -268,6 +284,8 @@ services:
       context: .
       dockerfile: apps/stores/Dockerfile
     container_name: casashopping-stores
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3005:3005"
     environment:
@@ -303,6 +321,8 @@ services:
       context: .
       dockerfile: apps/products/Dockerfile
     container_name: casashopping-products
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3006:3006"
     environment:
@@ -335,6 +355,8 @@ services:
   watchtower:
     image: containrrr/watchtower
     container_name: casashopping-watchtower
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -343,7 +365,7 @@ services:
       # Auth for private repos
       - REPO_USER=${DOCKERHUB_USER}
       - REPO_PASS=${DOCKERHUB_PASSWORD}
-    command: --interval 30 --cleanup
+    command: --interval 30 --cleanup --label-enable
     networks:
       - casashopping-net
     restart: unless-stopped
