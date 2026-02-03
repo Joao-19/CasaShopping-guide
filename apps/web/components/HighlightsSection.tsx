@@ -71,12 +71,14 @@ export function HighlightsSection() {
                 .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
             showStorePhone: product.showStorePhone,
             storePhone: product.store?.phone,
+            storeLogo: product.store?.logoImage,
             storeSite: product.store?.site,
             storeInstagram: product.store?.instagramLink,
             storeFacebook: product.store?.facebookLink,
             storeYoutube: product.store?.youtubeLink,
             whatsapp: product.store?.whatsapp,
             storeAddress: product.store?.address,
+            tags: Array.isArray(product.tags) ? product.tags : (typeof product.tags === 'string' ? product.tags.split(',') : []),
         };
         showPopup(<ProductDetailsCard product={productDetails} />);
     };
