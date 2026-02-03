@@ -88,6 +88,7 @@ export function ProductListingDialog({ initialCategory }: ProductListingDialogPr
         storeYoutube: p.store?.youtubeLink,
         whatsapp: p.store?.whatsapp,
         storeAddress: p.store?.address,
+        tags: Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? (p.tags as string).split(',') : []),
     }))) || [];
 
     const handleProductClick = (product: any) => {

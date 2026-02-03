@@ -79,7 +79,15 @@ export function HeroSection() {
             description: product.description,
             images: product.images?.sort((a: any, b: any) => a.index - b.index)
                 .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
-            storeAddress: product.store?.address
+            storePhone: product.store?.phone,
+            storeLogo: product.store?.logoImage,
+            storeSite: product.store?.site,
+            storeInstagram: product.store?.instagramLink,
+            storeFacebook: product.store?.facebookLink,
+            storeYoutube: product.store?.youtubeLink,
+            whatsapp: product.store?.whatsapp,
+            storeAddress: product.store?.address,
+            tags: Array.isArray(product.tags) ? product.tags : (typeof product.tags === 'string' ? (product.tags as string).split(',') : []),
         };
 
         showPopup(<ProductDetailsCard product={formattedProduct} />);
