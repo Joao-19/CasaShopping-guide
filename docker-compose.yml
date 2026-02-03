@@ -338,7 +338,11 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
+      # Fix API version mismatch
       - DOCKER_API_VERSION=1.44
+      # Auth for private repos
+      - REPO_USER=${DOCKERHUB_USER}
+      - REPO_PASS=${DOCKERHUB_PASSWORD}
     command: --interval 30 --cleanup
     networks:
       - casashopping-net
