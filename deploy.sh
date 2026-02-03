@@ -11,11 +11,9 @@ NC='\033[0m' # No Color
 echo -e "${GREEN}Starting deployment process...${NC}"
 
 # 1. Check if logged in to DockerHub
-if ! docker info | grep -q "Username"; then
-    echo -e "${RED}Error: You are not logged in to DockerHub.${NC}"
-    echo "Please run 'docker login' first."
-    exit 1
-fi
+# 1. (Optional) Check login - skipping explicit check to avoid false negatives.
+# If not logged in, 'docker compose push' will fail later, which is fine.
+echo "Skipping explicit login check..."
 
 echo -e "${GREEN}Logged in to DockerHub. Building images...${NC}"
 
