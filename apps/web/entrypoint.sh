@@ -26,7 +26,10 @@ TARGET_DIR="/app/apps/web"
 echo "Replacing environment variables in $TARGET_DIR..."
 
 # Recursively find all files in the target directory
-find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" \) | while read -r file; do
+# Recursively find all files in the target directory, excluding node_modules
+echo "Searching in $TARGET_DIR..."
+
+find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -o -name "*.css" \) -not -path "*/node_modules/*" | while read -r file; do
     replace_env "$file" "NEXT_PUBLIC_API_URL"
     replace_env "$file" "NEXT_PUBLIC_API_HOST"
     replace_env "$file" "NEXT_PUBLIC_STORAGE_URL"
