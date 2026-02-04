@@ -48,5 +48,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 COPY --chown=nextjs:nodejs apps/web/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
+# NUCLEAR OPTION: Ensure EVERYTHING in /app is owned by nextjs
+# This guarantees that 'sed' can create temporary files in any subdirectory
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["node", "apps/web/server.js"]
