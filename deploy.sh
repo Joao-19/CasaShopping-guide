@@ -44,14 +44,17 @@ echo -e "${GREEN}All images pushed successfully!${NC}"
 echo -e "\n${GREEN}== Step 3: Remote Deployment Change ==${NC}"
 echo -e "Triggering Watchtower on server ${SERVER_URL:-http://172.245.190.165:3000}..."
 
-# Load env file to get the token (optional, or rely on user having it defined)
+# Load specific variables needed for the script (TOKEN and URL)
+# We avoid exporting ALL variables to prevent corrupting the Docker build environment with bad parsing
 if [ -f .env ]; then
-    export $(cat .env | grep -v '#' | awk '/=/ {print $1}')
+    # Safely extract variables without exporting everything
+    TOKEN_FROM_ENV=$(grep "^DOCKERHUB_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+    URL_FROM_ENV=$(grep "^SERVER_URL=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
 fi
 
-# Use PROVIDED token or fallback to common variables
-TOKEN="${DOCKERHUB_PASSWORD}"
-SERVER_URL="${SERVER_URL:-http://172.245.190.165:3000}"
+# Use PROVIDED token or fallback to .env or empty
+TOKEN="${DOCKERHUB_PASSWORD:-$TOKEN_FROM_ENV}"
+SERVER_URL="${SERVER_URL:-${URL_FROM_ENV:-http://172.245.190.165:3000}}"
 
 if [ -z "$TOKEN" ]; then
     echo -e "${RED}[!] Warning: DOCKERHUB_PASSWORD not set.${NC}"

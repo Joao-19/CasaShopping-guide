@@ -36,8 +36,9 @@ export class DeployController {
 
     try {
       // Internal call to Watchtower HTTP API
-      // Using the service name 'casashopping-watchtower' from docker-compose
-      const watchtowerUrl = "http://casashopping-watchtower:8080/v1/update";
+      // Using the service name 'watchtower' from docker-compose service definition
+      // This is more reliable for Docker internal DNS than container name
+      const watchtowerUrl = "http://watchtower:8080/v1/update";
 
       // Pass the token in the header as required by Watchtower
       const response = await axios.post(
