@@ -30,7 +30,8 @@ echo -e "${GREEN}Build successful. Pushing images to DockerHub...${NC}"
 # 3. Push all services
 # Explicitly pushing services that have 'image' defined in docker-compose.yml
 # Note: 'docker compose push' pushes services that have both 'build' and 'image' keys.
-docker compose push
+# 3. Push only OUR services (skipping official images)
+docker compose push web admin api-gateway auth-service users-service stores-service products-service storage-service db-migration
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Push failed! Please check your network or DockerHub permissions.${NC}"
