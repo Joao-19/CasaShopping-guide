@@ -17,8 +17,8 @@ echo "Skipping explicit login check..."
 
 echo -e "${GREEN}Logged in to DockerHub. Building images...${NC}"
 
-# 2. Build Updated Images (No Cache)
-docker compose build --no-cache
+# 2. Build Updated Images
+docker compose build
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Build failed! Aborting deployment.${NC}"
