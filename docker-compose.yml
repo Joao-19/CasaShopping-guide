@@ -239,6 +239,7 @@ services:
       - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
       - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
       - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
+      - BASE_PATH=${WEB_BASE_PATH:-}
       - INTERNAL_API_URL=http://api-gateway:3000
       - HOSTNAME=0.0.0.0
     depends_on:
