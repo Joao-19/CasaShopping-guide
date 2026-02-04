@@ -18,7 +18,10 @@ echo "Skipping explicit login check..."
 echo -e "${GREEN}Logged in to DockerHub. Building images...${NC}"
 
 # 2. Build Updated Images
-docker compose build
+# FORCE WEB_BASE_PATH="" (Root) and ADMIN_BASE_PATH="/admin"
+# This guarantees that the built images always match the production URL structure,
+# ignoring any local environment pollution.
+WEB_BASE_PATH="" ADMIN_BASE_PATH="/admin" docker compose build
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Build failed! Aborting deployment.${NC}"
