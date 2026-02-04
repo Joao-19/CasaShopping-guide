@@ -38,4 +38,37 @@ if [ $? -ne 0 ]; then
 fi
 
 echo -e "${GREEN}All images pushed successfully!${NC}"
-echo -e "${GREEN}Watchtower on the server should detect changes within 30 seconds.${NC}"
+echo -e "${GREEN}All images pushed successfully!${NC}"
+
+# 4. Trigger Watchtower Update via API Gateway
+echo -e "${GREEN}Triggering remote update on server...${NC}"
+
+# Load env file to get the token (optional, or rely on user having it defined)
+if [ -f .env ]; then
+    export $(cat .env | grep -v '#' | awk '/=/ {print $1}')
+fi
+
+# Use PROVIDED token or fallback to common variables
+TOKEN="${DOCKERHUB_PASSWORD}"
+SERVER_URL="${SERVER_URL:-http://172.245.190.165:3000}"
+
+if [ -z "$TOKEN" ]; then
+    echo -e "${RED}Warning: DOCKERHUB_PASSWORD not set. Cannot auth with Watchtower.${NC}"
+else
+    # Making the URL dynamic - user can override SERVER_URL=http://... ./deploy.sh
+    RESPONSE=$(curl -s -X POST "$SERVER_URL/deploy/trigger" \
+        -H "Authorization: Bearer $TOKEN" \
+        -w "%{http_code}")
+    
+    HTTP_CODE=${RESPONSE: -3}
+    CONTENT=${RESPONSE:0:${#RESPONSE}-3}
+
+    if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "201" ]; then
+         echo -e "${GREEN}Success! Watchtower update triggered.${NC}"
+         echo "$CONTENT"
+    else
+         echo -e "${RED}Failed to trigger update. HTTP Code: $HTTP_CODE${NC}"
+         echo "$CONTENT"
+    fi
+fi
+

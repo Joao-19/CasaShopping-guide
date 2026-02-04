@@ -10,6 +10,7 @@ import { HttpModule } from "@nestjs/axios";
 import { PassportModule } from "@nestjs/passport";
 
 import { HealthController } from "./controllers/health.controller";
+import { DeployController } from "./controllers/deploy.controller";
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { HealthController } from "./controllers/health.controller";
     HttpModule,
     PassportModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, DeployController],
   providers: [],
 })
 export class AppModule {}

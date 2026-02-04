@@ -7,14 +7,13 @@ replace_env() {
     var_name=$2
     var_value=$(printenv "$var_name")
 
-    if [ -n "$var_value" ]; then
-        # Check if the placeholder exists in the file before trying to replace
-        if grep -q "APP_$var_name" "$file"; then
-            echo "Replacing APP_$var_name with $var_value in $file"
-            # Use sed to replace the placeholder with the actual value
-            # We use a different delimiter (|) to handle URLs containing slashes
-            sed -i "s|APP_$var_name|$var_value|g" "$file"
-        fi
+    # Always try to replace, even if value is empty (to clear placeholders like BASE_PATH)
+    # Check if the placeholder exists in the file before trying to replace
+    if grep -q "APP_$var_name" "$file"; then
+        echo "Replacing APP_$var_name with '$var_value' in $file"
+        # Use sed to replace the placeholder with the actual value (or empty string)
+        # We use a different delimiter (|) to handle URLs containing slashes
+        sed -i "s|APP_$var_name|$var_value|g" "$file"
     fi
 }
 

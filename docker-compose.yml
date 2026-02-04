@@ -82,6 +82,7 @@ services:
       - PRODUCTS_SERVICE_URL=http://products-service:3006
       - STORAGE_SERVICE_URL=http://storage-service:3007
       - JWT_SECRET=${JWT_SECRET}
+      - DOCKERHUB_PASSWORD=${DOCKERHUB_PASSWORD}
     depends_on:
       database:
         condition: service_started
@@ -359,13 +360,18 @@ services:
       - com.centurylinklabs.watchtower.enable=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8080:8080"
     environment:
       # Fix API version mismatch
       - DOCKER_API_VERSION=1.44
       # Auth for private repos
       - REPO_USER=${DOCKERHUB_USER}
       - REPO_PASS=${DOCKERHUB_PASSWORD}
-    command: --interval 30 --cleanup --label-enable
+      # HTTP API Mode
+      - WATCHTOWER_HTTP_API_UPDATE=true
+      - WATCHTOWER_HTTP_API_TOKEN=${DOCKERHUB_PASSWORD}
+    command: --cleanup --label-enable --http-api-periodic-polls
     networks:
       - casashopping-net
     restart: unless-stopped
