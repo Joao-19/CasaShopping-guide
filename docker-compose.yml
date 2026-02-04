@@ -371,7 +371,7 @@ services:
       # HTTP API Mode
       - WATCHTOWER_HTTP_API_UPDATE=true
       - WATCHTOWER_HTTP_API_TOKEN=${DOCKERHUB_PASSWORD}
-    command: --cleanup --label-enable --http-api-periodic-polls
+    command: --cleanup --label-enable --http-api-periodic-polls --include-stopped --revive-stopped
     networks:
       - casashopping-net
     restart: unless-stopped
