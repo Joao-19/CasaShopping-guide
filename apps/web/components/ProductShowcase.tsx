@@ -58,12 +58,14 @@ export function ProductShowcase({ title, tags, category, viewAllLink = "#" }: Pr
             .map((img) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
         showStorePhone: p.showStorePhone,
         storePhone: p.store?.phone,
+        storeLogo: p.store?.logoImage,
         storeSite: p.store?.site,
         storeInstagram: p.store?.instagramLink,
         storeFacebook: p.store?.facebookLink,
         storeYoutube: p.store?.youtubeLink,
         whatsapp: p.store?.whatsapp,
         storeAddress: p.store?.address,
+        tags: Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? (p.tags as string).split(',') : []),
     }))) || [];
 
     const products = baseProducts;
