@@ -48,6 +48,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 COPY --chown=nextjs:nodejs apps/web/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
+# Fix permissions for the specific web app directory to allow sed logic to work
+RUN chown -R nextjs:nodejs /app/apps/web
+
 USER nextjs
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["node", "apps/web/server.js"]
