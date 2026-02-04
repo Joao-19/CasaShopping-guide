@@ -36,20 +36,13 @@ RUN turbo run build --filter=web
 
 FROM node:20-alpine AS runner
 WORKDIR /app
+
+# Install su-exec (needs root)
+RUN apk add --no-cache su-exec
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-USER nextjs
-
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
-
-# Copy entrypoint script
-COPY --chown=nextjs:nodejs apps/web/entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
-
-# Install su-exec to allow dropping privileges in entrypoint
-RUN apk add --no-cache su-exec
+# DO NOT switch to USER nextjs here. We stay as root.
 
 # We start as root to allow entrypoint to modify files, then switch to nextjs in entrypoint
 ENTRYPOINT ["./entrypoint.sh"]

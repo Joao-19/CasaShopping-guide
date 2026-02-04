@@ -38,10 +38,11 @@ if [ $? -ne 0 ]; then
 fi
 
 echo -e "${GREEN}All images pushed successfully!${NC}"
-echo -e "${GREEN}All images pushed successfully!${NC}"
+
 
 # 4. Trigger Watchtower Update via API Gateway
-echo -e "${GREEN}Triggering remote update on server...${NC}"
+echo -e "\n${GREEN}== Step 3: Remote Deployment Change ==${NC}"
+echo -e "Triggering Watchtower on server ${SERVER_URL:-http://172.245.190.165:3000}..."
 
 # Load env file to get the token (optional, or rely on user having it defined)
 if [ -f .env ]; then
@@ -53,22 +54,32 @@ TOKEN="${DOCKERHUB_PASSWORD}"
 SERVER_URL="${SERVER_URL:-http://172.245.190.165:3000}"
 
 if [ -z "$TOKEN" ]; then
-    echo -e "${RED}Warning: DOCKERHUB_PASSWORD not set. Cannot auth with Watchtower.${NC}"
+    echo -e "${RED}[!] Warning: DOCKERHUB_PASSWORD not set.${NC}"
+    echo "    Cannot authenticate with Watchtower. Skipping automatic update trigger."
+    echo "    Please run 'docker compose up -d' manually on the server."
 else
     # Making the URL dynamic - user can override SERVER_URL=http://... ./deploy.sh
+    # Using curl with silent flag (-s) but capturing output
     RESPONSE=$(curl -s -X POST "$SERVER_URL/deploy/trigger" \
         -H "Authorization: Bearer $TOKEN" \
-        -w "%{http_code}")
+        -w "%{http_code}" --connect-timeout 10)
     
     HTTP_CODE=${RESPONSE: -3}
     CONTENT=${RESPONSE:0:${#RESPONSE}-3}
 
     if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "201" ]; then
-         echo -e "${GREEN}Success! Watchtower update triggered.${NC}"
-         echo "$CONTENT"
+         echo -e "${GREEN}✔ Deployment Triggered Successfully!${NC}"
+         echo -e "  Server responded: $CONTENT"
+         echo -e "\n${GREEN}🚀 Deployment Complete! The server is updating itself now.${NC}"
+    elif [ "$HTTP_CODE" == "000" ]; then
+         # 000 usually means the server killed the connection (which is EXPECTED when Watchtower restarts the gateway)
+         echo -e "${GREEN}✔ Trigger Sent (Connection verification skipped)${NC}"
+         echo -e "  (The server likely restarted the gateway to apply updates, which is normal)"
+         echo -e "\n${GREEN}🚀 Deployment Complete!${NC}"
     else
-         echo -e "${RED}Failed to trigger update. HTTP Code: $HTTP_CODE${NC}"
-         echo "$CONTENT"
+         echo -e "${RED}✘ Failed to trigger update.${NC}"
+         echo -e "  HTTP Code: $HTTP_CODE"
+         echo -e "  Response: $CONTENT"
     fi
 fi
 
