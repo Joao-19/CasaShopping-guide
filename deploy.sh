@@ -15,13 +15,19 @@ echo -e "${GREEN}Starting deployment process...${NC}"
 # If not logged in, 'docker compose push' will fail later, which is fine.
 echo "Skipping explicit login check..."
 
+# Capture optional arguments (like --no-cache)
+BUILD_ARGS="$@"
+
 echo -e "${GREEN}Logged in to DockerHub. Building images...${NC}"
+if [ -n "$BUILD_ARGS" ]; then
+    echo -e "${GREEN}Build arguments: $BUILD_ARGS${NC}"
+fi
 
 # 2. Build Updated Images
 # FORCE WEB_BASE_PATH="" (Root) and ADMIN_BASE_PATH="/admin"
 # This guarantees that the built images always match the production URL structure,
 # ignoring any local environment pollution.
-WEB_BASE_PATH="" ADMIN_BASE_PATH="/admin" docker compose build
+WEB_BASE_PATH="" ADMIN_BASE_PATH="/admin" docker compose build $BUILD_ARGS
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Build failed! Aborting deployment.${NC}"
