@@ -81,12 +81,13 @@ echo -e "Triggering Watchtower on server ${SERVER_URL:-http://172.245.190.165:30
 
 # Load specific variables needed for the script (TOKEN and URL)
 # We avoid exporting ALL variables to prevent corrupting the Docker build environment with bad parsing
-# Use PROVIDED token or fallback to .env or empty
-TOKEN="${DOCKERHUB_PASSWORD:-$TOKEN_FROM_ENV}"
+# Use PROVIDED DEPLOY_PASSWORD or fallback to reading from .env
+DEPLOY_TOKEN_FROM_ENV=$(grep "^DEPLOY_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+TOKEN="${DEPLOY_PASSWORD:-$DEPLOY_TOKEN_FROM_ENV}"
 SERVER_URL="${SERVER_URL:-${URL_FROM_ENV:-http://172.245.190.165:3000}}"
 
 if [ -z "$TOKEN" ]; then
-    echo -e "${RED}[!] Warning: DOCKERHUB_PASSWORD not set.${NC}"
+    echo -e "${RED}[!] Warning: DEPLOY_PASSWORD not set.${NC}"
     echo "    Cannot authenticate with Watchtower. Skipping automatic update trigger."
     echo "    Please run 'docker compose up -d' manually on the server."
 else

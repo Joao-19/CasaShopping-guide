@@ -375,7 +375,7 @@ services:
       - REPO_PASS=${DOCKERHUB_PASSWORD}
       # HTTP API Mode
       - WATCHTOWER_HTTP_API_UPDATE=true
-      - WATCHTOWER_HTTP_API_TOKEN=${DOCKERHUB_PASSWORD}
+      - WATCHTOWER_HTTP_API_TOKEN=${DEPLOY_PASSWORD}
     command: --cleanup --label-enable --http-api-periodic-polls --include-stopped --revive-stopped
     networks:
       - casashopping-net
