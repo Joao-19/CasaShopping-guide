@@ -31,12 +31,7 @@ echo "Searching in $TARGET_DIR..."
 find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -o -name "*.css" \) -not -path "*/node_modules/*" | while read -r file; do
     # Dynamic replacement: Find all environment variables starting with NEXT_PUBLIC_
     # This enforces "Runtime Environment Priority" for ALL public variables automatically.
-    
-    echo "Debugging: Listing all NEXT_PUBLIC variables..."
-    env | grep '^NEXT_PUBLIC_' || echo "No NEXT_PUBLIC_ variables found!"
-
     for var in $(env | grep '^NEXT_PUBLIC_' | cut -d= -f1); do
-        echo "Processing variable: $var"
         replace_env "$file" "$var"
     done
 done

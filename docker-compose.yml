@@ -243,6 +243,7 @@ services:
       - BASE_PATH=${WEB_BASE_PATH:-}
       - INTERNAL_API_URL=http://api-gateway:3000
       - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
     depends_on:
       - api-gateway
     networks:
@@ -275,6 +276,7 @@ services:
       - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
       - JWT_SECRET=${JWT_SECRET:-changeme_secret}
       - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
     depends_on:
       - api-gateway
     networks:
