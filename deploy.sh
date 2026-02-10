@@ -27,7 +27,7 @@ fi
 # FORCE WEB_BASE_PATH="" (Root) and ADMIN_BASE_PATH="/admin"
 # This guarantees that the built images always match the production URL structure,
 # ignoring any local environment pollution.
-WEB_BASE_PATH="" ADMIN_BASE_PATH="/admin" docker compose build $BUILD_ARGS
+WEB_BASE_PATH="" ADMIN_BASE_PATH="/admin" NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID}" docker compose build $BUILD_ARGS
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Build failed! Aborting deployment.${NC}"

@@ -32,6 +32,7 @@ find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -
     replace_env "$file" "NEXT_PUBLIC_API_HOST"
     replace_env "$file" "NEXT_PUBLIC_WEB_URL"
     replace_env "$file" "NEXT_PUBLIC_BASE_PATH"
+    replace_env "$file" "NEXT_PUBLIC_GTM_ID"
 done
 
 echo "Environment variable replacement complete."
