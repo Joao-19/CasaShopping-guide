@@ -215,6 +215,7 @@ services:
         - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
         - BASE_PATH=${WEB_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
+        - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
     container_name: casashopping-web
     ports:
       - "3001:3001"
@@ -244,6 +245,7 @@ services:
         - NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-http://localhost:3001}
         - BASE_PATH=${ADMIN_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
+        - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
     container_name: casashopping-admin
     ports:
       - "3002:3002"
