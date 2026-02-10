@@ -33,4 +33,6 @@ export * from "./pagination";
 export * from "./components/drawer";
 export * from "./context/PopupContext";
 export * from "./components/GlobalPopup";
+export * from "./components/google-tag-manager";
 export * from "./lib/utils";
+

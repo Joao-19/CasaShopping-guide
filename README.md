@@ -239,6 +239,12 @@ O arquivo `.env` é fundamental para a configuração dos serviços. Abaixo est�
 | `NEXT_PUBLIC_BASE_PATH` | Base path público para redirects no client-side. | `""` (vazio) ou `/base` |
 | `NEXT_PUBLIC_ADMIN_URL` | URL pública do Admin (usada no Web App).         | `http://localhost:3002` |
 
+### 📈 Analytics & Marketing
+
+| Variável             | Descrição                              | Exemplo       |
+| :------------------- | :------------------------------------- | :------------ |
+| `NEXT_PUBLIC_GTM_ID` | ID do Container do Google Tag Manager. | `GTM-XXXXXXX` |
+
 ---
 
 ## 🌐 Deploy com Nginx (Reverse Proxy)
