@@ -28,6 +28,13 @@ echo "Replacing environment variables in $TARGET_DIR..."
 # Recursively find all files in the target directory, excluding node_modules
 echo "Searching in $TARGET_DIR..."
 
+# Emergency Fallback: If NEXT_PUBLIC_GTM_ID is missing or is the placeholder, use the known ID.
+# This prevents the "replace placeholder with placeholder" bug if server config is missing.
+if [ -z "$NEXT_PUBLIC_GTM_ID" ] || [ "$NEXT_PUBLIC_GTM_ID" = "APP_NEXT_PUBLIC_GTM_ID" ]; then
+    echo "Warning: NEXT_PUBLIC_GTM_ID not set or is placeholder. Using hardcoded fallback: GTM-5MH287L"
+    export NEXT_PUBLIC_GTM_ID="GTM-5MH287L"
+fi
+
 # Pre-calculate vars to avoid calling env 1000 times
 # Using 'env' and 'cut' to get variable names
 VARS=$(env | grep '^NEXT_PUBLIC_' | cut -d= -f1)
