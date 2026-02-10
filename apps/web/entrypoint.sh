@@ -28,12 +28,25 @@ echo "Replacing environment variables in $TARGET_DIR..."
 # Recursively find all files in the target directory, excluding node_modules
 echo "Searching in $TARGET_DIR..."
 
+# Pre-calculate vars to avoid calling env 1000 times
+# Using 'env' and 'cut' to get variable names
+VARS=$(env | grep '^NEXT_PUBLIC_' | cut -d= -f1)
+
+if [ -z "$VARS" ]; then
+    echo "No NEXT_PUBLIC_ variables found to replace."
+else
+    echo "Found variables to replace: $(echo "$VARS" | tr '\n' ' ')"
+fi
+
 find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -o -name "*.css" \) -not -path "*/node_modules/*" | while read -r file; do
     # Dynamic replacement: Find all environment variables starting with NEXT_PUBLIC_
     # This enforces "Runtime Environment Priority" for ALL public variables automatically.
-    for var in $(env | grep '^NEXT_PUBLIC_' | cut -d= -f1); do
-        replace_env "$file" "$var"
-    done
+    
+    if [ -n "$VARS" ]; then
+        for var in $VARS; do
+            replace_env "$file" "$var"
+        done
+    fi
 done
 
 echo "Environment variable replacement complete."
