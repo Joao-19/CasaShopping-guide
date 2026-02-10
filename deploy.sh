@@ -10,10 +10,24 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}Starting deployment process...${NC}"
 
-# 1. Check if logged in to DockerHub
-# 1. (Optional) Check login - skipping explicit check to avoid false negatives.
-# If not logged in, 'docker compose push' will fail later, which is fine.
-echo "Skipping explicit login check..."
+echo "Checking DockerHub login..."
+
+# Load variables if not already loaded (though we load them later, we need them now for login)
+if [ -f .env ]; then
+    DH_USER=$(grep "^DOCKERHUB_USER=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+    DH_PASS=$(grep "^DOCKERHUB_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+fi
+
+# Use env vars or fallback to loaded values
+DOCKERHUB_USER="${DOCKERHUB_USER:-$DH_USER}"
+DOCKERHUB_PASSWORD="${DOCKERHUB_PASSWORD:-$DH_PASS}"
+
+if [ -n "$DOCKERHUB_USER" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
+    echo "Attempting to log in to DockerHub as $DOCKERHUB_USER..."
+    echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
+else
+    echo "Skipping explicit login (DOCKERHUB_PASSWORD not found in .env). Assuming system is already logged in..."
+fi
 
 # Capture optional arguments (like --no-cache)
 BUILD_ARGS="$@"
