@@ -23,6 +23,17 @@ if [ -n "$BUILD_ARGS" ]; then
     echo -e "${GREEN}Build arguments: $BUILD_ARGS${NC}"
 fi
 
+# Load variables from .env if present (to support GTM_ID and others during build)
+if [ -f .env ]; then
+    # Safely extract variables without exporting everything
+    TOKEN_FROM_ENV=$(grep "^DOCKERHUB_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+    URL_FROM_ENV=$(grep "^SERVER_URL=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+    GTM_ID_FROM_ENV=$(grep "^NEXT_PUBLIC_GTM_ID=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+fi
+
+# Set GTM_ID from env if not already set
+NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID:-$GTM_ID_FROM_ENV}"
+
 # 2. Build Updated Images
 # FORCE WEB_BASE_PATH="" (Root) and ADMIN_BASE_PATH="/admin"
 # This guarantees that the built images always match the production URL structure,
@@ -56,12 +67,6 @@ echo -e "Triggering Watchtower on server ${SERVER_URL:-http://172.245.190.165:30
 
 # Load specific variables needed for the script (TOKEN and URL)
 # We avoid exporting ALL variables to prevent corrupting the Docker build environment with bad parsing
-if [ -f .env ]; then
-    # Safely extract variables without exporting everything
-    TOKEN_FROM_ENV=$(grep "^DOCKERHUB_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-    URL_FROM_ENV=$(grep "^SERVER_URL=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-fi
-
 # Use PROVIDED token or fallback to .env or empty
 TOKEN="${DOCKERHUB_PASSWORD:-$TOKEN_FROM_ENV}"
 SERVER_URL="${SERVER_URL:-${URL_FROM_ENV:-http://172.245.190.165:3000}}"
