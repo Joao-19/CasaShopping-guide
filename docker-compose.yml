@@ -82,6 +82,7 @@ services:
       - PRODUCTS_SERVICE_URL=http://products-service:3006
       - STORAGE_SERVICE_URL=http://storage-service:3007
       - JWT_SECRET=${JWT_SECRET}
+      - REPO_PASS=${DEPLOY_PASSWORD}
       - DOCKERHUB_PASSWORD=${DOCKERHUB_PASSWORD}
     depends_on:
       database:
