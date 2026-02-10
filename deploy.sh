@@ -22,12 +22,13 @@ fi
 DOCKERHUB_USER="${DOCKERHUB_USER:-$DH_USER}"
 DOCKERHUB_PASSWORD="${DOCKERHUB_PASSWORD:-$DH_PASS}"
 
-if [ -n "$DOCKERHUB_USER" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
-    echo "Attempting to log in to DockerHub as $DOCKERHUB_USER..."
-    echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
-else
-    echo "Skipping explicit login (DOCKERHUB_PASSWORD not found in .env). Assuming system is already logged in..."
-fi
+# if [ -n "$DOCKERHUB_USER" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
+#     echo "Attempting to log in to DockerHub as $DOCKERHUB_USER..."
+#     echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
+# else
+#     echo "Skipping explicit login (DOCKERHUB_PASSWORD not found in .env). Assuming system is already logged in..."
+# fi
+echo "Skipping auto-login to prevent session conflict. Using existing system login."
 
 # Capture optional arguments (like --no-cache)
 BUILD_ARGS="$@"
