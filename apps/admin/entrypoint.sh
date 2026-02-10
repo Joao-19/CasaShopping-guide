@@ -19,7 +19,9 @@ replace_env() {
 
 echo "Starting deployment script for Admin App..."
 
-TARGET_DIR="/app/apps/admin"
+# Next.js standalone output puts things in apps/admin/.next
+# We search /app to catch everything including public folder and server.js
+TARGET_DIR="/app"
 
 echo "Replacing environment variables in $TARGET_DIR..."
 
