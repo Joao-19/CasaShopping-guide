@@ -12,6 +12,8 @@ import axios from "axios";
 @ApiTags("Deploy")
 @Controller("deploy")
 export class DeployController {
+  @Post("trigger")
+  @ApiOperation({ summary: "Trigger deployment update via Watchtower" })
   async triggerDeploy(@Headers("authorization") authHeader: string) {
     const token = process.env.REPO_PASS || process.env.DOCKERHUB_PASSWORD;
     if (!token) {
