@@ -115,7 +115,7 @@ if [ -z "$TOKEN" ]; then
 else
     # Making the URL dynamic - user can override SERVER_URL=http://... ./deploy.sh
     # Using curl with silent flag (-s) but capturing output
-    RESPONSE=$(curl -s -X POST "$SERVER_URL/deploy/trigger" \
+    RESPONSE=$(curl -s -X POST "$SERVER_URL/deploy" \
         -H "Authorization: Bearer $TOKEN" \
         -w "%{http_code}" --connect-timeout 10)
     
