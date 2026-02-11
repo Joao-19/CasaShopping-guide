@@ -84,7 +84,25 @@ graph TD
    cd casashopping-guide
    ```
 
-2. Copie os arquivos de ambiente de exemplo:
+## Deployment
+
+To deploy the application:
+
+1. Ensure `.env` is configured locally.
+2. Run `./deploy.sh`.
+
+### Updating Environment Variables
+
+To update environment variables:
+
+1. Edit the `.env` file **on the server**.
+2. Wait for the next deployment OR trigger a restart.
+   - If using Watchtower, the next time it updates the image, it will restart the container.
+   - Since the `.env` file is **mounted** into the container, the new values will be read at startup.
+
+**Note:** Changes to `.env` will **NOT** take effect immediately. The container must restart to read the file again. You can trigger a deploy from local (`./deploy.sh`) to force an update/restart.
+
+3. Copie os arquivos de ambiente de exemplo:
 
    ```bash
    cp .env.example .env
@@ -98,25 +116,25 @@ graph TD
    cp apps/storage/.env.example apps/storage/.env
    ```
 
-3. Instale as dependências:
+4. Instale as dependências:
 
    ```bash
    pnpm install
    ```
 
-4. Suba o banco de dados e o MinIO:
+5. Suba o banco de dados e o MinIO:
 
    ```bash
    docker-compose up -d database storage
    ```
 
-5. Execute as migrations do Prisma:
+6. Execute as migrations do Prisma:
 
    ```bash
    pnpm --filter @repo/database db:migrate
    ```
 
-6. Inicie todos os serviços em modo de desenvolvimento:
+7. Inicie todos os serviços em modo de desenvolvimento:
    ```bash
    pnpm dev
    ```

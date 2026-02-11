@@ -121,12 +121,12 @@ else
     HTTP_CODE=${RESPONSE: -3}
     CONTENT=${RESPONSE:0:${#RESPONSE}-3}
 
+
     if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "201" ]; then
          echo -e "${GREEN}✔ Deployment Triggered Successfully!${NC}"
          echo -e "  Server responded: $CONTENT"
-         echo -e "\n${GREEN}🚀 Deployment Complete! The server is updating itself now.${NC}"
+         echo -e "\n${GREEN}🚀 Deployment Complete! Watchtower uses the new image (with baked-in .env).${NC}"
     elif [ "$HTTP_CODE" == "000" ]; then
-         # 000 usually means the server killed the connection (which is EXPECTED when Watchtower restarts the gateway)
          echo -e "${GREEN}✔ Trigger Sent (Connection verification skipped)${NC}"
          echo -e "  (The server likely restarted the gateway to apply updates, which is normal)"
          echo -e "\n${GREEN}🚀 Deployment Complete!${NC}"
