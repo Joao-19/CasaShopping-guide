@@ -26,6 +26,10 @@ services:
     build:
       context: .
       dockerfile: apps/migration/Dockerfile
+    image: joaovvv/casashopping-migration:latest
+    container_name: casashopping-migration
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
     depends_on:
@@ -63,6 +67,8 @@ services:
       context: .
       dockerfile: apps/api-gateway/Dockerfile
     container_name: casashopping-gateway
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3000:3000"
     environment:
@@ -76,6 +82,8 @@ services:
       - PRODUCTS_SERVICE_URL=http://products-service:3006
       - STORAGE_SERVICE_URL=http://storage-service:3007
       - JWT_SECRET=${JWT_SECRET}
+      - REPO_PASS=${DEPLOY_PASSWORD}
+      - DOCKERHUB_PASSWORD=${DOCKERHUB_PASSWORD}
     depends_on:
       database:
         condition: service_started
@@ -111,6 +119,8 @@ services:
       context: .
       dockerfile: apps/auth/Dockerfile
     container_name: casashopping-auth
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3003:3003"
     environment:
@@ -147,6 +157,8 @@ services:
       context: .
       dockerfile: apps/users/Dockerfile
     container_name: casashopping-users
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3004:3004"
     environment:
@@ -177,6 +189,8 @@ services:
       context: .
       dockerfile: apps/storage/Dockerfile
     container_name: casashopping-storage-service
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3007:3007"
     environment:
@@ -216,6 +230,8 @@ services:
         - BASE_PATH=${WEB_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
     container_name: casashopping-web
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3001:3001"
     environment:
@@ -224,8 +240,10 @@ services:
       - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
       - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
       - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
+      - BASE_PATH=${WEB_BASE_PATH:-}
       - INTERNAL_API_URL=http://api-gateway:3000
       - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
     depends_on:
       - api-gateway
     networks:
@@ -245,6 +263,8 @@ services:
         - BASE_PATH=${ADMIN_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
     container_name: casashopping-admin
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3002:3002"
     environment:
@@ -255,6 +275,7 @@ services:
       - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
       - JWT_SECRET=${JWT_SECRET:-changeme_secret}
       - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
     depends_on:
       - api-gateway
     networks:
@@ -268,6 +289,8 @@ services:
       context: .
       dockerfile: apps/stores/Dockerfile
     container_name: casashopping-stores
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3005:3005"
     environment:
@@ -303,6 +326,8 @@ services:
       context: .
       dockerfile: apps/products/Dockerfile
     container_name: casashopping-products
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3006:3006"
     environment:
@@ -331,6 +356,30 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+  # --- WATCHTOWER (AUTO-UPDATE) ---
+  watchtower:
+    image: containrrr/watchtower
+    container_name: casashopping-watchtower
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8080:8080"
+    environment:
+      # Fix API version mismatch
+      - DOCKER_API_VERSION=1.44
+      # Auth for private repos
+      - REPO_USER=${DOCKERHUB_USER}
+      - REPO_PASS=${DOCKERHUB_PASSWORD}
+      # HTTP API Mode
+      - WATCHTOWER_HTTP_API_UPDATE=true
+      - WATCHTOWER_HTTP_API_TOKEN=${DEPLOY_PASSWORD}
+    command: --cleanup --label-enable --http-api-periodic-polls --include-stopped --revive-stopped
+    networks:
+      - casashopping-net
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   minio_data:
