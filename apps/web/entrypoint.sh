@@ -19,6 +19,14 @@ replace_env() {
 
 echo "Starting deployment script for Web App..."
 
+# Load environment variables from mounted .env file if it exists
+if [ -f /app/.env ]; then
+    echo "Loading environment variables from /app/.env..."
+    set -a
+    . /app/.env
+    set +a
+fi
+
 # Next.js standalone output puts things in apps/web/.next
 # Next.js standalone output puts things in apps/web/.next
 # We search /app to catch everything including public folder and server.js
