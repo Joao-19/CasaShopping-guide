@@ -12,23 +12,24 @@ echo -e "${GREEN}Starting deployment process...${NC}"
 
 echo "Checking DockerHub login..."
 
-# Load variables if not already loaded (though we load them later, we need them now for login)
+# Load variables from .env automatically to export them for Docker Compose
 if [ -f .env ]; then
-    DH_USER=$(grep "^DOCKERHUB_USER=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-    DH_PASS=$(grep "^DOCKERHUB_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+    echo "Loading environment variables from .env..."
+    set -o allexport
+    source .env
+    set +o allexport
 fi
 
-# Use env vars or fallback to loaded values
+# Use env vars or fallback to loaded values (if .env loading failed for some reason)
 DOCKERHUB_USER="${DOCKERHUB_USER:-$DH_USER}"
 DOCKERHUB_PASSWORD="${DOCKERHUB_PASSWORD:-$DH_PASS}"
 
-# if [ -n "$DOCKERHUB_USER" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
-#     echo "Attempting to log in to DockerHub as $DOCKERHUB_USER..."
-#     echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
-# else
-#     echo "Skipping explicit login (DOCKERHUB_PASSWORD not found in .env). Assuming system is already logged in..."
-# fi
-echo "Skipping auto-login to prevent session conflict. Using existing system login."
+if [ -n "$DOCKERHUB_USER" ] && [ -n "$DOCKERHUB_PASSWORD" ]; then
+    echo "Attempting to log in to DockerHub as $DOCKERHUB_USER..."
+    echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
+else
+    echo "Warning: DOCKERHUB_PASSWORD not found. Assuming system is already logged in..."
+fi
 
 # Capture optional arguments (like --no-cache)
 BUILD_ARGS="$@"
@@ -38,16 +39,9 @@ if [ -n "$BUILD_ARGS" ]; then
     echo -e "${GREEN}Build arguments: $BUILD_ARGS${NC}"
 fi
 
-# Load variables from .env if present (to support GTM_ID and others during build)
-if [ -f .env ]; then
-    # Safely extract variables without exporting everything
-    TOKEN_FROM_ENV=$(grep "^DOCKERHUB_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-    URL_FROM_ENV=$(grep "^SERVER_URL=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-    GTM_ID_FROM_ENV=$(grep "^NEXT_PUBLIC_GTM_ID=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-fi
-
-# Set GTM_ID from env if not already set
-NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID:-$GTM_ID_FROM_ENV}"
+# Ensure NEXT_PUBLIC_GTM_ID is set (fallback to GTM-5MH287L if completely missing, just for consistency)
+# This removes the "variable is not set" warning
+export NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID:-GTM-5MH287L}"
 
 # 2. Build Updated Images
 # FORCE WEB_BASE_PATH="" (Root) and ADMIN_BASE_PATH="/admin"
