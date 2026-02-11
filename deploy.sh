@@ -105,17 +105,18 @@ echo -e "Triggering Watchtower on server ${SERVER_URL:-http://172.245.190.165:30
 # We avoid exporting ALL variables to prevent corrupting the Docker build environment with bad parsing
 # Use PROVIDED DEPLOY_PASSWORD or fallback to reading from .env
 DEPLOY_TOKEN_FROM_ENV=$(grep "^DEPLOY_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-TOKEN="${DEPLOY_PASSWORD:-$DEPLOY_TOKEN_FROM_ENV}"
-SERVER_URL="${SERVER_URL:-${URL_FROM_ENV:-http://172.245.190.165:3000}}"
 
 if [ -z "$TOKEN" ]; then
     echo -e "${RED}[!] Warning: DEPLOY_PASSWORD not set.${NC}"
     echo "    Cannot authenticate with Watchtower. Skipping automatic update trigger."
     echo "    Please run 'docker compose up -d' manually on the server."
 else
-    # Making the URL dynamic - user can override SERVER_URL=http://... ./deploy.sh
+    # Using user-defined SERVER_URL or defaulting to the public IP (without port 3000, as requested)
+    SERVER_URL="${SERVER_URL:-${URL_FROM_ENV:-http://172.245.190.165}}"
+    
     # Using curl with silent flag (-s) but capturing output
-    RESPONSE=$(curl -s -X POST "$SERVER_URL/deploy/trigger" \
+    # Path updated to /api/deploy/trigger as per user instruction
+    RESPONSE=$(curl -s -X POST "$SERVER_URL/api/deploy/trigger" \
         -H "Authorization: Bearer $TOKEN" \
         -w "%{http_code}" --connect-timeout 10)
     
