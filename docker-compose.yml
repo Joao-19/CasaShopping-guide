@@ -102,6 +102,8 @@ services:
     networks:
       - casashopping-net
       - web-proxy
+    volumes:
+      - ./.env:/app/.env
     healthcheck:
       test:
         [
@@ -140,6 +142,8 @@ services:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+    volumes:
+      - ./.env:/app/.env
     healthcheck:
       test:
         [
@@ -172,6 +176,8 @@ services:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+    volumes:
+      - ./.env:/app/.env
     healthcheck:
       test:
         [
@@ -207,6 +213,8 @@ services:
       - storage
     networks:
       - casashopping-net
+    volumes:
+      - ./.env:/app/.env
     healthcheck:
       test:
         [
@@ -309,6 +317,8 @@ services:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+    volumes:
+      - ./.env:/app/.env
     healthcheck:
       test:
         [
@@ -347,6 +357,8 @@ services:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+    volumes:
+      - ./.env:/app/.env
     healthcheck:
       test:
         [

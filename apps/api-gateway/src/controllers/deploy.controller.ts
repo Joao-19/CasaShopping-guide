@@ -13,14 +13,7 @@ import axios from "axios";
 @Controller("deploy")
 export class DeployController {
   @Post("trigger")
-  @ApiOperation({ summary: "Trigger Watchtower update" })
-  @ApiHeader({
-    name: "Authorization",
-    description: "Bearer <WATCHTOWER_TOKEN>",
-    required: true,
-  })
-  @ApiResponse({ status: 200, description: "Update triggered successfully" })
-  @ApiResponse({ status: 401, description: "Invalid token" })
+  @ApiOperation({ summary: "Trigger deployment update via Watchtower" })
   async triggerDeploy(@Headers("authorization") authHeader: string) {
     const token = process.env.REPO_PASS || process.env.DOCKERHUB_PASSWORD;
     if (!token) {
@@ -36,11 +29,8 @@ export class DeployController {
 
     try {
       // Internal call to Watchtower HTTP API
-      // Using the service name 'watchtower' from docker-compose service definition
-      // This is more reliable for Docker internal DNS than container name
       const watchtowerUrl = "http://watchtower:8080/v1/update";
 
-      // Pass the token in the header as required by Watchtower
       const response = await axios.post(
         watchtowerUrl,
         {},

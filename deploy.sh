@@ -40,7 +40,8 @@ fi
 
 # Ensure NEXT_PUBLIC_GTM_ID is set (fallback to GTM-5MH287L if completely missing, just for consistency)
 # This removes the "variable is not set" warning
-export NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID:-GTM-5MH287L}"
+# Ensure NEXT_PUBLIC_GTM_ID is set (fallback to empty if missing)
+export NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID:-}"
 
 # 2. Build Updated Images
 # FORCE WEB_BASE_PATH="" (Root) and ADMIN_BASE_PATH="/admin"
@@ -103,30 +104,32 @@ echo -e "Triggering Watchtower on server ${SERVER_URL:-http://172.245.190.165:30
 # Load specific variables needed for the script (TOKEN and URL)
 # We avoid exporting ALL variables to prevent corrupting the Docker build environment with bad parsing
 # Use PROVIDED DEPLOY_PASSWORD or fallback to reading from .env
-DEPLOY_TOKEN_FROM_ENV=$(grep "^DEPLOY_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+DEPLOY_TOKEN_FROM_ENV=$(grep "^DEPLOY_PASSWORD=" .env | tail -n 1 | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
 TOKEN="${DEPLOY_PASSWORD:-$DEPLOY_TOKEN_FROM_ENV}"
-SERVER_URL="${SERVER_URL:-${URL_FROM_ENV:-http://172.245.190.165:3000}}"
 
 if [ -z "$TOKEN" ]; then
     echo -e "${RED}[!] Warning: DEPLOY_PASSWORD not set.${NC}"
     echo "    Cannot authenticate with Watchtower. Skipping automatic update trigger."
     echo "    Please run 'docker compose up -d' manually on the server."
 else
-    # Making the URL dynamic - user can override SERVER_URL=http://... ./deploy.sh
+    # Using user-defined SERVER_URL or defaulting to the public IP (without port 3000, as requested)
+    SERVER_URL="${SERVER_URL:-${URL_FROM_ENV:-http://172.245.190.165}}"
+    
     # Using curl with silent flag (-s) but capturing output
-    RESPONSE=$(curl -s -X POST "$SERVER_URL/deploy/trigger" \
+    # Path updated to /api/deploy/trigger as per user instruction
+    RESPONSE=$(curl -s -X POST "$SERVER_URL/api/deploy/trigger" \
         -H "Authorization: Bearer $TOKEN" \
         -w "%{http_code}" --connect-timeout 10)
     
     HTTP_CODE=${RESPONSE: -3}
     CONTENT=${RESPONSE:0:${#RESPONSE}-3}
 
+
     if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "201" ]; then
          echo -e "${GREEN}✔ Deployment Triggered Successfully!${NC}"
          echo -e "  Server responded: $CONTENT"
-         echo -e "\n${GREEN}🚀 Deployment Complete! The server is updating itself now.${NC}"
+         echo -e "\n${GREEN}🚀 Deployment Complete! Watchtower uses the new image (with baked-in .env).${NC}"
     elif [ "$HTTP_CODE" == "000" ]; then
-         # 000 usually means the server killed the connection (which is EXPECTED when Watchtower restarts the gateway)
          echo -e "${GREEN}✔ Trigger Sent (Connection verification skipped)${NC}"
          echo -e "  (The server likely restarted the gateway to apply updates, which is normal)"
          echo -e "\n${GREEN}🚀 Deployment Complete!${NC}"
