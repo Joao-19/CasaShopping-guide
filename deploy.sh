@@ -66,12 +66,24 @@ echo -e "${GREEN}Build successful. Pushing images to DockerHub...${NC}"
 # Explicitly pushing services that have 'image' defined in docker-compose.yml
 # Note: 'docker compose push' pushes services that have both 'build' and 'image' keys.
 # 3. Push only OUR services (skipping official images)
-docker compose push web admin api-gateway auth-service users-service stores-service products-service storage-service db-migration
+# We push sequentially to avoid "accept4 failed" WSL errors and credential helper timeouts under high load
+SERVICES="web admin api-gateway auth-service users-service stores-service products-service storage-service db-migration"
 
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Push failed! Please check your network or DockerHub permissions.${NC}"
-    exit 1
-fi
+for service in $SERVICES; do
+    echo -e "${GREEN}Pushing $service...${NC}"
+    docker compose push "$service"
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Push failed for $service! Retrying once...${NC}"
+        sleep 2
+        docker compose push "$service"
+        
+        if [ $? -ne 0 ]; then
+             echo -e "${RED}Push failed for $service after retry. Aborting.${NC}"
+             exit 1
+        fi
+    fi
+done
 
 echo -e "${GREEN}All images pushed successfully!${NC}"
 
