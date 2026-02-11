@@ -15,9 +15,8 @@ echo "Checking DockerHub login..."
 # Load variables from .env automatically to export them for Docker Compose
 if [ -f .env ]; then
     echo "Loading environment variables from .env..."
-    set -o allexport
-    source .env
-    set +o allexport
+    # Robust way to load .env, handling comments and empty lines
+    export $(grep -v '^#' .env | xargs) >/dev/null 2>&1
 fi
 
 # Use env vars or fallback to loaded values (if .env loading failed for some reason)
@@ -56,27 +55,42 @@ fi
 
 echo -e "${GREEN}Build successful. Pushing images to DockerHub...${NC}"
 
-# 3. Push all services
-# Explicitly pushing services that have 'image' defined in docker-compose.yml
-# Note: 'docker compose push' pushes services that have both 'build' and 'image' keys.
 # 3. Push only OUR services (skipping official images)
 # We push sequentially to avoid "accept4 failed" WSL errors and credential helper timeouts under high load
 SERVICES="web admin api-gateway auth-service users-service stores-service products-service storage-service db-migration"
 
-for service in $SERVICES; do
-    echo -e "${GREEN}Pushing $service...${NC}"
-    docker compose push "$service"
-    
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Push failed for $service! Retrying once...${NC}"
-        sleep 2
-        docker compose push "$service"
+push_with_retry() {
+    local service=$1
+    local retries=5
+    local count=0
+    local success=0
+
+    while [ $count -lt $retries ]; do
+        echo -e "${GREEN}Pushing $service (Attempt $((count+1))/$retries)...${NC}"
         
-        if [ $? -ne 0 ]; then
-             echo -e "${RED}Push failed for $service after retry. Aborting.${NC}"
-             exit 1
+        # Explicitly pass .env file to docker compose to silence warnings
+        docker compose --env-file .env push "$service"
+        
+        if [ $? -eq 0 ]; then
+            success=1
+            break
+        else
+            echo -e "${RED}Push failed for $service! Retrying in 5 seconds...${NC}"
+            sleep 5
+            count=$((count+1))
         fi
+    done
+
+    if [ $success -eq 0 ]; then
+         echo -e "${RED}Push failed for $service after $retries attempts. Aborting.${NC}"
+         exit 1
     fi
+}
+
+for service in $SERVICES; do
+    push_with_retry "$service"
+    # Sleep between services to let WSL release resources
+    sleep 3
 done
 
 echo -e "${GREEN}All images pushed successfully!${NC}"
