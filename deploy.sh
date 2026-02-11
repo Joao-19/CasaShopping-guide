@@ -104,7 +104,8 @@ echo -e "Triggering Watchtower on server ${SERVER_URL:-http://172.245.190.165:30
 # Load specific variables needed for the script (TOKEN and URL)
 # We avoid exporting ALL variables to prevent corrupting the Docker build environment with bad parsing
 # Use PROVIDED DEPLOY_PASSWORD or fallback to reading from .env
-DEPLOY_TOKEN_FROM_ENV=$(grep "^DEPLOY_PASSWORD=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+DEPLOY_TOKEN_FROM_ENV=$(grep "^DEPLOY_PASSWORD=" .env | tail -n 1 | cut -d '=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
+TOKEN="${DEPLOY_PASSWORD:-$DEPLOY_TOKEN_FROM_ENV}"
 
 if [ -z "$TOKEN" ]; then
     echo -e "${RED}[!] Warning: DEPLOY_PASSWORD not set.${NC}"
