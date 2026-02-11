@@ -30,10 +30,7 @@ echo "Replacing environment variables in $TARGET_DIR..."
 echo "Searching in $TARGET_DIR..."
 
 # Emergency Fallback: If NEXT_PUBLIC_GTM_ID is missing or is the placeholder, use the known ID.
-if [ -z "$NEXT_PUBLIC_GTM_ID" ] || [ "$NEXT_PUBLIC_GTM_ID" = "APP_NEXT_PUBLIC_GTM_ID" ]; then
-    echo "Warning: NEXT_PUBLIC_GTM_ID not set or is placeholder. Using hardcoded fallback: GTM-5MH287L"
-    export NEXT_PUBLIC_GTM_ID="GTM-5MH287L"
-fi
+# Emergency Fallback removed.
 
 # Pre-calculate vars to avoid calling env 1000 times
 # Using 'env' and 'cut' to get variable names

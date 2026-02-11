@@ -40,7 +40,8 @@ fi
 
 # Ensure NEXT_PUBLIC_GTM_ID is set (fallback to GTM-5MH287L if completely missing, just for consistency)
 # This removes the "variable is not set" warning
-export NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID:-GTM-5MH287L}"
+# Ensure NEXT_PUBLIC_GTM_ID is set (fallback to empty if missing)
+export NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID:-}"
 
 # 2. Build Updated Images
 # FORCE WEB_BASE_PATH="" (Root) and ADMIN_BASE_PATH="/admin"
