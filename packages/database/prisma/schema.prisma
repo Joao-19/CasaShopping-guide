@@ -130,3 +130,16 @@ model Category {
 
   @@map("categories")
 }
+
+// --- MODELO PARA O SERVIÇO DE SETTINGS (API Gateway) ---
+model Settings {
+  id                         Int     @id @default(1)
+  backgroundDesktop          String?
+  backgroundMobile           String?
+  advertisementBanner        String? // Link do banner
+  advertisementBannerDisplay Int     @default(3) // 1: Mobile, 2: Desktop, 3: Both
+
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
