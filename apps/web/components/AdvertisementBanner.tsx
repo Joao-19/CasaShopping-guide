@@ -28,8 +28,11 @@ export function AdvertisementBanner({
         displayMode === 'desktop' ? 'hidden md:block' :
             'block';
 
+    // Aspect ratio and dimensions classes
+    const aspectClass = displayMode === 'mobile' ? 'aspect-square max-h-[500px]' : 'aspect-32/9 max-h-[180px]';
+
     const content = (
-        <div className={`w-full relative rounded-2xl overflow-hidden aspect-32/9 max-w-[1920px] max-h-[180px] ${className}`}>
+        <div className={`w-full relative rounded-2xl overflow-hidden ${aspectClass} max-w-[1920px] ${className}`}>
             {isVideo ? (
                 <video
                     src={src}

@@ -134,34 +134,25 @@ export default function PersonalizacaoPage() {
 
     const [desktopBanner, setDesktopBanner] = useState<string | File | undefined>(undefined);
     const [mobileBanner, setMobileBanner] = useState<string | File | undefined>(undefined);
-    const [adsBanner, setAdsBanner] = useState<string | File | undefined>(undefined);
+    const [adsDesktop, setAdsDesktop] = useState<string | File | undefined>(undefined);
+    const [adsMobile, setAdsMobile] = useState<string | File | undefined>(undefined);
 
     // Sync state with fetched settings
     useEffect(() => {
         if (settings) {
-            setDesktopBanner(settings.backgroundDesktop || undefined);
-            setMobileBanner(settings.backgroundMobile || undefined);
-            setAdsBanner(settings.advertisementBanner || undefined);
+            const s = settings as any; // Temporary cast to avoid stale type error
+            setDesktopBanner(s.backgroundDesktop || undefined);
+            setMobileBanner(s.backgroundMobile || undefined);
+            setAdsDesktop(s.advertisementBannerDesktop || undefined);
+            setAdsMobile(s.advertisementBannerMobile || undefined);
         }
     }, [settings]);
 
-    const handleFileSelect = (file: File, type: 'desktop' | 'mobile' | 'ads') => {
-        // We store the File object to upload on save
-        // But for preview we need a URL
-        // BannerUpload expects string. 
-        // We can pass the File and let BannerUpload create object URL? 
-        // Or we create object URL here.
-        // But if we create Object URL, we lose the File object unless we store it separately.
-
-        // Simpler approach: Store File in state OR string.
-        // If it's a File, we upload it.
-        // We need to change state type.
-
-        // Actually, let's keep it simple:
-        // We can use a separate state for files to upload, or just check type.
+    const handleFileSelect = (file: File, type: 'desktop' | 'mobile' | 'adsDesktop' | 'adsMobile') => {
         if (type === 'desktop') setDesktopBanner(file);
         if (type === 'mobile') setMobileBanner(file);
-        if (type === 'ads') setAdsBanner(file);
+        if (type === 'adsDesktop') setAdsDesktop(file);
+        if (type === 'adsMobile') setAdsMobile(file);
     };
 
     const getPreviewUrl = (item: string | File | undefined) => {
@@ -174,7 +165,8 @@ export default function PersonalizacaoPage() {
         try {
             let desktopKey = typeof desktopBanner === 'string' ? desktopBanner : undefined;
             let mobileKey = typeof mobileBanner === 'string' ? mobileBanner : undefined;
-            let adsKey = typeof adsBanner === 'string' ? adsBanner : undefined;
+            let adsDesktopKey = typeof adsDesktop === 'string' ? adsDesktop : undefined;
+            let adsMobileKey = typeof adsMobile === 'string' ? adsMobile : undefined;
 
             // Upload new files
             const context = { folder: 'settings/home' };
@@ -187,38 +179,22 @@ export default function PersonalizacaoPage() {
                 mobileKey = await uploadImage(mobileBanner, context);
             }
 
-            if (adsBanner instanceof File) {
-                adsKey = await uploadImage(adsBanner, context);
+            if (adsDesktop instanceof File) {
+                adsDesktopKey = await uploadImage(adsDesktop, context);
             }
 
-            // If key is undefined (was cleared) send null? 
-            // setDesktopBanner(null) in onRemove -> undefined.
-            // But if it was originally "http...", we sending undefined means no change?
-            // "updateSettings" takes optional.
-            // Issues:
-            // 1. If user removes banner, setDesktopBanner(undefined). 
-            //    We want to unset it in DB. updateSettings({ backgroundDesktop: null })?
-            //    But DTO makes it optional string. If undefined, it might not update.
-            //    We check default values. 
-            //    If we explicitly want to delete, we should send null or empty string.
-            //    DTO says `backgroundDesktop?: string`.
-            //    We might need to check if we can send null. 
-            //    Interface `UpdateSettingsDto` uses `@IsOptional()`.
+            if (adsMobile instanceof File) {
+                adsMobileKey = await uploadImage(adsMobile, context);
+            }
 
-            // Let's assume sending '' (empty string) clears it, or logic allows null.
-            // SettingsService upsert uses `...data`.
-            // If we send undefined, it won't update the field?
-            // Actually, frontend state starts as undefined.
-            // If fetched, it becomes string.
-            // If removed, it should become null.
-            // Currently state uses undefined.
-
+            // If key is undefined (was cleared) send null or empty string to match previous logic
             await updateSettings({
-                backgroundDesktop: desktopKey || '', // Send empty string if undefined/null to clear?
+                backgroundDesktop: desktopKey || '',
                 backgroundMobile: mobileKey || '',
-                advertisementBanner: adsKey || '',
-                advertisementBannerDisplay: 3 // Default or get from state if we add a control
-            });
+                advertisementBannerDesktop: adsDesktopKey || '',
+                advertisementBannerMobile: adsMobileKey || '',
+                advertisementBannerDisplay: 3 // Default
+            } as any);
             toast.success("Configurações salvas com sucesso!");
         } catch (error) {
             console.error(error);
@@ -243,8 +219,6 @@ export default function PersonalizacaoPage() {
                     </div>
 
                     <div className="p-6 space-y-8">
-                        {/* ... Info ... */}
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <BannerUpload
                                 label="Banner Desktop"
@@ -271,16 +245,29 @@ export default function PersonalizacaoPage() {
 
                         <div className="pt-6 border-t border-gray-100">
                             <h3 className="text-lg font-semibold text-[#1A2B3C] mb-4">Banner de Anúncio Publicitário</h3>
-                            <div className="w-full">
-                                <BannerUpload
-                                    label="Imagem do Anúncio"
-                                    description="Exibido na listagem (Formato Wide)"
-                                    aspect="banner"
-                                    accept="image/*"
-                                    currentUrl={getPreviewUrl(adsBanner)}
-                                    onFileSelect={(file) => handleFileSelect(file, 'ads')}
-                                    onRemove={() => setAdsBanner(undefined)}
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                                <div className="w-full order-2 md:order-1">
+                                    <BannerUpload
+                                        label="Anúncio Desktop"
+                                        description="Exibido na Web (Formato Wide 32:9)"
+                                        aspect="banner"
+                                        accept="image/*"
+                                        currentUrl={getPreviewUrl(adsDesktop)}
+                                        onFileSelect={(file) => handleFileSelect(file, 'adsDesktop')}
+                                        onRemove={() => setAdsDesktop(undefined)}
+                                    />
+                                </div>
+                                <div className="max-w-[300px] mx-auto w-full order-1 md:order-2">
+                                    <BannerUpload
+                                        label="Anúncio Mobile"
+                                        description="Exibido no Mobile (Quadrado)"
+                                        aspect="square"
+                                        accept="image/*"
+                                        currentUrl={getPreviewUrl(adsMobile)}
+                                        onFileSelect={(file) => handleFileSelect(file, 'adsMobile')}
+                                        onRemove={() => setAdsMobile(undefined)}
+                                    />
+                                </div>
                             </div>
                         </div>
 

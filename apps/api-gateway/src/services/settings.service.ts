@@ -40,7 +40,12 @@ export class SettingsService {
       ...settings,
       backgroundDesktop: this.transformToUrl(settings.backgroundDesktop),
       backgroundMobile: this.transformToUrl(settings.backgroundMobile),
-      advertisementBanner: this.transformToUrl(settings.advertisementBanner),
+      advertisementBannerDesktop: this.transformToUrl(
+        settings.advertisementBannerDesktop,
+      ),
+      advertisementBannerMobile: this.transformToUrl(
+        settings.advertisementBannerMobile,
+      ),
     };
   }
 
@@ -51,7 +56,12 @@ export class SettingsService {
         ...data,
         backgroundDesktop: this.extractKey(data.backgroundDesktop),
         backgroundMobile: this.extractKey(data.backgroundMobile),
-        advertisementBanner: this.extractKey(data.advertisementBanner),
+        advertisementBannerDesktop: this.extractKey(
+          data.advertisementBannerDesktop,
+        ),
+        advertisementBannerMobile: this.extractKey(
+          data.advertisementBannerMobile,
+        ),
         updatedAt: new Date(),
       },
       create: {
@@ -59,7 +69,12 @@ export class SettingsService {
         ...data,
         backgroundDesktop: this.extractKey(data.backgroundDesktop),
         backgroundMobile: this.extractKey(data.backgroundMobile),
-        advertisementBanner: this.extractKey(data.advertisementBanner),
+        advertisementBannerDesktop: this.extractKey(
+          data.advertisementBannerDesktop,
+        ),
+        advertisementBannerMobile: this.extractKey(
+          data.advertisementBannerMobile,
+        ),
         advertisementBannerDisplay: data.advertisementBannerDisplay || 3,
       },
     });
@@ -68,7 +83,12 @@ export class SettingsService {
       ...settings,
       backgroundDesktop: this.transformToUrl(settings.backgroundDesktop),
       backgroundMobile: this.transformToUrl(settings.backgroundMobile),
-      advertisementBanner: this.transformToUrl(settings.advertisementBanner),
+      advertisementBannerDesktop: this.transformToUrl(
+        settings.advertisementBannerDesktop,
+      ),
+      advertisementBannerMobile: this.transformToUrl(
+        settings.advertisementBannerMobile,
+      ),
     };
   }
 }

@@ -4,7 +4,8 @@ export interface Settings {
   id: number;
   backgroundDesktop?: string | null;
   backgroundMobile?: string | null;
-  advertisementBanner?: string | null;
+  advertisementBannerDesktop?: string | null;
+  advertisementBannerMobile?: string | null;
   advertisementBannerDisplay: number;
   updatedAt: Date;
 }
@@ -20,7 +21,11 @@ export class UpdateSettingsDto {
 
   @IsOptional()
   @IsString()
-  advertisementBanner?: string;
+  advertisementBannerDesktop?: string;
+
+  @IsOptional()
+  @IsString()
+  advertisementBannerMobile?: string;
 
   @IsOptional()
   @IsInt()

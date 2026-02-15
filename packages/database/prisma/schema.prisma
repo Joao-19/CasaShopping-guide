@@ -136,7 +136,8 @@ model Settings {
   id                         Int     @id @default(1)
   backgroundDesktop          String?
   backgroundMobile           String?
-  advertisementBanner        String? // Link do banner
+  advertisementBannerMobile  String? // Link do banner mobile (Square/Rect)
+  advertisementBannerDesktop String? // Link do banner desktop (Wide 32:9)
   advertisementBannerDisplay Int     @default(3) // 1: Mobile, 2: Desktop, 3: Both
 
   updatedAt DateTime @updatedAt

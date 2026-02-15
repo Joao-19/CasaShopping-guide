@@ -116,13 +116,7 @@ export function HeroSection() {
         setIsOpen(false);
     };
 
-    const finalAdvertisementUrl = settings?.advertisementBanner || `${process.env.BASE_PATH || ""}/promotionalMidia/OFERTA.jpg`;
 
-    // 1: Mobile, 2: Desktop, 3: Both (All)
-    const displayMode = settings?.advertisementBannerDisplay === 1 ? 'mobile' :
-        settings?.advertisementBannerDisplay === 2 ? 'desktop' :
-            settings?.advertisementBannerDisplay === 3 ? 'all' :
-                'mobile'; // Default to mobile to match previous hardcoded behavior if settings undefined
 
     return (
         <div className="relative h-[600px] md:h-[800px] w-full">
@@ -247,13 +241,29 @@ export function HeroSection() {
                     </div>
                 </div>
 
-                <AdvertisementBanner
-                    src={finalAdvertisementUrl}
-                    type="image"
-                    alt="Oferta Especial"
-                    withoutWrapper={true}
-                    displayMode={displayMode}
-                />
+                <div className="w-full">
+                    {/* Mobile Banner: Show if displayMode is 1 (Mobile) or 3 (Both) */}
+                    {(settings?.advertisementBannerDisplay === 1 || settings?.advertisementBannerDisplay === 3) && (
+                        <AdvertisementBanner
+                            src={settings?.advertisementBannerMobile || `${process.env.BASE_PATH || ""}/promotionalMidia/OFERTA.jpg`}
+                            type="image"
+                            alt="Oferta Especial Mobile"
+                            withoutWrapper={true}
+                            displayMode="mobile"
+                        />
+                    )}
+
+                    {/* Desktop Banner: Show if displayMode is 2 (Desktop) or 3 (Both) */}
+                    {(settings?.advertisementBannerDisplay === 2 || settings?.advertisementBannerDisplay === 3) && (
+                        <AdvertisementBanner
+                            src={settings?.advertisementBannerDesktop || `${process.env.BASE_PATH || ""}/promotionalMidia/OFERTA.jpg`}
+                            type="image"
+                            alt="Oferta Especial Desktop"
+                            withoutWrapper={true}
+                            displayMode="desktop"
+                        />
+                    )}
+                </div>
             </div>
         </div>
     )
