@@ -116,6 +116,14 @@ export function HeroSection() {
         setIsOpen(false);
     };
 
+    const finalAdvertisementUrl = settings?.advertisementBanner || `${process.env.BASE_PATH || ""}/promotionalMidia/OFERTA.jpg`;
+
+    // 1: Mobile, 2: Desktop, 3: Both (All)
+    const displayMode = settings?.advertisementBannerDisplay === 1 ? 'mobile' :
+        settings?.advertisementBannerDisplay === 2 ? 'desktop' :
+            settings?.advertisementBannerDisplay === 3 ? 'all' :
+                'mobile'; // Default to mobile to match previous hardcoded behavior if settings undefined
+
     return (
         <div className="relative h-[600px] md:h-[800px] w-full">
             <div className="absolute inset-0">
@@ -240,11 +248,11 @@ export function HeroSection() {
                 </div>
 
                 <AdvertisementBanner
-                    src={`${process.env.BASE_PATH || ""}/promotionalMidia/OFERTA.jpg`}
+                    src={finalAdvertisementUrl}
                     type="image"
                     alt="Oferta Especial"
                     withoutWrapper={true}
-                    displayMode="mobile"
+                    displayMode={displayMode}
                 />
             </div>
         </div>
