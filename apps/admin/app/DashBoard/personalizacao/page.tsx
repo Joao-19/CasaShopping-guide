@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Label, toast } from "@repo/ui";
+import { Label, toast, Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { Header } from "../components";
 import useSettings from "../../../composable/settings/useSettings";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
@@ -211,78 +211,111 @@ export default function PersonalizacaoPage() {
 
             <div className="max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* ... Header and info box ... */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    {/* ... Title ... */}
-                    <div className="p-6 border-b border-gray-100">
-                        <h2 className="text-xl font-bold text-[#1A2B3C]">Personalização da Home</h2>
-                        <p className="text-sm text-gray-500 mt-1">Gerencie os banners e textos principais da página inicial</p>
-                    </div>
+                <Tabs defaultValue="home" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 bg-gray-300 p-1 rounded-lg">
+                        <TabsTrigger
+                            value="home"
+                            className="data-[state=active]:bg-white data-[state=active]:text-[#1A2B3C] data-[state=active]:shadow-sm text-gray-500 font-medium py-2 rounded-md transition-all"
+                        >
+                            Home
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="ads"
+                            className="data-[state=active]:bg-white data-[state=active]:text-[#1A2B3C] data-[state=active]:shadow-sm text-gray-500 font-medium py-2 rounded-md transition-all"
+                        >
+                            Publicidades
+                        </TabsTrigger>
+                    </TabsList>
 
-                    <div className="p-6 space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <BannerUpload
-                                label="Banner Desktop"
-                                description="1920x1080 (Vídeo ou Imagem)"
-                                aspect="video"
-                                accept="image/*,video/mp4"
-                                currentUrl={getPreviewUrl(desktopBanner)}
-                                onFileSelect={(file) => handleFileSelect(file, 'desktop')}
-                                onRemove={() => setDesktopBanner(undefined)}
-                            />
+                    <TabsContent value="home">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="p-6 border-b border-gray-100">
+                                <h2 className="text-xl font-bold text-[#1A2B3C]">Personalização da Home</h2>
+                                <p className="text-sm text-gray-500 mt-1">Gerencie os banners e textos principais da página inicial</p>
+                            </div>
+                            <div className="p-6 space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <BannerUpload
+                                        label="Banner Desktop"
+                                        description="1920x1080 (Vídeo ou Imagem)"
+                                        aspect="video"
+                                        accept="image/*,video/mp4"
+                                        currentUrl={getPreviewUrl(desktopBanner)}
+                                        onFileSelect={(file) => handleFileSelect(file, 'desktop')}
+                                        onRemove={() => setDesktopBanner(undefined)}
+                                    />
 
-                            <div className="max-w-[300px] mx-auto w-full">
-                                <BannerUpload
-                                    label="Banner Mobile"
-                                    description="1080x1080 (Imagem)"
-                                    aspect="square"
-                                    accept="image/*"
-                                    currentUrl={getPreviewUrl(mobileBanner)}
-                                    onFileSelect={(file) => handleFileSelect(file, 'mobile')}
-                                    onRemove={() => setMobileBanner(undefined)}
-                                />
+                                    <div className="max-w-[300px] mx-auto w-full">
+                                        <BannerUpload
+                                            label="Banner Mobile"
+                                            description="1080x1080 (Imagem)"
+                                            aspect="square"
+                                            accept="image/*"
+                                            currentUrl={getPreviewUrl(mobileBanner)}
+                                            onFileSelect={(file) => handleFileSelect(file, 'mobile')}
+                                            onRemove={() => setMobileBanner(undefined)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end pt-6 border-t border-gray-100">
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={loading || uploading}
+                                        className="bg-[#1A2B3C] hover:bg-[#2C4A6B] text-white px-8 py-3 text-base font-medium rounded-lg transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {(loading || uploading) && <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
+                                        {loading || uploading ? "Salvando..." : "Salvar Alterações"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    </TabsContent>
 
-                        <div className="pt-6 border-t border-gray-100">
-                            <h3 className="text-lg font-semibold text-[#1A2B3C] mb-4">Banner de Anúncio Publicitário</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                <div className="w-full order-2 md:order-1">
-                                    <BannerUpload
-                                        label="Anúncio Desktop"
-                                        description="Exibido na Web (Formato Wide 32:9)"
-                                        aspect="banner"
-                                        accept="image/*"
-                                        currentUrl={getPreviewUrl(adsDesktop)}
-                                        onFileSelect={(file) => handleFileSelect(file, 'adsDesktop')}
-                                        onRemove={() => setAdsDesktop(undefined)}
-                                    />
+                    <TabsContent value="ads">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="p-6 border-b border-gray-100">
+                                <h2 className="text-xl font-bold text-[#1A2B3C]">Personalização de Publicidades</h2>
+                                <p className="text-sm text-gray-500 mt-1">Gerencie os banners de publicidade da página inicial</p>
+                            </div>
+                            <div className="p-6 space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                                    <div className="w-full order-2 md:order-1">
+                                        <BannerUpload
+                                            label="Anúncio Desktop"
+                                            description="1920x540 (Imagem)"
+                                            aspect="banner"
+                                            accept="image/*"
+                                            currentUrl={getPreviewUrl(adsDesktop)}
+                                            onFileSelect={(file) => handleFileSelect(file, 'adsDesktop')}
+                                            onRemove={() => setAdsDesktop(undefined)}
+                                        />
+                                    </div>
+                                    <div className="w-full order-1 md:order-2">
+                                        <BannerUpload
+                                            label="Anúncio Mobile"
+                                            description="1080x300 (Imagem)"
+                                            aspect="banner"
+                                            accept="image/*"
+                                            currentUrl={getPreviewUrl(adsMobile)}
+                                            onFileSelect={(file) => handleFileSelect(file, 'adsMobile')}
+                                            onRemove={() => setAdsMobile(undefined)}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="max-w-[300px] mx-auto w-full order-1 md:order-2">
-                                    <BannerUpload
-                                        label="Anúncio Mobile"
-                                        description="Exibido no Mobile (Quadrado)"
-                                        aspect="square"
-                                        accept="image/*"
-                                        currentUrl={getPreviewUrl(adsMobile)}
-                                        onFileSelect={(file) => handleFileSelect(file, 'adsMobile')}
-                                        onRemove={() => setAdsMobile(undefined)}
-                                    />
+                                <div className="flex justify-end pt-6 border-t border-gray-100">
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={loading || uploading}
+                                        className="bg-[#1A2B3C] hover:bg-[#2C4A6B] text-white px-8 py-3 text-base font-medium rounded-lg transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {(loading || uploading) && <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
+                                        {loading || uploading ? "Salvando..." : "Salvar Alterações"}
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
-                        <div className="flex justify-end pt-4">
-                            <button
-                                onClick={handleSave}
-                                disabled={loading || uploading}
-                                className="bg-[#1A2B3C] hover:bg-[#2C4A6B] text-white px-8 py-3 text-base font-medium rounded-lg transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                            >
-                                {(loading || uploading) && <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
-                                {loading || uploading ? "Salvando..." : "Salvar Alterações"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );

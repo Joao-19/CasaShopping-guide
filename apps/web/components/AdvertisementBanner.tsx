@@ -29,7 +29,8 @@ export function AdvertisementBanner({
             'block';
 
     // Aspect ratio and dimensions classes
-    const aspectClass = displayMode === 'mobile' ? 'aspect-square max-h-[500px]' : 'aspect-32/9 max-h-[180px]';
+    // User requested Mobile to be same format as Desktop (32:9)
+    const aspectClass = 'aspect-32/9 max-h-[180px]';
 
     const content = (
         <div className={`w-full relative rounded-2xl overflow-hidden ${aspectClass} max-w-[1920px] ${className}`}>
