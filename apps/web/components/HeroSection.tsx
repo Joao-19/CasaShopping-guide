@@ -1,25 +1,47 @@
-"use client"; // Interactive components need client directive usually, usually safe to default in Nextjs app dir components if they use event handlers/state
+"use client";
 import { IconSearch, usePopup, formatPriceTier } from "@repo/ui";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { getSettings, Settings } from "../Services/http/settings.http";
+import { useRouter } from "next/navigation";
 import { getProducts } from "../Services/http/product.http";
 import { ProductDetailsCard } from "./ProductDetailsCard";
-import { useRouter } from "next/navigation";
 import { AdvertisementBanner } from "./AdvertisementBanner";
 
 export function HeroSection() {
     const basePath = process.env.BASE_PATH || "";
-    const backGroundVideoLink = `${basePath}/backgroundsHome/MudaTudoCamapnhaWEB.mp4`;
-    const backGroundImageLink = `${basePath}/backgroundsHome/FUNDO.jpg`;
-    const mobileBackGroundImageLink = `${basePath}/backgroundsHome/FUNDO-MOBILE.jpg`;
-    const mobileBackGroundVideoLink = `${basePath}/backgroundsHome/MudaTudoCamapnhaMOBILE.mp4`;
+    // Default Fallbacks
+    const defaultDesktopVideo = `${basePath}/backgroundsHome/MudaTudoCamapnhaWEB.mp4`;
+    const defaultDesktopImage = `${basePath}/backgroundsHome/FUNDO.jpg`;
+    const defaultMobileImage = `${basePath}/backgroundsHome/FUNDO-MOBILE.jpg`;
+    const defaultMobileVideo = `${basePath}/backgroundsHome/MudaTudoCamapnhaMOBILE.mp4`;
+
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [settings, setSettings] = useState<Settings | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { showPopup } = usePopup();
     const router = useRouter();
+
+    useEffect(() => {
+        getSettings().then(setSettings).catch(console.error);
+    }, []);
+
+    // Determine Desktop Background
+    const desktopUrl = settings?.backgroundDesktop;
+    const isDesktopVideo = desktopUrl
+        ? (desktopUrl.toLowerCase().endsWith('.mp4') || desktopUrl.toLowerCase().endsWith('.webm'))
+        : !!defaultDesktopVideo;
+    const finalDesktopUrl = desktopUrl || defaultDesktopVideo || defaultDesktopImage;
+
+    // Determine Mobile Background
+    const mobileUrl = settings?.backgroundMobile;
+    const isMobileVideo = mobileUrl
+        ? (mobileUrl.toLowerCase().endsWith('.mp4') || mobileUrl.toLowerCase().endsWith('.webm'))
+        : !!defaultMobileVideo;
+    const finalMobileUrl = mobileUrl || defaultMobileVideo || defaultMobileImage;
 
     const homeText = {
         // title: "Encontre o melhor da decoração e design para o seu lar.",
@@ -99,10 +121,9 @@ export function HeroSection() {
             <div className="absolute inset-0">
                 {/* Desktop Background */}
                 <div className="hidden md:block absolute inset-0">
-                    {backGroundVideoLink ? (
+                    {isDesktopVideo ? (
                         <video
-                            src={backGroundVideoLink}
-                            poster={backGroundImageLink}
+                            src={finalDesktopUrl}
                             className="w-full h-full object-cover"
                             loop
                             playsInline
@@ -111,7 +132,7 @@ export function HeroSection() {
                         />
                     ) : (
                         <img
-                            src={backGroundImageLink}
+                            src={finalDesktopUrl}
                             alt="Background"
                             className="w-full h-full object-cover"
                         />
@@ -120,10 +141,9 @@ export function HeroSection() {
 
                 {/* Mobile Background */}
                 <div className="block md:hidden absolute inset-0">
-                    {mobileBackGroundVideoLink ? (
+                    {isMobileVideo ? (
                         <video
-                            src={mobileBackGroundVideoLink}
-                            poster={mobileBackGroundImageLink}
+                            src={finalMobileUrl}
                             className="w-full h-full object-cover"
                             loop
                             playsInline
@@ -132,7 +152,7 @@ export function HeroSection() {
                         />
                     ) : (
                         <img
-                            src={mobileBackGroundImageLink}
+                            src={finalMobileUrl}
                             alt="Background Mobile"
                             className="w-full h-full object-cover"
                         />
