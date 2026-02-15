@@ -389,7 +389,7 @@ export function CreateProductForm({
 
                 if (img.file) {
                     // New file, upload it
-                    const key = await uploadImage(img.file, storeId);
+                    const key = await uploadImage(img.file, { storeId });
                     finalImages.push({ path: key, index: i });
                 } else if (img.path) {
                     // Existing image (URL), extract key if needed, or backend handles it?

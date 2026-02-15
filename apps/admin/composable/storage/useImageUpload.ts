@@ -9,7 +9,10 @@ export function useImageUpload() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const uploadImage = async (file: File, storeId: string) => {
+  const uploadImage = async (
+    file: File,
+    context: { storeId?: string; folder?: string },
+  ) => {
     setUploading(true);
     setError(null);
     try {
@@ -56,7 +59,8 @@ export function useImageUpload() {
       const { data } = await axios.post(
         `${API_URL}/storage/upload-url`,
         {
-          storeId,
+          storeId: context.storeId,
+          folder: context.folder,
           filename: finalFilename,
           contentType: finalFile.type,
           contentLength: finalFile.size,
@@ -64,7 +68,7 @@ export function useImageUpload() {
         {
           withCredentials: true, // IMPORTANT: Send HttpOnly cookies
           headers: token ? { Authorization: `Bearer ${token}` } : {}, // Add header only if we have visible token
-        }
+        },
       );
 
       const { url, key } = data;
@@ -84,7 +88,7 @@ export function useImageUpload() {
         const errorText = await uploadResponse.text();
         console.error("MinIO Upload Error:", errorText);
         throw new Error(
-          `Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`
+          `Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`,
         );
       }
 

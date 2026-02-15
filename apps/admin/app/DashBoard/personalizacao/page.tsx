@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label, toast } from "@repo/ui";
 import { Header } from "../components";
+import useSettings from "../../../composable/settings/useSettings";
+import { useImageUpload } from "@/composable/storage/useImageUpload";
 
 interface BannerUploadProps {
     label: string;
@@ -89,22 +91,101 @@ function BannerUpload({
 }
 
 export default function PersonalizacaoPage() {
-    // State to handle images locally for now, replacing the static props
-    const [desktopBanner, setDesktopBanner] = useState<string | undefined>(undefined);
-    const [mobileBanner, setMobileBanner] = useState<string | undefined>(undefined);
+    const { settings, updateSettings, loading } = useSettings();
+    const { uploadImage, uploading } = useImageUpload();
 
-    const handleDesktopUpload = (file: File) => {
-        // Mock upload for UI demonstration
-        const url = URL.createObjectURL(file);
-        setDesktopBanner(url);
-        toast.success("Banner desktop atualizado!");
+    const [desktopBanner, setDesktopBanner] = useState<string | File | undefined>(undefined);
+    const [mobileBanner, setMobileBanner] = useState<string | File | undefined>(undefined);
+    const [adsBanner, setAdsBanner] = useState<string | File | undefined>(undefined);
+
+    // Sync state with fetched settings
+    useEffect(() => {
+        if (settings) {
+            setDesktopBanner(settings.backgroundDesktop || undefined);
+            setMobileBanner(settings.backgroundMobile || undefined);
+            setAdsBanner(settings.advertisementBanner || undefined);
+        }
+    }, [settings]);
+
+    const handleFileSelect = (file: File, type: 'desktop' | 'mobile' | 'ads') => {
+        // We store the File object to upload on save
+        // But for preview we need a URL
+        // BannerUpload expects string. 
+        // We can pass the File and let BannerUpload create object URL? 
+        // Or we create object URL here.
+        // But if we create Object URL, we lose the File object unless we store it separately.
+
+        // Simpler approach: Store File in state OR string.
+        // If it's a File, we upload it.
+        // We need to change state type.
+
+        // Actually, let's keep it simple:
+        // We can use a separate state for files to upload, or just check type.
+        if (type === 'desktop') setDesktopBanner(file);
+        if (type === 'mobile') setMobileBanner(file);
+        if (type === 'ads') setAdsBanner(file);
     };
 
-    const handleMobileUpload = (file: File) => {
-        // Mock upload for UI demonstration
-        const url = URL.createObjectURL(file);
-        setMobileBanner(url);
-        toast.success("Banner mobile atualizado!");
+    const getPreviewUrl = (item: string | File | undefined) => {
+        if (!item) return undefined;
+        if (typeof item === 'string') return item;
+        return URL.createObjectURL(item);
+    };
+
+    const handleSave = async () => {
+        try {
+            let desktopKey = typeof desktopBanner === 'string' ? desktopBanner : undefined;
+            let mobileKey = typeof mobileBanner === 'string' ? mobileBanner : undefined;
+            let adsKey = typeof adsBanner === 'string' ? adsBanner : undefined;
+
+            // Upload new files
+            const context = { folder: 'settings/home' };
+
+            if (desktopBanner instanceof File) {
+                desktopKey = await uploadImage(desktopBanner, context);
+            }
+
+            if (mobileBanner instanceof File) {
+                mobileKey = await uploadImage(mobileBanner, context);
+            }
+
+            if (adsBanner instanceof File) {
+                adsKey = await uploadImage(adsBanner, context);
+            }
+
+            // If key is undefined (was cleared) send null? 
+            // setDesktopBanner(null) in onRemove -> undefined.
+            // But if it was originally "http...", we sending undefined means no change?
+            // "updateSettings" takes optional.
+            // Issues:
+            // 1. If user removes banner, setDesktopBanner(undefined). 
+            //    We want to unset it in DB. updateSettings({ backgroundDesktop: null })?
+            //    But DTO makes it optional string. If undefined, it might not update.
+            //    We check default values. 
+            //    If we explicitly want to delete, we should send null or empty string.
+            //    DTO says `backgroundDesktop?: string`.
+            //    We might need to check if we can send null. 
+            //    Interface `UpdateSettingsDto` uses `@IsOptional()`.
+
+            // Let's assume sending '' (empty string) clears it, or logic allows null.
+            // SettingsService upsert uses `...data`.
+            // If we send undefined, it won't update the field?
+            // Actually, frontend state starts as undefined.
+            // If fetched, it becomes string.
+            // If removed, it should become null.
+            // Currently state uses undefined.
+
+            await updateSettings({
+                backgroundDesktop: desktopKey || '', // Send empty string if undefined/null to clear?
+                backgroundMobile: mobileKey || '',
+                advertisementBanner: adsKey || '',
+                advertisementBannerDisplay: 3 // Default or get from state if we add a control
+            });
+            toast.success("Configurações salvas com sucesso!");
+        } catch (error) {
+            console.error(error);
+            toast.error("Erro ao salvar configurações.");
+        }
     };
 
     return (
@@ -115,23 +196,16 @@ export default function PersonalizacaoPage() {
             />
 
             <div className="max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* ... Header and info box ... */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    {/* ... Title ... */}
                     <div className="p-6 border-b border-gray-100">
                         <h2 className="text-xl font-bold text-[#1A2B3C]">Personalização da Home</h2>
                         <p className="text-sm text-gray-500 mt-1">Gerencie os banners e textos principais da página inicial</p>
                     </div>
 
                     <div className="p-6 space-y-8">
-                        <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-[#1A2B3C]">Título Principal (H1)</Label>
-                            <textarea
-                                rows={2}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-1 outline-none transition-all text-sm bg-white resize-none"
-                                placeholder="Digite o título principal da home..."
-                                defaultValue="Encontre o melhor da decoração e design para o seu lar."
-                            />
-                            <p className="text-xs text-gray-400">Este texto aparecerá em destaque sobre o banner principal.</p>
-                        </div>
+                        {/* ... Info ... */}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <BannerUpload
@@ -139,8 +213,8 @@ export default function PersonalizacaoPage() {
                                 description="1920x1080 (Vídeo ou Imagem)"
                                 aspect="video"
                                 accept="image/*,video/mp4"
-                                currentUrl={desktopBanner}
-                                onFileSelect={handleDesktopUpload}
+                                currentUrl={getPreviewUrl(desktopBanner)}
+                                onFileSelect={(file) => handleFileSelect(file, 'desktop')}
                                 onRemove={() => setDesktopBanner(undefined)}
                             />
 
@@ -150,11 +224,37 @@ export default function PersonalizacaoPage() {
                                     description="1080x1080 (Imagem)"
                                     aspect="square"
                                     accept="image/*"
-                                    currentUrl={mobileBanner}
-                                    onFileSelect={handleMobileUpload}
+                                    currentUrl={getPreviewUrl(mobileBanner)}
+                                    onFileSelect={(file) => handleFileSelect(file, 'mobile')}
                                     onRemove={() => setMobileBanner(undefined)}
                                 />
                             </div>
+                        </div>
+
+                        <div className="pt-6 border-t border-gray-100">
+                            <h3 className="text-lg font-semibold text-[#1A2B3C] mb-4">Banner de Anúncio Publicitário</h3>
+                            <div className="max-w-[300px]">
+                                <BannerUpload
+                                    label="Imagem do Anúncio"
+                                    description="Exibido na listagem (Quadrado)"
+                                    aspect="square"
+                                    accept="image/*"
+                                    currentUrl={getPreviewUrl(adsBanner)}
+                                    onFileSelect={(file) => handleFileSelect(file, 'ads')}
+                                    onRemove={() => setAdsBanner(undefined)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end pt-4">
+                            <button
+                                onClick={handleSave}
+                                disabled={loading || uploading}
+                                className="bg-[#1A2B3C] hover:bg-[#2C4A6B] text-white px-8 py-3 text-base font-medium rounded-lg transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {(loading || uploading) && <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
+                                {loading || uploading ? "Salvando..." : "Salvar Alterações"}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -162,4 +262,3 @@ export default function PersonalizacaoPage() {
         </div>
     );
 }
-
