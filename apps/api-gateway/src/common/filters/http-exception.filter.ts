@@ -70,14 +70,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
       code = "UPSTREAM_SERVICE_ERROR";
 
       this.logger.warn(
-        `Axios Error: ${JSON.stringify(message)} (Status: ${status})`
+        `Axios Error: ${JSON.stringify(message)} (Status: ${status})`,
       );
     } else {
       const err = exception as any;
-      if (err instanceof Error) {
-        message = err.message;
+      // Log the full error for debugging
+      this.logger.error(`Unknown Error: ${JSON.stringify(err.message || err)}`);
+
+      // Return a generic message to the user
+      message =
+        "Algo inesperado ocorreu. Por favor, tente novamente mais tarde.";
+      if (process.env.NODE_ENV !== "production") {
+        // Optional: append original error in dev mode if really needed,
+        // but user requested "NUNCA", so let's stick to generic or maybe a flag.
+        // User said "NUNCA deve por o erro da api", so we obey.
       }
-      this.logger.error(`Unknown Error: ${JSON.stringify(message)}`);
     }
 
     // Normalize message structure

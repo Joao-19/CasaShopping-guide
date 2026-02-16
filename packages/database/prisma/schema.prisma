@@ -140,6 +140,9 @@ model Settings {
   advertisementBannerDesktop String? // Link do banner desktop (Wide 32:9)
   advertisementBannerDisplay Int     @default(3) // 1: Mobile, 2: Desktop, 3: Both
 
+  homeTitleBold   String?
+  homeTitleNormal String?
+
   updatedAt DateTime @updatedAt
 
   @@map("settings")

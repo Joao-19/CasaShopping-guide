@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Label, toast, Tabs, TabsContent, TabsList, TabsTrigger, Checkbox } from "@repo/ui";
+import { Label, toast, Tabs, TabsContent, TabsList, TabsTrigger, Checkbox, BaseInput } from "@repo/ui";
 import { Header } from "../components";
 import useSettings from "../../../composable/settings/useSettings";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
@@ -139,6 +139,8 @@ export default function PersonalizacaoPage() {
     const [mobileBanner, setMobileBanner] = useState<string | File | undefined>(undefined);
     const [adsDesktop, setAdsDesktop] = useState<string | File | undefined>(undefined);
     const [adsMobile, setAdsMobile] = useState<string | File | undefined>(undefined);
+    const [homeTitleBold, setHomeTitleBold] = useState("");
+    const [homeTitleNormal, setHomeTitleNormal] = useState("");
 
     // Checkbox states for advertisement display
     const [showDesktopAds, setShowDesktopAds] = useState(false);
@@ -152,6 +154,8 @@ export default function PersonalizacaoPage() {
             setMobileBanner(s.backgroundMobile || undefined);
             setAdsDesktop(s.advertisementBannerDesktop || undefined);
             setAdsMobile(s.advertisementBannerMobile || undefined);
+            setHomeTitleBold(s.homeTitleBold || "");
+            setHomeTitleNormal(s.homeTitleNormal || "");
 
             const display = s.advertisementBannerDisplay || 0;
             // 1 = Mobile, 2 = Desktop, 3 = Both
@@ -216,7 +220,11 @@ export default function PersonalizacaoPage() {
                 backgroundMobile: mobileKey || '',
                 advertisementBannerDesktop: adsDesktopKey || '',
                 advertisementBannerMobile: adsMobileKey || '',
-                advertisementBannerDisplay: display
+                advertisementBannerDesktop: adsDesktopKey || '',
+                advertisementBannerMobile: adsMobileKey || '',
+                advertisementBannerDisplay: display,
+                homeTitleBold,
+                homeTitleNormal
             } as any);
             toast.success("Configurações salvas com sucesso!");
         } catch (error) {
@@ -252,9 +260,25 @@ export default function PersonalizacaoPage() {
 
                     <TabsContent value="home" className="space-y-6 animate-in fade-in-50 duration-300">
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="p-6 border-b border-gray-100">
-                                <h2 className="text-xl font-bold text-[#1A2B3C]">Personalização da Home</h2>
-                                <p className="text-sm text-gray-500 mt-1">Gerencie os banners e textos principais da página inicial</p>
+                            <div className="p-6 border-b border-gray-100 space-y-4">
+                                <div>
+                                    <h2 className="text-xl font-bold text-[#1A2B3C]">Personalização da Home</h2>
+                                    <p className="text-sm text-gray-500 mt-1">Gerencie os banners e textos principais da página inicial</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <BaseInput
+                                        label="Título (Negrito)"
+                                        value={homeTitleBold}
+                                        onChange={(e) => setHomeTitleBold(e.target.value)}
+                                        placeholder="Ex: Encontre o melhor"
+                                    />
+                                    <BaseInput
+                                        label="Título (Normal)"
+                                        value={homeTitleNormal}
+                                        onChange={(e) => setHomeTitleNormal(e.target.value)}
+                                        placeholder="Ex: da decoração e design para o seu lar."
+                                    />
+                                </div>
                             </div>
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3 text-blue-800 mx-6 mt-6">
                                 <div className="shrink-0 mt-0.5">

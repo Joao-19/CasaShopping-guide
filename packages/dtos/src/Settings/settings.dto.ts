@@ -6,8 +6,9 @@ export interface Settings {
   backgroundMobile?: string | null;
   advertisementBannerDesktop?: string | null;
   advertisementBannerMobile?: string | null;
-  advertisementBannerDisplay: number;
-  updatedAt: Date;
+  advertisementBannerDisplay?: number;
+  homeTitleBold?: string | null;
+  homeTitleNormal?: string | null;
 }
 
 export class UpdateSettingsDto {
@@ -30,4 +31,12 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsInt()
   advertisementBannerDisplay?: number;
+
+  @IsOptional()
+  @IsString()
+  homeTitleBold?: string;
+
+  @IsOptional()
+  @IsString()
+  homeTitleNormal?: string;
 }

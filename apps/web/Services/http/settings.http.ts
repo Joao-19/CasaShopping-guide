@@ -7,6 +7,8 @@ export interface Settings {
   advertisementBannerDesktop: string | null;
   advertisementBannerMobile: string | null;
   advertisementBannerDisplay: number;
+  homeTitleBold: string | null;
+  homeTitleNormal: string | null;
 }
 
 export const getSettings = async (): Promise<Settings> => {

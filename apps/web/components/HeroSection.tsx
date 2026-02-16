@@ -43,6 +43,9 @@ export function HeroSection() {
         : !!defaultMobileVideo;
     const finalMobileUrl = mobileUrl || defaultMobileVideo || defaultMobileImage;
 
+    const titleBold = settings?.homeTitleBold || "Encontre o melhor ";
+    const titleNormal = settings?.homeTitleNormal || "da decoração e design para o seu lar.";
+
     const homeText = {
         // title: "Encontre o melhor da decoração e design para o seu lar.",
         title: "Liquidação muda tudo",
@@ -166,8 +169,8 @@ export function HeroSection() {
             <div className="absolute inset-0 max-w-7xl mx-auto px-4 md:px-8 flex flex-col justify-center pt-20 z-20">
                 <div className="max-w-3xl w-full group">
                     <h1 className="text-white text-4xl md:text-[42px] leading-[1.1] font-sans mb-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
-                        <span className="font-bold block text-[rgb(255,255,255)]">Encontre o melhor </span>
-                        <span className="font-light">da decoração e design para o seu lar.</span>
+                        <span className="font-bold block text-[rgb(255,255,255)]">{titleBold}</span>
+                        <span className="font-light">{titleNormal}</span>
                     </h1>
                     <div className="relative w-full max-w-xl z-50" ref={wrapperRef}>
                         <div className="bg-white rounded-[16px] h-auto py-3 md:py-0 md:h-[72px] w-full flex items-center px-4 md:px-[24px] gap-3 md:gap-[16px] shadow-2xl cursor-text transition-transform hover:scale-[1.01] duration-300">
