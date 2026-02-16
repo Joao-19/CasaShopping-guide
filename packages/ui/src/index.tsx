@@ -35,5 +35,6 @@ export * from "./context/PopupContext";
 export * from "./components/GlobalPopup";
 export * from "./components/google-tag-manager";
 export * from "./components/tabs";
+export * from "./components/checkbox";
 export * from "./lib/utils";
 

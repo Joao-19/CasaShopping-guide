@@ -242,10 +242,10 @@ export function HeroSection() {
                 </div>
 
                 <div className="w-full">
-                    {/* Mobile Banner: Show if displayMode is 1 (Mobile) or 3 (Both) */}
-                    {(settings?.advertisementBannerDisplay === 1 || settings?.advertisementBannerDisplay === 3) && (
+                    {/* Mobile Banner: Show if displayMode is 1 (Mobile) or 3 (Both) AND image exists */}
+                    {(settings?.advertisementBannerDisplay === 1 || settings?.advertisementBannerDisplay === 3) && settings?.advertisementBannerMobile && (
                         <AdvertisementBanner
-                            src={settings?.advertisementBannerMobile || `${process.env.BASE_PATH || ""}/promotionalMidia/OFERTA.jpg`}
+                            src={settings.advertisementBannerMobile}
                             type="image"
                             alt="Oferta Especial Mobile"
                             withoutWrapper={true}
@@ -253,10 +253,10 @@ export function HeroSection() {
                         />
                     )}
 
-                    {/* Desktop Banner: Show if displayMode is 2 (Desktop) or 3 (Both) */}
-                    {(settings?.advertisementBannerDisplay === 2 || settings?.advertisementBannerDisplay === 3) && (
+                    {/* Desktop Banner: Show if displayMode is 2 (Desktop) or 3 (Both) AND image exists */}
+                    {(settings?.advertisementBannerDisplay === 2 || settings?.advertisementBannerDisplay === 3) && settings?.advertisementBannerDesktop && (
                         <AdvertisementBanner
-                            src={settings?.advertisementBannerDesktop || `${process.env.BASE_PATH || ""}/promotionalMidia/OFERTA.jpg`}
+                            src={settings.advertisementBannerDesktop}
                             type="image"
                             alt="Oferta Especial Desktop"
                             withoutWrapper={true}

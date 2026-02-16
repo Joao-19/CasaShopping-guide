@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Label, toast, Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
+import { Label, toast, Tabs, TabsContent, TabsList, TabsTrigger, Checkbox } from "@repo/ui";
 import { Header } from "../components";
 import useSettings from "../../../composable/settings/useSettings";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
@@ -137,6 +137,10 @@ export default function PersonalizacaoPage() {
     const [adsDesktop, setAdsDesktop] = useState<string | File | undefined>(undefined);
     const [adsMobile, setAdsMobile] = useState<string | File | undefined>(undefined);
 
+    // Checkbox states for advertisement display
+    const [showDesktopAds, setShowDesktopAds] = useState(false);
+    const [showMobileAds, setShowMobileAds] = useState(false);
+
     // Sync state with fetched settings
     useEffect(() => {
         if (settings) {
@@ -145,6 +149,11 @@ export default function PersonalizacaoPage() {
             setMobileBanner(s.backgroundMobile || undefined);
             setAdsDesktop(s.advertisementBannerDesktop || undefined);
             setAdsMobile(s.advertisementBannerMobile || undefined);
+
+            const display = s.advertisementBannerDisplay || 0;
+            // 1 = Mobile, 2 = Desktop, 3 = Both
+            setShowMobileAds(display === 1 || display === 3);
+            setShowDesktopAds(display === 2 || display === 3);
         }
     }, [settings]);
 
@@ -187,13 +196,18 @@ export default function PersonalizacaoPage() {
                 adsMobileKey = await uploadImage(adsMobile, context);
             }
 
+            // Calculate display flag
+            let display = 0;
+            if (showMobileAds) display += 1;
+            if (showDesktopAds) display += 2;
+
             // If key is undefined (was cleared) send null or empty string to match previous logic
             await updateSettings({
                 backgroundDesktop: desktopKey || '',
                 backgroundMobile: mobileKey || '',
                 advertisementBannerDesktop: adsDesktopKey || '',
                 advertisementBannerMobile: adsMobileKey || '',
-                advertisementBannerDisplay: 3 // Default
+                advertisementBannerDisplay: display
             } as any);
             toast.success("Configurações salvas com sucesso!");
         } catch (error) {
@@ -227,11 +241,23 @@ export default function PersonalizacaoPage() {
                         </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="home">
+                    <TabsContent value="home" className="space-y-6 animate-in fade-in-50 duration-300">
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="p-6 border-b border-gray-100">
                                 <h2 className="text-xl font-bold text-[#1A2B3C]">Personalização da Home</h2>
                                 <p className="text-sm text-gray-500 mt-1">Gerencie os banners e textos principais da página inicial</p>
+                            </div>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3 text-blue-800 mx-6 mt-6">
+                                <div className="shrink-0 mt-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-info"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
+                                </div>
+                                <div className="text-sm">
+                                    <strong className="font-semibold block mb-1">Guia de Formatos - Home</strong>
+                                    <ul className="list-disc pl-4 space-y-1 text-blue-700/90">
+                                        <li><strong>Banner Desktop:</strong> Recomendado 1920x1080px (16:9). Suporta Vídeo (MP4) ou Imagem.</li>
+                                        <li><strong>Banner Mobile:</strong> Recomendado 1080x1080px (1:1 Quadrado). Apenas Imagem.</li>
+                                    </ul>
+                                </div>
                             </div>
                             <div className="p-6 space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -271,15 +297,40 @@ export default function PersonalizacaoPage() {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="ads">
+                    <TabsContent value="ads" className="space-y-6 animate-in fade-in-50 duration-300">
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="p-6 border-b border-gray-100">
                                 <h2 className="text-xl font-bold text-[#1A2B3C]">Personalização de Publicidades</h2>
                                 <p className="text-sm text-gray-500 mt-1">Gerencie os banners de publicidade da página inicial</p>
                             </div>
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3 text-yellow-800 mx-6 mt-6">
+                                <div className="shrink-0 mt-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
+                                </div>
+                                <div className="text-sm">
+                                    <strong className="font-semibold block mb-1">Atenção aos Formatos - Publicidade</strong>
+                                    <p className="text-yellow-800/90 mb-2">
+                                        Os anúncios de publicidade possuem formato <strong>Wide (Esticado/Faixa)</strong> tanto no Desktop quanto no Mobile.
+                                    </p>
+                                    <ul className="list-disc pl-4 space-y-1 text-yellow-800/90">
+                                        <li><strong>Anúncio Desktop:</strong> Obrigatório <strong>1920x540px</strong> (32:9).</li>
+                                        <li><strong>Anúncio Mobile:</strong> Obrigatório <strong>1080x300px</strong> (32:9). Não use imagens quadradas!</li>
+                                    </ul>
+                                </div>
+                            </div>
                             <div className="p-6 space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                    <div className="w-full order-2 md:order-1">
+                                    <div className="w-full order-2 md:order-1 space-y-4">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="desktop-ads"
+                                                checked={showDesktopAds}
+                                                onCheckedChange={(checked) => setShowDesktopAds(checked as boolean)}
+                                            />
+                                            <Label htmlFor="desktop-ads" className="text-[#1A2B3C] font-medium cursor-pointer">
+                                                Ativar Anúncio Desktop
+                                            </Label>
+                                        </div>
                                         <BannerUpload
                                             label="Anúncio Desktop"
                                             description="1920x540 (Imagem)"
@@ -290,7 +341,17 @@ export default function PersonalizacaoPage() {
                                             onRemove={() => setAdsDesktop(undefined)}
                                         />
                                     </div>
-                                    <div className="w-full order-1 md:order-2">
+                                    <div className="w-full order-1 md:order-2 space-y-4">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="mobile-ads"
+                                                checked={showMobileAds}
+                                                onCheckedChange={(checked) => setShowMobileAds(checked as boolean)}
+                                            />
+                                            <Label htmlFor="mobile-ads" className="text-[#1A2B3C] font-medium cursor-pointer">
+                                                Ativar Anúncio Mobile
+                                            </Label>
+                                        </div>
                                         <BannerUpload
                                             label="Anúncio Mobile"
                                             description="1080x300 (Imagem)"
