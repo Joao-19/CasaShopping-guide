@@ -246,7 +246,7 @@ export function HeroSection() {
                     {(settings?.advertisementBannerDisplay === 1 || settings?.advertisementBannerDisplay === 3) && settings?.advertisementBannerMobile && (
                         <AdvertisementBanner
                             src={settings.advertisementBannerMobile}
-                            type="image"
+                            type={settings.advertisementBannerMobile.endsWith('.mp4') ? 'video' : 'image'}
                             alt="Oferta Especial Mobile"
                             withoutWrapper={true}
                             displayMode="mobile"
@@ -257,7 +257,7 @@ export function HeroSection() {
                     {(settings?.advertisementBannerDisplay === 2 || settings?.advertisementBannerDisplay === 3) && settings?.advertisementBannerDesktop && (
                         <AdvertisementBanner
                             src={settings.advertisementBannerDesktop}
-                            type="image"
+                            type={settings.advertisementBannerDesktop.endsWith('.mp4') ? 'video' : 'image'}
                             alt="Oferta Especial Desktop"
                             withoutWrapper={true}
                             displayMode="desktop"

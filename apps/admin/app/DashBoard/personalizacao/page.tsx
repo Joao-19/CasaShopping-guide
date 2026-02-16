@@ -12,6 +12,7 @@ interface BannerUploadProps {
     aspect: "video" | "square" | "banner";
     accept: string;
     currentUrl?: string;
+    isVideo?: boolean;
     onFileSelect: (file: File) => void;
     onRemove: () => void;
 }
@@ -22,11 +23,13 @@ function BannerUpload({
     aspect,
     accept,
     currentUrl,
+    isVideo,
     onFileSelect,
     onRemove
 }: BannerUploadProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const isVideo = currentUrl?.toLowerCase().endsWith('.mp4') || currentUrl?.toLowerCase().endsWith('.webm');
+    // Use prop if provided, otherwise check extension (fallback for strings)
+    const activeIsVideo = isVideo ?? (currentUrl?.toLowerCase().endsWith('.mp4') || currentUrl?.toLowerCase().endsWith('.webm'));
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -73,7 +76,7 @@ function BannerUpload({
                     className={`relative ${aspectClass} rounded-lg border border-gray-200 overflow-hidden group bg-gray-50 cursor-pointer hover:border-[#1A2B3C] transition-colors`}
                     title="Clique para alterar"
                 >
-                    {isVideo ? (
+                    {activeIsVideo ? (
                         <video
                             src={currentUrl}
                             className="object-cover w-full h-full pointer-events-none"
@@ -119,7 +122,7 @@ function BannerUpload({
                 {aspect === 'video'
                     ? "Suporta JPG, PNG, MP4. Recomendado: 1920x1080px."
                     : aspect === 'banner'
-                        ? "Suporta JPG ou PNG. Formato expandido (32:9)."
+                        ? "Suporta JPG, PNG ou MP4. Formato expandido (32:9)."
                         : "Suporta JPG ou PNG. Recomendado: 1080x1080px."}
             </p>
         </div>
@@ -168,6 +171,12 @@ export default function PersonalizacaoPage() {
         if (!item) return undefined;
         if (typeof item === 'string') return item;
         return URL.createObjectURL(item);
+    };
+
+    const checkIsVideo = (item: string | File | undefined) => {
+        if (!item) return false;
+        if (typeof item === 'string') return item.toLowerCase().endsWith('.mp4') || item.toLowerCase().endsWith('.webm');
+        return item.type.startsWith('video/');
     };
 
     const handleSave = async () => {
@@ -223,19 +232,19 @@ export default function PersonalizacaoPage() {
                 subtitle="Gerenciamento de personalização do sistema."
             />
 
-            <div className="max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
                 {/* ... Header and info box ... */}
                 <Tabs defaultValue="home" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 bg-gray-300 p-1 rounded-lg">
+                    <TabsList className="inline-flex w-auto bg-gray-200 h-auto p-1.5 rounded-xl mb-8 gap-2">
                         <TabsTrigger
                             value="home"
-                            className="data-[state=active]:bg-white data-[state=active]:text-[#1A2B3C] data-[state=active]:shadow-sm text-gray-500 font-medium py-2 rounded-md transition-all"
+                            className="h-11 px-6 data-[state=active]:bg-white data-[state=active]:text-[#1A2B3C] data-[state=active]:shadow-sm text-gray-500 font-medium rounded-lg transition-all"
                         >
                             Home
                         </TabsTrigger>
                         <TabsTrigger
                             value="ads"
-                            className="data-[state=active]:bg-white data-[state=active]:text-[#1A2B3C] data-[state=active]:shadow-sm text-gray-500 font-medium py-2 rounded-md transition-all"
+                            className="h-11 px-6 data-[state=active]:bg-white data-[state=active]:text-[#1A2B3C] data-[state=active]:shadow-sm text-gray-500 font-medium rounded-lg transition-all"
                         >
                             Publicidades
                         </TabsTrigger>
@@ -255,7 +264,7 @@ export default function PersonalizacaoPage() {
                                     <strong className="font-semibold block mb-1">Guia de Formatos - Home</strong>
                                     <ul className="list-disc pl-4 space-y-1 text-blue-700/90">
                                         <li><strong>Banner Desktop:</strong> Recomendado 1920x1080px (16:9). Suporta Vídeo (MP4) ou Imagem.</li>
-                                        <li><strong>Banner Mobile:</strong> Recomendado 1080x1080px (1:1 Quadrado). Apenas Imagem.</li>
+                                        <li><strong>Banner Mobile:</strong> Recomendado 1080x1080px (1:1 Quadrado). Suporta Vídeo ou Imagem.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -265,8 +274,9 @@ export default function PersonalizacaoPage() {
                                         label="Banner Desktop"
                                         description="1920x1080 (Vídeo ou Imagem)"
                                         aspect="video"
-                                        accept="image/*,video/mp4"
+                                        accept=".jpg, .jpeg, .png, .mp4"
                                         currentUrl={getPreviewUrl(desktopBanner)}
+                                        isVideo={checkIsVideo(desktopBanner)}
                                         onFileSelect={(file) => handleFileSelect(file, 'desktop')}
                                         onRemove={() => setDesktopBanner(undefined)}
                                     />
@@ -274,10 +284,11 @@ export default function PersonalizacaoPage() {
                                     <div className="max-w-[300px] mx-auto w-full">
                                         <BannerUpload
                                             label="Banner Mobile"
-                                            description="1080x1080 (Imagem)"
+                                            description="1080x1080 (Vídeo ou Imagem)"
                                             aspect="square"
-                                            accept="image/*"
+                                            accept=".jpg, .jpeg, .png, .mp4"
                                             currentUrl={getPreviewUrl(mobileBanner)}
+                                            isVideo={checkIsVideo(mobileBanner)}
                                             onFileSelect={(file) => handleFileSelect(file, 'mobile')}
                                             onRemove={() => setMobileBanner(undefined)}
                                         />
@@ -313,14 +324,14 @@ export default function PersonalizacaoPage() {
                                         Os anúncios de publicidade possuem formato <strong>Wide (Esticado/Faixa)</strong> tanto no Desktop quanto no Mobile.
                                     </p>
                                     <ul className="list-disc pl-4 space-y-1 text-yellow-800/90">
-                                        <li><strong>Anúncio Desktop:</strong> Obrigatório <strong>1920x540px</strong> (32:9).</li>
-                                        <li><strong>Anúncio Mobile:</strong> Obrigatório <strong>1080x300px</strong> (32:9). Não use imagens quadradas!</li>
+                                        <li><strong>Anúncio Desktop:</strong> Obrigatório <strong>1920x540px</strong> (32:9). Suporta Vídeo.</li>
+                                        <li><strong>Anúncio Mobile:</strong> Obrigatório <strong>1080x300px</strong> (32:9). Suporta Vídeo.</li>
                                     </ul>
                                 </div>
                             </div>
                             <div className="p-6 space-y-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                    <div className="w-full order-2 md:order-1 space-y-4">
+                                <div className="flex flex-col space-y-8">
+                                    <div className="w-full space-y-4">
                                         <div className="flex items-center space-x-2">
                                             <Checkbox
                                                 id="desktop-ads"
@@ -333,15 +344,16 @@ export default function PersonalizacaoPage() {
                                         </div>
                                         <BannerUpload
                                             label="Anúncio Desktop"
-                                            description="1920x540 (Imagem)"
+                                            description="1920x540 (Vídeo ou Imagem)"
                                             aspect="banner"
-                                            accept="image/*"
+                                            accept=".jpg, .jpeg, .png, .mp4"
                                             currentUrl={getPreviewUrl(adsDesktop)}
+                                            isVideo={checkIsVideo(adsDesktop)}
                                             onFileSelect={(file) => handleFileSelect(file, 'adsDesktop')}
                                             onRemove={() => setAdsDesktop(undefined)}
                                         />
                                     </div>
-                                    <div className="w-full order-1 md:order-2 space-y-4">
+                                    <div className="w-full space-y-4">
                                         <div className="flex items-center space-x-2">
                                             <Checkbox
                                                 id="mobile-ads"
@@ -354,10 +366,11 @@ export default function PersonalizacaoPage() {
                                         </div>
                                         <BannerUpload
                                             label="Anúncio Mobile"
-                                            description="1080x300 (Imagem)"
+                                            description="1080x300 (Vídeo ou Imagem)"
                                             aspect="banner"
-                                            accept="image/*"
+                                            accept=".jpg, .jpeg, .png, .mp4"
                                             currentUrl={getPreviewUrl(adsMobile)}
+                                            isVideo={checkIsVideo(adsMobile)}
                                             onFileSelect={(file) => handleFileSelect(file, 'adsMobile')}
                                             onRemove={() => setAdsMobile(undefined)}
                                         />
