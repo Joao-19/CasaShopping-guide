@@ -1,12 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "./prisma.service";
 import { Settings } from "@repo/database";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class SettingsService {
-  private readonly STORAGE_PUBLIC_URL = process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService
+  ) {}
 
-  constructor(private prisma: PrismaService) {}
+  private get STORAGE_PUBLIC_URL(): string {
+    return this.configService.get<string>("STORAGE_URL") || "http://localhost:9000/casashopping";
+  }
 
   private extractKey(url: string | null | undefined): string | null {
     if (!url) return null;
