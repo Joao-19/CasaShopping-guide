@@ -15,8 +15,10 @@ echo "Checking DockerHub login..."
 # Load variables from .env automatically to export them for Docker Compose
 if [ -f .env ]; then
     echo "Loading environment variables from .env..."
-    # Robust way to load .env, handling comments and empty lines
-    export $(grep -v '^#' .env | xargs) >/dev/null 2>&1
+    # Robust way to load .env, handling comments, empty lines, and quoted strings
+    set -a
+    source .env
+    set +a
 fi
 
 # Use env vars or fallback to loaded values (if .env loading failed for some reason)
