@@ -81,6 +81,7 @@ services:
       - STORE_SERVICE_URL=http://stores-service:3005
       - PRODUCTS_SERVICE_URL=http://products-service:3006
       - STORAGE_SERVICE_URL=http://storage-service:3007
+      - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
       - JWT_SECRET=${JWT_SECRET}
       - REPO_PASS=${DEPLOY_PASSWORD}
       - DOCKERHUB_PASSWORD=${DOCKERHUB_PASSWORD}

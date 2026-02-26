@@ -4,7 +4,7 @@ import { Settings } from "@repo/database";
 
 @Injectable()
 export class SettingsService {
-  private readonly STORAGE_PUBLIC_URL = "http://localhost:9000/casashopping";
+  private readonly STORAGE_PUBLIC_URL = process.env.STORAGE_URL || "http://localhost:9000/casashopping";
 
   constructor(private prisma: PrismaService) {}
 
