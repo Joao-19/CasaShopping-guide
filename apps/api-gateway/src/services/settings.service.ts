@@ -44,8 +44,6 @@ export class SettingsService {
         cleanKey = key;
       }
     }
-    console.log(111111111111, this.STORAGE_PUBLIC_URL);
-    
     cleanKey = cleanKey.startsWith("/") ? cleanKey.slice(1) : cleanKey;
     return `${this.STORAGE_PUBLIC_URL}/${cleanKey}`;
   }
