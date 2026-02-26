@@ -9,6 +9,7 @@ export * from "./UnloggedToolbar";
 export * from "./UnloggedFooter";
 export * from "./cards/FormCard";
 export * from "./inputs/ImageUpload";
+export { default as BaseInput } from "./inputs/BaseInput";
 export * from "./table";
 export * from "./confirmation-card";
 export * from "./Texts/BaseText";
@@ -34,5 +35,7 @@ export * from "./components/drawer";
 export * from "./context/PopupContext";
 export * from "./components/GlobalPopup";
 export * from "./components/google-tag-manager";
+export * from "./components/tabs";
+export * from "./components/checkbox";
 export * from "./lib/utils";
 

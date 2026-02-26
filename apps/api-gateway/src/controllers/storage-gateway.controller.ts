@@ -23,6 +23,7 @@ export class StorageGatewayController {
       type: "object",
       properties: {
         storeId: { type: "string" },
+        folder: { type: "string" },
         filename: { type: "string" },
         contentType: { type: "string" },
         contentLength: { type: "number" },
@@ -32,12 +33,13 @@ export class StorageGatewayController {
   async getUploadUrl(
     @Body()
     body: {
-      storeId: string;
+      storeId?: string;
+      folder?: string;
       filename: string;
       contentType: string;
       contentLength: number;
     },
-    @Req() req: Request
+    @Req() req: Request,
   ) {
     const token =
       req.cookies["access_token"] || req.headers.authorization?.split(" ")[1];
@@ -46,7 +48,8 @@ export class StorageGatewayController {
       body.filename,
       body.contentType,
       body.contentLength,
-      token || ""
+      token || "",
+      body.folder,
     );
   }
 
