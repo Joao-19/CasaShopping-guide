@@ -44,6 +44,8 @@ export class SettingsService {
         cleanKey = key;
       }
     }
+    console.log(111111111111, this.STORAGE_PUBLIC_URL);
+    
     cleanKey = cleanKey.startsWith("/") ? cleanKey.slice(1) : cleanKey;
     return `${this.STORAGE_PUBLIC_URL}/${cleanKey}`;
   }
@@ -61,6 +63,20 @@ export class SettingsService {
         },
       });
     }
+
+    console.log(settings)
+const formatterd = {
+      ...settings,
+      backgroundDesktop: this.transformToUrl(settings.backgroundDesktop),
+      backgroundMobile: this.transformToUrl(settings.backgroundMobile),
+      advertisementBannerDesktop: this.transformToUrl(
+        settings.advertisementBannerDesktop,
+      ),
+      advertisementBannerMobile: this.transformToUrl(
+        settings.advertisementBannerMobile,
+      ),
+    };
+    console.log(formatterd)
 
     return {
       ...settings,
