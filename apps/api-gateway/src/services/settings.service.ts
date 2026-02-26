@@ -8,18 +8,38 @@ export class SettingsService {
 
   constructor(private prisma: PrismaService) {}
 
-  private transformToUrl(key: string | null): string | null {
-    if (!key) return null;
-    if (key.startsWith("http")) return key;
-    return `${this.STORAGE_PUBLIC_URL}/${key}`;
-  }
-
   private extractKey(url: string | null | undefined): string | null {
     if (!url) return null;
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      try {
+        const parsed = new URL(url);
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        if (parts[0] === "casashopping") return parts.slice(1).join("/");
+        return parts.join("/");
+      } catch {
+        return url;
+      }
+    }
     if (url.startsWith(this.STORAGE_PUBLIC_URL)) {
       return url.replace(`${this.STORAGE_PUBLIC_URL}/`, "");
     }
     return url;
+  }
+
+  private transformToUrl(key: string | null): string | null {
+    if (!key) return null;
+    let cleanKey = key;
+    if (key.startsWith("http://") || key.startsWith("https://")) {
+      try {
+        const parsed = new URL(key);
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        cleanKey = parts[0] === "casashopping" ? parts.slice(1).join("/") : parts.join("/");
+      } catch {
+        cleanKey = key;
+      }
+    }
+    cleanKey = cleanKey.startsWith("/") ? cleanKey.slice(1) : cleanKey;
+    return `${this.STORAGE_PUBLIC_URL}/${cleanKey}`;
   }
 
   async getSettings(): Promise<Settings> {
