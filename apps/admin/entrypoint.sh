@@ -55,4 +55,6 @@ done
 echo "Environment variable replacement complete."
 echo "Starting Next.js..."
 
-exec "$@"
+# Switch to 'nextjs' user to run the application
+# This ensures successful startup after root modifications
+exec su-exec nextjs:nodejs "$@"
