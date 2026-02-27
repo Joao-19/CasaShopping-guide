@@ -30,6 +30,7 @@ ENV NEXT_PUBLIC_BASE_PATH=APP_NEXT_PUBLIC_BASE_PATH
 ARG NEXT_PUBLIC_WEB_URL
 ENV NEXT_PUBLIC_WEB_URL=APP_NEXT_PUBLIC_WEB_URL
 ENV NEXT_PUBLIC_GTM_ID=APP_NEXT_PUBLIC_GTM_ID
+ENV NEXT_PUBLIC_GA4_ID=APP_NEXT_PUBLIC_GA4_ID
 
 RUN corepack enable
 RUN npm install -g turbo
@@ -37,9 +38,11 @@ RUN turbo run build --filter=admin
 
 FROM node:20-alpine AS runner
 WORKDIR /app
+# Install su-exec (needs root)
+RUN apk add --no-cache su-exec
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-USER nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static

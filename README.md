@@ -262,6 +262,7 @@ O arquivo `.env` é fundamental para a configuração dos serviços. Abaixo est�
 | Variável             | Descrição                              | Exemplo       |
 | :------------------- | :------------------------------------- | :------------ |
 | `NEXT_PUBLIC_GTM_ID` | ID do Container do Google Tag Manager. | `GTM-XXXXXXX` |
+| `NEXT_PUBLIC_GA4_ID` | ID do Google Analytics 4.               | `G-XXXXXXXX`  |
 
 ---
 

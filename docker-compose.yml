@@ -253,6 +253,7 @@ services:
       - INTERNAL_API_URL=http://api-gateway:3000
       - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
+      - NEXT_PUBLIC_GA4_ID=${NEXT_PUBLIC_GA4_ID}
     depends_on:
       - api-gateway
     networks:
@@ -285,6 +286,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-changeme_secret}
       - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
+      - NEXT_PUBLIC_GA4_ID=${NEXT_PUBLIC_GA4_ID}
     depends_on:
       - api-gateway
     networks:

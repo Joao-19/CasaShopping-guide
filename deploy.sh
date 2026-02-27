@@ -44,12 +44,13 @@ fi
 # This removes the "variable is not set" warning
 # Ensure NEXT_PUBLIC_GTM_ID is set (fallback to empty if missing)
 export NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID:-}"
+export NEXT_PUBLIC_GA4_ID="${NEXT_PUBLIC_GA4_ID:-}"
 
 # 2. Build Updated Images
 # FORCE WEB_BASE_PATH="" (Root) and ADMIN_BASE_PATH="/admin"
 # This guarantees that the built images always match the production URL structure,
 # ignoring any local environment pollution.
-WEB_BASE_PATH="" ADMIN_BASE_PATH="/admin" NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID}" docker compose build $BUILD_ARGS
+WEB_BASE_PATH="" ADMIN_BASE_PATH="/admin" NEXT_PUBLIC_GTM_ID="${NEXT_PUBLIC_GTM_ID}" NEXT_PUBLIC_GA4_ID="${NEXT_PUBLIC_GA4_ID}" docker compose build $BUILD_ARGS
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Build failed! Aborting deployment.${NC}"

@@ -19,7 +19,7 @@ COPY --from=turbo-builder /app/out/full/ .
 RUN apt-get update && apt-get install -y openssl
 RUN corepack enable
 RUN npm install -g turbo
-RUN cd packages/database && npx prisma generate
+RUN cd packages/database && (npx prisma generate || (sleep 5 && npx prisma generate) || (sleep 10 && npx prisma generate))
 RUN turbo run build --filter=stores-service
 
 ARG NEXT_PUBLIC_API_URL

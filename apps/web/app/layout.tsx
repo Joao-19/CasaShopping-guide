@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 import { GlobalErrorListener } from "../components/GlobalErrorListener";
-import { GoogleTagManagerScript, GoogleTagManagerNoscript } from "@repo/ui";
+import { GoogleTagManagerScript, GoogleTagManagerNoscript, GoogleAnalytics4Script } from "@repo/ui";
 
 
 const geistSans = localFont({
@@ -26,11 +26,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID || "";
+  const gaId = process.env.NEXT_PUBLIC_GA4_ID || "";
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <GoogleTagManagerScript gtmId={gtmId} />
+        <GoogleAnalytics4Script gaId={gaId} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <GoogleTagManagerNoscript gtmId={gtmId} />
