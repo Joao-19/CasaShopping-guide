@@ -47,15 +47,22 @@ VARS="$VARS NEXT_PUBLIC_GA4_ID"
 
 if [ -z "$VARS" ]; then
 
-find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -o -name "*.css" \) -not -path "*/node_modules/*" | while read -r file; do
-    # Dynamic replacement: Find all environment variables starting with NEXT_PUBLIC_
-    # This enforces "Runtime Environment Priority" for ALL public variables automatically.
-    if [ -n "$VARS" ]; then
-        for var in $VARS; do
-            replace_env "$file" "$var"
-        done
-    fi
-done
+# Optimized replacement: Find only files that actually contain placeholders
+echo "Searching for files requiring replacement..."
+FILES=$(find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -o -name "*.css" \) -exec grep -l "APP_NEXT_PUBLIC_" {} + 2>/dev/null || true)
+
+if [ -n "$FILES" ]; then
+    echo "Found files to process. Starting replacement..."
+    for file in $FILES; do
+        if [ -n "$VARS" ]; then
+            for var in $VARS; do
+                replace_env "$file" "$var"
+            done
+        fi
+    done
+else
+    echo "No files found requiring replacement."
+fi
 
 echo "Environment variable replacement complete."
 echo "Starting Next.js..."
