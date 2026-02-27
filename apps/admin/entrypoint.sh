@@ -43,26 +43,14 @@ echo "Searching in $TARGET_DIR..."
 # Pre-calculate vars to avoid calling env 1000 times
 # Using 'env' and 'cut' to get variable names
 VARS=$(env | grep '^NEXT_PUBLIC_' | cut -d= -f1)
-VARS="$VARS NEXT_PUBLIC_GA4_ID"
+VARS="$VARS NEXT_PUBLIC_GTM_ID NEXT_PUBLIC_GA4_ID"
 
-if [ -z "$VARS" ]; then
-
-# Optimized replacement: Find only files that actually contain placeholders
-echo "Searching for files requiring replacement..."
-FILES=$(find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -o -name "*.css" \) -exec grep -l "APP_NEXT_PUBLIC_" {} + 2>/dev/null || true)
-
-if [ -n "$FILES" ]; then
-    echo "Found files to process. Starting replacement..."
-    for file in $FILES; do
-        if [ -n "$VARS" ]; then
-            for var in $VARS; do
-                replace_env "$file" "$var"
-            done
-        fi
+echo "Replacing variables in files..."
+find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -o -name "*.css" \) -not -path "*/node_modules/*" | while read -r file; do
+    for var in $VARS; do
+        replace_env "$file" "$var"
     done
-else
-    echo "No files found requiring replacement."
-fi
+done
 
 echo "Environment variable replacement complete."
 echo "Starting Next.js..."
