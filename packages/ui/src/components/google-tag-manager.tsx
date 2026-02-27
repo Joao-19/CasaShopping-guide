@@ -49,3 +49,30 @@ export function GoogleTagManagerNoscript({ gtmId }: { gtmId: string }) {
         </>
     );
 }
+
+export function GoogleAnalytics4Script({ gaId }: { gaId: string }) {
+    if (!gaId) {
+        return null;
+    }
+
+    return (
+        <>
+            <Script
+                src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+                strategy="afterInteractive"
+            />
+            <Script
+                id="ga4-script"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                    __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${gaId}');
+          `,
+                }}
+            />
+        </>
+    );
+}
