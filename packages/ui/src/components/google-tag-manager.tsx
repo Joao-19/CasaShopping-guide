@@ -51,7 +51,7 @@ export function GoogleTagManagerNoscript({ gtmId }: { gtmId: string }) {
 }
 
 export function GoogleAnalytics4Script({ gaId }: { gaId: string }) {
-    if (!gaId) {
+    if (!gaId || gaId.startsWith("APP_")) {
         return null;
     }
 

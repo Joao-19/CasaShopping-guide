@@ -47,6 +47,9 @@ else
     echo "Found variables to replace: $(echo "$VARS" | tr '\n' ' ')"
 fi
 
+# Explicitly check for GA4 and GTM to ensure they are replaced even if not in the automatic list
+VARS="$VARS NEXT_PUBLIC_GTM_ID NEXT_PUBLIC_GA4_ID"
+
 find "$TARGET_DIR" -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" -o -name "*.css" \) -not -path "*/node_modules/*" | while read -r file; do
     # Dynamic replacement: Find all environment variables starting with NEXT_PUBLIC_
     # This enforces "Runtime Environment Priority" for ALL public variables automatically.
