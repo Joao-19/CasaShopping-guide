@@ -15,6 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - casashopping-net
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d casashopping"]
       interval: 5s
@@ -54,6 +55,7 @@ services:
     networks:
       - casashopping-net
       - web-proxy
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -103,6 +105,7 @@ services:
     networks:
       - casashopping-net
       - web-proxy
+    restart: unless-stopped
     volumes:
       - ./.env:/app/.env
     healthcheck:
@@ -143,6 +146,7 @@ services:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+    restart: unless-stopped
     volumes:
       - ./.env:/app/.env
     healthcheck:
@@ -177,6 +181,7 @@ services:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+    restart: unless-stopped
     volumes:
       - ./.env:/app/.env
     healthcheck:
@@ -196,6 +201,7 @@ services:
       context: .
       dockerfile: apps/storage/Dockerfile
     container_name: casashopping-storage-service
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -239,6 +245,7 @@ services:
         - BASE_PATH=${WEB_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
     container_name: casashopping-web
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -273,6 +280,7 @@ services:
         - BASE_PATH=${ADMIN_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
     container_name: casashopping-admin
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -300,6 +308,7 @@ services:
       context: .
       dockerfile: apps/stores/Dockerfile
     container_name: casashopping-stores
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -339,6 +348,7 @@ services:
       context: .
       dockerfile: apps/products/Dockerfile
     container_name: casashopping-products
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
