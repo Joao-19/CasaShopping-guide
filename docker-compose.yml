@@ -1,10 +1,28 @@
 version: "3.8"
 
 services:
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/nginx/ssl/cloudflare:/etc/nginx/ssl/cloudflare:ro
+    depends_on:
+      - api-gateway
+      - web
+      - admin
+    networks:
+      - web-proxy
+
   # --- BANCO DE DADOS ---
   database:
     image: postgres:15-alpine
     container_name: casashopping-db
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
@@ -15,6 +33,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - casashopping-net
+      - web-proxy
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d casashopping"]
       interval: 5s
@@ -28,6 +47,7 @@ services:
       dockerfile: apps/migration/Dockerfile
     image: joaovvv/casashopping-migration:latest
     container_name: casashopping-migration
+    restart: on-failure
     labels:
       - com.centurylinklabs.watchtower.enable=true
     environment:
@@ -42,6 +62,7 @@ services:
   storage:
     image: minio/minio:latest
     container_name: casashopping-storage
+    restart: unless-stopped
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -67,6 +88,7 @@ services:
       context: .
       dockerfile: apps/api-gateway/Dockerfile
     container_name: casashopping-gateway
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -122,6 +144,7 @@ services:
       context: .
       dockerfile: apps/auth/Dockerfile
     container_name: casashopping-auth
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -162,6 +185,7 @@ services:
       context: .
       dockerfile: apps/users/Dockerfile
     container_name: casashopping-users
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -196,6 +220,7 @@ services:
       context: .
       dockerfile: apps/storage/Dockerfile
     container_name: casashopping-storage-service
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -239,6 +264,7 @@ services:
         - BASE_PATH=${WEB_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
     container_name: casashopping-web
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -273,6 +299,7 @@ services:
         - BASE_PATH=${ADMIN_BASE_PATH:-}
         - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
     container_name: casashopping-admin
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -300,6 +327,7 @@ services:
       context: .
       dockerfile: apps/stores/Dockerfile
     container_name: casashopping-stores
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -339,6 +367,7 @@ services:
       context: .
       dockerfile: apps/products/Dockerfile
     container_name: casashopping-products
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -375,6 +404,7 @@ services:
   watchtower:
     image: containrrr/watchtower
     container_name: casashopping-watchtower
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     volumes:
@@ -393,7 +423,6 @@ services:
     command: --cleanup --label-enable --http-api-periodic-polls --include-stopped --revive-stopped
     networks:
       - casashopping-net
-    restart: unless-stopped
 
 volumes:
   postgres_data:
