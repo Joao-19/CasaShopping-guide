@@ -66,14 +66,28 @@ Imagens: o slide guarda a **key** do storage; `GET` resolve pra URL pública
 - [x] Web: `NewsletterCarouselModal` (Embla, autoplay, reduced-motion, ESC, 1×/sessão) + montagem na home
 - [x] Gates: build `dtos`/`api-gateway`; type-check admin/web limpo (newsletter); lint 0 erros; `madge --circular` sem ciclos
 - [x] Fix colateral: chaves duplicadas no `handleSave` da personalização
-- [x] **Migration aplicada** no schema `casashopping` (2026-06-18) — `migrate status: up to date`
+- [x] **Migration aplicada** no database `casashopping` (2026-06-18) — `migrate status: up to date`
+- [x] Fix env: `apps/api-gateway/.env` ganhou `DATABASE_URL` próprio (→ casashopping);
+      sem ele, `/settings` e `/newsletter` (tratados no gateway) davam 500 herdando o `.env` da raiz
 
-### Pendente
+### Pendente — testes (e2e)
+> Status: API no ar; `GET /products` (proxy) OK. `GET /settings` e `/newsletter`
+> davam 500 por causa do `DATABASE_URL` do gateway — corrigido no `.env`, mas
+> **falta reiniciar o api-gateway** pra carregar o env e então rodar o roundtrip.
+
+- [ ] **Reiniciar o api-gateway** pra aplicar o novo `DATABASE_URL`
+- [ ] `GET /newsletter` retorna o default (`enabled:false`, `slides:[]`) sem 500
+- [ ] `PUT /newsletter` cria slide(s) + `enabled:true` e persiste (replace)
+- [ ] `GET /newsletter` pós-PUT: ordem dos slides e `imageUrl` resolvida pra URL pública
+- [ ] Admin: aba "Newsletter" salva (upload real no MinIO, folder `newsletter/`)
+- [ ] Web: modal auto-open abre na home com `enabled:true` (autoplay, prev/next, ESC, 1×/sessão)
+
+### Pendente — outros
 - [ ] **Segurança:** proteger as escritas de admin (`PUT /newsletter`,
       `PUT /settings`, `POST /storage/*`) com `JwtAuthGuard + RolesGuard`
       `@Roles("admin")` — hoje as 3 estão abertas (consistente entre si)
-- [ ] Smoke test e2e com serviços de pé (admin salva → web abre modal)
-- [ ] Validar upload real no MinIO (folder `newsletter/`) e resolução de URL
+- [ ] **Alinhar `.env` da raiz** (`postgres@.../postgres` → `.../casashopping?schema=public`)
+      pra o runner `apps/migration`/frontends não apontarem pro DB do weplanner
 - [ ] (Opcional) Persistir "já visto" além da sessão / re-exibir ao trocar slides
 - [ ] (Opcional) Imagem mobile dedicada por slide (hoje 1 imagem, aspect 21/9)
 - [ ] (Opcional) Decompor `personalizacao/page.tsx` (430 linhas; `BannerUpload` inline)
