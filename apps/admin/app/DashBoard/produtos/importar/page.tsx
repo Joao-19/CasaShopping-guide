@@ -70,6 +70,7 @@ export default function ImportarProdutosPage() {
           importing={im.importing}
           progress={im.progress}
           onUpdateRow={im.updateRow}
+          onBulkSetStore={im.bulkSetStore}
           onImport={im.runImport}
           onBack={() => im.reset()}
         />

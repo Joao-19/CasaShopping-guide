@@ -14,12 +14,14 @@ import { PRODUCT_CATEGORIES } from "../-lib/categories";
 import type { CommitProgress } from "../-lib/commit";
 import type { RowDiagnostics, ResolvedRow } from "../-lib/types";
 import { StoreResolveCell } from "./StoreResolveCell";
+import { BulkStoreToolbar } from "./BulkStoreToolbar";
 
+// Mesmos rótulos do form de criação de produto (CreateProductForm).
 const PRICE_LABELS: Record<PriceTier, string> = {
-  [PriceTier.LOW]: "Baixo",
-  [PriceTier.MEDIUM]: "Médio",
-  [PriceTier.HIGH]: "Alto",
-  [PriceTier.ON_REQUEST]: "Sem valor",
+  [PriceTier.LOW]: "Baixo ($)",
+  [PriceTier.MEDIUM]: "Médio ($$)",
+  [PriceTier.HIGH]: "Alto ($$$)",
+  [PriceTier.ON_REQUEST]: "Sem Valor",
 };
 
 const SEVERITY_DOT: Record<RowDiagnostics["severity"], string> = {
@@ -41,6 +43,7 @@ interface PreviewStepProps {
   importing: boolean;
   progress: CommitProgress | null;
   onUpdateRow: (index: number, patch: Partial<ResolvedRow>) => void;
+  onBulkSetStore: (storeId: string, onlyUnresolved: boolean) => void;
   onImport: () => void;
   onBack: () => void;
 }
@@ -54,6 +57,7 @@ export function PreviewStep({
   importing,
   progress,
   onUpdateRow,
+  onBulkSetStore,
   onImport,
   onBack,
 }: PreviewStepProps) {
@@ -79,6 +83,8 @@ export function PreviewStep({
           </p>
         </div>
       </div>
+
+      <BulkStoreToolbar onApply={onBulkSetStore} />
 
       <div className="border border-gray-100 rounded-lg overflow-x-auto">
         <Table>
@@ -170,16 +176,31 @@ export function PreviewStep({
                       />
                     )}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap text-sm text-gray-600">
-                    {resolvedImageCount(row)}/{row.images.length || 0}
+                  <TableCell
+                    className={`whitespace-nowrap text-sm ${
+                      resolvedImageCount(row) === 0
+                        ? "text-red-600 font-medium"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    {resolvedImageCount(row) === 0
+                      ? "sem foto"
+                      : `${resolvedImageCount(row)}/${row.images.length}`}
                   </TableCell>
                   <TableCell className="max-w-[220px]">
                     {diag.messages.length === 0 ? (
                       <span className="text-xs text-green-600">ok</span>
                     ) : (
-                      <ul className="text-xs text-gray-500 list-disc list-inside">
+                      <ul className="text-xs list-disc list-inside">
                         {diag.messages.map((m, i) => (
-                          <li key={i}>{m}</li>
+                          <li
+                            key={i}
+                            className={
+                              m.level === "error" ? "text-red-600" : "text-amber-600"
+                            }
+                          >
+                            {m.text}
+                          </li>
                         ))}
                       </ul>
                     )}

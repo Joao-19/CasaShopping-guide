@@ -101,6 +101,21 @@ export function useImport() {
     [],
   );
 
+  // Aplica uma loja a várias linhas de uma vez (evita editar 700×).
+  // `onlyUnresolved` = só nas linhas cuja loja não foi resolvida.
+  const bulkSetStore = useCallback(
+    (storeId: string, onlyUnresolved: boolean) => {
+      setRows((prev) =>
+        prev.map((r) =>
+          onlyUnresolved && r.store.status === "resolved"
+            ? r
+            : { ...r, store: { status: "resolved", value: storeId, raw: r.store.raw } },
+        ),
+      );
+    },
+    [],
+  );
+
   const importableRows = useMemo(() => rows.filter(isRowImportable), [rows]);
   const blockedCount = rows.length - importableRows.length;
 
@@ -162,6 +177,7 @@ export function useImport() {
     onFiles,
     confirmMapping,
     updateRow,
+    bulkSetStore,
     runImport,
     reset,
   };

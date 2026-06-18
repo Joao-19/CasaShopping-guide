@@ -9,7 +9,7 @@ const FIELD_LABELS: Record<ProductField, string> = {
   price: "Faixa de preço",
   categories: "Categorias",
   tags: "Tags",
-  storeName: "Loja *",
+  storeName: "Loja",
   isFeatured: "Destaque",
   image: "Imagem (nome do arquivo)",
 };
@@ -57,9 +57,10 @@ export function MappingStep({ headers, suggestions, onConfirm, onBack }: Mapping
     );
   };
 
+  // Só o Nome é exigido aqui. A Loja pode não existir como coluna (ex.:
+  // planilha de uma loja só) e ser definida em massa no preview.
   const nameMapped = mapping.find((m) => m.field === "name")?.header;
-  const storeMapped = mapping.find((m) => m.field === "storeName")?.header;
-  const canConfirm = !!nameMapped && !!storeMapped;
+  const canConfirm = !!nameMapped;
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-4">
@@ -67,7 +68,8 @@ export function MappingStep({ headers, suggestions, onConfirm, onBack }: Mapping
         <h2 className="text-lg font-bold text-gray-800">Confirme as colunas</h2>
         <p className="text-sm text-gray-500">
           Detectamos as colunas automaticamente. Ajuste o que estiver errado.
-          Nome e Loja são obrigatórios.
+          Só o Nome é obrigatório aqui — a Loja pode ser definida em massa na
+          revisão (útil quando todos os produtos são da mesma loja).
         </p>
       </div>
 

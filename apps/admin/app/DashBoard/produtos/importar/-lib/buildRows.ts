@@ -66,38 +66,49 @@ export function buildResolvedRows(
 // Classifica a linha para o semáforo do grid. Erros bloqueiam o import
 // da linha; warnings deixam importar mas sinalizam.
 export function diagnoseRow(row: ResolvedRow): RowDiagnostics {
-  const messages: string[] = [];
+  const messages: RowDiagnostics["messages"] = [];
   let severity: RowDiagnostics["severity"] = "ok";
 
-  const bump = (level: RowDiagnostics["severity"], msg: string) => {
-    messages.push(msg);
-    if (level === "error") severity = "error";
-    else if (level === "warning" && severity !== "error") severity = "warning";
+  // block: erro vermelho que IMPEDE o import da linha.
+  const block = (text: string) => {
+    messages.push({ level: "error", text });
+    severity = "error";
+  };
+  // warn: alerta amarelo, não bloqueia.
+  const warn = (text: string) => {
+    messages.push({ level: "warning", text });
+    if (severity !== "error") severity = "warning";
+  };
+  // note: mensagem vermelha que NÃO bloqueia (ex.: sem foto). Mantém a
+  // linha importável, só sobe o semáforo para "warning".
+  const note = (text: string) => {
+    messages.push({ level: "error", text });
+    if (severity === "ok") severity = "warning";
   };
 
-  if (!row.name) bump("error", "Nome do produto vazio");
-  if (!row.description) bump("warning", "Sem descrição");
+  if (!row.name) block("Nome do produto vazio");
+  if (!row.description) warn("Sem descrição");
 
   if (row.store.status === "missing")
-    bump("error", `Loja não encontrada: "${row.store.raw}"`);
+    block(`Loja não encontrada: "${row.store.raw}"`);
   else if (row.store.status === "ambiguous")
-    bump("error", `Loja ambígua: "${row.store.raw}" — confirme a sugestão`);
+    block(`Loja ambígua: "${row.store.raw}" — confirme a sugestão`);
 
   if (row.categories.status === "missing")
-    bump("error", `Categoria não reconhecida: "${row.categories.raw}"`);
+    block(`Categoria não reconhecida: "${row.categories.raw}"`);
   else if (row.categories.status === "ambiguous")
-    bump("warning", `Categoria parcial: "${row.categories.raw}"`);
+    warn(`Categoria parcial: "${row.categories.raw}"`);
 
   if (row.price.status === "missing")
-    bump("error", `Preço não reconhecido: "${row.price.raw}"`);
+    block(`Preço não reconhecido: "${row.price.raw}"`);
   else if (row.price.status === "ambiguous")
-    bump("warning", "Preço assumido como 'sem valor' — confirme");
+    warn("Preço assumido como 'sem valor' — confirme");
 
   const matchedImages = row.images.filter((i) => i.status === "resolved");
   const ambiguousImages = row.images.filter((i) => i.status === "ambiguous");
-  if (matchedImages.length === 0) bump("warning", "Sem foto casada");
+  if (matchedImages.length === 0) note("Sem foto — será criado sem imagem");
   if (ambiguousImages.length > 0)
-    bump("warning", `${ambiguousImages.length} foto(s) ambígua(s)`);
+    warn(`${ambiguousImages.length} foto(s) ambígua(s)`);
 
   return { severity, messages };
 }

@@ -63,7 +63,15 @@ export interface ResolvedRow {
 // Semáforo da linha no grid de preview.
 export type RowSeverity = "ok" | "warning" | "error";
 
+// Mensagem com nível próprio para colorir — o nível da mensagem é
+// independente de a linha bloquear ou não o import (ex.: "sem foto" é
+// vermelho mas não bloqueia).
+export interface DiagnosticMessage {
+  level: "warning" | "error";
+  text: string;
+}
+
 export interface RowDiagnostics {
   severity: RowSeverity;
-  messages: string[];
+  messages: DiagnosticMessage[];
 }
