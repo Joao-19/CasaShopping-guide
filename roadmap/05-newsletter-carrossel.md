@@ -80,25 +80,32 @@ Imagens: o slide guarda a **key** do storage; `GET` resolve pra URL pública
 
 ## Banco (resolvido em 2026-06-18)
 
-Postgres em `localhost:5432` é **compartilhado** entre projetos (rpg_gaming e
-weplanner já moram aqui). Não havia DB/schema `casashopping`. Decisão:
-casashopping fica **isolado num schema `casashopping` dentro do database
-`postgres`** (o `public` do `postgres` é do weplanner — não usar).
+Postgres em `localhost:5432` é **compartilhado** entre projetos, cada um no seu
+**database dedicado** (`rpg_gaming`, `weplanner_test`). Faltava o database
+`casashopping` — que **todos os `apps/*/.env` dos backends já esperam**
+(`.../casashopping?schema=public`). Por isso o Products falhava no init do
+Prisma (`PrismaClientInitializationError`): o database não existia.
 
-- `DATABASE_URL="postgresql://admin:admin123@localhost:5432/postgres?schema=casashopping"`
-  (atualizado em `.env` da raiz **e** `packages/database/.env` — ambos gitignored).
-- O user `admin` não tinha permissão de criar schema no DB `postgres`, então o
-  schema foi criado pelo superuser com owner admin:
-  ```bash
-  docker exec postgres psql -U postgres -d postgres \
-    -c "CREATE SCHEMA IF NOT EXISTS casashopping AUTHORIZATION admin;"
-  ```
-- Migrations aplicadas com `prisma migrate deploy` → `migrate status: up to date`.
-  Tabelas (incl. `newsletter_slides`) e colunas `newsletter*` no `settings`
-  confirmadas no schema.
+Correção (convenção do servidor = 1 database por projeto):
+```bash
+docker exec postgres psql -U postgres -c "CREATE DATABASE casashopping OWNER admin;"
+cd packages/database && npx prisma migrate deploy   # -> up to date
+```
+- `DATABASE_URL` dos backends e do `packages/database/.env`:
+  `postgresql://admin:admin123@localhost:5432/casashopping?schema=public`.
+- Tabelas (incl. `newsletter_slides`) e colunas `newsletter*` no `settings`
+  confirmadas no database.
+- **Tentativa anterior descartada:** cheguei a criar um *schema* `casashopping`
+  dentro do database `postgres` — abordagem errada (os `.env` dos apps querem um
+  *database*, não schema). Esse schema foi removido (`DROP SCHEMA ... CASCADE`),
+  sem afetar o weplanner (que mora no `public` do `postgres`).
+- **Atenção:** o `.env` da **raiz** está como
+  `postgresql://postgres@127.0.0.1:5432/postgres` (sem `casashopping`) — aponta
+  pro DB do weplanner. Os backends não usam ele (têm `.env` próprio), mas o
+  runner `apps/migration`/frontends podem. Recomendado alinhar pra
+  `.../casashopping?schema=public`.
 
-Reverter (se precisar): `DROP SCHEMA casashopping CASCADE;` (afeta só o
-casashopping, não toca no weplanner).
+Reverter tudo (se precisar): `DROP DATABASE casashopping;`.
 
 Em produção, a migration roda pelo runner `apps/migration` / pipeline de deploy.
 
