@@ -5,6 +5,7 @@ import { Label, toast, Tabs, TabsContent, TabsList, TabsTrigger, Checkbox, BaseI
 import { Header } from "../components";
 import useSettings from "../../../composable/settings/useSettings";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
+import { NewsletterManager } from "./components/NewsletterManager";
 
 interface BannerUploadProps {
     label: string;
@@ -220,8 +221,6 @@ export default function PersonalizacaoPage() {
                 backgroundMobile: mobileKey || '',
                 advertisementBannerDesktop: adsDesktopKey || '',
                 advertisementBannerMobile: adsMobileKey || '',
-                advertisementBannerDesktop: adsDesktopKey || '',
-                advertisementBannerMobile: adsMobileKey || '',
                 advertisementBannerDisplay: display,
                 homeTitleBold,
                 homeTitleNormal
@@ -255,6 +254,12 @@ export default function PersonalizacaoPage() {
                             className="h-11 px-6 data-[state=active]:bg-white data-[state=active]:text-[#1A2B3C] data-[state=active]:shadow-sm text-gray-500 font-medium rounded-lg transition-all"
                         >
                             Publicidades
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="newsletter"
+                            className="h-11 px-6 data-[state=active]:bg-white data-[state=active]:text-[#1A2B3C] data-[state=active]:shadow-sm text-gray-500 font-medium rounded-lg transition-all"
+                        >
+                            Newsletter
                         </TabsTrigger>
                     </TabsList>
 
@@ -412,6 +417,10 @@ export default function PersonalizacaoPage() {
                                 </div>
                             </div>
                         </div>
+                    </TabsContent>
+
+                    <TabsContent value="newsletter" className="space-y-6 animate-in fade-in-50 duration-300">
+                        <NewsletterManager />
                     </TabsContent>
                 </Tabs>
             </div>
