@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { downloadTemplate } from "../-lib/template";
 
 interface UploadStepProps {
   parsing: boolean;
@@ -54,12 +55,21 @@ export function UploadStep({ parsing, onSubmit }: UploadStepProps) {
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
-      <div>
-        <h2 className="text-lg font-bold text-gray-800">Importar produtos</h2>
-        <p className="text-sm text-gray-500">
-          Envie a planilha e o zip de imagens. A ferramenta detecta as
-          colunas, casa as fotos e mostra um preview antes de salvar.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-bold text-gray-800">Importar produtos</h2>
+          <p className="text-sm text-gray-500">
+            Envie a planilha e o zip de imagens. A ferramenta detecta as
+            colunas, casa as fotos e mostra um preview antes de salvar.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={downloadTemplate}
+          className="shrink-0 text-sm text-[#1A2B3C] font-medium underline underline-offset-2 hover:text-[#2c455d]"
+        >
+          Baixar modelo .xlsx
+        </button>
       </div>
 
       <FilePicker

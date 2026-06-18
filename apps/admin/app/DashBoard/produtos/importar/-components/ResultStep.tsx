@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { BulkCreateResult } from "@repo/dtos";
+import type { UploadFailure } from "../-lib/commit";
 
 interface ResultStepProps {
   result: BulkCreateResult;
+  uploadFailures: UploadFailure[];
   onReset: () => void;
 }
 
-export function ResultStep({ result, onReset }: ResultStepProps) {
+export function ResultStep({ result, uploadFailures, onReset }: ResultStepProps) {
   const failed = result.results.filter((r) => r.status === "error");
 
   return (
@@ -25,6 +27,22 @@ export function ResultStep({ result, onReset }: ResultStepProps) {
           )}
         </p>
       </div>
+
+      {uploadFailures.length > 0 && (
+        <div className="border border-amber-100 bg-amber-50/50 rounded-lg p-4">
+          <p className="text-sm font-medium text-amber-700 mb-2">
+            Produtos criados, mas algumas fotos não subiram (você pode
+            adicioná-las editando o produto):
+          </p>
+          <ul className="text-sm text-amber-700 flex flex-col gap-1">
+            {uploadFailures.map((f, i) => (
+              <li key={i}>
+                <span className="font-medium">{f.rowName}</span> — {f.count} foto(s)
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {failed.length > 0 && (
         <div className="border border-red-100 bg-red-50/50 rounded-lg p-4">

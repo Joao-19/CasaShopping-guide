@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import type JSZip from "jszip";
 import { BulkCreateResult } from "@repo/dtos";
 import { toast } from "@repo/ui";
 import productHttp from "@/Services/http/product.http";
@@ -11,9 +12,13 @@ import {
   suggestColumnMapping,
   suggestionsToMapping,
 } from "./columnMapping";
-import { extractZipImages, type ZipImage } from "./matchImages";
+import { loadZip } from "./matchImages";
 import { parseSpreadsheet } from "./parseSpreadsheet";
-import { buildBulkPayload, type CommitProgress } from "./commit";
+import {
+  buildBulkPayload,
+  type CommitProgress,
+  type UploadFailure,
+} from "./commit";
 import type { StoreOption } from "./resolve";
 import type {
   MappingSuggestion,
@@ -30,23 +35,25 @@ export function useImport() {
   const [parsing, setParsing] = useState(false);
   const [headers, setHeaders] = useState<string[]>([]);
   const [rawRows, setRawRows] = useState<RawRow[]>([]);
-  const [zipImages, setZipImages] = useState<ZipImage[]>([]);
+  const [zip, setZip] = useState<JSZip | null>(null);
+  const [imageEntries, setImageEntries] = useState<string[]>([]);
   const [stores, setStores] = useState<StoreOption[]>([]);
   const [suggestions, setSuggestions] = useState<MappingSuggestion[]>([]);
   const [rows, setRows] = useState<ResolvedRow[]>([]);
   const [progress, setProgress] = useState<CommitProgress | null>(null);
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<BulkCreateResult | null>(null);
+  const [uploadFailures, setUploadFailures] = useState<UploadFailure[]>([]);
 
   // Passo 1: recebe planilha + zip, faz parse e pré-carrega lojas.
   const onFiles = useCallback(
-    async (spreadsheet: File, zip: File | null) => {
+    async (spreadsheet: File, zipFile: File | null) => {
       setParsing(true);
       try {
-        const [{ headers: hdrs, rows: parsed }, images, storeList] =
+        const [{ headers: hdrs, rows: parsed }, loadedZip, storeList] =
           await Promise.all([
             parseSpreadsheet(spreadsheet),
-            zip ? extractZipImages(zip) : Promise.resolve<ZipImage[]>([]),
+            zipFile ? loadZip(zipFile) : Promise.resolve(null),
             storeHttp
               .list({ limit: 1000 })
               .then((r) => r.data.map((s) => ({ id: s.id, name: s.name }))),
@@ -59,7 +66,8 @@ export function useImport() {
 
         setHeaders(hdrs);
         setRawRows(parsed);
-        setZipImages(images);
+        setZip(loadedZip?.zip ?? null);
+        setImageEntries(loadedZip?.entries ?? []);
         setStores(storeList);
         setSuggestions(suggestColumnMapping(hdrs));
         setStep("mapping");
@@ -77,10 +85,10 @@ export function useImport() {
   const confirmMapping = useCallback(
     (confirmed: MappingSuggestion[]) => {
       const mapping = suggestionsToMapping(confirmed);
-      setRows(buildResolvedRows(rawRows, mapping, stores, zipImages));
+      setRows(buildResolvedRows(rawRows, mapping, stores, imageEntries));
       setStep("preview");
     },
-    [rawRows, stores, zipImages],
+    [rawRows, stores, imageEntries],
   );
 
   // Passo 3 (repair): aplica patch numa linha do preview.
@@ -105,13 +113,14 @@ export function useImport() {
     setImporting(true);
     setProgress({ phase: "uploading", uploadedImages: 0, totalImages: 0 });
     try {
-      const products = await buildBulkPayload(
+      const { products, uploadFailures: failures } = await buildBulkPayload(
         importableRows,
-        zipImages,
+        zip,
         uploadImage,
         setProgress,
       );
       const res = await productHttp.createBulk({ products });
+      setUploadFailures(failures);
       setResult(res);
       setStep("result");
     } catch (err) {
@@ -121,17 +130,19 @@ export function useImport() {
       setImporting(false);
       setProgress(null);
     }
-  }, [importableRows, zipImages, uploadImage]);
+  }, [importableRows, zip, uploadImage]);
 
   const reset = useCallback(() => {
     setStep("upload");
     setHeaders([]);
     setRawRows([]);
-    setZipImages([]);
+    setZip(null);
+    setImageEntries([]);
     setStores([]);
     setSuggestions([]);
     setRows([]);
     setResult(null);
+    setUploadFailures([]);
   }, []);
 
   return {
@@ -140,13 +151,13 @@ export function useImport() {
     importing,
     progress,
     headers,
-    zipImages,
     stores,
     suggestions,
     rows,
     importableRows,
     blockedCount,
     result,
+    uploadFailures,
     diagnoseRow,
     onFiles,
     confirmMapping,

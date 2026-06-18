@@ -6,37 +6,40 @@ import type { ImageMatch } from "./types";
 const AUTO_RESOLVE_MAX_DISTANCE = 0.2;
 const SUGGEST_MAX_DISTANCE = 0.5;
 
-export interface ZipImage {
-  entry: string; // caminho/nome dentro do zip
-  file: File;
-}
-
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|avif)$/i;
 
-// Extrai do zip apenas arquivos de imagem como File (prontos pro upload).
-// Ignora pastas e arquivos de sistema (ex.: __MACOSX, .DS_Store).
-export async function extractZipImages(file: File): Promise<ZipImage[]> {
+export interface LoadedZip {
+  zip: JSZip;
+  // Nomes das entradas de imagem (caminho dentro do zip). Só nomes — o
+  // conteúdo é decodificado sob demanda em `extractEntry` (lazy), pra
+  // não estourar a memória com zips grandes.
+  entries: string[];
+}
+
+// Carrega o zip e lista as imagens, SEM decodificar os bytes. Ignora
+// pastas e arquivos de sistema (__MACOSX, dotfiles).
+export async function loadZip(file: File): Promise<LoadedZip> {
   const zip = await JSZip.loadAsync(await file.arrayBuffer());
-  const images: ZipImage[] = [];
+  const entries = Object.values(zip.files)
+    .filter(
+      (e) =>
+        !e.dir &&
+        !e.name.startsWith("__MACOSX") &&
+        !e.name.split("/").pop()?.startsWith(".") &&
+        IMAGE_EXT.test(e.name),
+    )
+    .map((e) => e.name);
+  return { zip, entries };
+}
 
-  const entries = Object.values(zip.files).filter(
-    (e) =>
-      !e.dir &&
-      !e.name.startsWith("__MACOSX") &&
-      !e.name.split("/").pop()?.startsWith(".") &&
-      IMAGE_EXT.test(e.name),
-  );
-
-  for (const entry of entries) {
-    const blob = await entry.async("blob");
-    const basename = entry.name.split("/").pop() ?? entry.name;
-    images.push({
-      entry: entry.name,
-      file: new File([blob], basename, { type: blobType(basename) }),
-    });
-  }
-
-  return images;
+// Decodifica UMA entrada do zip como File (chamado só pras fotos casadas,
+// no momento do upload).
+export async function extractEntry(zip: JSZip, entryName: string): Promise<File> {
+  const entry = zip.file(entryName);
+  if (!entry) throw new Error(`Entrada não encontrada no zip: ${entryName}`);
+  const blob = await entry.async("blob");
+  const basename = entryName.split("/").pop() ?? entryName;
+  return new File([blob], basename, { type: blobType(basename) });
 }
 
 function blobType(name: string): string {
@@ -49,16 +52,20 @@ function blobType(name: string): string {
   return "application/octet-stream";
 }
 
-// Remove a extensão para comparar nomes sem ruído.
 function stripExt(name: string): string {
   return name.replace(IMAGE_EXT, "");
 }
 
-// Casa um nome de arquivo referenciado na planilha com uma entrada real
-// do zip: match exato (com/sem extensão) primeiro, depois fuzzy.
+function basenameKey(entry: string): string {
+  return normalizeKey(stripExt(entry.split("/").pop() ?? entry));
+}
+
+// Casa um nome de arquivo referenciado na planilha com uma entrada do
+// zip: exato (basename sem extensão) primeiro, depois fuzzy. Opera só
+// sobre nomes — nada é decodificado aqui.
 export function matchImageFilename(
   filename: string,
-  zipImages: ZipImage[],
+  entries: string[],
 ): ImageMatch {
   const wanted = filename.trim();
   if (!wanted) {
@@ -67,20 +74,13 @@ export function matchImageFilename(
 
   const wantedKey = normalizeKey(stripExt(wanted.split("/").pop() ?? wanted));
 
-  // Exato: basename normalizado sem extensão.
-  const exact = zipImages.find((z) => {
-    const base = z.entry.split("/").pop() ?? z.entry;
-    return normalizeKey(stripExt(base)) === wantedKey;
-  });
+  const exact = entries.find((e) => basenameKey(e) === wantedKey);
   if (exact) {
-    return { filename, status: "resolved", zipEntry: exact.entry };
+    return { filename, status: "resolved", zipEntry: exact };
   }
 
   const fuse = new Fuse(
-    zipImages.map((z) => {
-      const base = z.entry.split("/").pop() ?? z.entry;
-      return { entry: z.entry, key: normalizeKey(stripExt(base)) };
-    }),
+    entries.map((entry) => ({ entry, key: basenameKey(entry) })),
     { keys: ["key"], includeScore: true, threshold: SUGGEST_MAX_DISTANCE, ignoreLocation: true },
   );
   const hits = fuse.search(wantedKey).slice(0, 3);

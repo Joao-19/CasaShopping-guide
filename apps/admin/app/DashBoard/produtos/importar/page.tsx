@@ -76,7 +76,11 @@ export default function ImportarProdutosPage() {
       )}
 
       {im.step === "result" && im.result && (
-        <ResultStep result={im.result} onReset={im.reset} />
+        <ResultStep
+          result={im.result}
+          uploadFailures={im.uploadFailures}
+          onReset={im.reset}
+        />
       )}
     </div>
   );

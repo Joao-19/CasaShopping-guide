@@ -1,4 +1,4 @@
-import { matchImageFilename, type ZipImage } from "./matchImages";
+import { matchImageFilename } from "./matchImages";
 import { resolvePrice } from "./priceMapping";
 import { resolveCategories, resolveStore, type StoreOption } from "./resolve";
 import type {
@@ -23,7 +23,7 @@ function resolveImages(
   row: RawRow,
   mapping: ColumnMapping,
   productName: string,
-  zipImages: ZipImage[],
+  imageEntries: string[],
 ): ImageMatch[] {
   const imageCell = cell(row, mapping.image);
   const filenames = imageCell
@@ -32,7 +32,7 @@ function resolveImages(
 
   return filenames
     .slice(0, MAX_IMAGES)
-    .map((f) => matchImageFilename(f, zipImages));
+    .map((f) => matchImageFilename(f, imageEntries));
 }
 
 // Constrói as linhas resolvidas a partir das linhas cruas + mapeamento +
@@ -41,7 +41,7 @@ export function buildResolvedRows(
   rows: RawRow[],
   mapping: ColumnMapping,
   stores: StoreOption[],
-  zipImages: ZipImage[],
+  imageEntries: string[],
 ): ResolvedRow[] {
   return rows.map((row, index) => {
     const name = cell(row, mapping.name);
@@ -57,7 +57,7 @@ export function buildResolvedRows(
       tags: cell(row, mapping.tags) || undefined,
       store: resolveStore(cell(row, mapping.storeName), stores),
       isFeatured: TRUE_VALUES.has(isFeaturedRaw.toLowerCase()),
-      images: resolveImages(row, mapping, name, zipImages),
+      images: resolveImages(row, mapping, name, imageEntries),
       raw: row,
     };
   });
