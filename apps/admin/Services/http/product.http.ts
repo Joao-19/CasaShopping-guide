@@ -1,6 +1,8 @@
 import http from "./index";
 import {
   CreateProductDto,
+  CreateProductsBulkDto,
+  BulkCreateResult,
   Product,
   UpdateProductDto,
   PaginatedResult,
@@ -20,6 +22,14 @@ export class ProductHttpService {
 
   async create(data: CreateProductDto): Promise<Product> {
     const { data: response } = await http.post<Product>("/products", data);
+    return response;
+  }
+
+  async createBulk(data: CreateProductsBulkDto): Promise<BulkCreateResult> {
+    const { data: response } = await http.post<BulkCreateResult>(
+      "/products/bulk",
+      data,
+    );
     return response;
   }
 
