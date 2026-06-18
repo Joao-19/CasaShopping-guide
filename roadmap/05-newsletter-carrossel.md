@@ -66,10 +66,9 @@ Imagens: o slide guarda a **key** do storage; `GET` resolve pra URL pública
 - [x] Web: `NewsletterCarouselModal` (Embla, autoplay, reduced-motion, ESC, 1×/sessão) + montagem na home
 - [x] Gates: build `dtos`/`api-gateway`; type-check admin/web limpo (newsletter); lint 0 erros; `madge --circular` sem ciclos
 - [x] Fix colateral: chaves duplicadas no `handleSave` da personalização
+- [x] **Migration aplicada** no schema `casashopping` (2026-06-18) — `migrate status: up to date`
 
 ### Pendente
-- [] **Aplicar a migration no banco** (requer OK; DB local `casashopping` ainda
-      não existe nesse Postgres — ver §"Como aplicar a migration")
 - [ ] **Segurança:** proteger as escritas de admin (`PUT /newsletter`,
       `PUT /settings`, `POST /storage/*`) com `JwtAuthGuard + RolesGuard`
       `@Roles("admin")` — hoje as 3 estão abertas (consistente entre si)
@@ -79,16 +78,27 @@ Imagens: o slide guarda a **key** do storage; `GET` resolve pra URL pública
 - [ ] (Opcional) Imagem mobile dedicada por slide (hoje 1 imagem, aspect 21/9)
 - [ ] (Opcional) Decompor `personalizacao/page.tsx` (430 linhas; `BannerUpload` inline)
 
-## Como aplicar a migration
+## Banco (resolvido em 2026-06-18)
 
-DB local em `localhost:5432`, banco `casashopping` (ainda não criado nesse
-servidor). Aplica todas as migrations pendentes (cria o banco do zero):
+Postgres em `localhost:5432` é **compartilhado** entre projetos (rpg_gaming e
+weplanner já moram aqui). Não havia DB/schema `casashopping`. Decisão:
+casashopping fica **isolado num schema `casashopping` dentro do database
+`postgres`** (o `public` do `postgres` é do weplanner — não usar).
 
-```bash
-cd packages/database
-npx prisma migrate deploy      # cria banco + aplica migrations
-npx prisma migrate status      # conferir que ficou em dia
-```
+- `DATABASE_URL="postgresql://admin:admin123@localhost:5432/postgres?schema=casashopping"`
+  (atualizado em `.env` da raiz **e** `packages/database/.env` — ambos gitignored).
+- O user `admin` não tinha permissão de criar schema no DB `postgres`, então o
+  schema foi criado pelo superuser com owner admin:
+  ```bash
+  docker exec postgres psql -U postgres -d postgres \
+    -c "CREATE SCHEMA IF NOT EXISTS casashopping AUTHORIZATION admin;"
+  ```
+- Migrations aplicadas com `prisma migrate deploy` → `migrate status: up to date`.
+  Tabelas (incl. `newsletter_slides`) e colunas `newsletter*` no `settings`
+  confirmadas no schema.
+
+Reverter (se precisar): `DROP SCHEMA casashopping CASCADE;` (afeta só o
+casashopping, não toca no weplanner).
 
 Em produção, a migration roda pelo runner `apps/migration` / pipeline de deploy.
 
