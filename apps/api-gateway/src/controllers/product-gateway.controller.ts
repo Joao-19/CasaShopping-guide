@@ -12,6 +12,8 @@ import {
 import { ProductGatewayService } from "../services/product-gateway.service";
 import {
   CreateProductDto,
+  CreateProductsBulkDto,
+  BulkCreateResult,
   Product,
   UpdateProductDto,
   PaginatedResult,
@@ -44,6 +46,22 @@ export class ProductGatewayController {
   ): Promise<Product> {
     const token = req.cookies["access_token"];
     return this.productGatewayService.create(createProductDto, token);
+  }
+
+  @Post("bulk")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Create products in bulk (partial failure)" })
+  @ApiResponse({
+    status: 201,
+    description: "Per-row result with created/failed counts.",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden." })
+  async createBulk(
+    @Body() createProductsBulkDto: CreateProductsBulkDto,
+    @Req() req: Request
+  ): Promise<BulkCreateResult> {
+    const token = req.cookies["access_token"];
+    return this.productGatewayService.createBulk(createProductsBulkDto, token);
   }
 
   @Get()

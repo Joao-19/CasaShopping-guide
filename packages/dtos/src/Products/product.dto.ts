@@ -69,6 +69,27 @@ export class CreateProductDto {
   isFeatured?: boolean;
 }
 
+export class CreateProductsBulkDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateProductDto)
+  products!: CreateProductDto[];
+}
+
+export interface BulkRowResult {
+  index: number;
+  name: string;
+  status: "created" | "error";
+  productId?: string;
+  error?: string;
+}
+
+export interface BulkCreateResult {
+  created: number;
+  failed: number;
+  results: BulkRowResult[];
+}
+
 export class UpdateProductDto {
   @IsOptional()
   @IsString()

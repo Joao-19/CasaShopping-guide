@@ -13,6 +13,8 @@ import {
 import { ProductService } from "@/services/product.service";
 import {
   CreateProductDto,
+  CreateProductsBulkDto,
+  BulkCreateResult,
   Product,
   UpdateProductDto,
   PaginatedResult,
@@ -28,6 +30,15 @@ export class ProductController {
   @Roles("admin")
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productService.create(createProductDto);
+  }
+
+  @Post("bulk")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
+  async createBulk(
+    @Body() createProductsBulkDto: CreateProductsBulkDto,
+  ): Promise<BulkCreateResult> {
+    return this.productService.createBulk(createProductsBulkDto);
   }
 
   @Get()

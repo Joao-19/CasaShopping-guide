@@ -6,6 +6,9 @@ import {
 import { prisma } from "@repo/database";
 import {
   CreateProductDto,
+  CreateProductsBulkDto,
+  BulkCreateResult,
+  BulkRowResult,
   Product,
   UpdateProductDto,
   PaginatedResult,
@@ -60,6 +63,38 @@ export class ProductService {
     });
 
     return this.transformProduct(product) as unknown as Product;
+  }
+
+  // Criação em massa com falha parcial: cada linha é independente.
+  // Erro numa linha (duplicata, validação) não derruba as demais — é
+  // reportado por índice para o front mostrar no preview/repair.
+  async createBulk(data: CreateProductsBulkDto): Promise<BulkCreateResult> {
+    const results: BulkRowResult[] = [];
+    let created = 0;
+    let failed = 0;
+
+    for (const [i, dto] of data.products.entries()) {
+      try {
+        const product = await this.create(dto);
+        created++;
+        results.push({
+          index: i,
+          name: dto.name,
+          status: "created",
+          productId: product.id,
+        });
+      } catch (err: any) {
+        failed++;
+        results.push({
+          index: i,
+          name: dto?.name ?? `Linha ${i + 1}`,
+          status: "error",
+          error: err?.message ?? "Erro ao criar produto",
+        });
+      }
+    }
+
+    return { created, failed, results };
   }
 
   private transformProduct(product: any): any {

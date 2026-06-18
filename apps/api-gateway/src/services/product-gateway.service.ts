@@ -2,6 +2,8 @@ import { Injectable, HttpException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import {
   CreateProductDto,
+  CreateProductsBulkDto,
+  BulkCreateResult,
   Product,
   UpdateProductDto,
   PaginatedResult,
@@ -31,6 +33,31 @@ export class ProductGatewayService {
         this.httpService.post<Product>(
           `${this.productsServiceUrl}/products`,
           createProductDto,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
+  async createBulk(
+    createProductsBulkDto: CreateProductsBulkDto,
+    token: string
+  ): Promise<BulkCreateResult> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<BulkCreateResult>(
+          `${this.productsServiceUrl}/products/bulk`,
+          createProductsBulkDto,
           {
             headers: {
               Authorization: `Bearer ${token}`,
