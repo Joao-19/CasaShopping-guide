@@ -272,7 +272,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
             if (image) {
                 try {
                     const tempId = initialData?.id || 'new-store-upload';
-                    imageKey = await uploadImage(image, tempId);
+                    imageKey = await uploadImage(image, { storeId: tempId });
                 } catch (uploadErr) {
                     console.error('Failed to upload image', uploadErr);
                     toast.error('Erro ao fazer upload da imagem. Tente novamente.');
