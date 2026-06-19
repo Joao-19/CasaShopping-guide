@@ -1,0 +1,257 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Button, Label, FormCard, Checkbox, toast } from "@repo/ui";
+import BaseInput from "@repo/ui/inputs/BaseInput";
+import { useValidator, useFormField } from "@repo/ui/useForm";
+import { BannerUpload } from "../../components";
+import { useImageUpload } from "@/composable/storage/useImageUpload";
+import useCampaign from "@/composable/campaign/useCampaign";
+import campaignHttp from "@/Services/http/campaign.http";
+import { CampaignPageDetail } from "@repo/dtos";
+
+interface CreateCampaignFormProps {
+    onClose: () => void;
+    initialData?: CampaignPageDetail;
+}
+
+// Gera um slug "amigável" a partir do título (sem acentos, kebab-case).
+export function slugify(text: string): string {
+    return text
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormProps) {
+    const isEditing = !!initialData;
+    const { createCampaign, updateCampaign } = useCampaign();
+    const { uploadImage } = useImageUpload();
+    const validator = useValidator();
+
+    const [title, setTitle] = useState(initialData?.title ?? "");
+    const [slug, setSlug] = useState(initialData?.slug ?? "");
+    const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
+    // Banners: string = URL existente; File = novo upload pendente.
+    const [coverDesktop, setCoverDesktop] = useState<string | File | undefined>(
+        initialData?.coverDesktop ?? undefined,
+    );
+    const [coverMobile, setCoverMobile] = useState<string | File | undefined>(
+        initialData?.coverMobile ?? undefined,
+    );
+    // Produtos: editados no seletor (Dia 3); aqui preservamos os existentes.
+    const productIds = (initialData?.products ?? []).map((p) => p.id);
+
+    // Slug auto-sugerido a partir do título enquanto o usuário não o edita à mão.
+    const slugTouched = useRef(isEditing);
+    const [slugStatus, setSlugStatus] = useState<
+        "idle" | "checking" | "available" | "taken"
+    >("idle");
+    const [saving, setSaving] = useState(false);
+
+    const titleField = useFormField(title, [validator.rules.required]);
+    const slugField = useFormField(slug, [validator.rules.required]);
+
+    function handleTitleChange(value: string) {
+        setTitle(value);
+        if (!slugTouched.current) setSlug(slugify(value));
+    }
+
+    function handleSlugChange(value: string) {
+        slugTouched.current = true;
+        setSlug(slugify(value));
+    }
+
+    // Checagem de disponibilidade do slug (debounce). Ignora se igual ao inicial.
+    useEffect(() => {
+        const trimmed = slug.trim();
+        if (!trimmed || trimmed === initialData?.slug) {
+            setSlugStatus("idle");
+            return;
+        }
+        setSlugStatus("checking");
+        const t = setTimeout(async () => {
+            try {
+                const { available } = await campaignHttp.checkSlug(
+                    trimmed,
+                    initialData?.id,
+                );
+                setSlugStatus(available ? "available" : "taken");
+            } catch {
+                setSlugStatus("idle");
+            }
+        }, 400);
+        return () => clearTimeout(t);
+    }, [slug, initialData?.slug, initialData?.id]);
+
+    const isValid =
+        !titleField.error && !slugField.error && slugStatus !== "taken";
+
+    async function resolveCover(value: string | File | undefined) {
+        if (value instanceof File) {
+            return uploadImage(value, { folder: "campaigns" });
+        }
+        return value; // URL existente ou undefined
+    }
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!isValid || saving) return;
+        setSaving(true);
+        try {
+            const [desktopKey, mobileKey] = await Promise.all([
+                resolveCover(coverDesktop),
+                resolveCover(coverMobile),
+            ]);
+
+            const payload = {
+                title: title.trim(),
+                slug: slug.trim(),
+                isActive,
+                coverDesktop: desktopKey ?? "",
+                coverMobile: mobileKey ?? "",
+                productIds,
+            };
+
+            if (isEditing) {
+                await updateCampaign(initialData!.id, payload);
+                toast.success("Campanha atualizada!");
+            } else {
+                await createCampaign(payload);
+                toast.success("Campanha criada!");
+            }
+            onClose();
+        } catch (err: any) {
+            const status = err?.response?.status;
+            if (status === 409) {
+                setSlugStatus("taken");
+                toast.error("Essa URL (slug) já existe. Escolha outra.");
+            } else {
+                toast.error("Erro ao salvar a campanha.");
+            }
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    const coverDesktopUrl =
+        coverDesktop instanceof File
+            ? URL.createObjectURL(coverDesktop)
+            : coverDesktop;
+    const coverMobileUrl =
+        coverMobile instanceof File
+            ? URL.createObjectURL(coverMobile)
+            : coverMobile;
+
+    return (
+        <FormCard
+            title={isEditing ? "Editar Campanha" : "Nova Campanha"}
+            className="max-w-xl w-full md:min-w-[600px] max-h-[85vh] overflow-y-auto"
+            headerAction={
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                </button>
+            }
+        >
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Título <span className="text-red-500">*</span>
+                    </Label>
+                    <BaseInput
+                        value={title}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleTitleChange(e.target.value)
+                        }
+                        onBlur={titleField.onBlur}
+                        placeholder="Ex.: Especial Copa 2026"
+                        error={titleField.error}
+                    />
+                </div>
+
+                <div>
+                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                        URL da página <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-400 whitespace-nowrap">
+                            /campanha/
+                        </span>
+                        <BaseInput
+                            value={slug}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleSlugChange(e.target.value)
+                            }
+                            onBlur={slugField.onBlur}
+                            placeholder="especial-copa-2026"
+                            error={slugField.error}
+                        />
+                    </div>
+                    {slugStatus === "checking" && (
+                        <p className="text-xs text-gray-400 mt-1">Verificando disponibilidade…</p>
+                    )}
+                    {slugStatus === "available" && (
+                        <p className="text-xs text-green-600 mt-1">URL disponível.</p>
+                    )}
+                    {slugStatus === "taken" && (
+                        <p className="text-xs text-red-500 mt-1">Essa URL já existe. Escolha outra.</p>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-5">
+                    <BannerUpload
+                        label="Capa desktop"
+                        description="Banner largo (32:9)"
+                        aspect="banner"
+                        accept="image/*"
+                        currentUrl={coverDesktopUrl}
+                        isVideo={false}
+                        onFileSelect={(file) => setCoverDesktop(file)}
+                        onRemove={() => setCoverDesktop(undefined)}
+                    />
+                    <BannerUpload
+                        label="Capa mobile"
+                        description="Imagem quadrada (1:1)"
+                        aspect="square"
+                        accept="image/*"
+                        currentUrl={coverMobileUrl}
+                        isVideo={false}
+                        onFileSelect={(file) => setCoverMobile(file)}
+                        onRemove={() => setCoverMobile(undefined)}
+                    />
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                        checked={isActive}
+                        onCheckedChange={(checked) => setIsActive(checked as boolean)}
+                    />
+                    <span className="text-sm text-gray-700">Exibir página no site</span>
+                </label>
+
+                <p className="text-xs text-gray-400 border-t border-gray-100 pt-3">
+                    A seleção de produtos da vitrine será feita no seletor de produtos
+                    (próxima etapa). {isEditing && `${productIds.length} produto(s) vinculado(s).`}
+                </p>
+
+                <div className="flex justify-end gap-3 pt-2">
+                    <Button type="button" variant="outline" onClick={onClose}>
+                        Cancelar
+                    </Button>
+                    <Button type="submit" disabled={!isValid || saving}>
+                        {saving ? "Salvando…" : isEditing ? "Salvar" : "Criar"}
+                    </Button>
+                </div>
+            </form>
+        </FormCard>
+    );
+}
+
+export default CreateCampaignForm;

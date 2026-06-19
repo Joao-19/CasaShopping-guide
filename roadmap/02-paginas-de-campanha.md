@@ -50,11 +50,15 @@ Sem editor de blocos — o layout não muda.
 > **Gates Dia 1:** dtos build, api-gateway build, `madge` web sem ciclos — verdes.
 > **Pendente (herdado):** proteger escritas admin com guard `@Roles("admin")` (consistente com newsletter/settings, hoje abertas).
 
-### Dia 2 — Admin (CRUD + banners)
-- [ ] Item "Páginas de Campanha" na Sidebar
-- [ ] Lista (tabela + paginação + busca) reusando padrão de produtos
-- [ ] Form de criar/editar: título + `BannerUpload` desktop + `BannerUpload` mobile
-- [ ] Geração de slug sugerido a partir do título + campo editável
+### Dia 2 — Admin (CRUD + banners) ✅ (2026-06-19)
+- [x] Item "Campanhas" na Sidebar (`/DashBoard/campanhas`)
+- [x] Lista (`campanhas/page.tsx`): tabela + paginação + busca, reusando o padrão de produtos (`useCampaign` espelha `useProduct`; `campaign.http` espelha `product.http`)
+- [x] Form criar/editar (`-components/CreateCampaignForm.tsx`): título + slug + `BannerUpload` desktop (32:9) + mobile (1:1) + toggle "Exibir no site"; upload via `useImageUpload` (folder `campaigns`)
+- [x] Slug sugerido do título (`slugify`, kebab sem acento) + editável; checagem de disponibilidade com debounce (`GET /campaigns/slug-available`) e tratamento de 409 no submit
+- [x] **Reuso:** `BannerUpload` extraído de `personalizacao/page.tsx` → `DashBoard/components/BannerUpload.tsx` (exportado no barrel); personalização religada ao componente compartilhado
+
+> **Gates Dia 2:** admin tsc 0 erros, eslint 0 erros (só warnings `any`/`<img>` já existentes), `madge` admin sem ciclos.
+> **Pendente p/ Dia 3:** seletor de produtos (busca na API + ordenação). O form já preserva `productIds` no edit; a UI de seleção entra no Dia 3.
 
 ### Dia 3 — Seletor de produtos + publicação
 - [ ] Seletor de produtos com busca na API, paginação e seleção múltipla
