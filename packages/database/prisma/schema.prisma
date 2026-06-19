@@ -88,6 +88,8 @@ model Product {
   images         ProductImage[]
   favorites      Favorite[]
 
+  campaignProducts CampaignProduct[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -180,4 +182,38 @@ model NewsletterSlide {
   updatedAt DateTime @updatedAt
 
   @@map("newsletter_slides")
+}
+
+// --- PÁGINAS DE CAMPANHA (Frente 02) — gerenciadas no API Gateway via Prisma ---
+// Página temática de layout fixo: menu + banner (desktop/mobile) + título +
+// vitrine de produtos. Publicada em /campanha/[slug] no site público.
+model CampaignPage {
+  id           String  @id @default(uuid())
+  title        String
+  slug         String  @unique // usado na rota pública /campanha/[slug]
+  coverDesktop String? // key do storage (banner desktop)
+  coverMobile  String? // key do storage (banner mobile)
+  isActive     Boolean @default(true) // inativa => 404 no público
+
+  products CampaignProduct[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("campaign_pages")
+}
+
+// Junção campanha<->produto com ordem de exibição na vitrine.
+model CampaignProduct {
+  id         String       @id @default(uuid())
+  campaignId String
+  campaign   CampaignPage @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order      Int          @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([campaignId, productId])
+  @@map("campaign_products")
 }

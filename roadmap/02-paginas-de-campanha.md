@@ -39,11 +39,16 @@ Sem editor de blocos — o layout não muda.
 
 ## Plano de execução
 
-### Dia 1 — Backend
-- [ ] Schema Prisma: `CampaignPage` (title, slug único, coverDesktop, coverMobile, isActive) + `CampaignProduct` (ordem)
-- [ ] Migration
-- [ ] Endpoints NestJS: criar, listar, obter por id, obter por slug, atualizar, deletar
-- [ ] Endpoint/validação de unicidade de slug
+### Dia 1 — Backend ✅ (2026-06-19)
+- [x] Schema Prisma: `CampaignPage` (title, slug único, coverDesktop, coverMobile, isActive) + `CampaignProduct` (ordem)
+- [x] Migration `20260619140000_add_campaign_pages` (idempotente: `CREATE TABLE IF NOT EXISTS`, `CREATE UNIQUE INDEX IF NOT EXISTS`, FKs em DO-block por `pg_constraint`). Aplicada no DB `casashopping` (migrate status up to date).
+- [x] Endpoints (gateway-local Prisma, espelhando `newsletter`): `GET /campaigns` (lista paginada + busca), `GET /campaigns/:id`, `GET /campaigns/slug/:slug` (público, ativa-only→404), `POST /campaigns`, `PUT /campaigns/:id`, `DELETE /campaigns/:id`
+- [x] `GET /campaigns/slug-available?slug=&excludeId=` (unicidade de slug; `POST`/`PUT` retornam 409 em conflito)
+- [x] DTOs em `@repo/dtos` (`Create`/`Update` + views `CampaignPageListItem`/`CampaignPageDetail`/`CampaignProductView` + `SlugAvailability`)
+
+> **Decisões:** (1) gateway-local Prisma (não microserviço novo) — campanha é conteúdo tipo-CMS como newsletter/settings; produtos resolvidos via `include` no mesmo DB compartilhado. (2) `CampaignProduct` relacional com `order`; a API aceita `productIds[]` ordenado (write=replace, `order`=índice). (3) Sem link no menu público (acesso por URL direta).
+> **Gates Dia 1:** dtos build, api-gateway build, `madge` web sem ciclos — verdes.
+> **Pendente (herdado):** proteger escritas admin com guard `@Roles("admin")` (consistente com newsletter/settings, hoje abertas).
 
 ### Dia 2 — Admin (CRUD + banners)
 - [ ] Item "Páginas de Campanha" na Sidebar
