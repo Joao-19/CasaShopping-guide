@@ -15,6 +15,10 @@ import type { CommitProgress } from "../-lib/commit";
 import type { RowDiagnostics, ResolvedRow } from "../-lib/types";
 import { StoreResolveCell } from "./StoreResolveCell";
 import { BulkStoreToolbar } from "./BulkStoreToolbar";
+import {
+  StoreResolutionPanel,
+  type UnresolvedStoreGroup,
+} from "./StoreResolutionPanel";
 
 // Mesmos rótulos do form de criação de produto (CreateProductForm).
 const PRICE_LABELS: Record<PriceTier, string> = {
@@ -44,6 +48,8 @@ interface PreviewStepProps {
   progress: CommitProgress | null;
   onUpdateRow: (index: number, patch: Partial<ResolvedRow>) => void;
   onBulkSetStore: (storeId: string, onlyUnresolved: boolean) => void;
+  unresolvedStoreGroups: UnresolvedStoreGroup[];
+  onMapStoreByName: (rawName: string, storeId: string) => void;
   onImport: () => void;
   onBack: () => void;
 }
@@ -58,6 +64,8 @@ export function PreviewStep({
   progress,
   onUpdateRow,
   onBulkSetStore,
+  unresolvedStoreGroups,
+  onMapStoreByName,
   onImport,
   onBack,
 }: PreviewStepProps) {
@@ -83,6 +91,11 @@ export function PreviewStep({
           </p>
         </div>
       </div>
+
+      <StoreResolutionPanel
+        groups={unresolvedStoreGroups}
+        onMap={onMapStoreByName}
+      />
 
       <BulkStoreToolbar onApply={onBulkSetStore} />
 

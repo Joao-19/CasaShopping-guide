@@ -116,6 +116,37 @@ export function useImport() {
     [],
   );
 
+  // Mapeia UM nome de loja da planilha (origem) para uma loja real,
+  // aplicando só às linhas com aquele mesmo nome não resolvido. Permite
+  // ajuste fino quando há muitas lojas diferentes: nome X → loja W,
+  // nome Z → loja P, sem carimbar a mesma loja em cima de todas.
+  const mapStoreByRawName = useCallback(
+    (rawName: string, storeId: string) => {
+      setRows((prev) =>
+        prev.map((r) =>
+          r.store.status !== "resolved" && r.store.raw === rawName
+            ? { ...r, store: { status: "resolved", value: storeId, raw: r.store.raw } }
+            : r,
+        ),
+      );
+    },
+    [],
+  );
+
+  // Nomes de loja da planilha que não resolveram, agrupados (com a
+  // contagem de itens) — insumo do painel de resolução por nome.
+  const unresolvedStoreGroups = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      if (r.store.status !== "resolved") {
+        counts.set(r.store.raw, (counts.get(r.store.raw) ?? 0) + 1);
+      }
+    }
+    return Array.from(counts.entries())
+      .map(([raw, count]) => ({ raw, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [rows]);
+
   const importableRows = useMemo(() => rows.filter(isRowImportable), [rows]);
   const blockedCount = rows.length - importableRows.length;
 
@@ -178,6 +209,8 @@ export function useImport() {
     confirmMapping,
     updateRow,
     bulkSetStore,
+    mapStoreByRawName,
+    unresolvedStoreGroups,
     runImport,
     reset,
   };

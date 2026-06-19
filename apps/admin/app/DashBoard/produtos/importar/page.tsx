@@ -71,6 +71,8 @@ export default function ImportarProdutosPage() {
           progress={im.progress}
           onUpdateRow={im.updateRow}
           onBulkSetStore={im.bulkSetStore}
+          unresolvedStoreGroups={im.unresolvedStoreGroups}
+          onMapStoreByName={im.mapStoreByRawName}
           onImport={im.runImport}
           onBack={() => im.reset()}
         />
