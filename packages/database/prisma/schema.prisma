@@ -143,30 +143,38 @@ model Settings {
   homeTitleBold   String?
   homeTitleNormal String?
 
-  // Newsletter (carrossel auto-open na home) — configuração global
-  newsletterEnabled    Boolean @default(false)
-  newsletterAutoplay   Boolean @default(true)
-  newsletterIntervalMs Int     @default(6000)
+  // Newsletter (pop-up auto-open na home) — configuração global (Builder V2)
+  newsletterEnabled        Boolean @default(false)
+  newsletterImageSide      String  @default("left") // "left" | "right"
+  newsletterAccentColor    String  @default("#003ba6")
+  newsletterAppearDelay    Int     @default(5) // segundos até aparecer (0/3/5/10)
+  newsletterAutoClose      Boolean @default(false)
+  newsletterAutoCloseDelay Int     @default(15) // segundos visível (8/15/30)
+  // Segmentação: { pageTypes: string[], specificPages: string[], campaigns: string[] }
+  // Por ora persistido como JSON; web aplica home-only (ver roadmap 06).
+  newsletterTargeting Json?
 
   updatedAt DateTime @updatedAt
 
   @@map("settings")
 }
 
-// --- MODELO PARA O CARROSSEL DE NEWSLETTER (modal da home) ---
-// Cada linha é um slide. A ordem de exibição = campo `order`.
+// --- MODELO PARA O POP-UP DE NEWSLETTER (modal da home — Builder V2) ---
+// Cada linha é um slide (split: imagem de um lado, conteúdo do outro).
+// A ordem de exibição = campo `order`.
 model NewsletterSlide {
-  id            String  @id @default(uuid())
-  imageUrl      String? // key do storage (ou URL absoluta legada)
-  title         String?
-  subtitle      String?
-  ctaText       String? // texto do botão
-  ctaHref       String? // "/rota" interna ou "https://" externa
-  textPosition  String  @default("bottom-left") // top-left .. bottom-right
-  textBgEnabled Boolean @default(true) // caixa atrás do texto
-  textBgColor   String  @default("#000000")
-  textBgOpacity Int     @default(50) // 0-100
-  order         Int     @default(0)
+  id                  String   @id @default(uuid())
+  images              String[] @default([]) // keys do storage (ou URLs absolutas), em ordem
+  name                String? // rótulo interno do slide (não exibido)
+  title               String?
+  description         String?
+  fineprint           String?
+  primaryButtonText   String?
+  primaryButtonUrl    String? // "/rota" interna ou "https://" externa
+  showSecondaryButton Boolean @default(false)
+  secondaryButtonText String?
+  secondaryButtonUrl  String?
+  order               Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
