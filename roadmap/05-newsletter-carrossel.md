@@ -70,17 +70,40 @@ Imagens: o slide guarda a **key** do storage; `GET` resolve pra URL pública
 - [x] Fix env: `apps/api-gateway/.env` ganhou `DATABASE_URL` próprio (→ casashopping);
       sem ele, `/settings` e `/newsletter` (tratados no gateway) davam 500 herdando o `.env` da raiz
 
-### Pendente — testes (e2e)
-> Status: API no ar; `GET /products` (proxy) OK. `GET /settings` e `/newsletter`
-> davam 500 por causa do `DATABASE_URL` do gateway — corrigido no `.env`, mas
-> **falta reiniciar o api-gateway** pra carregar o env e então rodar o roundtrip.
+### Testes (e2e) — rodados em 2026-06-18 (Playwright + curl)
+> API e modal validados. Upload real bloqueado por infra (MinIO fora do ar).
 
-- [ ] **Reiniciar o api-gateway** pra aplicar o novo `DATABASE_URL`
-- [ ] `GET /newsletter` retorna o default (`enabled:false`, `slides:[]`) sem 500
-- [ ] `PUT /newsletter` cria slide(s) + `enabled:true` e persiste (replace)
-- [ ] `GET /newsletter` pós-PUT: ordem dos slides e `imageUrl` resolvida pra URL pública
-- [ ] Admin: aba "Newsletter" salva (upload real no MinIO, folder `newsletter/`)
-- [ ] Web: modal auto-open abre na home com `enabled:true` (autoplay, prev/next, ESC, 1×/sessão)
+- [x] **Reiniciar o api-gateway** pra aplicar o novo `DATABASE_URL` (feito pelo dev)
+- [x] `GET /newsletter` retorna o default (`enabled:false`, `slides:[]`) sem 500 — HTTP 200
+- [x] `PUT /newsletter` cria slide(s) + `enabled:true` e persiste (replace) — testado replace 2→1 slide
+- [x] `GET /newsletter` pós-PUT: ordem por índice OK; `extractKey` (bare key e URL absoluta) + `transformToUrl` resolvem pra URL pública; partial update preserva `enabled`
+- [x] Admin: login OK (senha = `ADMIN_PASSWORD` de `apps/auth/.env` = `admin123`, **não** a `Mudar@123` do `seed.ts`); aba "Newsletter" hidrata do `GET`; `POST /storage/upload-url` retorna presign (201)
+- [x] Admin upload real no MinIO — **OK após apontar pro MinIO :9100** (ver §MinIO abaixo): `upload-url` 201 → `PUT` no MinIO `:9100` **200** → `PUT /newsletter` 200 → persiste. `GET` retorna `imageUrl` em `:9100`; objeto público legível (200, `image/webp`).
+- [x] Web: modal auto-open na home com `enabled:true` — auto-open (~250ms), prev/next + dots (só com >1 slide), autoplay avançando, CTA→href, **ESC fecha**, **1×/sessão** (reload não reabre). **Imagem real renderiza** (screenshot conferido).
+
+### MinIO local — porta :9100 (resolvido em 2026-06-18)
+A porta 9000 está ocupada por outra app desta máquina. O MinIO de fato é o
+container compartilhado **`rpg-gaming-minio-1`** (`minio/minio:latest`), exposto
+no host em **`9100:9000`** (API) e `9101:9001` (console), creds root
+`admin/password123`. Repontados pra ele:
+- `apps/storage/.env`: `MINIO_PUBLIC_ENDPOINT` e `MINIO_INTERNAL_ENDPOINT` → `http://localhost:9100`
+- `apps/api-gateway/.env`: add `STORAGE_URL=http://localhost:9100/casashopping`
+  (resolve key→URL pública no `GET /newsletter` e `/settings`)
+
+No boot, o `ensureBucket` do storage criou o bucket `casashopping` no `:9100`,
+aplicou **CORS** (preflight do PUT volta 204 com `Access-Control-Allow-Origin`)
+e a **policy public-read**. Após editar os `.env`, reiniciar storage (`:3007`) e
+gateway (`:3000`).
+
+> Frontends leem a `imageUrl` que o gateway já devolve (`:9100`), então não
+> precisaram de mudança. Se algum render usar `NEXT_PUBLIC_STORAGE_URL`
+> direto, alinhar pra `:9100` também.
+
+### Achados do e2e (infra, fora do escopo da newsletter)
+- **Porta 9000 tomada**: o MinIO real está na `:9100` (acima). Em outro ambiente
+  (docker-compose próprio), o MinIO sobe na 9000 — conferir a porta efetiva.
+- **Bug no `apps/storage` `ensureBucket` (latente)**: `configureCorsManual(internalEndpoint)` (storage.service.ts:125) usa o endpoint interno mesmo quando o HeadBucket caiu no fallback público — se o interno for inalcançável, o CORS do bucket nunca é aplicado (catch+warn). Localmente o `.env` usa `localhost:9000` nos dois, então não dispara; mas em docker (`storage:9000`) rodando o app fora do compose, dispararia.
+- **Modal de erro global na home** (`z-[9999]`, "Ops! Algo deu errado / Internal server error") aparecia por um **500 do `/stores`** e **fica por cima** do modal da newsletter (`z-[100]`), interceptando cliques. **Resolvido (2026-06-18):** `apps/stores/.env` tinha `DATABASE_URL` **comentado** → o stores caía no DB errado (raiz/weplanner, sem a tabela `stores`) e o Prisma dava `KnownRequestError`. Descomentei a linha (→ casashopping) e reiniciei; `GET /stores` volta 200. Auditoria dos backends: só o `stores` estava comentado (`auth` não tem `DATABASE_URL` mas herda o do `@repo/database` → casashopping; demais ok).
 
 ### Pendente — outros
 - [ ] **Segurança:** proteger as escritas de admin (`PUT /newsletter`,
