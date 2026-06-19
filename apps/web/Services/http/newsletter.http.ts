@@ -1,33 +1,37 @@
 import http from "./index";
 
-export type NewsletterTextPosition =
-  | "top-left"
-  | "top-center"
-  | "top-right"
-  | "center-left"
-  | "center"
-  | "center-right"
-  | "bottom-left"
-  | "bottom-center"
-  | "bottom-right";
-
 export interface NewsletterSlide {
   id: string;
-  imageUrl: string | null;
+  images: string[];
+  name: string | null;
   title: string | null;
-  subtitle: string | null;
-  ctaText: string | null;
-  ctaHref: string | null;
-  textPosition: NewsletterTextPosition;
-  textBgEnabled: boolean;
-  textBgColor: string;
-  textBgOpacity: number;
+  description: string | null;
+  fineprint: string | null;
+  primaryButtonText: string | null;
+  primaryButtonUrl: string | null;
+  showSecondaryButton: boolean;
+  secondaryButtonText: string | null;
+  secondaryButtonUrl: string | null;
+}
+
+export interface NewsletterBehavior {
+  appearDelay: number;
+  autoClose: boolean;
+  autoCloseDelay: number;
+}
+
+export interface NewsletterTargeting {
+  pageTypes: string[];
+  specificPages: string[];
+  campaigns: string[];
 }
 
 export interface NewsletterSettings {
   enabled: boolean;
-  autoplay: boolean;
-  intervalMs: number;
+  imageSide: "left" | "right";
+  accentColor: string;
+  behavior: NewsletterBehavior;
+  targeting: NewsletterTargeting;
   slides: NewsletterSlide[];
 }
 

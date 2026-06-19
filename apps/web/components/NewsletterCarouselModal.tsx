@@ -6,100 +6,161 @@ import {
   getNewsletter,
   NewsletterSettings,
   NewsletterSlide,
-  NewsletterTextPosition,
 } from "../Services/http/newsletter.http";
 
 const SESSION_KEY = "newsletter_modal_seen";
-
-function hexToRgba(hex: string, opacity: number): string {
-  const clean = (hex || "#000000").replace("#", "");
-  const full =
-    clean.length === 3
-      ? clean.split("").map((c) => c + c).join("")
-      : clean;
-  const r = parseInt(full.substring(0, 2), 16) || 0;
-  const g = parseInt(full.substring(2, 4), 16) || 0;
-  const b = parseInt(full.substring(4, 6), 16) || 0;
-  return `rgba(${r}, ${g}, ${b}, ${Math.min(100, Math.max(0, opacity)) / 100})`;
-}
-
-function positionClasses(position: NewsletterTextPosition): {
-  wrapper: string;
-  textAlign: "left" | "center" | "right";
-} {
-  const [vertical, horizontal] = position.split("-") as [string, string];
-  const justify =
-    vertical === "top"
-      ? "justify-start"
-      : vertical === "bottom"
-        ? "justify-end"
-        : "justify-center";
-  const align =
-    horizontal === "left"
-      ? "items-start"
-      : horizontal === "right"
-        ? "items-end"
-        : "items-center";
-  const textAlign =
-    horizontal === "left" ? "left" : horizontal === "right" ? "right" : "center";
-  return { wrapper: `${justify} ${align}`, textAlign };
-}
 
 function isExternal(href: string): boolean {
   return /^https?:\/\//i.test(href);
 }
 
-function SlideView({ slide }: { slide: NewsletterSlide }) {
-  const { wrapper, textAlign } = positionClasses(
-    slide.textPosition || "bottom-left",
-  );
-  const hasText = slide.title || slide.subtitle || slide.ctaText;
+function SlideImages({ images, alt }: { images: string[]; alt: string }) {
+  const multiple = images.length > 1;
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    if (!multiple) return;
+    const t = setInterval(
+      () => setIdx((i) => (i + 1) % images.length),
+      3500,
+    );
+    return () => clearInterval(t);
+  }, [multiple, images.length]);
+
+  const safeIdx = Math.min(idx, images.length - 1);
 
   return (
-    <div className="relative flex-[0_0_100%] min-w-0 aspect-[21/9] bg-gray-200">
-      {slide.imageUrl && (
+    <div className="relative h-48 shrink-0 overflow-hidden bg-[#f0f1f3] @2xl:h-auto @2xl:basis-1/2 @2xl:grow-0">
+      {images.map((url, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={slide.imageUrl}
-          alt={slide.title || ""}
-          className="object-cover w-full h-full"
+          key={`${url}-${i}`}
+          src={url}
+          alt={alt}
+          className={`absolute inset-0 size-full object-cover transition-opacity duration-700 ${
+            i === safeIdx ? "opacity-100" : "opacity-0"
+          }`}
         />
-      )}
-      {hasText && (
-        <div className={`absolute inset-0 p-6 md:p-10 flex flex-col ${wrapper}`}>
-          <div
-            className="max-w-[80%] md:max-w-[60%] p-4 rounded-lg"
-            style={{
-              textAlign,
-              backgroundColor: slide.textBgEnabled
-                ? hexToRgba(slide.textBgColor, slide.textBgOpacity)
-                : "transparent",
-            }}
-          >
-            {slide.title && (
-              <h3 className="text-white font-bold text-lg md:text-3xl drop-shadow">
-                {slide.title}
-              </h3>
-            )}
-            {slide.subtitle && (
-              <p className="text-white/90 text-sm md:text-lg mt-1 drop-shadow">
-                {slide.subtitle}
-              </p>
-            )}
-            {slide.ctaText && slide.ctaHref && (
-              <a
-                href={slide.ctaHref}
-                target={isExternal(slide.ctaHref) ? "_blank" : undefined}
-                rel={
-                  isExternal(slide.ctaHref) ? "noopener noreferrer" : undefined
-                }
-                className="inline-block mt-3 bg-white text-[#162e47] font-bold text-sm md:text-base px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                {slide.ctaText}
-              </a>
-            )}
-          </div>
+      ))}
+      {multiple && (
+        <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5">
+          {images.map((url, i) => (
+            <button
+              key={`dot-${url}-${i}`}
+              type="button"
+              aria-label={`Ver imagem ${i + 1}`}
+              onClick={() => setIdx(i)}
+              className={`size-1.5 rounded-full transition ${
+                i === safeIdx ? "bg-white" : "bg-white/50 hover:bg-white/80"
+              }`}
+            />
+          ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function CtaButton({
+  text,
+  url,
+  primary,
+  accentColor,
+}: {
+  text: string;
+  url: string;
+  primary: boolean;
+  accentColor: string;
+}) {
+  const className = primary
+    ? "flex h-12 w-full items-center justify-center rounded-lg text-[15px] font-semibold text-white shadow-sm transition hover:brightness-95"
+    : "flex h-12 w-full items-center justify-center rounded-lg border border-gray-300 bg-white text-[15px] font-semibold text-gray-700 transition hover:bg-gray-50";
+  const style = primary ? { backgroundColor: accentColor } : undefined;
+
+  if (url.trim()) {
+    return (
+      <a
+        href={url}
+        target={isExternal(url) ? "_blank" : undefined}
+        rel={isExternal(url) ? "noopener noreferrer" : undefined}
+        className={className}
+        style={style}
+      >
+        {text}
+      </a>
+    );
+  }
+  return (
+    <button type="button" className={className} style={style}>
+      {text}
+    </button>
+  );
+}
+
+function SlideView({
+  slide,
+  accentColor,
+  imageSide,
+}: {
+  slide: NewsletterSlide;
+  accentColor: string;
+  imageSide: "left" | "right";
+}) {
+  const layout =
+    imageSide === "left"
+      ? "flex flex-col @2xl:flex-row"
+      : "flex flex-col @2xl:flex-row-reverse";
+
+  return (
+    <div className="min-w-0 shrink-0 grow-0 basis-full">
+      <div className={`${layout} @2xl:min-h-[440px]`}>
+        {/* Imagem(ns) */}
+        <SlideImages images={slide.images} alt={slide.title || ""} />
+
+        {/* Conteúdo */}
+        <div className="flex flex-col justify-center gap-5 bg-white p-6 pb-14 @2xl:basis-1/2 @2xl:grow-0 @2xl:p-10">
+          <div className="space-y-3">
+            {slide.title && (
+              <h2 className="text-[22px] leading-[1.15] font-bold tracking-tight text-gray-900 whitespace-pre-line @2xl:text-[28px]">
+                {slide.title}
+              </h2>
+            )}
+            {slide.description && (
+              <p className="text-[15px] leading-relaxed text-gray-500 whitespace-pre-line">
+                {slide.description}
+              </p>
+            )}
+          </div>
+
+          {slide.fineprint && (
+            <p className="text-[11px] leading-snug text-gray-400 whitespace-pre-line">
+              {slide.fineprint}
+            </p>
+          )}
+
+          {(slide.primaryButtonText ||
+            (slide.showSecondaryButton && slide.secondaryButtonText)) && (
+            <div className="flex flex-col gap-3">
+              {slide.primaryButtonText && (
+                <CtaButton
+                  text={slide.primaryButtonText}
+                  url={slide.primaryButtonUrl || ""}
+                  primary
+                  accentColor={accentColor}
+                />
+              )}
+              {slide.showSecondaryButton && slide.secondaryButtonText && (
+                <CtaButton
+                  text={slide.secondaryButtonText}
+                  url={slide.secondaryButtonUrl || ""}
+                  primary={false}
+                  accentColor={accentColor}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -108,10 +169,12 @@ export function NewsletterCarouselModal() {
   const [data, setData] = useState<NewsletterSettings | null>(null);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(0);
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
+  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Busca a config e decide se abre (uma vez por sessão).
+  // Busca a config e decide se abre (uma vez por sessão), respeitando o
+  // atraso configurado em behavior.appearDelay.
   useEffect(() => {
     let cancelled = false;
     if (
@@ -125,18 +188,21 @@ export function NewsletterCarouselModal() {
         if (cancelled) return;
         if (res.enabled && res.slides.length > 0) {
           setData(res);
-          // deixa a home pintar antes de abrir
-          setTimeout(() => setOpen(true), 250);
+          // appearDelay em segundos; mínimo de 250ms pra home pintar antes.
+          const delayMs = Math.max(250, (res.behavior.appearDelay ?? 0) * 1000);
+          openTimerRef.current = setTimeout(() => setOpen(true), delayMs);
         }
       })
       .catch(() => {});
     return () => {
       cancelled = true;
+      if (openTimerRef.current) clearTimeout(openTimerRef.current);
     };
   }, []);
 
   const close = useCallback(() => {
     setOpen(false);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     if (typeof window !== "undefined") sessionStorage.setItem(SESSION_KEY, "1");
   }, []);
 
@@ -151,23 +217,15 @@ export function NewsletterCarouselModal() {
     };
   }, [emblaApi]);
 
-  // Autoplay via timeout, respeitando prefers-reduced-motion e pausa no hover.
-  const [paused, setPaused] = useState(false);
+  // Auto-close: fecha sozinho após autoCloseDelay quando habilitado.
   useEffect(() => {
-    if (!open || !emblaApi || !data?.autoplay || paused) return;
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || data.slides.length < 2) return;
-
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      emblaApi.scrollNext();
-    }, data.intervalMs);
+    if (!open || !data?.behavior.autoClose) return;
+    const ms = Math.max(1, data.behavior.autoCloseDelay) * 1000;
+    closeTimerRef.current = setTimeout(() => close(), ms);
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
-  }, [open, emblaApi, data, paused, selected]);
+  }, [open, data, close]);
 
   // Fecha no ESC.
   useEffect(() => {
@@ -181,6 +239,8 @@ export function NewsletterCarouselModal() {
 
   if (!open || !data) return null;
 
+  const multiple = data.slides.length > 1;
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200"
@@ -190,16 +250,14 @@ export function NewsletterCarouselModal() {
       onClick={close}
     >
       <div
-        className="relative w-full max-w-3xl bg-white rounded-2xl overflow-hidden shadow-2xl"
+        className="@container relative w-full max-w-[780px] overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5"
         onClick={(e) => e.stopPropagation()}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
       >
         <button
           type="button"
           onClick={close}
           aria-label="Fechar"
-          className="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white text-[#162e47] w-9 h-9 rounded-full flex items-center justify-center shadow"
+          className="absolute top-4 right-4 z-20 flex size-8 items-center justify-center rounded-full bg-white/70 text-gray-700 backdrop-blur transition hover:bg-black/5"
         >
           ✕
         </button>
@@ -207,18 +265,23 @@ export function NewsletterCarouselModal() {
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {data.slides.map((slide) => (
-              <SlideView key={slide.id} slide={slide} />
+              <SlideView
+                key={slide.id}
+                slide={slide}
+                accentColor={data.accentColor}
+                imageSide={data.imageSide}
+              />
             ))}
           </div>
         </div>
 
-        {data.slides.length > 1 && (
+        {multiple && (
           <>
             <button
               type="button"
               onClick={() => emblaApi?.scrollPrev()}
               aria-label="Anterior"
-              className="absolute top-1/2 left-3 -translate-y-1/2 bg-white/80 hover:bg-white text-[#162e47] w-9 h-9 rounded-full flex items-center justify-center shadow"
+              className="absolute top-24 left-3 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur transition hover:bg-white @2xl:top-1/2"
             >
               ‹
             </button>
@@ -226,25 +289,26 @@ export function NewsletterCarouselModal() {
               type="button"
               onClick={() => emblaApi?.scrollNext()}
               aria-label="Próximo"
-              className="absolute top-1/2 right-3 -translate-y-1/2 bg-white/80 hover:bg-white text-[#162e47] w-9 h-9 rounded-full flex items-center justify-center shadow"
+              className="absolute top-24 right-3 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur transition hover:bg-white @2xl:top-1/2"
             >
               ›
             </button>
-            <div
-              className="absolute bottom-3 left-0 right-0 flex justify-center gap-2"
-              role="tablist"
-            >
+
+            <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
               {data.slides.map((slide, i) => (
                 <button
                   key={slide.id}
                   type="button"
-                  role="tab"
-                  aria-selected={selected === i}
                   aria-label={`Ir para o slide ${i + 1}`}
                   onClick={() => emblaApi?.scrollTo(i)}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    selected === i ? "bg-white" : "bg-white/50"
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    selected === i ? "w-6" : "w-2.5 bg-gray-300 hover:bg-gray-400"
                   }`}
+                  style={
+                    selected === i
+                      ? { backgroundColor: data.accentColor }
+                      : undefined
+                  }
                 />
               ))}
             </div>
