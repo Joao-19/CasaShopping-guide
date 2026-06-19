@@ -58,6 +58,8 @@ Sem editor de blocos — o layout não muda.
 - [x] **Reuso:** `BannerUpload` extraído de `personalizacao/page.tsx` → `DashBoard/components/BannerUpload.tsx` (exportado no barrel); personalização religada ao componente compartilhado
 
 > **Gates Dia 2:** admin tsc 0 erros, eslint 0 erros (só warnings `any`/`<img>` já existentes), `madge` admin sem ciclos.
+> **Validação e2e (Playwright, UI real, 2026-06-19):** login admin → Campanhas → criar "Especial Copa 2026" (slug auto + "URL disponível" via backend) → persiste e aparece na lista; editar título → PUT persiste, slug intacto; criar com slug repetido → "Essa URL já existe" + botão Criar travado. 0 erros de console.
+> **Fix:** `CreateCampaignForm` usava `useFormField` (exige `FormProvider`) → runtime error ao abrir o modal. Trocado por validação inline (required + touched), sem dependência de contexto.
 > **Pendente p/ Dia 3:** seletor de produtos (busca na API + ordenação). O form já preserva `productIds` no edit; a UI de seleção entra no Dia 3.
 
 ### Dia 3 — Seletor de produtos + publicação

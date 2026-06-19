@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Label, FormCard, Checkbox, toast } from "@repo/ui";
 import BaseInput from "@repo/ui/inputs/BaseInput";
-import { useValidator, useFormField } from "@repo/ui/useForm";
 import { BannerUpload } from "../../components";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
 import useCampaign from "@/composable/campaign/useCampaign";
@@ -30,7 +29,6 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
     const isEditing = !!initialData;
     const { createCampaign, updateCampaign } = useCampaign();
     const { uploadImage } = useImageUpload();
-    const validator = useValidator();
 
     const [title, setTitle] = useState(initialData?.title ?? "");
     const [slug, setSlug] = useState(initialData?.slug ?? "");
@@ -46,22 +44,24 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
     const productIds = (initialData?.products ?? []).map((p) => p.id);
 
     // Slug auto-sugerido a partir do título enquanto o usuário não o edita à mão.
-    const slugTouched = useRef(isEditing);
+    const slugEdited = useRef(isEditing);
+    const [titleBlurred, setTitleBlurred] = useState(false);
+    const [slugBlurred, setSlugBlurred] = useState(false);
     const [slugStatus, setSlugStatus] = useState<
         "idle" | "checking" | "available" | "taken"
     >("idle");
     const [saving, setSaving] = useState(false);
 
-    const titleField = useFormField(title, [validator.rules.required]);
-    const slugField = useFormField(slug, [validator.rules.required]);
+    const titleError = titleBlurred && !title.trim() ? "Campo obrigatório" : "";
+    const slugError = slugBlurred && !slug.trim() ? "Campo obrigatório" : "";
 
     function handleTitleChange(value: string) {
         setTitle(value);
-        if (!slugTouched.current) setSlug(slugify(value));
+        if (!slugEdited.current) setSlug(slugify(value));
     }
 
     function handleSlugChange(value: string) {
-        slugTouched.current = true;
+        slugEdited.current = true;
         setSlug(slugify(value));
     }
 
@@ -88,7 +88,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
     }, [slug, initialData?.slug, initialData?.id]);
 
     const isValid =
-        !titleField.error && !slugField.error && slugStatus !== "taken";
+        !!title.trim() && !!slug.trim() && slugStatus !== "taken";
 
     async function resolveCover(value: string | File | undefined) {
         if (value instanceof File) {
@@ -99,6 +99,8 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        setTitleBlurred(true);
+        setSlugBlurred(true);
         if (!isValid || saving) return;
         setSaving(true);
         try {
@@ -124,8 +126,9 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 toast.success("Campanha criada!");
             }
             onClose();
-        } catch (err: any) {
-            const status = err?.response?.status;
+        } catch (err) {
+            const status = (err as { response?: { status?: number } })?.response
+                ?.status;
             if (status === 409) {
                 setSlugStatus("taken");
                 toast.error("Essa URL (slug) já existe. Escolha outra.");
@@ -170,9 +173,9 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             handleTitleChange(e.target.value)
                         }
-                        onBlur={titleField.onBlur}
+                        onBlur={() => setTitleBlurred(true)}
                         placeholder="Ex.: Especial Copa 2026"
-                        error={titleField.error}
+                        error={titleError}
                     />
                 </div>
 
@@ -189,9 +192,9 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 handleSlugChange(e.target.value)
                             }
-                            onBlur={slugField.onBlur}
+                            onBlur={() => setSlugBlurred(true)}
                             placeholder="especial-copa-2026"
-                            error={slugField.error}
+                            error={slugError}
                         />
                     </div>
                     {slugStatus === "checking" && (
