@@ -11,7 +11,6 @@ import {
 } from "@repo/ui";
 import { CategoryMultiSelect } from "../../-components/CategoryMultiSelect";
 import { PRODUCT_CATEGORIES } from "../-lib/categories";
-import type { CommitProgress } from "../-lib/commit";
 import type { RowDiagnostics, ResolvedRow } from "../-lib/types";
 import { StoreResolveCell } from "./StoreResolveCell";
 import { BulkStoreToolbar } from "./BulkStoreToolbar";
@@ -44,8 +43,7 @@ interface PreviewStepProps {
   diagnose: (row: ResolvedRow) => RowDiagnostics;
   importableCount: number;
   blockedCount: number;
-  importing: boolean;
-  progress: CommitProgress | null;
+  isJobRunning: boolean;
   onUpdateRow: (index: number, patch: Partial<ResolvedRow>) => void;
   onBulkSetStore: (storeId: string, onlyUnresolved: boolean) => void;
   unresolvedStoreGroups: UnresolvedStoreGroup[];
@@ -60,8 +58,7 @@ export function PreviewStep({
   diagnose,
   importableCount,
   blockedCount,
-  importing,
-  progress,
+  isJobRunning,
   onUpdateRow,
   onBulkSetStore,
   unresolvedStoreGroups,
@@ -225,28 +222,26 @@ export function PreviewStep({
         </Table>
       </div>
 
-      {progress && (
-        <div className="text-sm text-gray-500">
-          {progress.phase === "uploading"
-            ? `Subindo imagens... ${progress.uploadedImages}/${progress.totalImages}`
-            : "Salvando produtos..."}
+      {isJobRunning && (
+        <div className="text-sm text-amber-600">
+          Já existe uma importação em andamento — acompanhe no card no canto da
+          tela. Aguarde terminar para iniciar outra.
         </div>
       )}
 
       <div className="flex justify-between pt-2">
         <button
           onClick={onBack}
-          disabled={importing}
-          className="px-4 py-2 text-gray-500 font-medium text-sm hover:bg-gray-50 rounded-lg disabled:opacity-50"
+          className="px-4 py-2 text-gray-500 font-medium text-sm hover:bg-gray-50 rounded-lg"
         >
           Voltar
         </button>
         <button
           onClick={onImport}
-          disabled={importing || importableCount === 0}
+          disabled={isJobRunning || importableCount === 0}
           className="px-6 py-2 bg-[#1A2B3C] text-white font-medium text-sm rounded-lg hover:bg-[#2c455d] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {importing ? "Importando..." : `Importar ${importableCount} produtos`}
+          {`Importar ${importableCount} produtos`}
         </button>
       </div>
     </div>

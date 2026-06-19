@@ -2,11 +2,8 @@
 
 import { useCallback, useMemo, useState } from "react";
 import type JSZip from "jszip";
-import { BulkCreateResult } from "@repo/dtos";
 import { toast } from "@repo/ui";
-import productHttp from "@/Services/http/product.http";
 import storeHttp from "@/Services/http/store.http";
-import { useImageUpload } from "@/composable/storage/useImageUpload";
 import { buildResolvedRows, diagnoseRow, isRowImportable } from "./buildRows";
 import {
   suggestColumnMapping,
@@ -14,11 +11,6 @@ import {
 } from "./columnMapping";
 import { loadZip } from "./matchImages";
 import { parseSpreadsheet } from "./parseSpreadsheet";
-import {
-  buildBulkPayload,
-  type CommitProgress,
-  type UploadFailure,
-} from "./commit";
 import type { StoreOption } from "./resolve";
 import type {
   MappingSuggestion,
@@ -29,8 +21,6 @@ import type {
 export type ImportStep = "upload" | "mapping" | "preview" | "result";
 
 export function useImport() {
-  const { uploadImage } = useImageUpload();
-
   const [step, setStep] = useState<ImportStep>("upload");
   const [parsing, setParsing] = useState(false);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -40,10 +30,6 @@ export function useImport() {
   const [stores, setStores] = useState<StoreOption[]>([]);
   const [suggestions, setSuggestions] = useState<MappingSuggestion[]>([]);
   const [rows, setRows] = useState<ResolvedRow[]>([]);
-  const [progress, setProgress] = useState<CommitProgress | null>(null);
-  const [importing, setImporting] = useState(false);
-  const [result, setResult] = useState<BulkCreateResult | null>(null);
-  const [uploadFailures, setUploadFailures] = useState<UploadFailure[]>([]);
 
   // Passo 1: recebe planilha + zip, faz parse e pré-carrega lojas.
   const onFiles = useCallback(
@@ -150,34 +136,6 @@ export function useImport() {
   const importableRows = useMemo(() => rows.filter(isRowImportable), [rows]);
   const blockedCount = rows.length - importableRows.length;
 
-  // Passo 4: sobe imagens e chama o endpoint bulk.
-  const runImport = useCallback(async () => {
-    if (importableRows.length === 0) {
-      toast.warning("Nenhuma linha apta para importar.");
-      return;
-    }
-    setImporting(true);
-    setProgress({ phase: "uploading", uploadedImages: 0, totalImages: 0 });
-    try {
-      const { products, uploadFailures: failures } = await buildBulkPayload(
-        importableRows,
-        zip,
-        uploadImage,
-        setProgress,
-      );
-      const res = await productHttp.createBulk({ products });
-      setUploadFailures(failures);
-      setResult(res);
-      setStep("result");
-    } catch (err) {
-      console.error(err);
-      toast.error("Erro ao importar. Nenhuma alteração parcial foi perdida.");
-    } finally {
-      setImporting(false);
-      setProgress(null);
-    }
-  }, [importableRows, zip, uploadImage]);
-
   const reset = useCallback(() => {
     setStep("upload");
     setHeaders([]);
@@ -187,23 +145,18 @@ export function useImport() {
     setStores([]);
     setSuggestions([]);
     setRows([]);
-    setResult(null);
-    setUploadFailures([]);
   }, []);
 
   return {
     step,
     parsing,
-    importing,
-    progress,
     headers,
+    zip,
     stores,
     suggestions,
     rows,
     importableRows,
     blockedCount,
-    result,
-    uploadFailures,
     diagnoseRow,
     onFiles,
     confirmMapping,
@@ -211,7 +164,6 @@ export function useImport() {
     bulkSetStore,
     mapStoreByRawName,
     unresolvedStoreGroups,
-    runImport,
     reset,
   };
 }

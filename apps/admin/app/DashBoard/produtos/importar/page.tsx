@@ -1,26 +1,42 @@
 "use client";
 
 import { useCallback } from "react";
+import { toast } from "@repo/ui";
 import { useImport } from "./-lib/useImport";
+import { useImportJob } from "./-lib/ImportJobContext";
 import { UploadStep } from "./-components/UploadStep";
 import { MappingStep } from "./-components/MappingStep";
 import { PreviewStep } from "./-components/PreviewStep";
-import { ResultStep } from "./-components/ResultStep";
 
 const STEPS = [
   { key: "upload", label: "Arquivos" },
   { key: "mapping", label: "Colunas" },
   { key: "preview", label: "Revisão" },
-  { key: "result", label: "Resultado" },
 ] as const;
 
 export default function ImportarProdutosPage() {
   const im = useImport();
+  const importJob = useImportJob();
 
   const storeNameById = useCallback(
     (id: string) => im.stores.find((s) => s.id === id)?.name ?? id,
     [im.stores],
   );
+
+  // Entrega o job ao provider (roda em segundo plano) e reseta o wizard.
+  const handleStart = useCallback(() => {
+    if (importJob.isRunning) {
+      toast.warning("Já existe uma importação em andamento.");
+      return;
+    }
+    if (im.importableRows.length === 0) {
+      toast.warning("Nenhuma linha apta para importar.");
+      return;
+    }
+    importJob.start({ rows: im.importableRows, zip: im.zip });
+    toast.success("Importação iniciada — acompanhe no card no canto da tela.");
+    im.reset();
+  }, [importJob, im]);
 
   const activeIndex = STEPS.findIndex((s) => s.key === im.step);
 
@@ -67,22 +83,13 @@ export default function ImportarProdutosPage() {
           diagnose={im.diagnoseRow}
           importableCount={im.importableRows.length}
           blockedCount={im.blockedCount}
-          importing={im.importing}
-          progress={im.progress}
+          isJobRunning={importJob.isRunning}
           onUpdateRow={im.updateRow}
           onBulkSetStore={im.bulkSetStore}
           unresolvedStoreGroups={im.unresolvedStoreGroups}
           onMapStoreByName={im.mapStoreByRawName}
-          onImport={im.runImport}
+          onImport={handleStart}
           onBack={() => im.reset()}
-        />
-      )}
-
-      {im.step === "result" && im.result && (
-        <ResultStep
-          result={im.result}
-          uploadFailures={im.uploadFailures}
-          onReset={im.reset}
         />
       )}
     </div>

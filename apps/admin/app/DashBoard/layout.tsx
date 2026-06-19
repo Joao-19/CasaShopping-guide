@@ -6,6 +6,8 @@ import Cookies from 'js-cookie';
 import authHttp from '@/Services/http/auth.http';
 import { useAuthStore } from '@/store/auth.store';
 import { Sidebar } from './components/Sidebar';
+import { ImportJobProvider } from './produtos/importar/-lib/ImportJobContext';
+import { ImportJobWidget } from './produtos/importar/-components/ImportJobWidget';
 
 // ...
 export default function DashboardLayout({
@@ -39,6 +41,7 @@ export default function DashboardLayout({
     };
 
     return (
+        <ImportJobProvider>
         <div className="min-h-screen bg-[#f0f1f3] font-sans antialiased">
             <div className="flex min-h-screen bg-[#F4F6F8] font-sans relative">
                 {/* Mobile Menu Button */}
@@ -70,6 +73,8 @@ export default function DashboardLayout({
                     {children}
                 </main>
             </div>
+            <ImportJobWidget />
         </div>
+        </ImportJobProvider>
     );
 }

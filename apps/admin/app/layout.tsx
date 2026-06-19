@@ -33,7 +33,10 @@ export default function RootLayout({
         <GoogleTagManagerScript gtmId={gtmId} />
         <GoogleAnalytics4Script gaId={gaId} />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable}`}
+        suppressHydrationWarning
+      >
         <GoogleTagManagerNoscript gtmId={gtmId} />
         <Providers>{children}</Providers>
       </body>
