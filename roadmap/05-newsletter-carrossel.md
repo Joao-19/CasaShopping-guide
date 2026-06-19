@@ -106,9 +106,11 @@ gateway (`:3000`).
 - **Modal de erro global na home** (`z-[9999]`, "Ops! Algo deu errado / Internal server error") aparecia por um **500 do `/stores`** e **fica por cima** do modal da newsletter (`z-[100]`), interceptando cliques. **Resolvido (2026-06-18):** `apps/stores/.env` tinha `DATABASE_URL` **comentado** → o stores caía no DB errado (raiz/weplanner, sem a tabela `stores`) e o Prisma dava `KnownRequestError`. Descomentei a linha (→ casashopping) e reiniciei; `GET /stores` volta 200. Auditoria dos backends: só o `stores` estava comentado (`auth` não tem `DATABASE_URL` mas herda o do `@repo/database` → casashopping; demais ok).
 
 ### Pendente — outros
-- [ ] **Segurança:** proteger as escritas de admin (`PUT /newsletter`,
-      `PUT /settings`, `POST /storage/*`) com `JwtAuthGuard + RolesGuard`
-      `@Roles("admin")` — hoje as 3 estão abertas (consistente entre si)
+- [x] **Segurança (2026-06-19):** `PUT /newsletter` e `PUT /settings` protegidos
+      com `JwtAuthGuard + RolesGuard @Roles("admin")` (ver detalhes em 06 §pendências).
+      `POST /storage/*` segue aberto (risco do cookie HttpOnly + guards comentados
+      no microserviço storage) — follow-up coordenado. Validação e2e pendente do
+      restart do gateway.
 - [ ] **Alinhar `.env` da raiz** (`postgres@.../postgres` → `.../casashopping?schema=public`)
       pra o runner `apps/migration`/frontends não apontarem pro DB do weplanner
 - [ ] (Opcional) Persistir "já visto" além da sessão / re-exibir ao trocar slides

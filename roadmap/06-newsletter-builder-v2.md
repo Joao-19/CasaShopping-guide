@@ -251,8 +251,17 @@ full-screen 2 painéis). Portar fiel do modelo:
 - [ ] Atualizar este roadmap + marcar a frente V1 (05) como substituída.
 
 ## Pendências herdadas (da frente V1, ainda válidas)
-- [ ] **Segurança:** proteger escritas admin (`PUT /newsletter`, `PUT /settings`,
-      `POST /storage/*`) com `JwtAuthGuard + RolesGuard @Roles("admin")` — hoje abertas.
+- [x] **Segurança (2026-06-19) — ✅ validado e2e:** `PUT /newsletter` e `PUT /settings`
+      protegidos com `@UseGuards(JwtAuthGuard, RolesGuard) @Roles("admin")`
+      (gateway-local; `AuthGuardModule` importado nos módulos; tsc verde).
+      Validado via curl: sem token → 401, com token admin → 200. Detalhes e o
+      pré-requisito de runtime em `02-paginas-de-campanha.md` §Segurança.
+      **⚠️ PRODUÇÃO:** o gateway precisou de `JWT_SECRET=access-secret` no `.env`
+      (não tinha; caía no `default_secret` e dava 401). O gateway em prod também
+      precisa dessa var no deploy/CI — ação do dono.
+      `POST /storage/*` **continua aberto** — guard header-only barraria o upload
+      quando o `access_token` é cookie HttpOnly (`useImageUpload`); além disso o
+      microserviço `apps/storage` tem os guards comentados. Fix coordenado à parte.
 - [ ] Alinhar `.env` da raiz (→ `casashopping`) pro runner/frontends.
 - [ ] MinIO local na `:9100` (container `rpg-gaming-minio-1`) — ver roadmap 05.
 

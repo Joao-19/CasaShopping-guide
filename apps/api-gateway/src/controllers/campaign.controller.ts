@@ -7,7 +7,9 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from "@nestjs/common";
+import { JwtAuthGuard, Roles, RolesGuard } from "@repo/auth-guard";
 import { CampaignService } from "../services/campaign.service";
 import {
   CampaignPageDetail,
@@ -52,9 +54,10 @@ export class CampaignController {
     return this.campaignService.findOne(id);
   }
 
-  // Admin grava. Guard segue desativado igual /newsletter e /settings;
-  // proteger as escritas de admin é follow-up (ver roadmap 05/06 §segurança).
+  // Admin grava — protegido por JWT + papel admin (mesmo padrão de products/stores).
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async create(
     @Body() data: CreateCampaignPageDto
   ): Promise<CampaignPageDetail> {
@@ -62,6 +65,8 @@ export class CampaignController {
   }
 
   @Put(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async update(
     @Param("id") id: string,
     @Body() data: UpdateCampaignPageDto
@@ -70,6 +75,8 @@ export class CampaignController {
   }
 
   @Delete(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async remove(@Param("id") id: string): Promise<{ id: string }> {
     return this.campaignService.remove(id);
   }

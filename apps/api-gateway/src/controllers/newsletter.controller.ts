@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Put } from "@nestjs/common";
+import { Body, Controller, Get, Put, UseGuards } from "@nestjs/common";
+import { JwtAuthGuard, Roles, RolesGuard } from "@repo/auth-guard";
 import { NewsletterService } from "../services/newsletter.service";
 import { NewsletterSettings, UpdateNewsletterDto } from "@repo/dtos";
 
@@ -12,9 +13,10 @@ export class NewsletterController {
     return this.newsletterService.getNewsletter();
   }
 
-  // Admin grava config + slides. Guard segue desativado igual /settings;
-  // proteger as escritas de admin (settings/newsletter/storage) é follow-up.
+  // Admin grava config + slides — protegido por JWT + papel admin.
   @Put()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async updateNewsletter(
     @Body() data: UpdateNewsletterDto
   ): Promise<NewsletterSettings> {

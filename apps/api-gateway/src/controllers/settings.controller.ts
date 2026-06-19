@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Put, UseGuards } from "@nestjs/common";
+import { JwtAuthGuard, Roles, RolesGuard } from "@repo/auth-guard";
 import { SettingsService } from "../services/settings.service";
 import { Settings } from "@repo/database";
-// import { AuthGuard } from '@nestjs/passport'; // Uncomment if auth is needed
 
 @Controller("settings")
 export class SettingsController {
@@ -13,7 +13,8 @@ export class SettingsController {
   }
 
   @Put()
-  // @UseGuards(AuthGuard('jwt')) // Uncomment if auth is needed logic
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
   async updateSettings(@Body() data: Partial<Settings>): Promise<Settings> {
     // Remove ID from body to prevent overwrite attempts on fixed ID
     const { id, ...updateData } = data as any;

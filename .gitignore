@@ -16,6 +16,9 @@ node_modules
 # Testing
 coverage
 
+# Playwright MCP (logs/snapshots de validacao e2e)
+.playwright-mcp/
+
 # Turbo
 .turbo
 
