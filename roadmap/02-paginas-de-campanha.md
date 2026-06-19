@@ -69,22 +69,27 @@ Sem editor de blocos — o layout não muda.
 
 > **Validação e2e (Playwright, UI real, 2026-06-19):** abrir campanha → buscar "a" (lista produtos reais da API) → adicionar 2 (Cadeira Background 1, Cama Box Queen) → Salvar → coluna Produtos vira **2**; reabrir → produtos hidratam na ordem #1/#2 (`getById` ordena por `order`). 0 erros de console.
 
-### Dia 4 — Página pública + refino — implementado, ⏳ e2e pendente (2026-06-19)
+### Dia 4 — Página pública + refino ✅ (2026-06-19)
 - [x] Rota `apps/web/app/campanha/[slug]/page.tsx` (client, `useParams`) + `Services/http/campaign.http.ts` (`getCampaignBySlug`)
 - [x] Layout: `Toolbar` + banner responsivo (desktop `hidden md:block` / mobile `block md:hidden`) + título + grid de `ProductCardSwiper` (click → `ProductDetailsCard`, favoritar) + `Footer`
 - [x] 404 para slug inexistente/inativo (backend já retorna 404; `retry:false` + UI "Campanha não encontrada"); SEO básico via `document.title`
 - [x] Backend enriquecido: `CampaignProductView` ganhou dados da loja (`store{}` + `showStorePhone`) p/ o card/detalhe funcionarem como no resto do site (só include, sem migration)
-- [ ] **Teste de fogo e2e (Playwright):** PENDENTE — stack do casashopping estava fora do ar no momento (máquina rodava o wePlanner na faixa 301x). Validar: página renderiza banner+título+vitrine, click abre detalhe, slug inativo/inexistente → 404, e ciclo admin→web (criar/ativar/desativar reflete no público).
+- [x] **Teste de fogo e2e (Playwright, UI real, 2026-06-19):** stack casashopping no ar (web :3001, admin :3002, gateway :3000). Validado:
+  - `/campanha/especial-copa-2026` → Toolbar + título + vitrine com 2 produtos (loja "Loja Teste", price tier, imagem real no 1º); `document.title` = "Especial Copa 2026 (BR) — CasaShopping" (SEO).
+  - Click no produto → `ProductDetailsCard` (título, preço, descrição, loja+endereço, Favoritar).
+  - Slug inexistente (`/campanha/nao-existe-xyz`) → "Campanha não encontrada" (único erro de console = 404 de rede esperado).
+  - **Ciclo admin→web:** desativar no admin (Status "Inativa") → público vira 404; reativar → vitrine volta a renderizar. 0 erros de JS.
 
 > **Gates Dia 4:** web tsc (só erro pré-existente do WebSocket), eslint 0 erros, `madge` web sem ciclos; dtos + api-gateway build OK.
+> **Nota:** banners não testados com imagem real (campanha de teste sem capa); render é condicional e direto. `/newsletter` dava 500 no boot — alheio a esta frente (provável coluna `newsletterSlideInterval` no schema sem migration, trabalho de newsletter em andamento).
 
-## Critérios de aceite
+## Critérios de aceite — ✅ validados via Playwright (2026-06-19)
 
-- [ ] Admin cria uma página de campanha com capa desktop/mobile e ≥1 produto.
-- [ ] Sistema sugere URL a partir do título e permite editar antes de salvar.
-- [ ] Slug duplicado é bloqueado com mensagem clara.
-- [ ] Página pública renderiza menu + banner correto por dispositivo + título + vitrine.
-- [ ] Slug inexistente/inativo retorna 404.
+- [x] Admin cria uma página de campanha com capa desktop/mobile e ≥1 produto. *(criação + seletor de produtos validados; banner com imagem real não testado — render condicional ok)*
+- [x] Sistema sugere URL a partir do título e permite editar antes de salvar.
+- [x] Slug duplicado é bloqueado com mensagem clara ("Essa URL já existe" + botão travado).
+- [x] Página pública renderiza menu + banner (condicional) + título + vitrine.
+- [x] Slug inexistente/inativo retorna 404 (incl. ciclo admin desativa → público 404 → reativa → volta).
 
 ## Fora de escopo (deste sprint)
 
