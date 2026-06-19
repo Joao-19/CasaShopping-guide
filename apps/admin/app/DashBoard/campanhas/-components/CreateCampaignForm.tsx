@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Label, FormCard, Checkbox, toast } from "@repo/ui";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import { BannerUpload } from "../../components";
+import { ProductSelector, SelectedProduct } from "./ProductSelector";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
 import useCampaign from "@/composable/campaign/useCampaign";
 import campaignHttp from "@/Services/http/campaign.http";
@@ -40,8 +41,14 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
     const [coverMobile, setCoverMobile] = useState<string | File | undefined>(
         initialData?.coverMobile ?? undefined,
     );
-    // Produtos: editados no seletor (Dia 3); aqui preservamos os existentes.
-    const productIds = (initialData?.products ?? []).map((p) => p.id);
+    // Produtos da vitrine (ordem = posição). Hidrata do detalhe no edit.
+    const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
+        (initialData?.products ?? []).map((p) => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+        })),
+    );
 
     // Slug auto-sugerido a partir do título enquanto o usuário não o edita à mão.
     const slugEdited = useRef(isEditing);
@@ -115,7 +122,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 isActive,
                 coverDesktop: desktopKey ?? "",
                 coverMobile: mobileKey ?? "",
-                productIds,
+                productIds: selectedProducts.map((p) => p.id),
             };
 
             if (isEditing) {
@@ -239,10 +246,15 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                     <span className="text-sm text-gray-700">Exibir página no site</span>
                 </label>
 
-                <p className="text-xs text-gray-400 border-t border-gray-100 pt-3">
-                    A seleção de produtos da vitrine será feita no seletor de produtos
-                    (próxima etapa). {isEditing && `${productIds.length} produto(s) vinculado(s).`}
-                </p>
+                <div className="border-t border-gray-100 pt-4 space-y-2">
+                    <Label className="block text-sm font-semibold text-gray-700">
+                        Produtos da vitrine
+                    </Label>
+                    <p className="text-xs text-gray-400">
+                        Busque e adicione produtos; arraste para definir a ordem de exibição.
+                    </p>
+                    <ProductSelector value={selectedProducts} onChange={setSelectedProducts} />
+                </div>
 
                 <div className="flex justify-end gap-3 pt-2">
                     <Button type="button" variant="outline" onClick={onClose}>

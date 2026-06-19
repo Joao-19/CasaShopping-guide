@@ -62,10 +62,12 @@ Sem editor de blocos — o layout não muda.
 > **Fix:** `CreateCampaignForm` usava `useFormField` (exige `FormProvider`) → runtime error ao abrir o modal. Trocado por validação inline (required + touched), sem dependência de contexto.
 > **Pendente p/ Dia 3:** seletor de produtos (busca na API + ordenação). O form já preserva `productIds` no edit; a UI de seleção entra no Dia 3.
 
-### Dia 3 — Seletor de produtos + publicação
-- [ ] Seletor de produtos com busca na API, paginação e seleção múltipla
-- [ ] (Opcional) ordenação dos produtos selecionados
-- [ ] Fluxo de publicação: confirma/edita URL → salva → trata conflito de slug
+### Dia 3 — Seletor de produtos + publicação ✅ (2026-06-19)
+- [x] Seletor de produtos (`-components/ProductSelector.tsx`): busca na API (`productHttp.list`, debounce 300ms, dropdown), seleção múltipla (exclui já selecionados), integrado ao `CreateCampaignForm`
+- [x] Ordenação por drag-n-drop (`@dnd-kit`, `verticalListSortingStrategy`); ordem = posição na vitrine, enviada como `productIds[]` (replace)
+- [x] Fluxo de publicação: toggle "Exibir no site" (`isActive`) + slug confirma/edita com unicidade (já no Dia 2; 409 tratado)
+
+> **Validação e2e (Playwright, UI real, 2026-06-19):** abrir campanha → buscar "a" (lista produtos reais da API) → adicionar 2 (Cadeira Background 1, Cama Box Queen) → Salvar → coluna Produtos vira **2**; reabrir → produtos hidratam na ordem #1/#2 (`getById` ordena por `order`). 0 erros de console.
 
 ### Dia 4 — Página pública + refino
 - [ ] Rota `apps/web/app/campanha/[slug]/page.tsx`
