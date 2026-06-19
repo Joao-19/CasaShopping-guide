@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { downloadTemplate } from "../-lib/template";
+import { HelpModal } from "./HelpModal";
 
 interface UploadStepProps {
   parsing: boolean;
@@ -52,6 +53,7 @@ function FilePicker({
 export function UploadStep({ parsing, onSubmit }: UploadStepProps) {
   const [spreadsheet, setSpreadsheet] = useState<File | null>(null);
   const [zip, setZip] = useState<File | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
@@ -63,14 +65,26 @@ export function UploadStep({ parsing, onSubmit }: UploadStepProps) {
             colunas, casa as fotos e mostra um preview antes de salvar.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={downloadTemplate}
-          className="shrink-0 text-sm text-[#1A2B3C] font-medium underline underline-offset-2 hover:text-[#2c455d]"
-        >
-          Baixar modelo .xlsx
-        </button>
+        <div className="shrink-0 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={downloadTemplate}
+            className="text-sm text-[#1A2B3C] font-medium underline underline-offset-2 hover:text-[#2c455d]"
+          >
+            Baixar modelo .xlsx
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowHelp(true)}
+            className="inline-flex items-center gap-1 text-sm text-gray-600 font-medium px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" /></svg>
+            Ajuda
+          </button>
+        </div>
       </div>
+
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
 
       <FilePicker
         label="Planilha (.xlsx / .csv)"
