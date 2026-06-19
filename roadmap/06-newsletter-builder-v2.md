@@ -256,9 +256,11 @@ full-screen 2 painéis). Portar fiel do modelo:
       (gateway-local; `AuthGuardModule` importado nos módulos; tsc verde).
       Validado via curl: sem token → 401, com token admin → 200. Detalhes e o
       pré-requisito de runtime em `02-paginas-de-campanha.md` §Segurança.
-      **⚠️ PRODUÇÃO:** o gateway precisou de `JWT_SECRET=access-secret` no `.env`
-      (não tinha; caía no `default_secret` e dava 401). O gateway em prod também
-      precisa dessa var no deploy/CI — ação do dono.
+      **Dev:** o gateway precisou de `JWT_SECRET` no `apps/api-gateway/.env`
+      (gitignored; no dev o NestJS só lê o `.env` do app, que não tinha). **Prod
+      já coberto:** `docker-compose.yml` injeta `JWT_SECRET=${JWT_SECRET}` no
+      gateway (linha 105) do env central; mesmo secret que o `auth` assina.
+      Nenhuma mudança de env/CI necessária no deploy.
       `POST /storage/*` **continua aberto** — guard header-only barraria o upload
       quando o `access_token` é cookie HttpOnly (`useImageUpload`); além disso o
       microserviço `apps/storage` tem os guards comentados. Fix coordenado à parte.
