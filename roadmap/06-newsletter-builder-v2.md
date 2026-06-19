@@ -131,6 +131,27 @@ O modelo é um **paradigma visual diferente** do que está no projeto hoje:
   (`GripVertical`); o grid captura seus próprios eventos de ponteiro.
 - Gates: admin tsc 0, eslint do arquivo limpo.
 
+## Iteração 3 (2026-06-19) — tempo de troca das imagens do slide configurável
+
+- **Antes:** o crossfade do carrossel **interno** (imagens de um mesmo slide) era
+  fixo em `3500ms`, hardcoded em `NewsletterModal` (preview admin) e
+  `NewsletterCarouselModal` (web). Curto demais.
+- **Agora:** `behavior.slideInterval` (segundos) — flui por toda a vertical igual
+  aos outros campos de behavior:
+  - `Settings.newsletterSlideInterval Int @default(5)` + migration
+    `20260619140000_newsletter_slide_interval` (idempotente, `ADD COLUMN IF NOT EXISTS`).
+  - DTO: `NewsletterBehavior.slideInterval` + `NewsletterBehaviorDto` (`@IsInt @Min(1) @Max(60)`).
+  - `newsletter.service`: read (`?? 5`) + write no `settingsUpdate`.
+  - Admin: `NewsletterBehavior.slideInterval` (types) + UI no `BehaviorPanel`
+    ("Troca de imagens do slide", presets 3/5/8/12s) + `ImagePane` usa `intervalMs`.
+  - Web: shape em `newsletter.http.ts` + `SlideView`→`SlideImages` recebe `intervalMs`.
+- `behavior` trafega como objeto inteiro no admin (`page.tsx`), então hidratação/save
+  não precisaram de mudança.
+- **Gates:** dtos build, admin tsc/lint, web tsc (só erro WS pré-existente)/lint OK.
+- **Pendente (precisa do dono):** aplicar migration no DB local + `prisma generate`
+  (lock de DLL com backend de pé) e então `api-gateway` tsc. Validação visual do
+  novo tempo no preview/web.
+
 ## Estado da implementação (2026-06-19)
 
 Fases 0–4 **implementadas e com gates verdes**. Falta validação e2e visual

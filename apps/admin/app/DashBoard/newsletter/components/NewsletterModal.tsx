@@ -6,7 +6,13 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ImageWithFallback } from "../_ui/ImageWithFallback";
 import type { NewsletterConfig, NewsletterSection } from "../types";
 
-function ImagePane({ section }: { section: NewsletterSection }) {
+function ImagePane({
+  section,
+  intervalMs,
+}: {
+  section: NewsletterSection;
+  intervalMs: number;
+}) {
   const { images } = section;
   const multiple = images.length > 1;
   const [idx, setIdx] = useState(0);
@@ -16,10 +22,10 @@ function ImagePane({ section }: { section: NewsletterSection }) {
     if (!multiple) return;
     const t = setInterval(
       () => setIdx((i) => (i + 1) % images.length),
-      3500,
+      intervalMs,
     );
     return () => clearInterval(t);
-  }, [multiple, images.length]);
+  }, [multiple, images.length, intervalMs]);
 
   const safeIdx = Math.min(idx, images.length - 1);
 
@@ -197,7 +203,10 @@ export function NewsletterModal({
           {sections.map((section) => (
             <div key={section.id} className="min-w-0 shrink-0 grow-0 basis-full">
               <div className={`${layout} @2xl:min-h-[440px]`}>
-                <ImagePane section={section} />
+                <ImagePane
+                  section={section}
+                  intervalMs={config.behavior.slideInterval * 1000}
+                />
                 <ContentPane section={section} accentColor={config.accentColor} />
               </div>
             </div>

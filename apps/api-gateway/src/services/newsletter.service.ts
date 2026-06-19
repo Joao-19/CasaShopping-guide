@@ -95,6 +95,7 @@ export class NewsletterService {
         appearDelay: settings?.newsletterAppearDelay ?? 5,
         autoClose: settings?.newsletterAutoClose ?? false,
         autoCloseDelay: settings?.newsletterAutoCloseDelay ?? 15,
+        slideInterval: settings?.newsletterSlideInterval ?? 5,
       },
       targeting: parseTargeting(settings?.newsletterTargeting),
       slides: slides.map((s) => ({
@@ -125,6 +126,7 @@ export class NewsletterService {
       newsletterAppearDelay?: number;
       newsletterAutoClose?: boolean;
       newsletterAutoCloseDelay?: number;
+      newsletterSlideInterval?: number;
       newsletterTargeting?: Prisma.InputJsonValue;
     } = {};
     if (data.enabled !== undefined)
@@ -139,6 +141,8 @@ export class NewsletterService {
       settingsUpdate.newsletterAutoClose = data.behavior.autoClose;
     if (data.behavior?.autoCloseDelay !== undefined)
       settingsUpdate.newsletterAutoCloseDelay = data.behavior.autoCloseDelay;
+    if (data.behavior?.slideInterval !== undefined)
+      settingsUpdate.newsletterSlideInterval = data.behavior.slideInterval;
     if (data.targeting !== undefined)
       settingsUpdate.newsletterTargeting = {
         pageTypes: data.targeting.pageTypes ?? [],

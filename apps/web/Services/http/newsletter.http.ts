@@ -18,6 +18,7 @@ export interface NewsletterBehavior {
   appearDelay: number;
   autoClose: boolean;
   autoCloseDelay: number;
+  slideInterval: number;
 }
 
 export interface NewsletterTargeting {

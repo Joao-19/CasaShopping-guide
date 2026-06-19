@@ -33,6 +33,8 @@ export interface NewsletterBehavior {
   autoClose: boolean;
   /** segundos visível antes do auto-close. */
   autoCloseDelay: number;
+  /** segundos entre as imagens do carrossel interno de um slide. */
+  slideInterval: number;
 }
 
 export interface NewsletterConfig {

@@ -33,6 +33,7 @@ export interface NewsletterBehavior {
   appearDelay: number; // segundos até aparecer
   autoClose: boolean;
   autoCloseDelay: number; // segundos visível antes de fechar
+  slideInterval: number; // segundos entre imagens do carrossel interno do slide
 }
 
 export interface NewsletterTargeting {
@@ -116,6 +117,12 @@ export class NewsletterBehaviorDto {
   @Min(1)
   @Max(600)
   autoCloseDelay?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(60)
+  slideInterval?: number;
 }
 
 export class NewsletterTargetingDto {

@@ -152,6 +152,7 @@ model Settings {
   newsletterAppearDelay    Int     @default(5) // segundos até aparecer (0/3/5/10)
   newsletterAutoClose      Boolean @default(false)
   newsletterAutoCloseDelay Int     @default(15) // segundos visível (8/15/30)
+  newsletterSlideInterval  Int     @default(5) // segundos entre imagens do carrossel interno do slide
   // Segmentação: { pageTypes: string[], specificPages: string[], campaigns: string[] }
   // Por ora persistido como JSON; web aplica home-only (ver roadmap 06).
   newsletterTargeting Json?

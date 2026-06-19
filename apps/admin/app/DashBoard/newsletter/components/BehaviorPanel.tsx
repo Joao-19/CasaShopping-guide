@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Timer } from "lucide-react";
+import { Clock, Images, Timer } from "lucide-react";
 import { Switch } from "../_ui/switch";
 import { Label } from "../_ui/label";
 import { Separator } from "../_ui/separator";
@@ -22,6 +22,13 @@ const CLOSE_OPTIONS = [
   { value: 8, label: "8s" },
   { value: 15, label: "15s" },
   { value: 30, label: "30s" },
+];
+
+const SLIDE_INTERVAL_OPTIONS = [
+  { value: 3, label: "3s" },
+  { value: 5, label: "5s" },
+  { value: 8, label: "8s" },
+  { value: 12, label: "12s" },
 ];
 
 function OptionRow({
@@ -71,6 +78,27 @@ export function BehaviorPanel({ behavior, onChange }: BehaviorPanelProps) {
           options={APPEAR_OPTIONS}
           value={behavior.appearDelay}
           onSelect={(v) => onChange({ ...behavior, appearDelay: v })}
+        />
+      </section>
+
+      <Separator />
+
+      {/* Tempo entre imagens do slide */}
+      <section className="space-y-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-gray-900">
+            <Images className="size-4 text-gray-500" />
+            <h3 className="text-sm font-semibold">Troca de imagens do slide</h3>
+          </div>
+          <p className="text-xs text-gray-400">
+            Quando um slide tem várias imagens, este é o tempo que cada uma fica
+            antes de passar para a próxima. Padrão: 5s.
+          </p>
+        </div>
+        <OptionRow
+          options={SLIDE_INTERVAL_OPTIONS}
+          value={behavior.slideInterval}
+          onSelect={(v) => onChange({ ...behavior, slideInterval: v })}
         />
       </section>
 

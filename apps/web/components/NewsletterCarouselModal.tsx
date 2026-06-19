@@ -14,7 +14,15 @@ function isExternal(href: string): boolean {
   return /^https?:\/\//i.test(href);
 }
 
-function SlideImages({ images, alt }: { images: string[]; alt: string }) {
+function SlideImages({
+  images,
+  alt,
+  intervalMs,
+}: {
+  images: string[];
+  alt: string;
+  intervalMs: number;
+}) {
   const multiple = images.length > 1;
   const [idx, setIdx] = useState(0);
 
@@ -22,10 +30,10 @@ function SlideImages({ images, alt }: { images: string[]; alt: string }) {
     if (!multiple) return;
     const t = setInterval(
       () => setIdx((i) => (i + 1) % images.length),
-      3500,
+      intervalMs,
     );
     return () => clearInterval(t);
-  }, [multiple, images.length]);
+  }, [multiple, images.length, intervalMs]);
 
   const safeIdx = Math.min(idx, images.length - 1);
 
@@ -101,10 +109,12 @@ function SlideView({
   slide,
   accentColor,
   imageSide,
+  slideIntervalMs,
 }: {
   slide: NewsletterSlide;
   accentColor: string;
   imageSide: "left" | "right";
+  slideIntervalMs: number;
 }) {
   const layout =
     imageSide === "left"
@@ -115,7 +125,11 @@ function SlideView({
     <div className="min-w-0 shrink-0 grow-0 basis-full">
       <div className={`${layout} @2xl:min-h-[440px]`}>
         {/* Imagem(ns) */}
-        <SlideImages images={slide.images} alt={slide.title || ""} />
+        <SlideImages
+          images={slide.images}
+          alt={slide.title || ""}
+          intervalMs={slideIntervalMs}
+        />
 
         {/* Conteúdo */}
         <div className="flex flex-col justify-center gap-5 bg-white p-6 pb-14 @2xl:basis-1/2 @2xl:grow-0 @2xl:p-10">
@@ -270,6 +284,7 @@ export function NewsletterCarouselModal() {
                 slide={slide}
                 accentColor={data.accentColor}
                 imageSide={data.imageSide}
+                slideIntervalMs={(data.behavior.slideInterval ?? 5) * 1000}
               />
             ))}
           </div>
