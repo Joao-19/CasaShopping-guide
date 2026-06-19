@@ -67,6 +67,18 @@ export class UpdateCampaignPageDto {
 }
 
 // --- Leitura ---
+export interface CampaignProductStore {
+  name: string;
+  logoImage: string | null; // URL pública
+  phone: string | null;
+  address: string | null;
+  site: string | null;
+  instagramLink: string | null;
+  facebookLink: string | null;
+  youtubeLink: string | null;
+  whatsapp: string | null;
+}
+
 export interface CampaignProductView {
   id: string;
   name: string;
@@ -76,6 +88,8 @@ export interface CampaignProductView {
   storeId: string;
   images: string[]; // URLs públicas resolvidas, na ordem do index
   order: number;
+  showStorePhone: boolean;
+  store: CampaignProductStore | null;
 }
 
 // Item de lista (admin) — sem os produtos resolvidos.

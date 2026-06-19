@@ -69,11 +69,14 @@ Sem editor de blocos — o layout não muda.
 
 > **Validação e2e (Playwright, UI real, 2026-06-19):** abrir campanha → buscar "a" (lista produtos reais da API) → adicionar 2 (Cadeira Background 1, Cama Box Queen) → Salvar → coluna Produtos vira **2**; reabrir → produtos hidratam na ordem #1/#2 (`getById` ordena por `order`). 0 erros de console.
 
-### Dia 4 — Página pública + refino
-- [ ] Rota `apps/web/app/campanha/[slug]/page.tsx`
-- [ ] Layout: menu + banner responsivo (desktop/mobile) + título + grid
-- [ ] 404 para slug inexistente/inativo + meta/SEO básico
-- [ ] Testes manuais, ajustes responsivos, buffer
+### Dia 4 — Página pública + refino — implementado, ⏳ e2e pendente (2026-06-19)
+- [x] Rota `apps/web/app/campanha/[slug]/page.tsx` (client, `useParams`) + `Services/http/campaign.http.ts` (`getCampaignBySlug`)
+- [x] Layout: `Toolbar` + banner responsivo (desktop `hidden md:block` / mobile `block md:hidden`) + título + grid de `ProductCardSwiper` (click → `ProductDetailsCard`, favoritar) + `Footer`
+- [x] 404 para slug inexistente/inativo (backend já retorna 404; `retry:false` + UI "Campanha não encontrada"); SEO básico via `document.title`
+- [x] Backend enriquecido: `CampaignProductView` ganhou dados da loja (`store{}` + `showStorePhone`) p/ o card/detalhe funcionarem como no resto do site (só include, sem migration)
+- [ ] **Teste de fogo e2e (Playwright):** PENDENTE — stack do casashopping estava fora do ar no momento (máquina rodava o wePlanner na faixa 301x). Validar: página renderiza banner+título+vitrine, click abre detalhe, slug inativo/inexistente → 404, e ciclo admin→web (criar/ativar/desativar reflete no público).
+
+> **Gates Dia 4:** web tsc (só erro pré-existente do WebSocket), eslint 0 erros, `madge` web sem ciclos; dtos + api-gateway build OK.
 
 ## Critérios de aceite
 

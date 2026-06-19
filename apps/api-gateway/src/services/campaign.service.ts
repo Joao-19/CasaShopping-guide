@@ -74,7 +74,7 @@ export class CampaignService {
     return {
       products: {
         orderBy: { order: "asc" as const },
-        include: { product: { include: { images: true } } },
+        include: { product: { include: { images: true, store: true } } },
       },
     };
   }
@@ -97,7 +97,19 @@ export class CampaignService {
         price: string;
         tags: string | null;
         storeId: string;
+        showStorePhone: boolean;
         images: Array<{ path: string; index: number }>;
+        store: {
+          name: string;
+          logoImage: string | null;
+          phone: string | null;
+          address: string | null;
+          site: string | null;
+          instagramLink: string | null;
+          facebookLink: string | null;
+          youtubeLink: string | null;
+          whatsapp: string | null;
+        } | null;
       };
     }>;
   }): CampaignPageDetail {
@@ -113,6 +125,20 @@ export class CampaignService {
         .map((img) => this.transformToUrl(img.path))
         .filter((url): url is string => !!url),
       order: cp.order,
+      showStorePhone: cp.product.showStorePhone,
+      store: cp.product.store
+        ? {
+            name: cp.product.store.name,
+            logoImage: this.transformToUrl(cp.product.store.logoImage),
+            phone: cp.product.store.phone,
+            address: cp.product.store.address,
+            site: cp.product.store.site,
+            instagramLink: cp.product.store.instagramLink,
+            facebookLink: cp.product.store.facebookLink,
+            youtubeLink: cp.product.store.youtubeLink,
+            whatsapp: cp.product.store.whatsapp,
+          }
+        : null,
     }));
 
     return {
