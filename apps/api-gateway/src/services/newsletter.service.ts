@@ -1,11 +1,33 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { Prisma } from "@repo/database";
 import { PrismaService } from "./prisma.service";
 import {
+  NewsletterImageSide,
   NewsletterSettings,
-  NewsletterTextPosition,
+  NewsletterTargeting,
   UpdateNewsletterDto,
 } from "@repo/dtos";
+
+const DEFAULT_TARGETING: NewsletterTargeting = {
+  pageTypes: [],
+  specificPages: [],
+  campaigns: [],
+};
+
+function parseTargeting(value: unknown): NewsletterTargeting {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const t = value as Record<string, unknown>;
+    return {
+      pageTypes: Array.isArray(t.pageTypes) ? (t.pageTypes as string[]) : [],
+      specificPages: Array.isArray(t.specificPages)
+        ? (t.specificPages as string[])
+        : [],
+      campaigns: Array.isArray(t.campaigns) ? (t.campaigns as string[]) : [],
+    };
+  }
+  return { ...DEFAULT_TARGETING };
+}
 
 @Injectable()
 export class NewsletterService {
@@ -67,19 +89,28 @@ export class NewsletterService {
 
     return {
       enabled: settings?.newsletterEnabled ?? false,
-      autoplay: settings?.newsletterAutoplay ?? true,
-      intervalMs: settings?.newsletterIntervalMs ?? 6000,
+      imageSide: (settings?.newsletterImageSide as NewsletterImageSide) ?? "left",
+      accentColor: settings?.newsletterAccentColor ?? "#003ba6",
+      behavior: {
+        appearDelay: settings?.newsletterAppearDelay ?? 5,
+        autoClose: settings?.newsletterAutoClose ?? false,
+        autoCloseDelay: settings?.newsletterAutoCloseDelay ?? 15,
+      },
+      targeting: parseTargeting(settings?.newsletterTargeting),
       slides: slides.map((s) => ({
         id: s.id,
-        imageUrl: this.transformToUrl(s.imageUrl),
+        images: s.images
+          .map((key) => this.transformToUrl(key))
+          .filter((url): url is string => !!url),
+        name: s.name ?? "",
         title: s.title ?? "",
-        subtitle: s.subtitle ?? "",
-        ctaText: s.ctaText ?? "",
-        ctaHref: s.ctaHref ?? "",
-        textPosition: (s.textPosition as NewsletterTextPosition) ?? "bottom-left",
-        textBgEnabled: s.textBgEnabled,
-        textBgColor: s.textBgColor,
-        textBgOpacity: s.textBgOpacity,
+        description: s.description ?? "",
+        fineprint: s.fineprint ?? "",
+        primaryButtonText: s.primaryButtonText ?? "",
+        primaryButtonUrl: s.primaryButtonUrl ?? "",
+        showSecondaryButton: s.showSecondaryButton,
+        secondaryButtonText: s.secondaryButtonText ?? "",
+        secondaryButtonUrl: s.secondaryButtonUrl ?? "",
       })),
     };
   }
@@ -89,14 +120,31 @@ export class NewsletterService {
   ): Promise<NewsletterSettings> {
     const settingsUpdate: {
       newsletterEnabled?: boolean;
-      newsletterAutoplay?: boolean;
-      newsletterIntervalMs?: number;
+      newsletterImageSide?: string;
+      newsletterAccentColor?: string;
+      newsletterAppearDelay?: number;
+      newsletterAutoClose?: boolean;
+      newsletterAutoCloseDelay?: number;
+      newsletterTargeting?: Prisma.InputJsonValue;
     } = {};
-    if (data.enabled !== undefined) settingsUpdate.newsletterEnabled = data.enabled;
-    if (data.autoplay !== undefined)
-      settingsUpdate.newsletterAutoplay = data.autoplay;
-    if (data.intervalMs !== undefined)
-      settingsUpdate.newsletterIntervalMs = data.intervalMs;
+    if (data.enabled !== undefined)
+      settingsUpdate.newsletterEnabled = data.enabled;
+    if (data.imageSide !== undefined)
+      settingsUpdate.newsletterImageSide = data.imageSide;
+    if (data.accentColor !== undefined)
+      settingsUpdate.newsletterAccentColor = data.accentColor;
+    if (data.behavior?.appearDelay !== undefined)
+      settingsUpdate.newsletterAppearDelay = data.behavior.appearDelay;
+    if (data.behavior?.autoClose !== undefined)
+      settingsUpdate.newsletterAutoClose = data.behavior.autoClose;
+    if (data.behavior?.autoCloseDelay !== undefined)
+      settingsUpdate.newsletterAutoCloseDelay = data.behavior.autoCloseDelay;
+    if (data.targeting !== undefined)
+      settingsUpdate.newsletterTargeting = {
+        pageTypes: data.targeting.pageTypes ?? [],
+        specificPages: data.targeting.specificPages ?? [],
+        campaigns: data.targeting.campaigns ?? [],
+      };
 
     await this.prisma.$transaction(async (tx) => {
       if (Object.keys(settingsUpdate).length > 0) {
@@ -118,15 +166,18 @@ export class NewsletterService {
         if (data.slides.length > 0) {
           await tx.newsletterSlide.createMany({
             data: data.slides.map((s, index) => ({
-              imageUrl: this.extractKey(s.imageUrl),
+              images: (s.images ?? [])
+                .map((url) => this.extractKey(url))
+                .filter((key): key is string => !!key),
+              name: s.name ?? null,
               title: s.title ?? null,
-              subtitle: s.subtitle ?? null,
-              ctaText: s.ctaText ?? null,
-              ctaHref: s.ctaHref ?? null,
-              textPosition: s.textPosition ?? "bottom-left",
-              textBgEnabled: s.textBgEnabled ?? true,
-              textBgColor: s.textBgColor ?? "#000000",
-              textBgOpacity: s.textBgOpacity ?? 50,
+              description: s.description ?? null,
+              fineprint: s.fineprint ?? null,
+              primaryButtonText: s.primaryButtonText ?? null,
+              primaryButtonUrl: s.primaryButtonUrl ?? null,
+              showSecondaryButton: s.showSecondaryButton ?? false,
+              secondaryButtonText: s.secondaryButtonText ?? null,
+              secondaryButtonUrl: s.secondaryButtonUrl ?? null,
               order: index,
             })),
           });

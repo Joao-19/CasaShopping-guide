@@ -76,10 +76,14 @@ export class SettingsService {
   }
 
   async updateSettings(data: Partial<Settings>): Promise<Settings> {
+    // `newsletterTargeting` é um Json nullable gerenciado pelo endpoint
+    // /newsletter; propagá-lo aqui quebra a tipagem do input do Prisma
+    // (null literal != Prisma.JsonNull). Removido do spread.
+    const { newsletterTargeting: _ignoredTargeting, ...rest } = data;
     const settings = await this.prisma.settings.upsert({
       where: { id: 1 },
       update: {
-        ...data,
+        ...rest,
         backgroundDesktop: this.extractKey(data.backgroundDesktop),
         backgroundMobile: this.extractKey(data.backgroundMobile),
         advertisementBannerDesktop: this.extractKey(
@@ -92,7 +96,7 @@ export class SettingsService {
       },
       create: {
         id: 1,
-        ...data,
+        ...rest,
         backgroundDesktop: this.extractKey(data.backgroundDesktop),
         backgroundMobile: this.extractKey(data.backgroundMobile),
         advertisementBannerDesktop: this.extractKey(
