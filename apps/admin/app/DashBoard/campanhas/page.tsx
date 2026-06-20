@@ -11,11 +11,14 @@ import {
 import { Header } from '../components';
 import useCampaign from '@/composable/campaign/useCampaign';
 import campaignHttp from '@/Services/http/campaign.http';
+import { useRedirectUrl } from '@/composable/useRedirectUrl';
 import { CreateCampaignForm } from './-components/CreateCampaignForm';
 
 export default function CampanhasPage() {
     const { showPopup, hidePopup } = usePopup();
     const { campaigns, loading, deleteCampaign, search, setSearch, page, setPage, meta } = useCampaign();
+    // Base do site público p/ o link "ver página" de cada campanha.
+    const webUrl = useRedirectUrl(process.env.NEXT_PUBLIC_WEB_URL, "");
 
     const handleCreate = () => {
         showPopup(<CreateCampaignForm onClose={hidePopup} />);
@@ -119,7 +122,17 @@ export default function CampanhasPage() {
                                             <span className="font-medium text-[#1A2B3C] text-sm">{campaign.title}</span>
                                         </TableCell>
                                         <TableCell>
-                                            <span className="text-xs text-gray-500 font-mono">/campanha/{campaign.slug}</span>
+                                            <a
+                                                href={`${webUrl}/campanha/${campaign.slug}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="inline-flex items-center gap-1 text-xs text-[#1A2B3C] font-mono hover:text-[#003ba6] hover:underline transition-colors"
+                                                title="Abrir página pública"
+                                            >
+                                                /campanha/{campaign.slug}
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link shrink-0" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path></svg>
+                                            </a>
                                         </TableCell>
                                         <TableCell>
                                             <span className="text-sm text-gray-700">{campaign.productCount}</span>

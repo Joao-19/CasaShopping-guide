@@ -127,15 +127,17 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
                 <Label className="block text-sm font-semibold text-gray-700 mb-2">
                     URL da página <span className="text-red-500">*</span>
                 </Label>
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400 whitespace-nowrap">/loja/</span>
-                    <BaseInput
-                        id="slug"
-                        type="text"
-                        placeholder="abracasa"
-                        value={data.slug}
-                        onChange={(e) => handlers.setSlug(e.target.value)}
-                    />
+                <div className="flex items-start gap-2">
+                    <span className="h-11 inline-flex items-center text-sm text-gray-400 whitespace-nowrap">/loja/</span>
+                    <div className="flex-1">
+                        <BaseInput
+                            id="slug"
+                            type="text"
+                            placeholder="abracasa"
+                            value={data.slug}
+                            onChange={(e) => handlers.setSlug(e.target.value)}
+                        />
+                    </div>
                 </div>
                 {data.slugStatus === "checking" && (
                     <p className="text-xs text-gray-400 mt-1">Verificando disponibilidade…</p>

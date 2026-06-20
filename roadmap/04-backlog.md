@@ -119,8 +119,63 @@ condicional no site com controle de frequência; aplicar **Zod** no read/write
 
 ---
 
+## Revisão completa da ata (2026-06-20) — itens que o resumo inicial não pegou
+
+> Releitura da transcrição inteira (`reuniao-2026-06-17.pdf`, 31min). O núcleo
+> (B1–B4 + upload em massa + área de dados) está coberto. Abaixo, o que apareceu
+> na reunião e **não** estava nas frentes — gaps e itens deferidos.
+
+### B5 — Redesign do bloco da loja no modal do produto (tem Figma)
+**Risco:** baixo · **Não planejado.**
+Na reunião (00:09–00:10): ao clicar no produto → ver a loja, o bloco "ligar/loja"
+"tá pobre" e "estranho"; pediram **visual novo** e disseram ter **um bloco pronto
+no Figma** de como deve se comportar. É o `StoreDetailsCard` (web) — **distinto da
+B2** (página da loja). Precisa do print/Figma do Felipe para fidelidade.
+
+### B6 — Responsividade do card/modal do produto + "ler mais"
+**Risco:** baixo · **Parcial (B1 fez só o limite).**
+Item de abertura (00:03): **descrição e imagem cortadas**, "tornar responsivo",
+e talvez um **"ler mais"**. A B1 resolveu o limite de caracteres; falta revisar o
+corte da imagem/descrição no modal e avaliar "ler mais".
+
+### B7 — Preview rico no WhatsApp (Open Graph) do link compartilhado
+**Risco:** médio · **Parcial (B3 fez o link, não o preview).**
+Na reunião (00:12–00:13) o pedido explícito do compartilhar inclui **"aquele
+cardzinho com previewzinho"** no WhatsApp. A B3 entrega o deep-link, mas a página
+`/produto/[id]` é client-side e **não gera Open Graph** (og:title/og:image) — o
+WhatsApp mostra link "pelado". Exige metadata server-side (`generateMetadata` em
+server component, ou rota/SSR dedicada).
+
+### B8 — Banners / peças de campanha em mais lugares do guia
+**Risco:** baixo · **Parcial.**
+Na reunião (00:14–00:15): "ter mais lugares para banners e peças de campanha",
+estilo e-commerce (banners de chamada entre as seções/colunas do guia). Hoje só
+existe o banner de "Publicidades" (Settings). Falta os pontos extras no layout.
+
+### B9 — Mapa do shopping (2D, posições editáveis no admin) — DEFERIDO
+**Risco:** alto · **Deferido na própria reunião** (00:10–00:12, 00:28–00:29).
+Mapa 2D pra chegar até a loja; posições das lojas **editáveis no admin**
+(obrigatório, loja muda de lugar). Decisão: **fora do escopo agora** (prazo).
+Registrado pra não se perder.
+
+### B10 — Revista/PDF do guia para download — DEFERIDO/EXTERNO
+**Risco:** médio · **Deferido** (00:18–00:24).
+Landing "acesse o guia online ou baixe a revista (PDF)"; gerar PDF estilizado
+puxando o conteúdo atual (modelo wePlanner). Conclusão: provavelmente **fora do
+guia** (site do Casa Shopping / TI), com toggle de ativar no admin. Futuro.
+
+### Observações
+- **B4 (popup):** o dono fechou como **atendido pela Newsletter (Frente 6)**.
+  A reunião pedia também **agendar por data** e **redirecionar p/ guias
+  específicos** (ex.: guia da Copa) — a newsletter não tem janela por data; só
+  promover se necessário.
+- **Prazo da reunião:** entregar o grosso até **24/06/2026** (4 dias após hoje).
+- **Bug de dado:** loja sem logo aparecia "vazia" no modal — é preenchimento de
+  cadastro, não dev.
+
 ## Próximo passo
 
-Priorizar B1–B4 entre si e encaixar após as Frentes 1–3 (ou intercalar os baratos
-B1/B3 como quick wins). Quando priorizado, promover cada item a uma Frente própria
-com plano de execução detalhado.
+Núcleo (B1–B3) entregue e validado; B4 atendido pela newsletter. **Decidir** se
+B5 (redesign loja, tem Figma), B6 (responsividade produto) e B7 (OG no WhatsApp)
+entram já — são baratos e foram pedidos com ênfase. B8 baixo custo. B9/B10 ficam
+deferidos como combinado na reunião.

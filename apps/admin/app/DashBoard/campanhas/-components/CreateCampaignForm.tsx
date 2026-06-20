@@ -190,19 +190,21 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                     <Label className="block text-sm font-semibold text-gray-700 mb-2">
                         URL da página <span className="text-red-500">*</span>
                     </Label>
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-400 whitespace-nowrap">
+                    <div className="flex items-start gap-2">
+                        <span className="h-11 inline-flex items-center text-sm text-gray-400 whitespace-nowrap">
                             /campanha/
                         </span>
-                        <BaseInput
-                            value={slug}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleSlugChange(e.target.value)
-                            }
-                            onBlur={() => setSlugBlurred(true)}
-                            placeholder="especial-copa-2026"
-                            error={slugError}
-                        />
+                        <div className="flex-1">
+                            <BaseInput
+                                value={slug}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                    handleSlugChange(e.target.value)
+                                }
+                                onBlur={() => setSlugBlurred(true)}
+                                placeholder="especial-copa-2026"
+                                error={slugError}
+                            />
+                        </div>
                     </div>
                     {slugStatus === "checking" && (
                         <p className="text-xs text-gray-400 mt-1">Verificando disponibilidade…</p>
