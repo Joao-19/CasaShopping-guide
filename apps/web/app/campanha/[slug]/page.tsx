@@ -177,11 +177,11 @@ export default function CampanhaPage() {
                                         {products.map((product, index) => (
                                             <div
                                                 key={`${product.id}-${index}`}
-                                                className="camp-rise h-[340px] group cursor-pointer"
+                                                className="camp-rise h-[372px] group cursor-pointer"
                                                 style={{ animationDelay: `${220 + index * 70}ms` }}
                                                 onClick={() => handleProductClick(product)}
                                             >
-                                                <div className="h-full transition-transform duration-300 group-hover:-translate-y-1">
+                                                <div className="h-full rounded-3xl bg-white p-3 shadow-[0_8px_30px_-14px_rgba(20,42,69,0.22)] group-hover:shadow-[0_20px_44px_-16px_rgba(20,42,69,0.34)] transition-all duration-300 group-hover:-translate-y-1.5">
                                                     <ProductCardSwiper
                                                         title={product.title}
                                                         storeName={product.storeName}
@@ -195,7 +195,7 @@ export default function CampanhaPage() {
                                                             }
                                                             toggleFavorite(product.id);
                                                         }}
-                                                        className="h-full shadow-sm group-hover:shadow-xl transition-shadow duration-300"
+                                                        className="h-full"
                                                     />
                                                 </div>
                                             </div>
