@@ -35,7 +35,13 @@
 
 ## B1 — Limites/validação de campos do produto
 
-**Esforço:** ~2-3h · **Risco:** baixo
+**Esforço:** ~2-3h · **Risco:** baixo · **Status: ✅ CONCLUÍDA** (2026-06-20, commit `c4bc261`)
+
+> Entregue: limite de 500 chars na descrição em 3 camadas (DTO `@MaxLength`,
+> service defensivo, form com contador + cap nativo) + `@ArrayMaxSize(5)` nas
+> imagens. Constantes `PRODUCT_DESCRIPTION_MAX_LENGTH`/`PRODUCT_MAX_IMAGES` em
+> `@repo/dtos` como fonte única (DTO + form + service + bulk). Validado e2e via
+> Playwright (contador 0→491→500, cap trava 600→500). Gates verdes, 0 erros console.
 
 ### Estado real (verificado 2026-06-20)
 - ✅ **Limite de 5 fotos JÁ ESTÁ PRONTO** em 3 camadas:
@@ -59,9 +65,9 @@
    `create`/`update` (espelha o padrão do limite de imagens já existente).
 
 ### Critérios de aceite
-- [ ] Descrição > 500 chars é rejeitada no backend (400) e barrada no form.
-- [ ] Form mostra contador `{len}/500` e impede submit acima do limite.
-- [ ] Limite de 5 fotos continua funcionando (regressão) no form, bulk e API.
+- [x] Descrição > 500 chars é rejeitada no backend (400) e barrada no form.
+- [x] Form mostra contador `{len}/500` e impede submit acima do limite.
+- [x] Limite de 5 fotos continua funcionando (regressão) no form, bulk e API.
 
 ---
 
