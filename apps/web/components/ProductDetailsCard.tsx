@@ -40,6 +40,13 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
     const { isFavorited, toggleFavorite } = useFavorites();
     const { user } = useAuthStore();
     const [showStoreDetails, setShowStoreDetails] = useState(false);
+    const [descExpanded, setDescExpanded] = useState(false);
+
+    const descricao =
+        product.description ||
+        "Esta peça une design e conforto supremo, sendo ideal para adicionar sofisticação ao seu ambiente.";
+    // Heurística: descrição longa (~> 3 linhas) ganha "ler mais".
+    const descIsLong = descricao.length > 120;
 
     // Em popup, fechar = hidePopup. Na página /produto/[id] (render direto),
     // o pai passa onClose (ex.: voltar pra listagem) — X não pode ser no-op.
@@ -81,7 +88,7 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                     <div className="w-full min-w-full h-full flex-shrink-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                         <div className="flex flex-col w-full">
                             {/* Image Section with Horizontal Swiper */}
-                            <div className="h-[301px] w-full overflow-hidden relative shrink-0 group">
+                            <div className="h-[301px] w-full overflow-hidden relative shrink-0 group bg-white">
                                 <Swiper
                                     modules={[Navigation, Pagination]}
                                     navigation={{
@@ -121,7 +128,7 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                                     <img
                                                         src={img}
                                                         alt={`${product.title} - ${idx + 1}`}
-                                                        className="w-full h-full object-cover"
+                                                        className="w-full h-full object-contain"
                                                     />
                                                 )}
                                             </SwiperSlide>
@@ -162,9 +169,20 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                     </span>
                                 </div>
 
-                                <p className="text-[#888] text-[12px] leading-relaxed line-clamp-3 min-h-[54px]" title={product.description}>
-                                    {product.description || "Esta peça une design e conforto supremo, sendo ideal para adicionar sofisticação ao seu ambiente."}
-                                </p>
+                                <div className="w-full">
+                                    <p className={`text-[#888] text-[12px] leading-relaxed ${descExpanded ? "" : "line-clamp-3 min-h-[54px]"}`}>
+                                        {descricao}
+                                    </p>
+                                    {descIsLong && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setDescExpanded((v) => !v)}
+                                            className="mt-1 text-[12px] font-medium text-[#003ba6] hover:underline"
+                                        >
+                                            {descExpanded ? "Ler menos" : "Ler mais"}
+                                        </button>
+                                    )}
+                                </div>
 
                                 {product.tags && product.tags.length > 0 && (
                                     <div className="flex flex-wrap gap-[8px] items-start w-full">

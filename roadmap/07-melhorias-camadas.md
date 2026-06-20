@@ -36,7 +36,7 @@
 
 | Passo | Item | Status |
 |---|---|---|
-| 5 | **B6** Responsividade do produto + "ler mais" | ⬜ a fazer |
+| 5 | **B6** Responsividade do produto + "ler mais" | ✅ validado e2e |
 | 6 | **B7** Preview WhatsApp (Open Graph) + link de compartilhar | ✅ validado e2e |
 | 7 | **B11** Campanha: seletor de produtos rico (tabs + filtros) | ✅ `c6721f8` (price/recent: restart do gateway) |
 | 8 | **B5** Redesign do bloco da loja no modal | 🔒 aguardando Figma/visual do Felipe |
@@ -52,11 +52,14 @@
 ## Rodada 2 — itens em aberto
 
 ### B6 — Responsividade do card/modal do produto + "ler mais"
-**Risco:** baixo · **Status: ⬜ a fazer.**
-Ata 00:03: descrição e **imagem cortadas**, "tornar responsivo", talvez **"ler
-mais"**. A B1 resolveu só o limite de caracteres. Falta: revisar o corte de
-imagem/descrição no `ProductDetailsCard` em telas pequenas e avaliar um "ler mais"
-(expandir descrição). Validar responsivo via Playwright (resize + screenshot).
+**Risco:** baixo · **Status: ✅ CONCLUÍDA** (2026-06-20).
+Ata 00:03: descrição e imagem **cortadas**. **Feito** no `ProductDetailsCard`:
+descrição ganhou **"Ler mais"/"Ler menos"** (clamp 3 linhas → texto completo;
+toggle só aparece se desc > 120 chars); imagem do produto trocada de
+`object-cover` (cortava) para **`object-contain` + fundo branco** (mostra a peça
+inteira, sem crop). Vídeos seguem `object-cover`.
+**Validado e2e (Playwright):** com descrição longa de teste, "Ler mais" expande
+e vira "Ler menos"; imagem sem corte; 0 erros console. Gates verdes.
 
 ### B7 — Preview no WhatsApp (Open Graph) + link de compartilhar
 **Risco:** médio · **Status: ✅ CONCLUÍDA** (2026-06-20).
