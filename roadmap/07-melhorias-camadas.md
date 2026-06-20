@@ -21,7 +21,9 @@
 - **B4 — popups:** **atendido pela Newsletter (Frente 6)** — sem CRUD separado
   (decisão do dono, 2026-06-20).
 
-## Status da frente — ✅ CONCLUÍDA (2026-06-20)
+## Status da frente
+
+**Rodada 1 — ✅ CONCLUÍDA (2026-06-20)**
 
 | Passo | Item | Status |
 |---|---|---|
@@ -30,9 +32,58 @@
 | 3 | **B2** Página por lojista | ✅ `bd800e3`+`914f8f3` — validado e2e |
 | 4 | **B4** Popups | ✅ atendido pela Newsletter (Frente 6) |
 
+**Rodada 2 — 🟡 EM ANDAMENTO (itens da revisão completa da ata, 2026-06-20)**
+
+| Passo | Item | Status |
+|---|---|---|
+| 5 | **B6** Responsividade do produto + "ler mais" | ⬜ a fazer |
+| 6 | **B7** Preview WhatsApp (Open Graph) + link de compartilhar | ⬜ a fazer |
+| 7 | **B11** Campanha: seletor de produtos rico (tabs + filtros) | ⬜ a fazer |
+| 8 | **B5** Redesign do bloco da loja no modal | 🔒 aguardando Figma/visual do Felipe |
+
 > Branch `feat/melhorias-camadas` (base `dev`). Pendente: merge/push (exige OK do dono).
-> Dívida técnica anotada: `CreateStoreForm.tsx` (503 linhas) e `CreateProductForm.tsx`
-> (539) acima do alvo de 300 — candidatos a decomposição num refactor à parte.
+> **Pendências fora de escopo** (decisão/estudo nosso+cliente): B8, B9, B10 →
+> ver `pendencias.md`.
+> Dívida técnica: `CreateStoreForm.tsx` (~505 linhas) e `CreateProductForm.tsx`
+> (~539) acima do alvo de 300 — candidatos a decomposição num refactor à parte.
+
+---
+
+## Rodada 2 — itens em aberto
+
+### B6 — Responsividade do card/modal do produto + "ler mais"
+**Risco:** baixo · **Status: ⬜ a fazer.**
+Ata 00:03: descrição e **imagem cortadas**, "tornar responsivo", talvez **"ler
+mais"**. A B1 resolveu só o limite de caracteres. Falta: revisar o corte de
+imagem/descrição no `ProductDetailsCard` em telas pequenas e avaliar um "ler mais"
+(expandir descrição). Validar responsivo via Playwright (resize + screenshot).
+
+### B7 — Preview no WhatsApp (Open Graph) + link de compartilhar
+**Risco:** médio · **Status: ⬜ a fazer.**
+Ata 00:12–00:13: o compartilhar deve gerar **"cardzinho com previewzinho"** no
+WhatsApp. A B3 entregou o deep-link `/produto/[id]` + `ShareButton`, mas a página é
+client-side e **não emite Open Graph** (`og:title`/`og:image`/`og:description`) →
+o WhatsApp mostra link "pelado". **Escopo:** fazer a rota emitir OG via metadata
+server-side (`generateMetadata` em server component que busca o produto, com child
+client p/ interatividade) **e** garantir que o `ShareButton`/menu compartilhe esse
+link. Validar com o "link preview" (inspecionar as meta tags no HTML).
+
+### B11 — Campanha: seletor de produtos rico (tela com tabs + filtros)
+**Risco:** médio · **Status: ⬜ a fazer (pedido 2026-06-20).**
+O `ProductSelector` atual (busca + dropdown dentro do modal do form) ficou
+**pobre/apertado** junto do modal principal. Pedido: **uma tela dedicada usando
+tabs** para navegar/selecionar produtos, com **filtros**: adicionados
+recentemente, busca, por loja, por categoria e por preço.
+**A definir (ver perguntas ao dono):** tela dedicada (rota/full-screen) vs
+drawer/modal cheio; o que as tabs representam. **Reusa:** `productHttp.list`
+(busca/paginação), filtros já suportados na API (`storeId`, `category`, `search`,
+faixa de preço = enum `PriceTier`), padrão de seleção/ordenação do `ProductSelector`.
+
+### B5 — Redesign do bloco da loja no modal do produto
+**Risco:** baixo · **Status: 🔒 BLOQUEADO — aguardando o Felipe entregar o visual novo (Figma).**
+Ata 00:09–00:10: o bloco "ligar/loja" do `StoreDetailsCard` "tá pobre"; há um
+**bloco pronto no Figma**. Fica no roadmap ativo (não é decisão, só falta o asset).
+Quando o Figma chegar, implementar fiel. Distinto da B2 (página da loja).
 
 ---
 

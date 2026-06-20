@@ -17,10 +17,16 @@
 |---|--------|--------|------------------|-------|---------|
 | 3 | **Área de Dados** (favoritos + mapa de calor + origem do visitante) | não iniciada | **~8 dias** | alto (deploy + escala) | `03-area-de-dados.md` |
 | 6 | **Newsletter Builder V2** | Fases 0–4 ✅, falta Fase 5 (e2e) | — | baixo | `06-newsletter-builder-v2.md` |
-| 7 | **Melhorias em Camadas** (B1 limites, B3 compartilhar, B2 loja, B4 popups) | **a seguir agora** | **~5–6 dias** | baixo/médio | `07-melhorias-camadas.md` |
+| 7 | **Melhorias em Camadas** | Rodada 1 (B1/B2/B3/B4) ✅; Rodada 2 (B5/B6/B7/B11) em andamento | baixo/médio | `07-melhorias-camadas.md` |
 
-> **Frente 7 é a ativa.** Promove os itens "Outros" da reunião (antes em
-> `04-backlog.md`), com estado verificado contra o código. Ordem: **B1 → B3 → B2 → B4**.
+> **Frente 7 é a ativa.** Rodada 1 (limites, compartilhar, página de loja, popups)
+> concluída e validada. Rodada 2 (revisão completa da ata): B6 responsividade do
+> produto, B7 preview WhatsApp/OG, B11 seletor de produtos rico na campanha; B5
+> (redesign do bloco da loja) aguarda Figma do Felipe.
+
+> **Pendências** (bloqueadas por decisão/estudo nosso + cliente): B8 banners,
+> B9 mapa do shopping, B10 revista/PDF — ver `pendencias.md`. Fora de escopo até
+> destravar.
 
 > **Newsletter (Carrossel V1)** — substituída pela Frente 6. Registro em
 > `05-newsletter-carrossel.md`.
