@@ -54,10 +54,12 @@ enum AdminRole {
 model Store {
   id            String  @id @default(uuid())
   name          String
+  slug          String? @unique
   address       String
   phone         String?
   site          String?
   logoImage     String?
+  bannerImage   String?
   facebookLink  String?
   instagramLink String?
   youtubeLink   String?

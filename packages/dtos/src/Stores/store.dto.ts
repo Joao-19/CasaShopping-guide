@@ -15,6 +15,14 @@ export class CreateStoreDto {
   @IsNotEmpty()
   name!: string;
 
+  @ApiPropertyOptional({ description: "URL slug for the public store page" })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: "Invalid slug (lowercase letters, numbers and hyphens only).",
+  })
+  slug?: string;
+
   @ApiPropertyOptional({ description: "Image file for the store" })
   @IsOptional()
   image?: any;
@@ -23,6 +31,11 @@ export class CreateStoreDto {
   @IsOptional()
   @IsString()
   logoImage?: string;
+
+  @ApiPropertyOptional({ description: "URL of the banner image" })
+  @IsOptional()
+  @IsString()
+  bannerImage?: string;
 
   @ApiProperty({ description: "Address of the store" })
   @IsString()
@@ -86,10 +99,23 @@ export class UpdateStoreDto {
   @IsNotEmpty()
   name?: string;
 
+  @ApiPropertyOptional({ description: "URL slug for the public store page" })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: "Invalid slug (lowercase letters, numbers and hyphens only).",
+  })
+  slug?: string;
+
   @ApiPropertyOptional({ description: "URL of the logo image" })
   @IsOptional()
   @IsString()
   logoImage?: string;
+
+  @ApiPropertyOptional({ description: "URL of the banner image" })
+  @IsOptional()
+  @IsString()
+  bannerImage?: string;
 
   @ApiPropertyOptional({ description: "Address of the store" })
   @IsOptional()
@@ -150,7 +176,9 @@ export class UpdateStoreDto {
 export interface Store {
   id: string;
   name: string;
+  slug?: string | null;
   logoImage?: string | null;
+  bannerImage?: string | null;
   address: string;
   phone?: string | null;
   site?: string | null;
