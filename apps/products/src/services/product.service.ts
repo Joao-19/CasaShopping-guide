@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   BadRequestException,
+  NotFoundException,
 } from "@nestjs/common";
 import { prisma } from "@repo/database";
 import {
@@ -220,6 +221,36 @@ export class ProductService {
       },
     };
   }
+  // Busca um único produto por id, com imagens + dados públicos da loja
+  // (mesmo include do findAll). Público — usado pela página /produto/[id].
+  async findById(id: string): Promise<Product> {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        images: true,
+        store: {
+          select: {
+            name: true,
+            logoImage: true,
+            address: true,
+            phone: true,
+            site: true,
+            facebookLink: true,
+            instagramLink: true,
+            youtubeLink: true,
+            whatsapp: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException("Product not found");
+    }
+
+    return this.transformProduct(product) as unknown as Product;
+  }
+
   async update(id: string, data: UpdateProductDto): Promise<Product> {
     const existingProduct = await prisma.product.findUnique({
       where: { id },

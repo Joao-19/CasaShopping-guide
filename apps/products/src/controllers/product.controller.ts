@@ -98,4 +98,11 @@ export class ProductController {
   ): Promise<{ isFavorited: boolean }> {
     return this.productService.toggleFavorite(req.user.userId, id);
   }
+
+  // Público — detalhe de 1 produto (página /produto/[id]).
+  // Declarado por último: ":id" não pode sombrear "favorites"/"favorites/ids".
+  @Get(":id")
+  async findById(@Param("id") id: string): Promise<Product> {
+    return this.productService.findById(id);
+  }
 }

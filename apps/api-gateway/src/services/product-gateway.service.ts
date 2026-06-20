@@ -102,6 +102,22 @@ export class ProductGatewayService {
       );
     }
   }
+  async findById(id: string): Promise<Product> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<Product>(
+          `${this.productsServiceUrl}/products/${id}`
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
   async update(
     id: string,
     updateProductDto: any,

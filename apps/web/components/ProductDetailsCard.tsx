@@ -7,11 +7,13 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { useFavorites } from "@/composable/useFavorites";
 import { useState } from "react";
+import { ShareButton } from "./ShareButton";
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 interface ProductDetailsCardProps {
+    onClose?: () => void;
     product: {
         id: string;
         title: string;
@@ -33,11 +35,15 @@ interface ProductDetailsCardProps {
     };
 }
 
-export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
+export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps) {
     const { hidePopup, showPopup } = usePopup();
     const { isFavorited, toggleFavorite } = useFavorites();
     const { user } = useAuthStore();
     const [showStoreDetails, setShowStoreDetails] = useState(false);
+
+    // Em popup, fechar = hidePopup. Na página /produto/[id] (render direto),
+    // o pai passa onClose (ex.: voltar pra listagem) — X não pode ser no-op.
+    const close = onClose ?? hidePopup;
 
     const isProductFavorited = isFavorited(product.id);
 
@@ -130,7 +136,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
 
                                 {/* Close Button */}
                                 <button
-                                    onClick={hidePopup}
+                                    onClick={close}
                                     className="absolute right-[25px] top-[25px] z-50 p-2 cursor-pointer hover:opacity-70 transition-opacity bg-black/20 rounded-full text-white"
                                 >
                                     <X size={20} />
@@ -226,6 +232,8 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                                             </svg>
                                         </a>
                                     )}
+
+                                    <ShareButton productId={product.id} productTitle={product.title} />
                                 </div>
                             </div>
                         </div>
@@ -237,7 +245,7 @@ export function ProductDetailsCard({ product }: ProductDetailsCardProps) {
                             {/* Close Button */}
                             <div className="absolute top-6 right-6 z-10">
                                 <button
-                                    onClick={hidePopup}
+                                    onClick={close}
                                     className="p-2 hover:opacity-70 transition-opacity"
                                 >
                                     <div className="relative size-[30px]">

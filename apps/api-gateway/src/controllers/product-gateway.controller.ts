@@ -158,4 +158,14 @@ export class ProductGatewayController {
     const token = req.cookies["access_token"];
     return this.productGatewayService.toggleFavorite(id, token);
   }
+
+  // Público — detalhe de 1 produto (página /produto/[id]).
+  // Declarado por último: ":id" não pode sombrear "favorites"/"favorites/ids".
+  @Get(":id")
+  @ApiOperation({ summary: "Retrieve a single product by id" })
+  @ApiResponse({ status: 200, description: "Return the product." })
+  @ApiResponse({ status: 404, description: "Product not found." })
+  async findById(@Param("id") id: string): Promise<Product> {
+    return this.productGatewayService.findById(id);
+  }
 }
