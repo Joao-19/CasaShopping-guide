@@ -60,11 +60,8 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
     >("idle");
     const [saving, setSaving] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<"campanha" | "produtos" | "vitrines">("campanha");
 
-    // Modo de organização: vitrine plana (simple) ou seções personalizadas.
-    const [mode, setMode] = useState<"simple" | "sections">(
-        initialData?.sections && initialData.sections.length ? "sections" : "simple",
-    );
     // Hidrata seções do edit: resolve productId -> {id,name,price} via o pool.
     const [sections, setSections] = useState<SectionDraft[]>(() =>
         (initialData?.sections ?? []).map((s) => ({
@@ -113,9 +110,8 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         return () => clearTimeout(t);
     }, [slug, initialData?.slug, initialData?.id]);
 
-    const sectionsValid =
-        mode === "simple" ||
-        (sections.length > 0 && sections.every((s) => s.title.trim()));
+    // Vitrines opcionais; se houver, toda seção precisa de título.
+    const sectionsValid = sections.every((s) => s.title.trim());
     const isValid =
         !!title.trim() && !!slug.trim() && slugStatus !== "taken" && sectionsValid;
 
@@ -130,7 +126,14 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         e.preventDefault();
         setTitleBlurred(true);
         setSlugBlurred(true);
-        if (!isValid || saving) return;
+        if (saving) return;
+        if (!isValid) {
+            // Leva o usuário até a aba com o problema.
+            if (!title.trim() || !slug.trim() || slugStatus === "taken")
+                setActiveTab("campanha");
+            else if (!sectionsValid) setActiveTab("vitrines");
+            return;
+        }
         setSaving(true);
         try {
             const [desktopKey, mobileKey] = await Promise.all([
@@ -145,11 +148,12 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 coverDesktop: desktopKey ?? "",
                 coverMobile: mobileKey ?? "",
             };
+            // Com vitrines definidas, elas mandam (backend deriva o pool da união);
+            // sem vitrines, usa a vitrine simples (productIds da aba Produtos).
             const payload =
-                mode === "sections"
+                sections.length > 0
                     ? {
                           ...base,
-                          // backend deriva o pool da união; sections leva a ordem/grupos.
                           sections: sections.map((s) => ({
                               id: s.id,
                               title: s.title.trim(),
@@ -160,8 +164,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                     : {
                           ...base,
                           productIds: selectedProducts.map((p) => p.id),
-                          // null explícito limpa seções ao voltar pro modo simples.
-                          sections: null,
+                          sections: null, // limpa vitrines antigas
                       };
 
             if (isEditing) {
@@ -211,140 +214,144 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
             }
         >
             <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Título <span className="text-red-500">*</span>
-                    </Label>
-                    <BaseInput
-                        value={title}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleTitleChange(e.target.value)
-                        }
-                        onBlur={() => setTitleBlurred(true)}
-                        placeholder="Ex.: Especial Copa 2026"
-                        error={titleError}
-                    />
+                {/* Abas: Campanha | Produtos | Vitrines */}
+                <div className="flex gap-1 border-b border-gray-100">
+                    {([
+                        { id: "campanha", label: "Campanha" },
+                        { id: "produtos", label: `Produtos${selectedProducts.length ? ` (${selectedProducts.length})` : ""}` },
+                        { id: "vitrines", label: `Vitrines${sections.length ? ` (${sections.length})` : ""}` },
+                    ] as const).map((t) => (
+                        <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setActiveTab(t.id)}
+                            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${activeTab === t.id ? "border-[#1A2B3C] text-[#1A2B3C]" : "border-transparent text-gray-400 hover:text-gray-600"}`}
+                        >
+                            {t.label}
+                        </button>
+                    ))}
                 </div>
 
-                <div>
-                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                        URL da página <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex items-start gap-2">
-                        <span className="h-11 inline-flex items-center text-sm text-gray-400 whitespace-nowrap">
-                            /campanha/
-                        </span>
-                        <div className="flex-1">
+                {/* ===== Aba Campanha ===== */}
+                {activeTab === "campanha" && (
+                    <div className="space-y-5">
+                        <div>
+                            <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Título <span className="text-red-500">*</span>
+                            </Label>
                             <BaseInput
-                                value={slug}
+                                value={title}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                    handleSlugChange(e.target.value)
+                                    handleTitleChange(e.target.value)
                                 }
-                                onBlur={() => setSlugBlurred(true)}
-                                placeholder="especial-copa-2026"
-                                error={slugError}
+                                onBlur={() => setTitleBlurred(true)}
+                                placeholder="Ex.: Especial Copa 2026"
+                                error={titleError}
                             />
                         </div>
-                    </div>
-                    {slugStatus === "checking" && (
-                        <p className="text-xs text-gray-400 mt-1">Verificando disponibilidade…</p>
-                    )}
-                    {slugStatus === "available" && (
-                        <p className="text-xs text-green-600 mt-1">URL disponível.</p>
-                    )}
-                    {slugStatus === "taken" && (
-                        <p className="text-xs text-red-500 mt-1">Essa URL já existe. Escolha outra.</p>
-                    )}
-                </div>
 
-                <div className="grid grid-cols-1 gap-5">
-                    <BannerUpload
-                        label="Capa desktop"
-                        description="Banner largo (32:9)"
-                        aspect="banner"
-                        accept="image/*"
-                        currentUrl={coverDesktopUrl}
-                        isVideo={false}
-                        onFileSelect={(file) => setCoverDesktop(file)}
-                        onRemove={() => setCoverDesktop(undefined)}
-                    />
-                    <BannerUpload
-                        label="Capa mobile"
-                        description="Imagem quadrada (1:1)"
-                        aspect="square"
-                        accept="image/*"
-                        currentUrl={coverMobileUrl}
-                        isVideo={false}
-                        onFileSelect={(file) => setCoverMobile(file)}
-                        onRemove={() => setCoverMobile(undefined)}
-                    />
-                </div>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                        checked={isActive}
-                        onCheckedChange={(checked) => setIsActive(checked as boolean)}
-                    />
-                    <span className="text-sm text-gray-700">Exibir página no site</span>
-                </label>
-
-                <div className="border-t border-gray-100 pt-4 space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                        <Label className="block text-sm font-semibold text-gray-700">
-                            Produtos da vitrine
-                        </Label>
-                        {/* Toggle: vitrine simples vs seções personalizadas */}
-                        <div className="inline-flex p-0.5 bg-gray-100 rounded-lg text-xs font-medium">
-                            <button
-                                type="button"
-                                onClick={() => setMode("simple")}
-                                className={`px-3 py-1.5 rounded-md transition-colors ${mode === "simple" ? "bg-white text-[#1A2B3C] shadow-sm" : "text-gray-500"}`}
-                            >
-                                Vitrine simples
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setMode("sections")}
-                                className={`px-3 py-1.5 rounded-md transition-colors ${mode === "sections" ? "bg-white text-[#1A2B3C] shadow-sm" : "text-gray-500"}`}
-                            >
-                                Seções
-                            </button>
-                        </div>
-                    </div>
-
-                    {mode === "simple" ? (
-                        <>
-                            <p className="text-xs text-gray-400">
-                                Navegue pelo catálogo com filtros, selecione e ordene os produtos.
-                            </p>
-                            <button
-                                type="button"
-                                onClick={() => setPickerOpen(true)}
-                                className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-gray-200 rounded-lg text-sm hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors"
-                            >
-                                <span className="text-gray-700">
-                                    {selectedProducts.length > 0
-                                        ? `${selectedProducts.length} produto(s) selecionado(s)`
-                                        : "Nenhum produto selecionado"}
+                        <div>
+                            <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                                URL da página <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="flex items-start gap-2">
+                                <span className="h-11 inline-flex items-center text-sm text-gray-400 whitespace-nowrap">
+                                    /campanha/
                                 </span>
-                                <span className="text-[#1A2B3C] font-medium">Gerenciar produtos →</span>
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <p className="text-xs text-gray-400">
-                                Crie seções nomeadas, escolha os produtos de cada uma e marque uma como Destaques.
-                            </p>
-                            <CampaignSectionsManager value={sections} onChange={setSections} />
-                        </>
-                    )}
-                </div>
+                                <div className="flex-1">
+                                    <BaseInput
+                                        value={slug}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            handleSlugChange(e.target.value)
+                                        }
+                                        onBlur={() => setSlugBlurred(true)}
+                                        placeholder="especial-copa-2026"
+                                        error={slugError}
+                                    />
+                                </div>
+                            </div>
+                            {slugStatus === "checking" && (
+                                <p className="text-xs text-gray-400 mt-1">Verificando disponibilidade…</p>
+                            )}
+                            {slugStatus === "available" && (
+                                <p className="text-xs text-green-600 mt-1">URL disponível.</p>
+                            )}
+                            {slugStatus === "taken" && (
+                                <p className="text-xs text-red-500 mt-1">Essa URL já existe. Escolha outra.</p>
+                            )}
+                        </div>
 
-                <div className="flex justify-end gap-3 pt-2">
+                        <div className="grid grid-cols-1 gap-5">
+                            <BannerUpload
+                                label="Capa desktop"
+                                description="Banner largo (32:9)"
+                                aspect="banner"
+                                accept="image/*"
+                                currentUrl={coverDesktopUrl}
+                                isVideo={false}
+                                onFileSelect={(file) => setCoverDesktop(file)}
+                                onRemove={() => setCoverDesktop(undefined)}
+                            />
+                            <BannerUpload
+                                label="Capa mobile"
+                                description="Imagem quadrada (1:1)"
+                                aspect="square"
+                                accept="image/*"
+                                currentUrl={coverMobileUrl}
+                                isVideo={false}
+                                onFileSelect={(file) => setCoverMobile(file)}
+                                onRemove={() => setCoverMobile(undefined)}
+                            />
+                        </div>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <Checkbox
+                                checked={isActive}
+                                onCheckedChange={(checked) => setIsActive(checked as boolean)}
+                            />
+                            <span className="text-sm text-gray-700">Exibir página no site</span>
+                        </label>
+                    </div>
+                )}
+
+                {/* ===== Aba Produtos (vitrine simples) ===== */}
+                {activeTab === "produtos" && (
+                    <div className="space-y-3">
+                        <p className="text-xs text-gray-400">
+                            Vitrine simples: selecione e ordene os produtos da campanha.
+                            {sections.length > 0 && " Ignorada enquanto houver vitrines na aba Vitrines."}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => setPickerOpen(true)}
+                            className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-gray-200 rounded-lg text-sm hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors"
+                        >
+                            <span className="text-gray-700">
+                                {selectedProducts.length > 0
+                                    ? `${selectedProducts.length} produto(s) selecionado(s)`
+                                    : "Nenhum produto selecionado"}
+                            </span>
+                            <span className="text-[#1A2B3C] font-medium">Gerenciar produtos →</span>
+                        </button>
+                    </div>
+                )}
+
+                {/* ===== Aba Vitrines (seções) ===== */}
+                {activeTab === "vitrines" && (
+                    <div className="space-y-3">
+                        <p className="text-xs text-gray-400">
+                            Organize os produtos em seções nomeadas e marque uma como Destaques.
+                            Se houver vitrines, elas substituem a vitrine simples da aba Produtos.
+                        </p>
+                        <CampaignSectionsManager value={sections} onChange={setSections} />
+                    </div>
+                )}
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                     <Button type="button" variant="outline" onClick={onClose}>
                         Cancelar
                     </Button>
-                    <Button type="submit" disabled={!isValid || saving}>
+                    <Button type="submit" disabled={saving}>
                         {saving ? "Salvando…" : isEditing ? "Salvar" : "Criar"}
                     </Button>
                 </div>
