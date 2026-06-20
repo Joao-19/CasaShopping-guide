@@ -7,6 +7,7 @@
     "NEXT_PUBLIC_API_HOST",
     "NEXT_PUBLIC_STORAGE_URL",
     "NEXT_PUBLIC_WEB_URL",
+    "INTERNAL_API_URL",
     "NODE_ENV"
   ],
   "tasks": {

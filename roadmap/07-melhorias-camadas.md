@@ -37,7 +37,7 @@
 | Passo | Item | Status |
 |---|---|---|
 | 5 | **B6** Responsividade do produto + "ler mais" | ⬜ a fazer |
-| 6 | **B7** Preview WhatsApp (Open Graph) + link de compartilhar | ⬜ a fazer |
+| 6 | **B7** Preview WhatsApp (Open Graph) + link de compartilhar | ✅ validado e2e |
 | 7 | **B11** Campanha: seletor de produtos rico (tabs + filtros) | ✅ `c6721f8` (price/recent: restart do gateway) |
 | 8 | **B5** Redesign do bloco da loja no modal | 🔒 aguardando Figma/visual do Felipe |
 
@@ -59,14 +59,19 @@ imagem/descrição no `ProductDetailsCard` em telas pequenas e avaliar um "ler m
 (expandir descrição). Validar responsivo via Playwright (resize + screenshot).
 
 ### B7 — Preview no WhatsApp (Open Graph) + link de compartilhar
-**Risco:** médio · **Status: ⬜ a fazer.**
-Ata 00:12–00:13: o compartilhar deve gerar **"cardzinho com previewzinho"** no
-WhatsApp. A B3 entregou o deep-link `/produto/[id]` + `ShareButton`, mas a página é
-client-side e **não emite Open Graph** (`og:title`/`og:image`/`og:description`) →
-o WhatsApp mostra link "pelado". **Escopo:** fazer a rota emitir OG via metadata
-server-side (`generateMetadata` em server component que busca o produto, com child
-client p/ interatividade) **e** garantir que o `ShareButton`/menu compartilhe esse
-link. Validar com o "link preview" (inspecionar as meta tags no HTML).
+**Risco:** médio · **Status: ✅ CONCLUÍDA** (2026-06-20).
+A B3 entregou o deep-link + `ShareButton`, mas a página era client-side e não
+emitia OG. **Feito:** `/produto/[id]/page.tsx` virou **server component** com
+`generateMetadata` (busca o produto no servidor → `og:title`/`description`/`image`
++ `twitter:*`); a interatividade saiu pro client `ProdutoDetail.tsx`. Fetch
+server-side **resiliente** (tenta `INTERNAL_API_URL` → `NEXT_PUBLIC_API_URL` →
+`localhost:3000`) — em prod usa o hostname Docker `api-gateway`, em dev cai pra
+localhost (achado: `INTERNAL_API_URL=api-gateway:3000` não resolve em dev local).
+`turbo.json`: `INTERNAL_API_URL` declarada no `globalEnv`.
+**Validado e2e:** curl do HTML mostra og:title/description/image + twitter card;
+página ainda renderiza o card (Playwright); 404 e SEO OK. 0 erros console.
+> Obs.: em dev o `og:image` aponta pro MinIO local (`localhost:9000`, não acessível
+> pelo WhatsApp); em prod é o endpoint público do MinIO, com preview real.
 
 ### B11 — Campanha: seletor de produtos rico (tela com tabs + filtros)
 **Risco:** médio · **Status: ✅ CONCLUÍDA** (2026-06-20, commit `c6721f8`) ·

@@ -1,101 +1,89 @@
-"use client";
-
-import { useEffect } from "react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { Toolbar } from "../../../components/Toolbar";
-import { Footer } from "../../../components/Footer";
-import { ProductDetailsCard } from "../../../components/ProductDetailsCard";
-import { getProduct } from "../../../Services/http/product.http";
+import type { Metadata } from "next";
+import { ProdutoDetail } from "./ProdutoDetail";
 
 // Página pública e compartilhável de um produto (deep-link do botão Compartilhar).
-// Reusa o ProductDetailsCard (mesmo card do modal); o X volta para a listagem.
-export default function ProdutoPage() {
-    const params = useParams();
-    const router = useRouter();
-    const id = Array.isArray(params.id) ? params.id[0] : params.id;
+// Server component só para emitir o Open Graph (preview rico no WhatsApp/redes);
+// a interatividade fica no client `ProdutoDetail`.
 
-    const {
-        data: product,
-        isLoading,
-        isError,
-    } = useQuery({
-        queryKey: ["produto", id],
-        queryFn: () => getProduct(id as string),
-        enabled: !!id,
-        retry: false,
-    });
+interface ProductLite {
+    name: string;
+    description?: string | null;
+    images?: { path: string; index: number }[];
+}
 
-    // SEO básico (client): título do documento reflete o produto.
-    useEffect(() => {
-        if (product?.name) document.title = `${product.name} — CasaShopping`;
-    }, [product?.name]);
+// Bases candidatas da API no servidor, em ordem de preferência. Prod (Docker)
+// usa o hostname interno `api-gateway`; dev cai pra localhost. Tenta cada uma
+// até funcionar — assim a OG funciona nos dois ambientes sem env extra.
+function serverApiBases(): string[] {
+    const bases = [
+        process.env.INTERNAL_API_URL,
+        process.env.NEXT_PUBLIC_API_URL,
+        "http://localhost:3000",
+    ].filter(Boolean) as string[];
+    return [...new Set(bases)];
+}
 
-    const mapped = product
-        ? {
-              id: product.id,
-              title: product.name,
-              storeName: product.store?.name || "Loja",
-              price: product.price,
-              description: product.description,
-              images:
-                  product.images
-                      ?.slice()
-                      .sort((a, b) => a.index - b.index)
-                      .map((img) =>
-                          img.path.replace(
-                              "localhost",
-                              process.env.NEXT_PUBLIC_API_HOST || "localhost",
-                          ),
-                      ) || [],
-              showStorePhone: product.showStorePhone,
-              storePhone: product.store?.phone ?? undefined,
-              storeLogo: product.store?.logoImage ?? undefined,
-              storeAddress: product.store?.address ?? undefined,
-              storeSite: product.store?.site ?? undefined,
-              storeInstagram: product.store?.instagramLink ?? undefined,
-              storeFacebook: product.store?.facebookLink ?? undefined,
-              storeYoutube: product.store?.youtubeLink ?? undefined,
-              whatsapp: product.store?.whatsapp ?? undefined,
-          }
-        : null;
+async function fetchProduct(id: string): Promise<ProductLite | null> {
+    for (const base of serverApiBases()) {
+        try {
+            const res = await fetch(`${base}/products/${id}`, {
+                // conteúdo público; cache curto evita refetch a cada preview
+                next: { revalidate: 60 },
+            });
+            if (res.ok) return (await res.json()) as ProductLite;
+            // 404 numa base que respondeu = produto não existe mesmo.
+            if (res.status === 404) return null;
+        } catch {
+            // base inacessível (ex.: hostname Docker em dev) — tenta a próxima
+        }
+    }
+    return null;
+}
 
-    return (
-        <main className="w-full h-full flex flex-col flex-1 bg-[#f0f1f3]">
-            <Toolbar />
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+    const { id } = await params;
+    const product = await fetchProduct(id);
 
-            {isLoading ? (
-                <div className="flex-1 flex justify-center items-center min-h-[400px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#003BA6]"></div>
-                </div>
-            ) : isError || !mapped ? (
-                <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] text-center px-6">
-                    <h1 className="text-3xl font-bold text-[#1A2B3C] mb-2">
-                        Produto não encontrado
-                    </h1>
-                    <p className="text-gray-500 mb-6">
-                        Este produto não existe ou não está mais disponível.
-                    </p>
-                    <Link
-                        href="/produtos"
-                        className="px-5 py-2.5 bg-[#003BA6] text-white rounded-xl text-sm font-medium hover:bg-[#002d7a] transition-colors"
-                    >
-                        Ver todos os produtos
-                    </Link>
-                </div>
-            ) : (
-                <div className="flex-1 w-full flex justify-center items-start py-10 px-4">
-                    <div className="w-full max-w-[420px] h-[78vh] max-h-[640px]">
-                        <ProductDetailsCard
-                            product={mapped}
-                            onClose={() => router.push("/produtos")}
-                        />
-                    </div>
-                </div>
-            )}
+    if (!product) {
+        return { title: "Produto não encontrado — CasaShopping" };
+    }
 
-            <Footer />
-        </main>
-    );
+    const title = `${product.name} — CasaShopping`;
+    const description =
+        product.description?.slice(0, 160) ||
+        `Veja ${product.name} no Guia de Compras CasaShopping.`;
+    const firstImage = product.images
+        ?.slice()
+        .sort((a, b) => a.index - b.index)[0]?.path;
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title: product.name,
+            description,
+            type: "website",
+            siteName: "CasaShopping",
+            images: firstImage ? [{ url: firstImage }] : [],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: product.name,
+            description,
+            images: firstImage ? [firstImage] : [],
+        },
+    };
+}
+
+export default async function ProdutoPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
+    return <ProdutoDetail id={id} />;
 }
