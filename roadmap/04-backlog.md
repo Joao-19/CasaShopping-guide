@@ -1,5 +1,11 @@
 # Backlog — Itens da reunião (a priorizar)
 
+> ⚠️ **PROMOVIDO (2026-06-20):** os itens B1–B4 viraram a **[Frente 7](07-melhorias-camadas.md)**,
+> com estado verificado contra o código, ordem definida (B1→B3→B2→B4) e planos de
+> execução. **Siga o `07`** — este arquivo fica como registro histórico da reunião.
+> Correções relevantes que o `07` aplica: a trava de 5 fotos (B1) **já estava
+> pronta**; o molde do B4 é o **builder da newsletter (Frente 6)**, não o export antigo.
+
 > Capturado da reunião de 2026-06-17 ("O que devemos fazer").
 > Estimativas **preliminares** (dias úteis com IA) — a confirmar ao detalhar cada item.
 > Ainda **sem ordem definida** dentro do backlog; entram após as Frentes 1–3.

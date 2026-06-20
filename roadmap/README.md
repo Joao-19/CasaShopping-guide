@@ -4,27 +4,26 @@
 > Estimativas em **dias úteis com desenvolvimento assistido por IA** (código gerado por IA, dev fullstack dirigindo, revisando, testando e fazendo deploy).
 > Data base: 2026-06-17.
 
-## Ordem de produção (definida)
+## Estado das frentes (atualizado 2026-06-20)
 
-1. **Upload em massa** — destrava o cadastro dos ~70 produtos.
-2. **Páginas de Campanha** — usa os produtos cadastrados.
-3. **Área de Dados** — mede favoritos e visualizações desses produtos.
+**✅ Concluídas** (movidas para `completos/`):
+1. **Upload em massa** — `completos/01-upload-em-massa.md` (falta só teste de
+   volume real ~70 + push/PR; não-bloqueante).
+2. **Páginas de Campanha** — `completos/02-paginas-de-campanha.md` (validada e2e).
 
-| # | Frente | Estado atual | Esforço (c/ IA) | Risco | Detalhe |
-|---|--------|--------------|------------------|-------|---------|
-| 1 | **Upload em massa** (planilha + fotos, ~70 produtos) | ~70% reaproveitável | **~3 dias** | médio | `01-upload-em-massa.md` |
-| 2 | **Páginas de Campanha** | ~75% reaproveitável | **~4 dias** | baixo | `02-paginas-de-campanha.md` |
-| 3 | **Área de Dados** (favoritos + mapa de calor + **origem do visitante**) | tracking do zero | **~8 dias** | alto (deploy + escala) | `03-area-de-dados.md` |
-| | **Total** | | **~15 dias** | | |
+**🟡 Em andamento / planejadas:**
 
-> **Backlog** (itens da reunião de 2026-06-17, a priorizar após as Frentes 1–3):
-> limites de produto, página por lojista, botão compartilhar e cadastro de popups —
-> ver `04-backlog.md`. A "Implementação Principal" da reunião (Páginas de Campanha)
-> já corresponde à Frente 2.
+| # | Frente | Estado | Esforço (c/ IA) | Risco | Detalhe |
+|---|--------|--------|------------------|-------|---------|
+| 3 | **Área de Dados** (favoritos + mapa de calor + origem do visitante) | não iniciada | **~8 dias** | alto (deploy + escala) | `03-area-de-dados.md` |
+| 6 | **Newsletter Builder V2** | Fases 0–4 ✅, falta Fase 5 (e2e) | — | baixo | `06-newsletter-builder-v2.md` |
+| 7 | **Melhorias em Camadas** (B1 limites, B3 compartilhar, B2 loja, B4 popups) | **a seguir agora** | **~5–6 dias** | baixo/médio | `07-melhorias-camadas.md` |
 
-> **Newsletter (Carrossel)** — frente paralela, **implementada** na branch
-> `feat/newsletter-carousel` (falta aplicar a migration + auth nas escritas).
-> Estado e checklist em `05-newsletter-carrossel.md`.
+> **Frente 7 é a ativa.** Promove os itens "Outros" da reunião (antes em
+> `04-backlog.md`), com estado verificado contra o código. Ordem: **B1 → B3 → B2 → B4**.
+
+> **Newsletter (Carrossel V1)** — substituída pela Frente 6. Registro em
+> `05-newsletter-carrossel.md`.
 
 ## Recomendação de sprints (2 semanas = 10 dias úteis)
 
