@@ -6,7 +6,14 @@ import BaseInput from "@repo/ui/inputs/BaseInput";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import useProduct from "@/composable/product/useProduct";
 import useStore from "@/composable/store/useStore";
-import { CreateProductDto, PriceTier, Product, ProductImage } from "@repo/dtos";
+import {
+    CreateProductDto,
+    PriceTier,
+    Product,
+    ProductImage,
+    PRODUCT_DESCRIPTION_MAX_LENGTH,
+    PRODUCT_MAX_IMAGES,
+} from "@repo/dtos";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
 import {
     DndContext,
@@ -88,6 +95,9 @@ function CreateProductFormContent({
     const nameField = useFormField(data.name, [validator.rules.required]);
     const descriptionField = useFormField(data.description, [
         validator.rules.required,
+        (v: string) =>
+            v.length <= PRODUCT_DESCRIPTION_MAX_LENGTH ||
+            `Máximo de ${PRODUCT_DESCRIPTION_MAX_LENGTH} caracteres.`,
     ]);
     const categoriesField = useFormField(data.categories.length > 0 ? 'valid' : '', [
         validator.rules.required,
@@ -149,7 +159,7 @@ function CreateProductFormContent({
             {/* Image Gallery */}
             <div className="mb-6">
                 <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Imagens do Produto (Máx 5)
+                    Imagens do Produto (Máx {PRODUCT_MAX_IMAGES})
                 </Label>
 
                 <DndContext
@@ -178,7 +188,7 @@ function CreateProductFormContent({
                             ))}
 
                             {/* Add Button */}
-                            {data.images.length < 5 && (
+                            {data.images.length < PRODUCT_MAX_IMAGES && (
                                 <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors">
                                     <input
                                         type="file"
@@ -188,7 +198,7 @@ function CreateProductFormContent({
                                         onChange={(e) => {
                                             if (e.target.files && e.target.files.length > 0) {
                                                 const newFiles = Array.from(e.target.files);
-                                                const remainingSlots = 5 - data.images.length;
+                                                const remainingSlots = PRODUCT_MAX_IMAGES - data.images.length;
 
                                                 if (remainingSlots <= 0) return;
 
@@ -227,15 +237,24 @@ function CreateProductFormContent({
                     value={data.description}
                     onChange={(e) => handlers.setDescription(e.target.value)}
                     onBlur={descriptionField.onBlur}
+                    maxLength={PRODUCT_DESCRIPTION_MAX_LENGTH}
                     className={`w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-[#1A2B3C] min-h-[100px] ${descriptionField.error ? "border-red-500" : "border-gray-200"
                         }`}
                     placeholder="Descreva o produto..."
                 />
-                {descriptionField.error && (
-                    <span className="text-xs text-red-500 mt-1">
-                        {descriptionField.error}
+                <div className="flex justify-between items-center mt-1">
+                    <span className="text-xs text-red-500">
+                        {descriptionField.error || ""}
                     </span>
-                )}
+                    <span
+                        className={`text-xs ${data.description.length >= PRODUCT_DESCRIPTION_MAX_LENGTH
+                            ? "text-red-500"
+                            : "text-gray-400"
+                            }`}
+                    >
+                        {data.description.length}/{PRODUCT_DESCRIPTION_MAX_LENGTH}
+                    </span>
+                </div>
             </div>
 
             {/* Grid Price/Categories */}

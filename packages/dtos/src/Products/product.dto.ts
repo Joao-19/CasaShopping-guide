@@ -10,8 +10,14 @@ import {
   ValidateNested,
   Min,
   Max,
+  MaxLength,
+  ArrayMaxSize,
 } from "class-validator";
 import { Type } from "class-transformer";
+
+/** Limites de campos do produto — fonte única (DTO + form admin + service). */
+export const PRODUCT_DESCRIPTION_MAX_LENGTH = 500;
+export const PRODUCT_MAX_IMAGES = 5;
 
 export enum PriceTier {
   LOW = "LOW",
@@ -38,6 +44,7 @@ export class CreateProductDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(PRODUCT_DESCRIPTION_MAX_LENGTH)
   description!: string;
 
   @IsEnum(PriceTier)
@@ -56,6 +63,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(PRODUCT_MAX_IMAGES)
   @ValidateNested({ each: true })
   @Type(() => ProductImageDto)
   images?: ProductImageDto[];
@@ -99,6 +107,7 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
+  @MaxLength(PRODUCT_DESCRIPTION_MAX_LENGTH)
   description?: string;
 
   @IsOptional()
@@ -120,6 +129,7 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(PRODUCT_MAX_IMAGES)
   @ValidateNested({ each: true })
   @Type(() => ProductImageDto)
   images?: ProductImageDto[];

@@ -12,6 +12,8 @@ import {
   Product,
   UpdateProductDto,
   PaginatedResult,
+  PRODUCT_DESCRIPTION_MAX_LENGTH,
+  PRODUCT_MAX_IMAGES,
 } from "@repo/dtos";
 
 const STORAGE_SERVICE_URL =
@@ -36,8 +38,19 @@ export class ProductService {
       );
     }
 
-    if (data.images && data.images.length > 5) {
-      throw new BadRequestException("Maximum of 5 images allowed per product");
+    if (
+      data.description &&
+      data.description.length > PRODUCT_DESCRIPTION_MAX_LENGTH
+    ) {
+      throw new BadRequestException(
+        `Description must be at most ${PRODUCT_DESCRIPTION_MAX_LENGTH} characters`,
+      );
+    }
+
+    if (data.images && data.images.length > PRODUCT_MAX_IMAGES) {
+      throw new BadRequestException(
+        `Maximum of ${PRODUCT_MAX_IMAGES} images allowed per product`,
+      );
     }
 
     const product = await prisma.product.create({
@@ -219,8 +232,19 @@ export class ProductService {
       throw new ConflictException("Product not found"); // Or NotFoundException, using Conflict for simplified import reuse or ideally separate exception
     }
 
-    if (data.images && data.images.length > 5) {
-      throw new BadRequestException("Maximum of 5 images allowed per product");
+    if (
+      data.description &&
+      data.description.length > PRODUCT_DESCRIPTION_MAX_LENGTH
+    ) {
+      throw new BadRequestException(
+        `Description must be at most ${PRODUCT_DESCRIPTION_MAX_LENGTH} characters`,
+      );
+    }
+
+    if (data.images && data.images.length > PRODUCT_MAX_IMAGES) {
+      throw new BadRequestException(
+        `Maximum of ${PRODUCT_MAX_IMAGES} images allowed per product`,
+      );
     }
 
     const product = await prisma.$transaction(async (tx) => {

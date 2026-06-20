@@ -1,3 +1,4 @@
+import { PRODUCT_MAX_IMAGES } from "@repo/dtos";
 import { matchImageFilename } from "./matchImages";
 import { resolvePrice } from "./priceMapping";
 import { resolveCategories, resolveStore, type StoreOption } from "./resolve";
@@ -9,7 +10,7 @@ import type {
   RowDiagnostics,
 } from "./types";
 
-const MAX_IMAGES = 5;
+const MAX_IMAGES = PRODUCT_MAX_IMAGES;
 const TRUE_VALUES = new Set(["sim", "true", "1", "x", "yes", "destaque"]);
 
 function cell(row: RawRow, header: string | null | undefined): string {
