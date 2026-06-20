@@ -14,22 +14,25 @@
 - **B3 — deep-link de produto:** **rota dedicada `/produto/[id]`** (não query
   param) — melhor SEO + preview de link no WhatsApp (Open Graph).
 
-## Decisões ainda pendentes (resolver ao chegar na sub-frente)
+## Decisões resolvidas
 
-- **B2 — design do banner do lojista** (logo + contato sobreposto): precisa de
-  design antes de codar. Bloqueia só o visual do banner, não a rota/listagem.
-- **B4 — arquitetura de popups:** novo model `Popup` (espelhando
-  `NewsletterSlide`) **vs.** KV `system_config`. Recomendação técnica abaixo;
-  confirmar ao iniciar B4.
+- **B2 — design do banner:** default implementado (banner imagem/gradiente +
+  scrim + overlay logo/nome/contato). Aprovado na validação.
+- **B4 — popups:** **atendido pela Newsletter (Frente 6)** — sem CRUD separado
+  (decisão do dono, 2026-06-20).
 
-## Ordem e custo (revisado vs. código real)
+## Status da frente — ✅ CONCLUÍDA (2026-06-20)
 
-| Passo | Item | Falta de verdade | Bloqueio | Esforço |
-|---|---|---|---|---|
-| 1 | **B1** Limites do produto | só limite de descrição (fotos já feito) | — (X já definido: 500) | **~2-3h** |
-| 2 | **B3** Compartilhar | rota `/produto/[id]` + share popup | — (rota já decidida) | ~1–1,5 dia |
-| 3 | **B2** Página por lojista | rota `/loja/[slug]`, slug+banner (migration), agrupar por categoria | design do banner | ~2 dias |
-| 4 | **B4** Popups | model multi-popup + frequência (datas/horas) | KV vs. estender | ~2 dias |
+| Passo | Item | Status |
+|---|---|---|
+| 1 | **B1** Limites do produto | ✅ `c4bc261` — validado e2e |
+| 2 | **B3** Compartilhar (deep-link + share) | ✅ `eedf36d` — validado e2e |
+| 3 | **B2** Página por lojista | ✅ `bd800e3`+`914f8f3` — validado e2e |
+| 4 | **B4** Popups | ✅ atendido pela Newsletter (Frente 6) |
+
+> Branch `feat/melhorias-camadas` (base `dev`). Pendente: merge/push (exige OK do dono).
+> Dívida técnica anotada: `CreateStoreForm.tsx` (503 linhas) e `CreateProductForm.tsx`
+> (539) acima do alvo de 300 — candidatos a decomposição num refactor à parte.
 
 ---
 
@@ -73,14 +76,19 @@
 
 ## B3 — Compartilhar produto (deep-link + share)
 
-**Esforço:** ~1–1,5 dia · **Risco:** baixo (médio pela rota nova) · **Status: 🟡 código pronto (commit `eedf36d`); ShareButton validado e2e; página `/produto/[id]` pendente de validação (precisa reiniciar o api-gateway)**
+**Esforço:** ~1–1,5 dia · **Risco:** baixo (médio pela rota nova) · **Status: ✅ CONCLUÍDA** (2026-06-20, commit `eedf36d`)
 
 > Achado: **não existia `GET /products/:id` no gateway** — criado no products-service
 > + gateway (rota pública, declarada por último p/ não sombrear `/products/favorites`).
 > Share extraído em `ShareButton.tsx` (nativo + fallback menu). `ProductDetailsCard`
-> ganhou prop `onClose`. Validado e2e: share nativo dispara; fallback mostra Copiar
-> link (toast) + WhatsApp; visual OK. **Falta:** gateway `nest start` sem `--watch`
-> não recarregou a rota → validar a página `/produto/[id]` após restart do gateway.
+> ganhou prop `onClose`. **Validado e2e (Playwright):** share nativo dispara; fallback
+> mostra Copiar link (toast `writeText` ok) + WhatsApp; `/produto/[id]` renderiza o card
+> (SEO `document.title`); id inexistente → "Produto não encontrado" (404). Visual OK.
+
+### Critérios de aceite — ✅ validados
+- [x] `/produto/[id]` renderiza o produto; id inexistente → 404.
+- [x] Botão Compartilhar: share nativo no mobile; fallback Copiar link + WhatsApp no desktop.
+- [x] Link compartilhado abre direto a página do produto.
 
 ### Estado real (verificado 2026-06-20)
 - ✅ Confirmado: produto abre **só em modal** (`showPopup(<ProductDetailsCard/>)`)
@@ -120,7 +128,24 @@
 
 ## B2 — Página pública por lojista
 
-**Esforço:** ~2 dias · **Risco:** médio
+**Esforço:** ~2 dias · **Risco:** médio · **Status: ✅ CONCLUÍDA** (2026-06-20, commits `bd800e3`+`914f8f3`)
+
+> Entregue: `Store.slug`+`bannerImage` (migration idempotente + backfill); backend
+> `findBySlug`/`slug-available` (auto-gera slug do nome, 409 se em uso); admin com
+> campo slug (sugestão + disponibilidade) + upload de banner; página `/loja/[slug]`
+> com banner+overlay (logo/nome/endereço/contato) e produtos por categoria.
+> **Design do banner:** default — banner (imagem ou gradiente #003ba6→#162e47) +
+> scrim + overlay no canto inferior. **Validado e2e (Playwright):** criar loja
+> "Móveis do João Teste" → slug auto `moveis-do-joao-teste` + "URL disponível";
+> slug repetido → "Essa URL já existe"; upload de banner → persiste (webp MinIO);
+> página pública mostra banner real + nome legível (fix `!text-white` sobre regra
+> global de h1) + produtos agrupados em 6 categorias; click → modal. 0 erros console.
+
+### Critérios de aceite — ✅ validados
+- [x] `/loja/[slug]` mostra banner + logo/contato + produtos da loja por categoria.
+- [x] Slug único; admin sugere do nome e permite editar; duplicado bloqueado.
+- [x] Slug inexistente → 404.
+- [x] Upload de banner da loja funciona (presigned MinIO).
 
 ### Estado real (verificado 2026-06-20)
 - ❌ Rota `/loja/[slug]` não existe (só `/stores` = listagem geral).
@@ -159,7 +184,14 @@
 
 ## B4 — Cadastro de popups configuráveis
 
-**Esforço:** ~2 dias · **Risco:** médio
+**Esforço:** ~2 dias · **Risco:** médio · **Status: ✅ ATENDIDO pela Newsletter (Frente 6)** (decisão do dono, 2026-06-20)
+
+> **Decisão (2026-06-20):** o dono considera o B4 **coberto pelo modal da newsletter**
+> (Frente 6) — que já é um popup do site **configurável**: imagem, título/descrição,
+> botões primário/secundário, `accentColor`, `appearDelay`, `autoClose`+`autoCloseDelay`,
+> `slideInterval`, exibição 1×/sessão. Não haverá CRUD de múltiplos popups nem janela
+> por datas/`repeatEveryHours` por ora. Reabrir como frente própria só se surgir a
+> necessidade de popups múltiplos/segmentados além da newsletter.
 
 ### Estado real (verificado 2026-06-20)
 A **Frente 6 (newsletter v2) já construiu ~80% da mecânica** — é o molde, não o

@@ -162,7 +162,7 @@ export default function LojaPage() {
                                 )}
                             </div>
                             <div className="flex-1 text-white pb-1">
-                                <h1 className="text-2xl md:text-4xl font-bold drop-shadow-sm">{store.name}</h1>
+                                <h1 className="text-2xl md:text-4xl font-bold !text-white drop-shadow-md">{store.name}</h1>
                                 {store.address && (
                                     <p className="text-sm md:text-base text-white/80 mt-1">{store.address}</p>
                                 )}
