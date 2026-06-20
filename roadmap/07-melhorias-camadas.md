@@ -73,7 +73,14 @@
 
 ## B3 — Compartilhar produto (deep-link + share)
 
-**Esforço:** ~1–1,5 dia · **Risco:** baixo (médio pela rota nova)
+**Esforço:** ~1–1,5 dia · **Risco:** baixo (médio pela rota nova) · **Status: 🟡 código pronto (commit `eedf36d`); ShareButton validado e2e; página `/produto/[id]` pendente de validação (precisa reiniciar o api-gateway)**
+
+> Achado: **não existia `GET /products/:id` no gateway** — criado no products-service
+> + gateway (rota pública, declarada por último p/ não sombrear `/products/favorites`).
+> Share extraído em `ShareButton.tsx` (nativo + fallback menu). `ProductDetailsCard`
+> ganhou prop `onClose`. Validado e2e: share nativo dispara; fallback mostra Copiar
+> link (toast) + WhatsApp; visual OK. **Falta:** gateway `nest start` sem `--watch`
+> não recarregou a rota → validar a página `/produto/[id]` após restart do gateway.
 
 ### Estado real (verificado 2026-06-20)
 - ✅ Confirmado: produto abre **só em modal** (`showPopup(<ProductDetailsCard/>)`)
