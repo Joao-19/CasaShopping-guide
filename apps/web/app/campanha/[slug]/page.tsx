@@ -57,8 +57,17 @@ export default function CampanhaPage() {
         showPopup(<ProductDetailsCard product={product} />);
     };
 
+    const count = products.length;
+    const hasBanner = !!(campaign?.coverDesktop || campaign?.coverMobile);
+
     return (
-        <main className="w-full h-full flex flex-col flex-1 bg-[#f0f1f3]">
+        <main className="w-full h-full flex flex-col flex-1 bg-[#eef0f3]">
+            <style>{`
+                @keyframes campRise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+                @keyframes campGlow { 0%,100% { opacity:.55 } 50% { opacity:.9 } }
+                .camp-rise { animation: campRise .7s cubic-bezier(.16,.84,.44,1) both; }
+            `}</style>
+
             <Toolbar />
 
             {isLoading ? (
@@ -75,65 +84,138 @@ export default function CampanhaPage() {
                 </div>
             ) : (
                 <div className="flex-1 w-full">
-                    {/* Banner responsivo (desktop/mobile) */}
-                    {(campaign.coverDesktop || campaign.coverMobile) && (
-                        <div className="w-full">
-                            {campaign.coverDesktop && (
-                                <img
-                                    src={campaign.coverDesktop}
-                                    alt={campaign.title}
-                                    className="hidden md:block w-full object-cover"
-                                />
-                            )}
-                            {(campaign.coverMobile || campaign.coverDesktop) && (
+                    {/* ===== HERO imersivo: banner + título sobreposto ===== */}
+                    <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#01265f] via-[#003ba6] to-[#162e47]">
+                        {/* Banner (ou gradiente de fallback com textura) */}
+                        {hasBanner ? (
+                            <>
+                                {campaign.coverDesktop && (
+                                    <img
+                                        src={campaign.coverDesktop}
+                                        alt={campaign.title}
+                                        className="hidden md:block w-full object-cover"
+                                    />
+                                )}
                                 <img
                                     src={campaign.coverMobile || campaign.coverDesktop || ""}
                                     alt={campaign.title}
-                                    className="block md:hidden w-full object-cover"
+                                    className="block md:hidden w-full aspect-square object-cover"
                                 />
-                            )}
-                        </div>
-                    )}
-
-                    <div className="max-w-7xl mx-auto px-6 py-8 w-full">
-                        <h1 className="text-3xl font-bold text-[#1A2B3C] font-sans mb-10">
-                            {campaign.title}
-                        </h1>
-
-                        {products.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
-                                <p className="text-lg text-gray-500 font-medium font-sans">
-                                    Nenhum produto nesta campanha ainda.
-                                </p>
-                            </div>
+                            </>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
-                                {products.map((product, index) => (
-                                    <div
-                                        key={`${product.id}-${index}`}
-                                        className="h-[320px]"
-                                        onClick={() => handleProductClick(product)}
-                                    >
-                                        <ProductCardSwiper
-                                            title={product.title}
-                                            storeName={product.storeName}
-                                            price={product.price}
-                                            images={product.images}
-                                            isFavorited={isFavorited(product.id)}
-                                            onWishlistClick={() => {
-                                                if (!user || user.isGuest) {
-                                                    showPopup(<LoginRequiredPopup onClose={hidePopup} />);
-                                                    return;
-                                                }
-                                                toggleFavorite(product.id);
-                                            }}
-                                            className="h-full"
-                                        />
-                                    </div>
-                                ))}
+                            <div className="w-full aspect-[21/9] md:aspect-[32/10] relative">
+                                {/* malha decorativa suave no fallback */}
+                                <div
+                                    className="absolute inset-0 opacity-40"
+                                    style={{
+                                        backgroundImage:
+                                            "radial-gradient(circle at 18% 28%, rgba(255,255,255,.18), transparent 42%), radial-gradient(circle at 82% 72%, rgba(0,0,0,.35), transparent 45%)",
+                                        animation: "campGlow 9s ease-in-out infinite",
+                                    }}
+                                />
                             </div>
                         )}
-                    </div>
+
+                        {/* Scrim para legibilidade do overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5" />
+
+                        {/* Conteúdo do hero */}
+                        <div className="absolute inset-x-0 bottom-0">
+                            <div className="max-w-7xl mx-auto px-6 md:px-10 pb-12 md:pb-20">
+                                <div className="camp-rise inline-flex items-center gap-2.5 mb-4">
+                                    <span className="h-[2px] w-8 bg-[#7aa2ff] rounded-full" />
+                                    <span className="uppercase tracking-[0.28em] text-[11px] md:text-xs font-semibold text-[#cdddff]">
+                                        Campanha
+                                    </span>
+                                </div>
+                                <h1
+                                    className="camp-rise font-bold text-white leading-[1.02] tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-6xl max-w-3xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
+                                    style={{ animationDelay: "80ms" }}
+                                >
+                                    {campaign.title}
+                                </h1>
+                                <div
+                                    className="camp-rise mt-5 flex items-center gap-3 text-white/80"
+                                    style={{ animationDelay: "160ms" }}
+                                >
+                                    <span className="text-sm md:text-base">
+                                        {count} {count === 1 ? "produto selecionado" : "produtos selecionados"}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ===== VITRINE ===== */}
+                    <section className="relative">
+                        {/* Container que "sobe" levemente sobre o hero */}
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="bg-white rounded-t-[28px] md:rounded-t-[36px] -mt-6 md:-mt-10 relative shadow-[0_-12px_40px_-24px_rgba(0,0,0,0.25)] px-6 md:px-10 pt-10 md:pt-12 pb-16">
+                                {/* Cabeçalho da vitrine */}
+                                <div className="flex items-end justify-between gap-4 mb-9 md:mb-11">
+                                    <div>
+                                        <div className="h-[3px] w-12 bg-[#003ba6] rounded-full mb-3" />
+                                        <h2 className="text-2xl md:text-[28px] font-bold text-[#142a45] tracking-tight">
+                                            Produtos da campanha
+                                        </h2>
+                                    </div>
+                                    <span className="shrink-0 text-xs md:text-sm font-medium text-gray-400 tabular-nums pb-1">
+                                        {String(count).padStart(2, "0")}
+                                    </span>
+                                </div>
+
+                                {count === 0 ? (
+                                    <div className="flex flex-col items-center justify-center min-h-[260px] text-center">
+                                        <div className="w-14 h-14 rounded-2xl bg-[#eef2fb] flex items-center justify-center mb-4">
+                                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#003ba6" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg>
+                                        </div>
+                                        <p className="text-lg text-[#142a45] font-semibold font-sans">Vitrine em preparação</p>
+                                        <p className="text-sm text-gray-400 mt-1">Os produtos desta campanha entram em breve.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-7">
+                                        {products.map((product, index) => (
+                                            <div
+                                                key={`${product.id}-${index}`}
+                                                className="camp-rise h-[340px] group cursor-pointer"
+                                                style={{ animationDelay: `${220 + index * 70}ms` }}
+                                                onClick={() => handleProductClick(product)}
+                                            >
+                                                <div className="h-full transition-transform duration-300 group-hover:-translate-y-1">
+                                                    <ProductCardSwiper
+                                                        title={product.title}
+                                                        storeName={product.storeName}
+                                                        price={product.price}
+                                                        images={product.images}
+                                                        isFavorited={isFavorited(product.id)}
+                                                        onWishlistClick={() => {
+                                                            if (!user || user.isGuest) {
+                                                                showPopup(<LoginRequiredPopup onClose={hidePopup} />);
+                                                                return;
+                                                            }
+                                                            toggleFavorite(product.id);
+                                                        }}
+                                                        className="h-full shadow-sm group-hover:shadow-xl transition-shadow duration-300"
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Rodapé da vitrine: voltar ao guia */}
+                                <div className="mt-12 pt-8 border-t border-gray-100 flex justify-center">
+                                    <Link
+                                        href="/produtos"
+                                        className="inline-flex items-center gap-2 text-sm font-medium text-[#003ba6] hover:gap-3 transition-all"
+                                    >
+                                        Ver todos os produtos do guia
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             )}
 
