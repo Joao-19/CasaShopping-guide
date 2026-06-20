@@ -38,6 +38,21 @@ export class StoreController {
     return this.storeService.findAll(+page, search, limit ? +limit : undefined);
   }
 
+  // Rotas específicas ANTES de ":id" para ":id" não as sombrear.
+  @Get("slug-available")
+  async slugAvailable(
+    @Query("slug") slug: string,
+    @Query("excludeId") excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    const available = await this.storeService.isSlugAvailable(slug, excludeId);
+    return { available };
+  }
+
+  @Get("slug/:slug")
+  async findBySlug(@Param("slug") slug: string): Promise<Store> {
+    return this.storeService.findBySlug(slug);
+  }
+
   @Get(":id")
   async findOne(@Param("id") id: string): Promise<Store> {
     return this.storeService.findOne(id);

@@ -19,6 +19,7 @@ export const getProducts = async (params?: {
   page?: number;
   search?: string;
   isFeatured?: boolean;
+  storeId?: string;
 }) => {
   // Assuming the API returns { data: [...], meta: ... } or similar for pagination
   // If the API currently returns just an array, we might need to adjust or mock the meta structure until the backend is fully ready.

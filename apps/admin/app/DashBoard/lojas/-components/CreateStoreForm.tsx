@@ -1,15 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ImageUpload, BaseText, Button, Label, FormCard, toast } from '@repo/ui';
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import useStore from '@/composable/store/useStore';
+import storeHttp from '@/Services/http/store.http';
 import { CreateStoreDto, Store } from '@repo/dtos';
 import { formatPhone, cleanPhone } from '@/utils/formatters';
 import { useImageUpload } from '@/composable/storage/useImageUpload';
+import { BannerUpload } from '../../components';
 import { FaWhatsapp } from "react-icons/fa";
 import { HiOutlinePhone } from "react-icons/hi";
+
+// Gera um slug "amigável" a partir do texto (sem acentos, kebab-case).
+function slugify(text: string): string {
+    return text
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+type SlugStatus = "idle" | "checking" | "available" | "taken";
 
 interface CreateStoreFormProps {
     onClose: () => void;
@@ -19,6 +34,8 @@ interface CreateStoreFormProps {
 interface CreateStoreFormContentProps {
     data: {
         name: string;
+        slug: string;
+        slugStatus: SlugStatus;
         address: string;
         phone: string;
         site: string;
@@ -27,9 +44,11 @@ interface CreateStoreFormContentProps {
         youtubeLink: string;
         whatsapp?: string;
         currentImageUrl?: string;
+        currentBannerUrl?: string;
     };
     handlers: {
         setName: (v: string) => void;
+        setSlug: (v: string) => void;
         setAddress: (v: string) => void;
         setPhone: (v: string) => void;
         setSite: (v: string) => void;
@@ -39,6 +58,8 @@ interface CreateStoreFormContentProps {
         setWhatsapp: (v: string) => void;
         setImage: (v: File) => void;
         onRemoveImage?: () => void;
+        setBanner: (v: File) => void;
+        onRemoveBanner: () => void;
     };
     loading: boolean;
     onClose: () => void;
@@ -100,6 +121,46 @@ function CreateStoreFormContent({ data, handlers, loading, onClose, onSubmit, is
                 error={nameField.error}
                 onBlur={nameField.onBlur}
             />
+
+            {/* Slug da página pública */}
+            <div className="mb-2">
+                <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                    URL da página <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-400 whitespace-nowrap">/loja/</span>
+                    <BaseInput
+                        id="slug"
+                        type="text"
+                        placeholder="abracasa"
+                        value={data.slug}
+                        onChange={(e) => handlers.setSlug(e.target.value)}
+                    />
+                </div>
+                {data.slugStatus === "checking" && (
+                    <p className="text-xs text-gray-400 mt-1">Verificando disponibilidade…</p>
+                )}
+                {data.slugStatus === "available" && (
+                    <p className="text-xs text-green-600 mt-1">URL disponível.</p>
+                )}
+                {data.slugStatus === "taken" && (
+                    <p className="text-xs text-red-500 mt-1">Essa URL já existe. Escolha outra.</p>
+                )}
+            </div>
+
+            {/* Banner da loja (página pública) */}
+            <div className="mb-2">
+                <BannerUpload
+                    label="Banner da loja"
+                    description="Banner largo da página pública (32:9)"
+                    aspect="banner"
+                    accept="image/*"
+                    currentUrl={data.currentBannerUrl}
+                    isVideo={false}
+                    onFileSelect={(file) => handlers.setBanner(file)}
+                    onRemove={handlers.onRemoveBanner}
+                />
+            </div>
 
             {/* Grid Endereço/Telefone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -247,6 +308,11 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
 
     // Form State
     const [name, setName] = useState(initialData?.name || '');
+    const [slug, setSlug] = useState(initialData?.slug || '');
+    const [banner, setBanner] = useState<File | null>(null);
+    const [bannerRemoved, setBannerRemoved] = useState(false);
+    const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle');
+    const slugEdited = useRef(isEditing);
     const [address, setAddress] = useState(initialData?.address || '');
     const [phone, setPhone] = useState(initialData?.phone ? formatPhone(initialData.phone) : '');
     const [site, setSite] = useState(initialData?.site || '');
@@ -258,7 +324,34 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
     const [imageRemoved, setImageRemoved] = useState(false);
     const { uploadImage, uploading: uploadingImage, error: uploadError } = useImageUpload();
 
+    // Slug sugerido a partir do nome enquanto não for editado à mão.
+    const handleNameChange = (value: string) => {
+        setName(value);
+        if (!slugEdited.current) setSlug(slugify(value));
+    };
+    const handleSlugChange = (value: string) => {
+        slugEdited.current = true;
+        setSlug(slugify(value));
+    };
 
+    // Checagem de disponibilidade do slug (debounce). Ignora se igual ao inicial.
+    useEffect(() => {
+        const trimmed = slug.trim();
+        if (!trimmed || trimmed === initialData?.slug) {
+            setSlugStatus('idle');
+            return;
+        }
+        setSlugStatus('checking');
+        const t = setTimeout(async () => {
+            try {
+                const { available } = await storeHttp.checkSlug(trimmed, initialData?.id);
+                setSlugStatus(available ? 'available' : 'taken');
+            } catch {
+                setSlugStatus('idle');
+            }
+        }, 400);
+        return () => clearTimeout(t);
+    }, [slug, initialData?.slug, initialData?.id]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -290,8 +383,23 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 imageKey = '';
             }
 
+            // Banner: upload se novo arquivo; "" se removido; mantém o atual caso contrário.
+            let bannerKey = initialData?.bannerImage ?? undefined;
+            if (banner) {
+                try {
+                    bannerKey = await uploadImage(banner, { folder: 'stores' });
+                } catch (uploadErr) {
+                    console.error('Failed to upload banner', uploadErr);
+                    toast.error('Erro ao fazer upload do banner. Tente novamente.');
+                    return;
+                }
+            } else if (bannerRemoved) {
+                bannerKey = '';
+            }
+
             const submissionData: CreateStoreDto = {
                 name,
+                slug: slug.trim() || undefined,
                 address,
                 phone: cleanPhone(phone),
                 site,
@@ -300,6 +408,7 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 youtubeLink,
                 whatsapp: cleanPhone(whatsapp), // Add whatsapp here
                 logoImage: imageKey || '', // Send string path to DB
+                bannerImage: bannerKey,
             };
 
             if (isEditing && initialData?.id) {
@@ -310,7 +419,13 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
             onClose();
             toast.success(isEditing ? 'Loja atualizada com sucesso!' : 'Loja criada com sucesso!');
         } catch (error) {
-            toast.error('Erro ao salvar a loja. Verifique os dados e tente novamente.');
+            const status = (error as { response?: { status?: number } })?.response?.status;
+            if (status === 409) {
+                setSlugStatus('taken');
+                toast.error('Essa URL (slug) já existe. Escolha outra.');
+            } else {
+                toast.error('Erro ao salvar a loja. Verifique os dados e tente novamente.');
+            }
         }
     };
 
@@ -334,9 +449,11 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
         >
             <FormProvider>
                 <CreateStoreFormContent
-                    isValid={isValid}
+                    isValid={isValid && slugStatus !== 'taken'}
                     data={{
                         name,
+                        slug,
+                        slugStatus,
                         address,
                         phone,
                         site,
@@ -344,10 +461,12 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                         instagramLink,
                         youtubeLink,
                         whatsapp,
-                        currentImageUrl: imageRemoved ? undefined : (image ? URL.createObjectURL(image) : (initialData?.logoImage || undefined))
+                        currentImageUrl: imageRemoved ? undefined : (image ? URL.createObjectURL(image) : (initialData?.logoImage || undefined)),
+                        currentBannerUrl: bannerRemoved ? undefined : (banner ? URL.createObjectURL(banner) : (initialData?.bannerImage || undefined))
                     }}
                     handlers={{
-                        setName,
+                        setName: handleNameChange,
+                        setSlug: handleSlugChange,
                         setAddress,
                         setPhone,
                         setSite,
@@ -362,6 +481,14 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                         onRemoveImage: () => {
                             setImage(null);
                             setImageRemoved(true);
+                        },
+                        setBanner: (file: File) => {
+                            setBanner(file);
+                            setBannerRemoved(false);
+                        },
+                        onRemoveBanner: () => {
+                            setBanner(null);
+                            setBannerRemoved(true);
                         }
                     }}
                     loading={loading || uploadingImage}

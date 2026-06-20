@@ -66,6 +66,25 @@ export class StoreGatewayController {
     );
   }
 
+  // Rotas específicas ANTES de ":id" para não serem sombreadas.
+  @Get("slug-available")
+  @ApiOperation({ summary: "Check if a store slug is available" })
+  @ApiResponse({ status: 200, description: "Slug availability." })
+  async slugAvailable(
+    @Query("slug") slug: string,
+    @Query("excludeId") excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    return this.storeGatewayService.slugAvailable(slug, excludeId);
+  }
+
+  @Get("slug/:slug")
+  @ApiOperation({ summary: "Retrieve a store by slug (public page)" })
+  @ApiResponse({ status: 200, description: "Return the store." })
+  @ApiResponse({ status: 404, description: "Store not found." })
+  async findBySlug(@Param("slug") slug: string): Promise<Store> {
+    return this.storeGatewayService.findBySlug(slug);
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "Retrieve a store by ID" })
   @ApiResponse({ status: 200, description: "Return the store." })

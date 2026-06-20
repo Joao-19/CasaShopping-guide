@@ -9,6 +9,17 @@ import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
 const STORAGE_SERVICE_URL =
   process.env.STORAGE_SERVICE_URL || "http://storage-service:3007";
 
+// Gera slug "amigável" (sem acento, kebab) a partir de um texto.
+function slugify(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 @Injectable()
 export class StoreService {
   async create(data: CreateStoreDto): Promise<Store> {
@@ -25,9 +36,13 @@ export class StoreService {
       );
     }
 
+    // Slug: usa o informado (se válido/único) ou gera do nome, garantindo unicidade.
+    const slug = await this.resolveUniqueSlug(data.slug || slugify(data.name));
+
     const store = await prisma.store.create({
       data: {
         name: data.name,
+        slug,
         address: data.address,
         phone: data.phone,
         site: data.site,
@@ -36,26 +51,66 @@ export class StoreService {
         youtubeLink: data.youtubeLink,
         whatsapp: data.whatsapp,
         logoImage: data.logoImage,
+        bannerImage: data.bannerImage,
       },
     });
 
     return this.transformStore(store);
   }
 
+  // Garante slug único: se já existe (ignorando excludeId), anexa sufixo numérico.
+  private async resolveUniqueSlug(
+    base: string,
+    excludeId?: string,
+  ): Promise<string> {
+    const root = slugify(base) || "loja";
+    let candidate = root;
+    let n = 2;
+    // Loop curto: na prática 1-2 iterações; protege contra colisão.
+    while (true) {
+      const clash = await prisma.store.findFirst({
+        where: { slug: candidate, id: excludeId ? { not: excludeId } : undefined },
+        select: { id: true },
+      });
+      if (!clash) return candidate;
+      candidate = `${root}-${n++}`;
+    }
+  }
+
+  async isSlugAvailable(slug: string, excludeId?: string): Promise<boolean> {
+    const clash = await prisma.store.findFirst({
+      where: { slug, id: excludeId ? { not: excludeId } : undefined },
+      select: { id: true },
+    });
+    return !clash;
+  }
+
+  async findBySlug(slug: string): Promise<Store> {
+    const store = await prisma.store.findFirst({
+      where: { slug, deletedAt: null },
+    });
+    if (!store) {
+      throw new NotFoundException(`Store with slug "${slug}" not found`);
+    }
+    return this.transformStore(store);
+  }
+
   private transformStore(store: Store): Store {
+    const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
+    const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
+    const baseUrl = publicEndpoint
+      ? `${publicEndpoint.replace(/\/$/, "")}/${bucketName}`
+      : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+    const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+
+    const toPublicUrl = (key: string) =>
+      `${cleanBase}/${key.startsWith("/") ? key.slice(1) : key}`;
+
     if (store.logoImage && !store.logoImage.startsWith("http")) {
-      const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
-      const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
-
-      let baseUrl = publicEndpoint
-        ? `${publicEndpoint.replace(/\/$/, "")}/${bucketName}`
-        : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
-
-      const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-      const cleanKey = store.logoImage.startsWith("/")
-        ? store.logoImage.slice(1)
-        : store.logoImage;
-      store.logoImage = `${cleanBase}/${cleanKey}`;
+      store.logoImage = toPublicUrl(store.logoImage);
+    }
+    if (store.bannerImage && !store.bannerImage.startsWith("http")) {
+      store.bannerImage = toPublicUrl(store.bannerImage);
     }
     return store;
   }
@@ -146,10 +201,13 @@ export class StoreService {
         where: { storeId: id },
       });
 
-      // 4. Get store to delete logo
+      // 4. Get store to delete logo + banner
       const store = await tx.store.findUnique({ where: { id } });
       if (store?.logoImage) {
         await this.deleteFileFromStorage(store.logoImage);
+      }
+      if (store?.bannerImage) {
+        await this.deleteFileFromStorage(store.bannerImage);
       }
 
       // 5. Soft delete the store
@@ -180,6 +238,16 @@ export class StoreService {
       }
     }
 
+    // Slug explícito: precisa ser único (409 p/ o admin tratar, igual campanha).
+    if (data.slug) {
+      const available = await this.isSlugAvailable(data.slug, id);
+      if (!available) {
+        throw new ConflictException(
+          `A store with slug "${data.slug}" already exists.`,
+        );
+      }
+    }
+
     const updateData: any = {
       ...data,
       modifiedAt: new Date(),
@@ -204,6 +272,14 @@ export class StoreService {
       data.logoImage !== existingStore.logoImage
     ) {
       await this.deleteFileFromStorage(existingStore.logoImage);
+    }
+
+    if (
+      data.bannerImage !== undefined &&
+      existingStore.bannerImage &&
+      data.bannerImage !== existingStore.bannerImage
+    ) {
+      await this.deleteFileFromStorage(existingStore.bannerImage);
     }
 
     return this.transformStore(updatedStore);

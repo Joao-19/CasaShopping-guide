@@ -13,4 +13,8 @@ export default {
       })
       .then((res) => res.data);
   },
+
+  getBySlug(slug: string) {
+    return http.get<Store>(`stores/slug/${slug}`).then((res) => res.data);
+  },
 };

@@ -7,6 +7,7 @@ export default {
     // When we add file upload, we'll convert to FormData
     const payload = {
       name: form.name,
+      slug: form.slug,
       address: form.address,
       phone: form.phone,
       site: form.site,
@@ -15,9 +16,18 @@ export default {
       youtubeLink: form.youtubeLink,
       whatsapp: form.whatsapp,
       logoImage: form.logoImage,
+      bannerImage: form.bannerImage,
     };
 
     return http.post<Store>("stores", payload).then((res) => res.data);
+  },
+
+  checkSlug(slug: string, excludeId?: string) {
+    return http
+      .get<{ available: boolean }>("stores/slug-available", {
+        params: { slug, excludeId },
+      })
+      .then((res) => res.data);
   },
 
   // Placeholders for other methods

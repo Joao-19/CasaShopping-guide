@@ -71,6 +71,42 @@ export class StoreGatewayService {
     }
   }
 
+  async findBySlug(slug: string): Promise<Store> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<Store>(
+          `${this.storesServiceUrl}/stores/slug/${slug}`,
+        ),
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500,
+      );
+    }
+  }
+
+  async slugAvailable(
+    slug: string,
+    excludeId?: string,
+  ): Promise<{ available: boolean }> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<{ available: boolean }>(
+          `${this.storesServiceUrl}/stores/slug-available`,
+          { params: { slug, excludeId } },
+        ),
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500,
+      );
+    }
+  }
+
   async findOne(id: string, token: string): Promise<Store> {
     try {
       const headers: any = {};
