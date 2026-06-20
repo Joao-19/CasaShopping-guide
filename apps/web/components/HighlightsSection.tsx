@@ -11,7 +11,36 @@ import AutoScroll from 'embla-carousel-auto-scroll';
 import { LoginRequiredPopup } from "./LoginRequiredPopup";
 import { useAuthStore } from "@/store/auth.store";
 
-export function HighlightsSection() {
+// Item normalizado p/ os Destaques (imagens já como URLs prontas).
+export interface HighlightItem {
+    id: string;
+    name: string;
+    price: string;
+    description?: string;
+    images: string[];
+    showStorePhone?: boolean;
+    tags?: string | string[] | null;
+    store?: {
+        name?: string;
+        logoImage?: string | null;
+        phone?: string | null;
+        address?: string | null;
+        site?: string | null;
+        instagramLink?: string | null;
+        facebookLink?: string | null;
+        youtubeLink?: string | null;
+        whatsapp?: string | null;
+    } | null;
+}
+
+interface HighlightsSectionProps {
+    // Quando fornecido, usa esses itens (ex.: seção de campanha) em vez de
+    // buscar os produtos em destaque (isFeatured) — visual idêntico.
+    items?: HighlightItem[];
+    title?: string;
+}
+
+export function HighlightsSection({ items, title }: HighlightsSectionProps = {}) {
     const { showPopup, hidePopup } = usePopup();
     const { isFavorited, toggleFavorite: toggleFav } = useFavorites();
     const { user } = useAuthStore();
@@ -46,38 +75,56 @@ export function HighlightsSection() {
             return undefined;
         },
         initialPageParam: 1,
+        enabled: !items, // com itens fornecidos, não busca isFeatured.
     });
 
-    const products = data?.pages.flatMap((page) => Array.isArray(page) ? page : page.data) || [];
+    const host = process.env.NEXT_PUBLIC_API_HOST || 'localhost';
+    // Modo padrão (home): busca isFeatured e normaliza p/ HighlightItem.
+    const fetchedItems: HighlightItem[] = (
+        data?.pages.flatMap((page) => (Array.isArray(page) ? page : page.data)) || []
+    ).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        description: p.description,
+        images: (p.images ?? [])
+            .slice()
+            .sort((a: any, b: any) => a.index - b.index)
+            .map((img: any) => img.path.replace('localhost', host)),
+        showStorePhone: p.showStorePhone,
+        tags: p.tags,
+        store: p.store,
+    }));
+
+    const products: HighlightItem[] = items ?? fetchedItems;
 
     useEffect(() => {
-        if (hasNextPage && !isFetchingNextPage && products.length < 30) {
+        if (!items && hasNextPage && !isFetchingNextPage && products.length < 30) {
             fetchNextPage();
         }
-    }, [products.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+    }, [items, products.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     const slidesData = products.length > 0
         ? [...products, ...products, ...products, ...products]
         : [];
 
-    const handleProductClick = (product: any) => {
+    const handleProductClick = (product: HighlightItem) => {
         const productDetails = {
             id: product.id,
             title: product.name,
             storeName: product.store?.name || "Loja",
             price: product.price,
             description: product.description,
-            images: product.images?.sort((a: any, b: any) => a.index - b.index)
-                .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
+            images: product.images,
             showStorePhone: product.showStorePhone,
-            storePhone: product.store?.phone,
-            storeLogo: product.store?.logoImage,
-            storeSite: product.store?.site,
-            storeInstagram: product.store?.instagramLink,
-            storeFacebook: product.store?.facebookLink,
-            storeYoutube: product.store?.youtubeLink,
-            whatsapp: product.store?.whatsapp,
-            storeAddress: product.store?.address,
+            storePhone: product.store?.phone ?? undefined,
+            storeLogo: product.store?.logoImage ?? undefined,
+            storeSite: product.store?.site ?? undefined,
+            storeInstagram: product.store?.instagramLink ?? undefined,
+            storeFacebook: product.store?.facebookLink ?? undefined,
+            storeYoutube: product.store?.youtubeLink ?? undefined,
+            whatsapp: product.store?.whatsapp ?? undefined,
+            storeAddress: product.store?.address ?? undefined,
             tags: Array.isArray(product.tags) ? product.tags : (typeof product.tags === 'string' ? product.tags.split(',') : []),
         };
         showPopup(<ProductDetailsCard product={productDetails} />);
@@ -115,7 +162,7 @@ export function HighlightsSection() {
         <section className="rounded-[24px] py-10 bg-[rgb(236,236,238)] relative overflow-visible">
             <div className="px-8 flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div className="flex items-center gap-4">
-                    <h2 className="text-[rgb(22,46,71)] text-[28px] font-bold font-sans">Destaques</h2>
+                    <h2 className="text-[rgb(22,46,71)] text-[28px] font-bold font-sans">{title ?? "Destaques"}</h2>
                 </div>
             </div>
 
@@ -128,7 +175,7 @@ export function HighlightsSection() {
             >
                 <div className="flex touch-pan-y">
                     {slidesData.map((product, index) => {
-                        const mediaPath = product.images?.[0]?.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost');
+                        const mediaPath = product.images?.[0];
 
                         // Detect if the media is a video
                         const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];

@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { usePopup } from "@repo/ui";
-import { Star } from "lucide-react";
 import { Toolbar } from "../../../components/Toolbar";
 import { Footer } from "../../../components/Footer";
 import { ProductCardSwiper } from "../../../components/ProductCardSwiper";
+import { HighlightsSection, HighlightItem } from "../../../components/HighlightsSection";
 import { ProductDetailsCard } from "../../../components/ProductDetailsCard";
 import { LoginRequiredPopup } from "../../../components/LoginRequiredPopup";
 import { useFavorites } from "../../../composable/useFavorites";
@@ -75,6 +75,24 @@ export default function CampanhaPage() {
         : null;
     const useSections = !!sectionsResolved && sectionsResolved.length > 0;
 
+    // Itens de destaque (CampaignProductView -> HighlightItem) p/ reusar o
+    // HighlightsSection da home 1:1 nas seções marcadas como "highlights".
+    const rawById = new Map((campaign?.products ?? []).map((p) => [p.id, p]));
+    const toHighlightItems = (productIds: string[]): HighlightItem[] =>
+        productIds
+            .map((id) => rawById.get(id))
+            .filter((p): p is NonNullable<typeof p> => !!p)
+            .map((p) => ({
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                description: p.description,
+                images: p.images,
+                showStorePhone: p.showStorePhone,
+                tags: p.tags,
+                store: p.store,
+            }));
+
     // Grid reutilizável (mesmos cards arredondados da vitrine).
     const renderGrid = (items: typeof products) => (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-7">
@@ -108,7 +126,7 @@ export default function CampanhaPage() {
     );
 
     return (
-        <main className="w-full h-full flex flex-col flex-1 bg-[#eef0f3]">
+        <main className="w-full h-full flex flex-col flex-1 bg-[#eef0f3] overflow-x-hidden">
             <style>{`
                 @keyframes campRise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
                 @keyframes campGlow { 0%,100% { opacity:.55 } 50% { opacity:.9 } }
@@ -194,85 +212,85 @@ export default function CampanhaPage() {
                     </section>
 
                     {/* ===== VITRINE ===== */}
-                    <section className="relative">
-                        {/* Container que "sobe" levemente sobre o hero */}
-                        <div className="max-w-7xl mx-auto px-6">
-                            <div className="bg-white rounded-t-[28px] md:rounded-t-[36px] -mt-6 md:-mt-10 relative shadow-[0_-12px_40px_-24px_rgba(0,0,0,0.25)] px-6 md:px-10 pt-10 md:pt-12 pb-16">
-                                {useSections ? (
-                                    /* ===== Modo seções ===== */
-                                    sectionsResolved!.map((sec) => {
-                                        const isHL = sec.type === "highlights";
-                                        return (
-                                            <section
-                                                key={sec.id}
-                                                className={
-                                                    isHL
-                                                        ? "rounded-3xl bg-gradient-to-br from-[#fff7e8] to-white ring-1 ring-amber-100 p-5 md:p-8 mb-10 last:mb-0"
-                                                        : "mb-12 last:mb-0"
-                                                }
-                                            >
-                                                <div className="flex items-end justify-between gap-4 mb-7">
-                                                    <div>
-                                                        {isHL ? (
-                                                            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-600 mb-2">
-                                                                <Star size={14} className="fill-amber-400 text-amber-400" /> Destaques
-                                                            </span>
-                                                        ) : (
-                                                            <div className="h-[3px] w-12 bg-[#003ba6] rounded-full mb-3" />
-                                                        )}
-                                                        <h2 className="text-xl md:text-[26px] font-bold text-[#142a45] tracking-tight">
-                                                            {sec.title}
-                                                        </h2>
-                                                    </div>
-                                                    <span className="shrink-0 text-xs md:text-sm font-medium text-gray-400 tabular-nums pb-1">
-                                                        {String(sec.items.length).padStart(2, "0")}
-                                                    </span>
-                                                </div>
-                                                {renderGrid(sec.items)}
-                                            </section>
-                                        );
-                                    })
+                    {useSections ? (
+                        /* Modo seções: layout estilo-home (bg clara). Destaques = HighlightsSection 1:1. */
+                        <div className="max-w-7xl mx-auto w-full px-6 md:px-8 pt-10 md:pt-14 pb-16 space-y-14">
+                            {sectionsResolved!.map((sec) =>
+                                sec.type === "highlights" ? (
+                                    <HighlightsSection
+                                        key={sec.id}
+                                        title={sec.title}
+                                        items={toHighlightItems(sec.items.map((i) => i.id))}
+                                    />
                                 ) : (
-                                    /* ===== Modo plano (vitrine única) ===== */
-                                    <>
-                                        <div className="flex items-end justify-between gap-4 mb-9 md:mb-11">
+                                    <section key={sec.id}>
+                                        <div className="flex items-end justify-between gap-4 mb-7">
                                             <div>
                                                 <div className="h-[3px] w-12 bg-[#003ba6] rounded-full mb-3" />
                                                 <h2 className="text-2xl md:text-[28px] font-bold text-[#142a45] tracking-tight">
-                                                    Produtos da campanha
+                                                    {sec.title}
                                                 </h2>
                                             </div>
                                             <span className="shrink-0 text-xs md:text-sm font-medium text-gray-400 tabular-nums pb-1">
-                                                {String(count).padStart(2, "0")}
+                                                {String(sec.items.length).padStart(2, "0")}
                                             </span>
                                         </div>
-                                        {count === 0 ? (
-                                            <div className="flex flex-col items-center justify-center min-h-[260px] text-center">
-                                                <div className="w-14 h-14 rounded-2xl bg-[#eef2fb] flex items-center justify-center mb-4">
-                                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#003ba6" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg>
-                                                </div>
-                                                <p className="text-lg text-[#142a45] font-semibold font-sans">Vitrine em preparação</p>
-                                                <p className="text-sm text-gray-400 mt-1">Os produtos desta campanha entram em breve.</p>
-                                            </div>
-                                        ) : (
-                                            renderGrid(products)
-                                        )}
-                                    </>
-                                )}
+                                        {renderGrid(sec.items)}
+                                    </section>
+                                ),
+                            )}
 
-                                {/* Rodapé: voltar para a home */}
-                                <div className="mt-12 pt-8 border-t border-gray-100 flex justify-center">
-                                    <Link
-                                        href="/"
-                                        className="inline-flex items-center gap-2 text-sm font-medium text-[#003ba6] hover:gap-3 transition-all"
-                                    >
-                                        Voltar para a home
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-                                    </Link>
-                                </div>
+                            <div className="pt-4 flex justify-center">
+                                <Link
+                                    href="/"
+                                    className="inline-flex items-center gap-2 text-sm font-medium text-[#003ba6] hover:gap-3 transition-all"
+                                >
+                                    Voltar para a home
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                                </Link>
                             </div>
                         </div>
-                    </section>
+                    ) : (
+                        /* Modo plano: container branco que "sobe" sobre o hero. */
+                        <section className="relative">
+                            <div className="max-w-7xl mx-auto px-6">
+                                <div className="bg-white rounded-t-[28px] md:rounded-t-[36px] -mt-6 md:-mt-10 relative shadow-[0_-12px_40px_-24px_rgba(0,0,0,0.25)] px-6 md:px-10 pt-10 md:pt-12 pb-16">
+                                    <div className="flex items-end justify-between gap-4 mb-9 md:mb-11">
+                                        <div>
+                                            <div className="h-[3px] w-12 bg-[#003ba6] rounded-full mb-3" />
+                                            <h2 className="text-2xl md:text-[28px] font-bold text-[#142a45] tracking-tight">
+                                                Produtos da campanha
+                                            </h2>
+                                        </div>
+                                        <span className="shrink-0 text-xs md:text-sm font-medium text-gray-400 tabular-nums pb-1">
+                                            {String(count).padStart(2, "0")}
+                                        </span>
+                                    </div>
+                                    {count === 0 ? (
+                                        <div className="flex flex-col items-center justify-center min-h-[260px] text-center">
+                                            <div className="w-14 h-14 rounded-2xl bg-[#eef2fb] flex items-center justify-center mb-4">
+                                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#003ba6" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg>
+                                            </div>
+                                            <p className="text-lg text-[#142a45] font-semibold font-sans">Vitrine em preparação</p>
+                                            <p className="text-sm text-gray-400 mt-1">Os produtos desta campanha entram em breve.</p>
+                                        </div>
+                                    ) : (
+                                        renderGrid(products)
+                                    )}
+
+                                    <div className="mt-12 pt-8 border-t border-gray-100 flex justify-center">
+                                        <Link
+                                            href="/"
+                                            className="inline-flex items-center gap-2 text-sm font-medium text-[#003ba6] hover:gap-3 transition-all"
+                                        >
+                                            Voltar para a home
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    )}
                 </div>
             )}
 
