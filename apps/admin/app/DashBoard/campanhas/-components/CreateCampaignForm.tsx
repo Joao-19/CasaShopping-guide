@@ -232,6 +232,8 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                     ))}
                 </div>
 
+                {/* Altura fixa: troca de aba não muda o tamanho do modal. */}
+                <div className="h-[440px] overflow-y-auto pr-1 -mr-1">
                 {/* ===== Aba Campanha ===== */}
                 {activeTab === "campanha" && (
                     <div className="space-y-5">
@@ -346,6 +348,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                         <CampaignSectionsManager value={sections} onChange={setSections} />
                     </div>
                 )}
+                </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                     <Button type="button" variant="outline" onClick={onClose}>
