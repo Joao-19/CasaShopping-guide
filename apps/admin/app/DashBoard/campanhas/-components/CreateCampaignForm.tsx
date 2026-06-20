@@ -5,6 +5,7 @@ import { Button, Label, FormCard, Checkbox, toast } from "@repo/ui";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import { BannerUpload } from "../../components";
 import { CampaignProductPicker, SelectedProduct } from "./CampaignProductPicker";
+import { CampaignSectionsManager, SectionDraft } from "./CampaignSectionsManager";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
 import useCampaign from "@/composable/campaign/useCampaign";
 import campaignHttp from "@/Services/http/campaign.http";
@@ -60,6 +61,23 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
     const [saving, setSaving] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
 
+    // Modo de organização: vitrine plana (simple) ou seções personalizadas.
+    const [mode, setMode] = useState<"simple" | "sections">(
+        initialData?.sections && initialData.sections.length ? "sections" : "simple",
+    );
+    // Hidrata seções do edit: resolve productId -> {id,name,price} via o pool.
+    const [sections, setSections] = useState<SectionDraft[]>(() =>
+        (initialData?.sections ?? []).map((s) => ({
+            id: s.id,
+            title: s.title,
+            type: s.type,
+            products: s.productIds
+                .map((pid) => initialData!.products.find((p) => p.id === pid))
+                .filter((p): p is NonNullable<typeof p> => !!p)
+                .map((p) => ({ id: p.id, name: p.name, price: p.price })),
+        })),
+    );
+
     const titleError = titleBlurred && !title.trim() ? "Campo obrigatório" : "";
     const slugError = slugBlurred && !slug.trim() ? "Campo obrigatório" : "";
 
@@ -95,8 +113,11 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         return () => clearTimeout(t);
     }, [slug, initialData?.slug, initialData?.id]);
 
+    const sectionsValid =
+        mode === "simple" ||
+        (sections.length > 0 && sections.every((s) => s.title.trim()));
     const isValid =
-        !!title.trim() && !!slug.trim() && slugStatus !== "taken";
+        !!title.trim() && !!slug.trim() && slugStatus !== "taken" && sectionsValid;
 
     async function resolveCover(value: string | File | undefined) {
         if (value instanceof File) {
@@ -117,14 +138,31 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 resolveCover(coverMobile),
             ]);
 
-            const payload = {
+            const base = {
                 title: title.trim(),
                 slug: slug.trim(),
                 isActive,
                 coverDesktop: desktopKey ?? "",
                 coverMobile: mobileKey ?? "",
-                productIds: selectedProducts.map((p) => p.id),
             };
+            const payload =
+                mode === "sections"
+                    ? {
+                          ...base,
+                          // backend deriva o pool da união; sections leva a ordem/grupos.
+                          sections: sections.map((s) => ({
+                              id: s.id,
+                              title: s.title.trim(),
+                              type: s.type,
+                              productIds: s.products.map((p) => p.id),
+                          })),
+                      }
+                    : {
+                          ...base,
+                          productIds: selectedProducts.map((p) => p.id),
+                          // null explícito limpa seções ao voltar pro modo simples.
+                          sections: null,
+                      };
 
             if (isEditing) {
                 await updateCampaign(initialData!.id, payload);
@@ -250,25 +288,56 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                     <span className="text-sm text-gray-700">Exibir página no site</span>
                 </label>
 
-                <div className="border-t border-gray-100 pt-4 space-y-2">
-                    <Label className="block text-sm font-semibold text-gray-700">
-                        Produtos da vitrine
-                    </Label>
-                    <p className="text-xs text-gray-400">
-                        Navegue pelo catálogo com filtros, selecione e ordene os produtos.
-                    </p>
-                    <button
-                        type="button"
-                        onClick={() => setPickerOpen(true)}
-                        className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-gray-200 rounded-lg text-sm hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors"
-                    >
-                        <span className="text-gray-700">
-                            {selectedProducts.length > 0
-                                ? `${selectedProducts.length} produto(s) selecionado(s)`
-                                : "Nenhum produto selecionado"}
-                        </span>
-                        <span className="text-[#1A2B3C] font-medium">Gerenciar produtos →</span>
-                    </button>
+                <div className="border-t border-gray-100 pt-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                        <Label className="block text-sm font-semibold text-gray-700">
+                            Produtos da vitrine
+                        </Label>
+                        {/* Toggle: vitrine simples vs seções personalizadas */}
+                        <div className="inline-flex p-0.5 bg-gray-100 rounded-lg text-xs font-medium">
+                            <button
+                                type="button"
+                                onClick={() => setMode("simple")}
+                                className={`px-3 py-1.5 rounded-md transition-colors ${mode === "simple" ? "bg-white text-[#1A2B3C] shadow-sm" : "text-gray-500"}`}
+                            >
+                                Vitrine simples
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMode("sections")}
+                                className={`px-3 py-1.5 rounded-md transition-colors ${mode === "sections" ? "bg-white text-[#1A2B3C] shadow-sm" : "text-gray-500"}`}
+                            >
+                                Seções
+                            </button>
+                        </div>
+                    </div>
+
+                    {mode === "simple" ? (
+                        <>
+                            <p className="text-xs text-gray-400">
+                                Navegue pelo catálogo com filtros, selecione e ordene os produtos.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setPickerOpen(true)}
+                                className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-gray-200 rounded-lg text-sm hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors"
+                            >
+                                <span className="text-gray-700">
+                                    {selectedProducts.length > 0
+                                        ? `${selectedProducts.length} produto(s) selecionado(s)`
+                                        : "Nenhum produto selecionado"}
+                                </span>
+                                <span className="text-[#1A2B3C] font-medium">Gerenciar produtos →</span>
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-xs text-gray-400">
+                                Crie seções nomeadas, escolha os produtos de cada uma e marque uma como Destaques.
+                            </p>
+                            <CampaignSectionsManager value={sections} onChange={setSections} />
+                        </>
+                    )}
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">

@@ -197,6 +197,10 @@ model CampaignPage {
   coverDesktop String? // key do storage (banner desktop)
   coverMobile  String? // key do storage (banner mobile)
   isActive     Boolean @default(true) // inativa => 404 no público
+  // Seções opcionais: [{ id, title, type: "custom"|"highlights", productIds: [] }]
+  // null => vitrine plana (todos os `products` num grid). CampaignProduct segue
+  // sendo o pool resolvido (union dos productIds das seções).
+  sections     Json?
 
   products CampaignProduct[]
 

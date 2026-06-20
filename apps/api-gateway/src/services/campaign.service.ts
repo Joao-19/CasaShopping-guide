@@ -5,10 +5,13 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "./prisma.service";
+import { Prisma } from "@repo/database";
 import {
   CampaignPageDetail,
   CampaignPageListItem,
   CampaignProductView,
+  CampaignSectionDto,
+  CampaignSectionView,
   CreateCampaignPageDto,
   PaginatedResult,
   SlugAvailability,
@@ -69,6 +72,50 @@ export class CampaignService {
     return `${this.STORAGE_PUBLIC_URL}/${cleanKey}`;
   }
 
+  // União dedup (preserva ordem de 1ª aparição) dos productIds das seções.
+  private unionProductIds(sections: CampaignSectionDto[]): string[] {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const s of sections)
+      for (const id of s.productIds)
+        if (!seen.has(id)) {
+          seen.add(id);
+          out.push(id);
+        }
+    return out;
+  }
+
+  // Normaliza p/ armazenamento: [] => null (cai no modo plano).
+  private normalizeSections(
+    sections?: CampaignSectionDto[] | null
+  ): CampaignSectionView[] | null {
+    if (!sections || sections.length === 0) return null;
+    return sections.map((s) => ({
+      id: s.id,
+      title: s.title,
+      type: s.type,
+      productIds: s.productIds,
+    }));
+  }
+
+  // Valor pronto pro Prisma (DbNull p/ limpar o Json? nullable).
+  private sectionsForDb(sections?: CampaignSectionDto[] | null) {
+    const normalized = this.normalizeSections(sections);
+    return normalized === null
+      ? Prisma.DbNull
+      : (normalized as unknown as Prisma.InputJsonValue);
+  }
+
+  // Pool de produtos = união das seções (se houver) ou productIds (modo plano).
+  private poolIds(data: {
+    productIds?: string[];
+    sections?: CampaignSectionDto[] | null;
+  }): string[] {
+    if (data.sections && data.sections.length > 0)
+      return this.unionProductIds(data.sections);
+    return data.productIds ?? [];
+  }
+
   // include reutilizado para montar o detalhe (campanha + produtos ordenados).
   private get detailInclude() {
     return {
@@ -86,6 +133,7 @@ export class CampaignService {
     coverDesktop: string | null;
     coverMobile: string | null;
     isActive: boolean;
+    sections: Prisma.JsonValue;
     createdAt: Date;
     updatedAt: Date;
     products: Array<{
@@ -141,6 +189,18 @@ export class CampaignService {
         : null,
     }));
 
+    // Seções: filtra ids órfãos (produto deletado) contra o pool resolvido.
+    const poolIds = new Set(products.map((p) => p.id));
+    const rawSections =
+      (campaign.sections as unknown as CampaignSectionView[] | null) ?? null;
+    const sections =
+      rawSections && rawSections.length
+        ? rawSections.map((s) => ({
+            ...s,
+            productIds: s.productIds.filter((id) => poolIds.has(id)),
+          }))
+        : null;
+
     return {
       id: campaign.id,
       title: campaign.title,
@@ -149,6 +209,7 @@ export class CampaignService {
       coverMobile: this.transformToUrl(campaign.coverMobile),
       isActive: campaign.isActive,
       products,
+      sections,
       createdAt: campaign.createdAt,
       updatedAt: campaign.updatedAt,
     };
@@ -242,8 +303,9 @@ export class CampaignService {
         coverDesktop: this.extractKey(data.coverDesktop),
         coverMobile: this.extractKey(data.coverMobile),
         isActive: data.isActive ?? true,
+        sections: this.sectionsForDb(data.sections),
         products: {
-          create: (data.productIds ?? []).map((productId, index) => ({
+          create: this.poolIds(data).map((productId, index) => ({
             productId,
             order: index,
           })),
@@ -286,15 +348,19 @@ export class CampaignService {
             coverMobile: this.extractKey(data.coverMobile),
           }),
           ...(data.isActive !== undefined && { isActive: data.isActive }),
+          ...(data.sections !== undefined && {
+            sections: this.sectionsForDb(data.sections),
+          }),
         },
       });
 
-      // Replace dos produtos: a UI envia a lista completa na ordem desejada.
-      if (data.productIds) {
+      // Replace do pool: union das seções (se houver) ou productIds (modo plano).
+      if (data.sections !== undefined || data.productIds !== undefined) {
+        const ids = this.poolIds(data);
         await tx.campaignProduct.deleteMany({ where: { campaignId: id } });
-        if (data.productIds.length > 0) {
+        if (ids.length > 0) {
           await tx.campaignProduct.createMany({
-            data: data.productIds.map((productId, index) => ({
+            data: ids.map((productId, index) => ({
               campaignId: id,
               productId,
               order: index,

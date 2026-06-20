@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { usePopup } from "@repo/ui";
+import { Star } from "lucide-react";
 import { Toolbar } from "../../../components/Toolbar";
 import { Footer } from "../../../components/Footer";
 import { ProductCardSwiper } from "../../../components/ProductCardSwiper";
@@ -59,6 +60,52 @@ export default function CampanhaPage() {
 
     const count = products.length;
     const hasBanner = !!(campaign?.coverDesktop || campaign?.coverMobile);
+
+    // Seções (opcional): resolve productIds -> produtos do pool; descarta vazias.
+    const productMap = new Map(products.map((p) => [p.id, p]));
+    const sectionsResolved = campaign?.sections
+        ? campaign.sections
+              .map((s) => ({
+                  ...s,
+                  items: s.productIds
+                      .map((id) => productMap.get(id))
+                      .filter((p): p is (typeof products)[number] => !!p),
+              }))
+              .filter((s) => s.items.length > 0)
+        : null;
+    const useSections = !!sectionsResolved && sectionsResolved.length > 0;
+
+    // Grid reutilizável (mesmos cards arredondados da vitrine).
+    const renderGrid = (items: typeof products) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-7">
+            {items.map((product, index) => (
+                <div
+                    key={`${product.id}-${index}`}
+                    className="camp-rise h-[372px] group cursor-pointer"
+                    style={{ animationDelay: `${120 + index * 60}ms` }}
+                    onClick={() => handleProductClick(product)}
+                >
+                    <div className="h-full rounded-3xl bg-white p-3 shadow-[0_8px_30px_-14px_rgba(20,42,69,0.22)] group-hover:shadow-[0_20px_44px_-16px_rgba(20,42,69,0.34)] transition-all duration-300 group-hover:-translate-y-1.5">
+                        <ProductCardSwiper
+                            title={product.title}
+                            storeName={product.storeName}
+                            price={product.price}
+                            images={product.images}
+                            isFavorited={isFavorited(product.id)}
+                            onWishlistClick={() => {
+                                if (!user || user.isGuest) {
+                                    showPopup(<LoginRequiredPopup onClose={hidePopup} />);
+                                    return;
+                                }
+                                toggleFavorite(product.id);
+                            }}
+                            className="h-full"
+                        />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 
     return (
         <main className="w-full h-full flex flex-col flex-1 bg-[#eef0f3]">
@@ -151,65 +198,75 @@ export default function CampanhaPage() {
                         {/* Container que "sobe" levemente sobre o hero */}
                         <div className="max-w-7xl mx-auto px-6">
                             <div className="bg-white rounded-t-[28px] md:rounded-t-[36px] -mt-6 md:-mt-10 relative shadow-[0_-12px_40px_-24px_rgba(0,0,0,0.25)] px-6 md:px-10 pt-10 md:pt-12 pb-16">
-                                {/* Cabeçalho da vitrine */}
-                                <div className="flex items-end justify-between gap-4 mb-9 md:mb-11">
-                                    <div>
-                                        <div className="h-[3px] w-12 bg-[#003ba6] rounded-full mb-3" />
-                                        <h2 className="text-2xl md:text-[28px] font-bold text-[#142a45] tracking-tight">
-                                            Produtos da campanha
-                                        </h2>
-                                    </div>
-                                    <span className="shrink-0 text-xs md:text-sm font-medium text-gray-400 tabular-nums pb-1">
-                                        {String(count).padStart(2, "0")}
-                                    </span>
-                                </div>
-
-                                {count === 0 ? (
-                                    <div className="flex flex-col items-center justify-center min-h-[260px] text-center">
-                                        <div className="w-14 h-14 rounded-2xl bg-[#eef2fb] flex items-center justify-center mb-4">
-                                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#003ba6" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg>
-                                        </div>
-                                        <p className="text-lg text-[#142a45] font-semibold font-sans">Vitrine em preparação</p>
-                                        <p className="text-sm text-gray-400 mt-1">Os produtos desta campanha entram em breve.</p>
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-7">
-                                        {products.map((product, index) => (
-                                            <div
-                                                key={`${product.id}-${index}`}
-                                                className="camp-rise h-[372px] group cursor-pointer"
-                                                style={{ animationDelay: `${220 + index * 70}ms` }}
-                                                onClick={() => handleProductClick(product)}
+                                {useSections ? (
+                                    /* ===== Modo seções ===== */
+                                    sectionsResolved!.map((sec) => {
+                                        const isHL = sec.type === "highlights";
+                                        return (
+                                            <section
+                                                key={sec.id}
+                                                className={
+                                                    isHL
+                                                        ? "rounded-3xl bg-gradient-to-br from-[#fff7e8] to-white ring-1 ring-amber-100 p-5 md:p-8 mb-10 last:mb-0"
+                                                        : "mb-12 last:mb-0"
+                                                }
                                             >
-                                                <div className="h-full rounded-3xl bg-white p-3 shadow-[0_8px_30px_-14px_rgba(20,42,69,0.22)] group-hover:shadow-[0_20px_44px_-16px_rgba(20,42,69,0.34)] transition-all duration-300 group-hover:-translate-y-1.5">
-                                                    <ProductCardSwiper
-                                                        title={product.title}
-                                                        storeName={product.storeName}
-                                                        price={product.price}
-                                                        images={product.images}
-                                                        isFavorited={isFavorited(product.id)}
-                                                        onWishlistClick={() => {
-                                                            if (!user || user.isGuest) {
-                                                                showPopup(<LoginRequiredPopup onClose={hidePopup} />);
-                                                                return;
-                                                            }
-                                                            toggleFavorite(product.id);
-                                                        }}
-                                                        className="h-full"
-                                                    />
+                                                <div className="flex items-end justify-between gap-4 mb-7">
+                                                    <div>
+                                                        {isHL ? (
+                                                            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-600 mb-2">
+                                                                <Star size={14} className="fill-amber-400 text-amber-400" /> Destaques
+                                                            </span>
+                                                        ) : (
+                                                            <div className="h-[3px] w-12 bg-[#003ba6] rounded-full mb-3" />
+                                                        )}
+                                                        <h2 className="text-xl md:text-[26px] font-bold text-[#142a45] tracking-tight">
+                                                            {sec.title}
+                                                        </h2>
+                                                    </div>
+                                                    <span className="shrink-0 text-xs md:text-sm font-medium text-gray-400 tabular-nums pb-1">
+                                                        {String(sec.items.length).padStart(2, "0")}
+                                                    </span>
                                                 </div>
+                                                {renderGrid(sec.items)}
+                                            </section>
+                                        );
+                                    })
+                                ) : (
+                                    /* ===== Modo plano (vitrine única) ===== */
+                                    <>
+                                        <div className="flex items-end justify-between gap-4 mb-9 md:mb-11">
+                                            <div>
+                                                <div className="h-[3px] w-12 bg-[#003ba6] rounded-full mb-3" />
+                                                <h2 className="text-2xl md:text-[28px] font-bold text-[#142a45] tracking-tight">
+                                                    Produtos da campanha
+                                                </h2>
                                             </div>
-                                        ))}
-                                    </div>
+                                            <span className="shrink-0 text-xs md:text-sm font-medium text-gray-400 tabular-nums pb-1">
+                                                {String(count).padStart(2, "0")}
+                                            </span>
+                                        </div>
+                                        {count === 0 ? (
+                                            <div className="flex flex-col items-center justify-center min-h-[260px] text-center">
+                                                <div className="w-14 h-14 rounded-2xl bg-[#eef2fb] flex items-center justify-center mb-4">
+                                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#003ba6" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg>
+                                                </div>
+                                                <p className="text-lg text-[#142a45] font-semibold font-sans">Vitrine em preparação</p>
+                                                <p className="text-sm text-gray-400 mt-1">Os produtos desta campanha entram em breve.</p>
+                                            </div>
+                                        ) : (
+                                            renderGrid(products)
+                                        )}
+                                    </>
                                 )}
 
-                                {/* Rodapé da vitrine: voltar ao guia */}
+                                {/* Rodapé: voltar para a home */}
                                 <div className="mt-12 pt-8 border-t border-gray-100 flex justify-center">
                                     <Link
-                                        href="/produtos"
+                                        href="/"
                                         className="inline-flex items-center gap-2 text-sm font-medium text-[#003ba6] hover:gap-3 transition-all"
                                     >
-                                        Ver todos os produtos do guia
+                                        Voltar para a home
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
                                     </Link>
                                 </div>

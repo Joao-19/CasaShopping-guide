@@ -1,11 +1,33 @@
 import {
   IsArray,
   IsBoolean,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
 } from "class-validator";
+import { Type } from "class-transformer";
+
+// Seção opcional de uma campanha. `productIds` referenciam produtos do pool
+// (CampaignProduct). `type: "highlights"` recebe realce visual no público.
+export class CampaignSectionDto {
+  @IsString()
+  @IsNotEmpty()
+  id!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  title!: string;
+
+  @IsIn(["custom", "highlights"])
+  type!: "custom" | "highlights";
+
+  @IsArray()
+  @IsUUID("all", { each: true })
+  productIds!: string[];
+}
 
 // --- Escrita (admin) ---
 // Estratégia de replace: a UI envia a lista completa de productIds na ordem
@@ -35,6 +57,13 @@ export class CreateCampaignPageDto {
   @IsArray()
   @IsUUID("all", { each: true })
   productIds?: string[];
+
+  // Modo seções (opcional). Se ausente/null => vitrine plana via productIds.
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CampaignSectionDto)
+  sections?: CampaignSectionDto[] | null;
 }
 
 export class UpdateCampaignPageDto {
@@ -64,6 +93,13 @@ export class UpdateCampaignPageDto {
   @IsArray()
   @IsUUID("all", { each: true })
   productIds?: string[];
+
+  // null explícito limpa as seções (volta pro modo simples).
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CampaignSectionDto)
+  sections?: CampaignSectionDto[] | null;
 }
 
 // --- Leitura ---
@@ -105,6 +141,14 @@ export interface CampaignPageListItem {
   updatedAt: Date;
 }
 
+// Seção resolvida na leitura (productIds já saneados contra o pool).
+export interface CampaignSectionView {
+  id: string;
+  title: string;
+  type: "custom" | "highlights";
+  productIds: string[];
+}
+
 // Detalhe (admin edita / web renderiza) — com produtos resolvidos.
 export interface CampaignPageDetail {
   id: string;
@@ -114,6 +158,7 @@ export interface CampaignPageDetail {
   coverMobile: string | null; // URL pública
   isActive: boolean;
   products: CampaignProductView[];
+  sections: CampaignSectionView[] | null; // null => vitrine plana
   createdAt: Date;
   updatedAt: Date;
 }
