@@ -158,6 +158,8 @@ export class ProductService {
     category?: string,
     isFeatured?: boolean,
     page: number = 1,
+    price?: string,
+    sort?: string,
   ): Promise<PaginatedResult<Product>> {
     const take = 15;
     const skip = (page - 1) * take;
@@ -175,6 +177,11 @@ export class ProductService {
       where.categories = { has: category };
     }
 
+    // Filtro por faixa de preço (enum PriceTier). Valor inválido é ignorado.
+    if (price && ["LOW", "MEDIUM", "HIGH", "ON_REQUEST"].includes(price)) {
+      where.price = price;
+    }
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
@@ -183,12 +190,21 @@ export class ProductService {
       ];
     }
 
+    // Ordenação: "recent" = adicionados recentemente; padrão = nome (ou
+    // updatedAt quando filtrando destaques, comportamento legado).
+    const orderBy: any =
+      sort === "recent"
+        ? { createdAt: "desc" }
+        : isFeatured
+          ? { updatedAt: "desc" }
+          : { name: "asc" };
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         take,
         skip,
-        orderBy: isFeatured ? { updatedAt: "desc" } : { name: "asc" },
+        orderBy,
         include: {
           images: true,
           store: {

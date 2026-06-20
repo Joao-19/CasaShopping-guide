@@ -48,6 +48,8 @@ export class ProductController {
     @Query("category") category?: string,
     @Query("isFeatured") isFeatured?: string,
     @Query("page") page: string = "1",
+    @Query("price") price?: string,
+    @Query("sort") sort?: string,
   ): Promise<PaginatedResult<Product>> {
     return this.productService.findAll(
       storeId,
@@ -55,6 +57,8 @@ export class ProductController {
       category,
       isFeatured ? isFeatured === "true" : undefined,
       +page,
+      price,
+      sort,
     );
   }
 

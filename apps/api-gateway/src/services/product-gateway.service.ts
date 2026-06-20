@@ -80,14 +80,16 @@ export class ProductGatewayService {
     category?: string,
     isFeatured?: string,
     token?: string,
-    page: number = 1
+    page: number = 1,
+    price?: string,
+    sort?: string
   ): Promise<PaginatedResult<Product>> {
     try {
       const response = await firstValueFrom(
         this.httpService.get<PaginatedResult<Product>>(
           `${this.productsServiceUrl}/products`,
           {
-            params: { storeId, search, category, page, isFeatured },
+            params: { storeId, search, category, page, isFeatured, price, sort },
             headers: {
               Authorization: `Bearer ${token}`,
             },

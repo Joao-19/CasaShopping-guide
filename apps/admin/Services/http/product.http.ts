@@ -13,6 +13,9 @@ export class ProductHttpService {
     page?: number;
     search?: string;
     storeId?: string;
+    category?: string;
+    price?: string;
+    sort?: "recent" | "name";
   }): Promise<PaginatedResult<Product>> {
     const { data } = await http.get<PaginatedResult<Product>>("/products", {
       params,

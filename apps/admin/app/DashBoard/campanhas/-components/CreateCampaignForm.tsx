@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Label, FormCard, Checkbox, toast } from "@repo/ui";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import { BannerUpload } from "../../components";
-import { ProductSelector, SelectedProduct } from "./ProductSelector";
+import { CampaignProductPicker, SelectedProduct } from "./CampaignProductPicker";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
 import useCampaign from "@/composable/campaign/useCampaign";
 import campaignHttp from "@/Services/http/campaign.http";
@@ -58,6 +58,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         "idle" | "checking" | "available" | "taken"
     >("idle");
     const [saving, setSaving] = useState(false);
+    const [pickerOpen, setPickerOpen] = useState(false);
 
     const titleError = titleBlurred && !title.trim() ? "Campo obrigatório" : "";
     const slugError = slugBlurred && !slug.trim() ? "Campo obrigatório" : "";
@@ -157,6 +158,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
             : coverMobile;
 
     return (
+        <>
         <FormCard
             title={isEditing ? "Editar Campanha" : "Nova Campanha"}
             className="max-w-xl w-full md:min-w-[600px] max-h-[85vh] overflow-y-auto"
@@ -253,9 +255,20 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                         Produtos da vitrine
                     </Label>
                     <p className="text-xs text-gray-400">
-                        Busque e adicione produtos; arraste para definir a ordem de exibição.
+                        Navegue pelo catálogo com filtros, selecione e ordene os produtos.
                     </p>
-                    <ProductSelector value={selectedProducts} onChange={setSelectedProducts} />
+                    <button
+                        type="button"
+                        onClick={() => setPickerOpen(true)}
+                        className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-gray-200 rounded-lg text-sm hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors"
+                    >
+                        <span className="text-gray-700">
+                            {selectedProducts.length > 0
+                                ? `${selectedProducts.length} produto(s) selecionado(s)`
+                                : "Nenhum produto selecionado"}
+                        </span>
+                        <span className="text-[#1A2B3C] font-medium">Gerenciar produtos →</span>
+                    </button>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
@@ -268,6 +281,14 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 </div>
             </form>
         </FormCard>
+
+        <CampaignProductPicker
+            open={pickerOpen}
+            value={selectedProducts}
+            onChange={setSelectedProducts}
+            onClose={() => setPickerOpen(false)}
+        />
+        </>
     );
 }
 
