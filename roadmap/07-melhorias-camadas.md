@@ -38,7 +38,7 @@
 |---|---|---|
 | 5 | **B6** Responsividade do produto + "ler mais" | ⬜ a fazer |
 | 6 | **B7** Preview WhatsApp (Open Graph) + link de compartilhar | ⬜ a fazer |
-| 7 | **B11** Campanha: seletor de produtos rico (tabs + filtros) | ⬜ a fazer |
+| 7 | **B11** Campanha: seletor de produtos rico (tabs + filtros) | ✅ `c6721f8` (price/recent: restart do gateway) |
 | 8 | **B5** Redesign do bloco da loja no modal | 🔒 aguardando Figma/visual do Felipe |
 
 > Branch `feat/melhorias-camadas` (base `dev`). Pendente: merge/push (exige OK do dono).
@@ -69,15 +69,21 @@ client p/ interatividade) **e** garantir que o `ShareButton`/menu compartilhe es
 link. Validar com o "link preview" (inspecionar as meta tags no HTML).
 
 ### B11 — Campanha: seletor de produtos rico (tela com tabs + filtros)
-**Risco:** médio · **Status: ⬜ a fazer (pedido 2026-06-20).**
-O `ProductSelector` atual (busca + dropdown dentro do modal do form) ficou
-**pobre/apertado** junto do modal principal. Pedido: **uma tela dedicada usando
-tabs** para navegar/selecionar produtos, com **filtros**: adicionados
-recentemente, busca, por loja, por categoria e por preço.
-**A definir (ver perguntas ao dono):** tela dedicada (rota/full-screen) vs
-drawer/modal cheio; o que as tabs representam. **Reusa:** `productHttp.list`
-(busca/paginação), filtros já suportados na API (`storeId`, `category`, `search`,
-faixa de preço = enum `PriceTier`), padrão de seleção/ordenação do `ProductSelector`.
+**Risco:** médio · **Status: ✅ CONCLUÍDA** (2026-06-20, commit `c6721f8`) ·
+**⚠️ price/recent só end-to-end após restart do gateway.**
+Substituído o `ProductSelector` inline (apertado no modal) por `CampaignProductPicker`
+— drawer full-screen (z-60) com **tabs Catálogo | Selecionados(N)**, filtros
+(busca, loja, categoria, preço, toggle "adicionados recentemente"), grade com
+toggle add/remove + "carregar mais" (`useInfiniteQuery`), aba Selecionados com
+reorder dnd-kit, footer Concluir. Form: botão "Gerenciar produtos" abre o drawer.
+**Backend:** products `findAll` ganhou filtro `price` (PriceTier) + `sort=recent`
+(createdAt desc) — products-service + gateway + admin http.
+**Validado e2e (Playwright):** drawer/tabs/seleção/contador/reorder/Concluir OK,
+visual conferido por screenshot, 0 erros console. Backend price/recent confirmado
+por curl direto no products-service (:3006). **Pendente:** o gateway (`nest start`
+sem `--watch`) não repassa `price`/`sort` até reiniciar — busca/loja/categoria já
+funcionam via gateway. **Dívida:** `CampaignProductPicker.tsx` (~351 linhas) >
+alvo 300 — candidato a decompor.
 
 ### B5 — Redesign do bloco da loja no modal do produto
 **Risco:** baixo · **Status: 🔒 BLOQUEADO — aguardando o Felipe entregar o visual novo (Figma).**
