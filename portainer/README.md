@@ -102,10 +102,14 @@ aparecem em **GitHub > repo > Packages**.
    - a rede do **banco**, definida em `DB_NETWORK_NAME` (padrão
      `infra-network`) — onde o container `postgres` já roda.
    Confirme os nomes com `docker network ls`.
-3. **Banco de dados:** a stack **não sobe postgres** — ela reutiliza o seu
-   banco existente. Preencha `DATABASE_URL` (e `DIRECT_URL`) apontando para o
-   host `postgres` (ex.: `postgres://user:pass@postgres:5432/meubanco`). Os
-   serviços alcançam o `postgres` pela rede `DB_NETWORK_NAME`.
+3. **Banco de dados (sem SQL manual):** a stack **não sobe postgres** — ela
+   reutiliza o banco que **já existe** na infra usando um **schema próprio**.
+   Aponte `DATABASE_URL`/`DIRECT_URL` para o banco existente + `?schema=casashopping`,
+   ex.: `postgres://user:pass@postgres:5432/weplanner_test?schema=casashopping`
+   (use o nome do `POSTGRES_DB` da infra, **não** um banco novo). O
+   `prisma migrate deploy` cria o schema `casashopping` automaticamente — não
+   precisa rodar `CREATE DATABASE`/`CREATE SCHEMA`. Não colide com o weplanner
+   (que usa o schema `public` no mesmo banco).
 4. **Stacks > Add stack**:
    - **Build method:** *Repository* (Git) — aponte para este repo e o
      caminho do compose do ambiente:
