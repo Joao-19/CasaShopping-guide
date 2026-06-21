@@ -1,54 +1,40 @@
 # ============================================================================
-# CasaShopping — Stack PROD para PORTAINER (canal :prod no GHCR)
+# CasaShopping — Stack PROD para PORTAINER (atras do NGINX CENTRAL)
 # ============================================================================
-# Use este arquivo na stack de PRODUCAO do Portainer.
+# Roda no MESMO servidor/nginx do WePlanner-Infra. O casashopping NAO tem
+# nginx proprio nem publica portas no host: quem faz a borda (80/443 + SSL) e
+# o nginx central, que alcanca os serviços pela rede externa `web-proxy`.
+#
 # Default da versao: TAG=prod (imagens do push em `main`).
 #
 # ESQUEMA DE TAGS (para o Portainer nao se perder):
 #   - Flutuante : :prod -> a stack puxa esta (pull_policy: always); "Pull and
 #                          redeploy" sempre traz a ultima build do canal prod.
 #   - Imutavel  : :prod-AAAAMMDD-HHMM-<sha7> -> ROLLBACK: defina TAG=prod-...
-#                          nas variaveis da stack e redeploy.
 #
-# ESPELHO FIEL do docker-compose.yml da raiz (o que roda em producao hoje).
-# Mantem: nomes de servico/container, blocos environment, healthchecks,
-# portas e labels.
+# TOPOLOGIA (diferenças vs docker-compose.yml da raiz):
+#   1. image: -> GHCR + ${TAG}        (em vez de joaovvv/*:latest no Docker Hub)
+#   2. pull_policy: always            (para o "Pull and redeploy" re-puxar)
+#   3. SEM blocos build:              (Portainer consome imagem pronta do GHCR)
+#   4. SEM servico watchtower          (redeploy e MANUAL)
+#   5. SEM mount ./.env:/app/.env      (env vem das variaveis da stack)
+#   6. SEM postgres embutido           (banco EXTERNO via DATABASE_URL/DIRECT_URL
+#      na rede ${DB_NETWORK_NAME:-infra-network})
+#   7. SEM nginx-proxy proprio         (a borda e o nginx central do WePlanner)
+#   8. SEM ports: publicadas no host   (tudo so na rede docker; evita colidir
+#      com o nginx central / portas do weplanner)
 #
-# Unicas diferencas (estritamente necessarias para o Portainer):
-#   1. image: -> GHCR + ${TAG}   (em vez de joaovvv/*:latest no Docker Hub)
-#   2. pull_policy: always        (para o "Pull and redeploy" manual re-puxar)
-#   3. SEM blocos build:          (Portainer consome imagem pronta do GHCR)
-#   4. SEM servico watchtower      (redeploy e MANUAL; auto-update brigaria)
-#   5. SEM mount ./.env:/app/.env  (no Portainer o env vem das variaveis da
-#      stack; os blocos environment abaixo ja trazem tudo)
-#   6. SEM postgres embutido       (reutiliza banco EXTERNO ja existente:
-#      DATABASE_URL/DIRECT_URL apontam pro host `postgres`, alcancado pela
-#      rede externa ${DB_NETWORK_NAME:-infra-network})
-#
-# Isolamento: registry GHCR + tags :dev/:prod. O Watchtower de producao so
-# vigia joaovvv/casashopping-*:latest no Docker Hub -> nunca ve estas imagens.
+# O nginx central roteia (config no WePlanner-Infra, repo separado):
+#   /        -> casashopping-web:3001
+#   /api     -> casashopping-gateway:3000
+#   /admin   -> casashopping-admin:3002
+#   /minio/  -> casashopping-storage:9000   (leitura publica de imagens)
 #
 # Variaveis: defina na UI do Portainer (ver portainer/.env.example).
-# A chave que escolhe a versao e TAG (dev ou prod).
 # ============================================================================
 version: "3.8"
 
 services:
-  nginx-proxy:
-    image: nginx:alpine
-    container_name: nginx-proxy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    volumes:
-      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - api-gateway
-      - web
-      - admin
-    networks:
-      - web-proxy
-
   # --- MIGRATION (AUTO-INIT) ---
   db-migration:
     image: ghcr.io/joao-19/casashopping-migration:${TAG:-prod}
@@ -62,14 +48,11 @@ services:
       - casashopping-net
       - db-net
 
-  # --- STORAGE ---
+  # --- STORAGE (MinIO) ---
   storage:
     image: minio/minio:latest
     container_name: casashopping-storage
     restart: unless-stopped
-    ports:
-      - "9000:9000"
-      - "9001:9001"
     environment:
       MINIO_ROOT_USER: ${STORAGE_USER:-admin}
       MINIO_ROOT_PASSWORD: ${STORAGE_PASSWORD:-password123}
@@ -91,8 +74,6 @@ services:
     pull_policy: always
     container_name: casashopping-gateway
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       - PORT=3000
       - DATABASE_URL=${DATABASE_URL}
@@ -141,8 +122,6 @@ services:
     pull_policy: always
     container_name: casashopping-auth
     restart: unless-stopped
-    ports:
-      - "3003:3003"
     environment:
       - PORT=3003
       - DATABASE_URL=${DATABASE_URL}
@@ -176,8 +155,6 @@ services:
     pull_policy: always
     container_name: casashopping-users
     restart: unless-stopped
-    ports:
-      - "3004:3004"
     environment:
       - PORT=3004
       - DATABASE_URL=${DATABASE_URL}
@@ -205,8 +182,6 @@ services:
     pull_policy: always
     container_name: casashopping-storage-service
     restart: unless-stopped
-    ports:
-      - "3007:3007"
     environment:
       - PORT=3007
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
@@ -237,8 +212,6 @@ services:
     pull_policy: always
     container_name: casashopping-web
     restart: unless-stopped
-    ports:
-      - "3001:3001"
     environment:
       - PORT=3001
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
@@ -262,8 +235,6 @@ services:
     pull_policy: always
     container_name: casashopping-admin
     restart: unless-stopped
-    ports:
-      - "3002:3002"
     environment:
       - PORT=3002
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
@@ -286,8 +257,6 @@ services:
     pull_policy: always
     container_name: casashopping-stores
     restart: unless-stopped
-    ports:
-      - "3005:3005"
     environment:
       - PORT=3005
       - DATABASE_URL=${DATABASE_URL}
@@ -320,8 +289,6 @@ services:
     pull_policy: always
     container_name: casashopping-products
     restart: unless-stopped
-    ports:
-      - "3006:3006"
     environment:
       - PORT=3006
       - DATABASE_URL=${DATABASE_URL}

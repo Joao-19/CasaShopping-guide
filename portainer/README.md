@@ -60,6 +60,24 @@ Cada serviço recebe **duas** tags por publicação:
 
 Serviços: `api-gateway, auth, users, stores, products, storage, migration, web, admin`.
 
+## Topologia: atrás do nginx central
+
+As stacks rodam no **mesmo servidor que o WePlanner** e **não têm nginx
+próprio nem publicam portas** no host. Quem faz a borda (80/443 + SSL) é o
+**nginx central** (WePlanner-Infra), que alcança os serviços pela rede
+`web-proxy`:
+
+```
+/        -> casashopping-web:3001
+/api     -> casashopping-gateway:3000
+/admin   -> casashopping-admin:3002
+/minio/  -> casashopping-storage:9000   (leitura pública de imagens)
+```
+
+Esse roteamento precisa existir na config do nginx central (repo
+WePlanner-Infra). Os arquivos `default.conf` e `manutencao.html` desta pasta
+são **referência** — não são montados por estas stacks.
+
 ## Pré-requisitos no GitHub
 
 Nenhum secret a configurar — os workflows usam o `GITHUB_TOKEN` automático
@@ -77,13 +95,13 @@ aparecem em **GitHub > repo > Packages**.
 1. **Registries** (só se os pacotes forem privados): Registries > Add
    registry > Custom > URL `ghcr.io`, usuário = seu login GitHub, senha =
    PAT com `read:packages`.
-2. **Redes externas** (uma vez por host): a stack usa **duas** redes externas:
-   - `web-proxy` (igual ao compose de produção). Se não existir:
-     `docker network create web-proxy`
-   - a rede do **banco existente**, definida em `DB_NETWORK_NAME`
-     (padrão `infra-network`) — é onde o container `postgres` já roda. Ela
-     normalmente **já existe** (é a rede da sua infra). Confirme o nome com
-     `docker network ls`.
+2. **Redes externas** (já devem existir na sua infra): a stack usa **duas**
+   redes externas, compartilhadas com o WePlanner:
+   - `web-proxy` — rede do **nginx central**; por ela o nginx alcança
+     `web`/`admin`/`gateway`/`storage` por nome.
+   - a rede do **banco**, definida em `DB_NETWORK_NAME` (padrão
+     `infra-network`) — onde o container `postgres` já roda.
+   Confirme os nomes com `docker network ls`.
 3. **Banco de dados:** a stack **não sobe postgres** — ela reutiliza o seu
    banco existente. Preencha `DATABASE_URL` (e `DIRECT_URL`) apontando para o
    host `postgres` (ex.: `postgres://user:pass@postgres:5432/meubanco`). Os
@@ -94,9 +112,10 @@ aparecem em **GitHub > repo > Packages**.
      - DEV → `portainer/docker-compose.dev.yml`
      - PROD → `portainer/docker-compose.prod.yml`
 
-     O método Git resolve o `./default.conf` ao lado pelo mount relativo.
-     - Alternativa: *Web editor* colando o conteúdo do compose **+** subir
-       o `default.conf` como arquivo/volume, ou usar um proxy próprio.
+     - Alternativa: *Web editor* colando o conteúdo do compose.
+
+     Esta stack **não tem nginx próprio** — a borda é o nginx central. Não há
+     `default.conf` a montar aqui.
    - **Environment variables:** preencha conforme `portainer/.env.example`.
      Não precisa setar `TAG` — cada compose já fixa o canal do seu ambiente
      (`dev` ou `prod`). Só use `TAG` para fixar uma imutável (rollback).
@@ -105,13 +124,13 @@ aparecem em **GitHub > repo > Packages**.
 Crie **duas stacks** — uma com `docker-compose.dev.yml` e outra com
 `docker-compose.prod.yml` — se quiser os dois ambientes no mesmo Portainer.
 
-> **Fidelidade ao compose de produção:** os `portainer/docker-compose.*.yml`
-> são espelho do `docker-compose.yml` da raiz (mesmos nomes de container,
-> `environment`, healthchecks e portas). As únicas diferenças são as 6
-> listadas no cabeçalho do arquivo: imagens via GHCR `${TAG}`,
-> `pull_policy: always`, sem `build:`, sem `watchtower`, sem mount `./.env`
-> (o env vem das variáveis da stack) e **sem postgres embutido** (reutiliza o
-> banco externo via `DATABASE_URL`/`DIRECT_URL` na rede `DB_NETWORK_NAME`).
+> **Relação com o compose de produção:** os `portainer/docker-compose.*.yml`
+> herdam do `docker-compose.yml` da raiz os mesmos nomes de container,
+> `environment` e healthchecks. As diferenças (todas no cabeçalho de cada
+> arquivo) adaptam a stack para rodar **atrás do nginx central** e com **banco
+> externo**: imagens via GHCR `${TAG}`, `pull_policy: always`, sem `build:`,
+> sem `watchtower`, sem mount `./.env`, **sem postgres embutido**, **sem nginx
+> próprio** e **sem portas publicadas** no host.
 
 ## Atualizar para uma versão nova
 
@@ -143,9 +162,9 @@ runtime). A **única** coisa assada no build é o `basePath` do Next:
 - `web` é buildado na **raiz** (`BASE_PATH=`)
 - `admin` é buildado em **`/admin`**
 
-Isso casa com o `default.conf` desta pasta (`/` → web, `/admin` → admin). Se
-a TI quiser outro roteamento, ajuste tanto o `buildArgs` no workflow quanto o
-`default.conf`.
+Isso deve casar com o roteamento do **nginx central** (`/` → web, `/admin` →
+admin). Para outro roteamento, ajuste tanto o `buildArgs` no workflow quanto a
+config do nginx central (WePlanner-Infra).
 
 ## O que este pipeline NÃO toca
 
