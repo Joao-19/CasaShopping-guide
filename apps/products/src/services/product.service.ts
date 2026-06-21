@@ -115,9 +115,14 @@ export class ProductService {
     const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
     const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
 
-    let baseUrl = publicEndpoint
-      ? `${publicEndpoint}/${bucketName}`
-      : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+    // STORAGE_URL e a base de LEITURA publica (MinIO: endpoint/bucket; R2:
+    // dominio publico pub-*.r2.dev). MINIO_PUBLIC_ENDPOINT e o endpoint S3 de
+    // UPLOAD (privado no R2) — so serve de fallback se STORAGE_URL faltar.
+    let baseUrl =
+      process.env.STORAGE_URL ||
+      (publicEndpoint
+        ? `${publicEndpoint}/${bucketName}`
+        : "http://localhost:9000/casashopping");
 
     const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 
