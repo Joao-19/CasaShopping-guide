@@ -13,6 +13,7 @@
     "@nestjs/core": "^11.1.9",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.9",
+    "@repo/auth-guard": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/dtos": "workspace:*",
     "@repo/typescript-config": "workspace:*",
