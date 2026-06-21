@@ -47,18 +47,28 @@ aparecem em **GitHub > repo > Packages**.
 1. **Registries** (só se os pacotes forem privados): Registries > Add
    registry > Custom > URL `ghcr.io`, usuário = seu login GitHub, senha =
    PAT com `read:packages`.
-2. **Stacks > Add stack**:
+2. **Rede externa** (uma vez por host): o stack usa a rede externa
+   `web-proxy` (igual ao compose de produção). Crie-a antes:
+   `docker network create web-proxy`
+3. **Stacks > Add stack**:
    - **Build method:** *Repository* (Git) — aponte para este repo e o
-     caminho `portainer/docker-compose.yml`. (O método Git faz o
-     `nginx.conf` ao lado ser resolvido pelo mount relativo.)
+     caminho `portainer/docker-compose.yml`. O método Git resolve o
+     `./default.conf` ao lado pelo mount relativo.
      - Alternativa: *Web editor* colando o conteúdo do compose **+** subir
-       o `nginx.conf` como arquivo/volume, ou usar um proxy próprio.
+       o `default.conf` como arquivo/volume, ou usar um proxy próprio.
    - **Environment variables:** preencha conforme `portainer/.env.example`.
      A chave que escolhe a versão é **`TAG`** (`dev` ou `stable`).
-3. **Deploy the stack.**
+4. **Deploy the stack.**
 
 Crie **duas stacks** (uma com `TAG=dev`, outra com `TAG=stable`) se quiser
 os dois ambientes no mesmo Portainer.
+
+> **Fidelidade ao compose de produção:** o `portainer/docker-compose.yml` é
+> espelho do `docker-compose.yml` da raiz (mesmos nomes de container, redes,
+> `environment`, healthchecks e portas). As únicas diferenças são as 5
+> listadas no cabeçalho do arquivo: imagens via GHCR `${TAG}`,
+> `pull_policy: always`, sem `build:`, sem `watchtower` e sem mount `./.env`
+> (o env vem das variáveis da stack).
 
 ## Atualizar para uma versão nova
 
