@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Já estamos voltando · Guia de Compras CasaShopping</title>
+  <style>
+    :root {
+      /* Cores da marca (apps/web globals.css) */
+      --brand:       #003ba6;  /* primary */
+      --brand-light: #0059b3;  /* primary-light */
+      --brand-deep:  #01265f;  /* azul profundo dos gradientes do site */
+      --brand-navy:  #162e47;
+      --accent:      #5b9bd5;  /* azul clareado p/ destaque sobre fundo escuro */
+      --cream:       #f3f6fb;  /* branco frio p/ texto */
+      --muted:       rgba(243, 246, 251, 0.80);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      min-height: 100dvh;
+      font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      color: var(--cream);
+      /* Fallback: gradiente azul da marca caso a imagem nao carregue */
+      background:
+        radial-gradient(120% 120% at 80% 70%, rgba(0, 89, 179, 0.40), transparent 60%),
+        linear-gradient(135deg, var(--brand-deep) 0%, #0a2f6b 45%, var(--brand) 100%);
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Imagem de fundo (drope manutencao-bg.jpg nesta pasta) */
+    .bg {
+      position: absolute;
+      inset: 0;
+      background-image: url("magnific_cinematic-wideangle-photo_YVPyuJiWeC.png");
+      background-size: cover;
+      background-position: center right;
+      z-index: 0;
+      animation: slow-zoom 28s ease-in-out infinite alternate;
+    }
+
+    @keyframes slow-zoom {
+      from { transform: scale(1); }
+      to   { transform: scale(1.08); }
+    }
+
+    /* Veu escuro pra garantir contraste do texto a esquerda */
+    .scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      /* Veu na cor navy da marca (#01265f) p/ casar com o tema do site */
+      background:
+        linear-gradient(100deg,
+          rgba(1, 20, 45, 0.90) 0%,
+          rgba(1, 25, 55, 0.66) 38%,
+          rgba(1, 25, 55, 0.18) 70%,
+          rgba(1, 25, 55, 0.06) 100%);
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: clamp(28px, 6vw, 80px);
+    }
+
+    .card {
+      max-width: 620px;
+      animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(246, 239, 230, 0.1);
+      border: 1px solid rgba(246, 239, 230, 0.22);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(91, 155, 213, 0.7);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(91, 155, 213, 0.55); }
+      70%  { box-shadow: 0 0 0 12px rgba(91, 155, 213, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(91, 155, 213, 0); }
+    }
+
+    h1 {
+      margin: 26px 0 0;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      line-height: 1.04;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    h1 .accent {
+      color: var(--accent);
+    }
+
+    p.lead {
+      margin: 22px 0 0;
+      font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+      line-height: 1.55;
+      color: var(--muted);
+      max-width: 30ch;
+      text-shadow: 0 1px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .progress {
+      margin-top: 38px;
+      height: 6px;
+      width: min(320px, 80%);
+      border-radius: 999px;
+      background: rgba(246, 239, 230, 0.16);
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 40%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--brand-light));
+      animation: sweep 1.8s ease-in-out infinite;
+    }
+
+    @keyframes sweep {
+      0%   { transform: translateX(-110%); }
+      100% { transform: translateX(320%); }
+    }
+
+    .footer {
+      margin-top: 44px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px 22px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: var(--cream);
+    }
+
+    .brand .mark {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-light));
+      color: #fff;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(246, 239, 230, 0.25);
+    }
+
+    @media (max-width: 520px) {
+      .scrim {
+        background: linear-gradient(180deg,
+          rgba(1, 20, 45, 0.50) 0%,
+          rgba(1, 20, 45, 0.86) 100%);
+      }
+      .footer { gap: 12px; }
+      .sep { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bg, .progress span, .dot, .card { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" role="img" aria-label="Loja se preparando para abrir"></div>
+  <div class="scrim"></div>
+
+  <main class="wrap">
+    <div class="card">
+      <span class="badge"><span class="dot"></span>Em manutenção</span>
+
+      <h1>Estamos arrumando<br /><span class="accent">a loja pra você.</span></h1>
+
+      <p class="lead">
+        Voltamos rapidinho. Estamos preparando tudo para te receber
+        com a melhor experiência. Obrigado pela paciência!
+      </p>
+
+      <div class="progress" aria-hidden="true"><span></span></div>
+
+      <div class="footer">
+        <span class="brand">
+          <span class="mark">C</span>
+          Guia de Compras CasaShopping
+        </span>
+        <span class="sep"></span>
+        <span>Já já voltamos ao ar ✨</span>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
