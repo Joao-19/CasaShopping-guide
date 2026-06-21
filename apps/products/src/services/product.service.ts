@@ -214,6 +214,7 @@ export class ProductService {
           images: true,
           store: {
             select: {
+              slug: true,
               name: true,
               logoImage: true,
               address: true,
@@ -251,6 +252,7 @@ export class ProductService {
         images: true,
         store: {
           select: {
+            slug: true,
             name: true,
             logoImage: true,
             address: true,
@@ -450,6 +452,7 @@ export class ProductService {
           images: true,
           store: {
             select: {
+              slug: true,
               name: true,
               logoImage: true,
               address: true,

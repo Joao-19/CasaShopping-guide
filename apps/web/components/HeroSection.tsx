@@ -100,6 +100,7 @@ export function HeroSection() {
             id: product.id,
             title: product.name,
             storeName: product.store?.name || "Loja",
+            storeSlug: product.store?.slug ?? undefined,
             price: product.price,
             description: product.description,
             images: product.images?.sort((a: any, b: any) => a.index - b.index)

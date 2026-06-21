@@ -84,6 +84,7 @@ export default function LojaPage() {
         id: p.id,
         title: p.name,
         storeName: p.store?.name || store?.name || "Loja",
+        storeSlug: p.store?.slug ?? store?.slug ?? undefined,
         price: p.price,
         description: p.description,
         categories: (p.categories as string[]) ?? [],
