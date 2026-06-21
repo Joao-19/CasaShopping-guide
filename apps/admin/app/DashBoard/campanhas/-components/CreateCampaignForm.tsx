@@ -59,8 +59,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         "idle" | "checking" | "available" | "taken"
     >("idle");
     const [saving, setSaving] = useState(false);
-    const [pickerOpen, setPickerOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<"campanha" | "vitrines">("campanha");
+    const [activeTab, setActiveTab] = useState<"campanha" | "produtos" | "vitrines">("campanha");
 
     // Hidrata seções do edit: resolve productId -> {id,name,price} via o pool.
     const [sections, setSections] = useState<SectionDraft[]>(() =>
@@ -202,7 +201,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         <>
         <FormCard
             title={isEditing ? "Editar Campanha" : "Nova Campanha"}
-            className="max-w-xl w-full md:min-w-[600px] max-h-[85vh] overflow-y-auto"
+            className="max-w-3xl w-full max-h-[90vh] overflow-hidden"
             headerAction={
                 <button
                     type="button"
@@ -214,10 +213,11 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
             }
         >
             <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Abas: Campanha | Vitrines */}
+                {/* Abas: Campanha | Produtos | Vitrines */}
                 <div className="flex gap-1 border-b border-gray-100">
                     {([
                         { id: "campanha", label: "Campanha" },
+                        { id: "produtos", label: `Produtos${selectedProducts.length ? ` (${selectedProducts.length})` : ""}` },
                         { id: "vitrines", label: `Vitrines${sections.length ? ` (${sections.length})` : ""}` },
                     ] as const).map((t) => (
                         <button
@@ -232,10 +232,10 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 </div>
 
                 {/* Altura fixa: troca de aba não muda o tamanho do modal. */}
-                <div className="h-[440px] overflow-y-auto pr-1 -mr-1">
+                <div className="h-[58vh] min-h-0">
                 {/* ===== Aba Campanha ===== */}
                 {activeTab === "campanha" && (
-                    <div className="space-y-5">
+                    <div className="h-full overflow-y-auto pr-1 -mr-1 space-y-5">
                         <div>
                             <Label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Título <span className="text-red-500">*</span>
@@ -315,43 +315,23 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                     </div>
                 )}
 
-                {/* ===== Aba Vitrines (vitrine simples + seções) ===== */}
-                {activeTab === "vitrines" && (
-                    <div className="space-y-5">
-                        {/* Vitrine simples: um grid único de produtos */}
-                        <div className="space-y-2">
-                            <Label className="block text-sm font-semibold text-gray-700">
-                                Vitrine simples
-                            </Label>
-                            <p className="text-xs text-gray-400">
-                                Produtos num grid único.
-                                {sections.length > 0 && " Ignorada enquanto houver seções abaixo."}
-                            </p>
-                            <button
-                                type="button"
-                                onClick={() => setPickerOpen(true)}
-                                className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-gray-200 rounded-lg text-sm hover:border-[#1A2B3C] hover:bg-gray-50 transition-colors"
-                            >
-                                <span className="text-gray-700">
-                                    {selectedProducts.length > 0
-                                        ? `${selectedProducts.length} produto(s) selecionado(s)`
-                                        : "Nenhum produto selecionado"}
-                                </span>
-                                <span className="text-[#1A2B3C] font-medium">Gerenciar produtos →</span>
-                            </button>
-                        </div>
+                {/* ===== Aba Produtos (seletor embutido direto na tela) ===== */}
+                {activeTab === "produtos" && (
+                    <CampaignProductPicker
+                        inline
+                        value={selectedProducts}
+                        onChange={setSelectedProducts}
+                    />
+                )}
 
-                        {/* Seções: vitrines temáticas que substituem a simples */}
-                        <div className="border-t border-gray-100 pt-4 space-y-2">
-                            <Label className="block text-sm font-semibold text-gray-700">
-                                Seções temáticas
-                            </Label>
-                            <p className="text-xs text-gray-400">
-                                Organize em seções nomeadas e marque uma como Destaques. Se houver
-                                seções, elas substituem a vitrine simples acima.
-                            </p>
-                            <CampaignSectionsManager value={sections} onChange={setSections} />
-                        </div>
+                {/* ===== Aba Vitrines (seções temáticas) ===== */}
+                {activeTab === "vitrines" && (
+                    <div className="h-full overflow-y-auto pr-1 -mr-1 space-y-2">
+                        <p className="text-xs text-gray-400">
+                            Organize os produtos em seções nomeadas e marque uma como Destaques.
+                            Se houver seções, elas substituem a vitrine simples (aba Produtos).
+                        </p>
+                        <CampaignSectionsManager value={sections} onChange={setSections} />
                     </div>
                 )}
                 </div>
@@ -366,13 +346,6 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 </div>
             </form>
         </FormCard>
-
-        <CampaignProductPicker
-            open={pickerOpen}
-            value={selectedProducts}
-            onChange={setSelectedProducts}
-            onClose={() => setPickerOpen(false)}
-        />
         </>
     );
 }

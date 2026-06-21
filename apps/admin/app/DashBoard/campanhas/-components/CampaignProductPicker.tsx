@@ -51,10 +51,12 @@ const priceLabel = (p: string) =>
     p === "ON_REQUEST" ? "Sem Valor" : formatPriceTier(p);
 
 interface CampaignProductPickerProps {
-    open: boolean;
+    open?: boolean;
     value: SelectedProduct[];
     onChange: (value: SelectedProduct[]) => void;
-    onClose: () => void;
+    onClose?: () => void;
+    // Embutido direto na tela (sem overlay/header/footer) — ex.: aba Produtos.
+    inline?: boolean;
 }
 
 // Linha arrastável de um produto selecionado (ordem = posição na vitrine).
@@ -115,7 +117,9 @@ export function CampaignProductPicker({
     value,
     onChange,
     onClose,
+    inline = false,
 }: CampaignProductPickerProps) {
+    const pickerActive = inline || open;
     const [tab, setTab] = useState<"catalog" | "selected">("catalog");
     // Filtros do catálogo
     const [search, setSearch] = useState("");
@@ -139,7 +143,7 @@ export function CampaignProductPicker({
     const { data: storesResp } = useQuery({
         queryKey: ["picker-stores"],
         queryFn: () => storeHttp.list({ page: 1, limit: 25 }),
-        enabled: open,
+        enabled: pickerActive,
     });
 
     const {
@@ -162,7 +166,7 @@ export function CampaignProductPicker({
         getNextPageParam: (last) =>
             last.meta.page < last.meta.lastPage ? last.meta.page + 1 : undefined,
         initialPageParam: 1,
-        enabled: open,
+        enabled: pickerActive,
     });
 
     const products = data?.pages.flatMap((p) => p.data) || [];
@@ -185,40 +189,30 @@ export function CampaignProductPicker({
         }
     }
 
-    if (!open) return null;
-
     const selectClass =
         "px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#1A2B3C]";
 
-    return (
-        <div className="fixed inset-0 z-[60] bg-black/40 flex justify-center items-stretch">
-            <div className="bg-[#f7f8fa] w-full max-w-5xl h-full flex flex-col shadow-2xl">
-                {/* Header + tabs */}
-                <div className="bg-white border-b border-gray-200 px-6 pt-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-lg font-bold text-[#1A2B3C]">Selecionar produtos</h2>
-                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" title="Fechar">
-                            <X size={22} />
-                        </button>
-                    </div>
-                    <div className="flex gap-1">
-                        <button
-                            onClick={() => setTab("catalog")}
-                            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === "catalog" ? "border-[#1A2B3C] text-[#1A2B3C]" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-                        >
-                            Catálogo
-                        </button>
-                        <button
-                            onClick={() => setTab("selected")}
-                            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === "selected" ? "border-[#1A2B3C] text-[#1A2B3C]" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-                        >
-                            Selecionados ({value.length})
-                        </button>
-                    </div>
-                </div>
+    const tabBar = (
+        <div className="flex gap-1">
+            <button
+                type="button"
+                onClick={() => setTab("catalog")}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === "catalog" ? "border-[#1A2B3C] text-[#1A2B3C]" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            >
+                Catálogo
+            </button>
+            <button
+                type="button"
+                onClick={() => setTab("selected")}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === "selected" ? "border-[#1A2B3C] text-[#1A2B3C]" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            >
+                Selecionados ({value.length})
+            </button>
+        </div>
+    );
 
-                {/* Conteúdo */}
-                <div className="flex-1 overflow-y-auto p-6">
+    const content = (
+        <div className="flex-1 overflow-y-auto p-4 md:p-5 min-h-0">
                     {tab === "catalog" ? (
                         <>
                             {/* Barra de filtros */}
@@ -330,8 +324,34 @@ export function CampaignProductPicker({
                         </DndContext>
                     )}
                 </div>
+    );
 
-                {/* Footer */}
+    // Embutido (ex.: aba Produtos): sem overlay/header/footer, preenche o pai.
+    if (inline) {
+        return (
+            <div className="flex flex-col h-full min-h-0 bg-[#f7f8fa] rounded-xl border border-gray-200 overflow-hidden">
+                <div className="bg-white border-b border-gray-200 px-4 pt-2">{tabBar}</div>
+                {content}
+            </div>
+        );
+    }
+
+    if (!open) return null;
+
+    // Drawer full-screen (ex.: por seção, nas Vitrines).
+    return (
+        <div className="fixed inset-0 z-[60] bg-black/40 flex justify-center items-stretch">
+            <div className="bg-[#f7f8fa] w-full max-w-5xl h-full flex flex-col shadow-2xl">
+                <div className="bg-white border-b border-gray-200 px-6 pt-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-lg font-bold text-[#1A2B3C]">Selecionar produtos</h2>
+                        <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" title="Fechar">
+                            <X size={22} />
+                        </button>
+                    </div>
+                    {tabBar}
+                </div>
+                {content}
                 <div className="bg-white border-t border-gray-200 px-6 py-3 flex items-center justify-between">
                     <span className="text-sm text-gray-500">{value.length} produto(s) selecionado(s)</span>
                     <button
