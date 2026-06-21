@@ -61,7 +61,7 @@ export function AdvertisementBanner({
 
         if (link) {
             return (
-                <Link href={link} className={`transition-transform hover:scale-[1.01] active:scale-[0.99] duration-300 ${wrapperClass}`}>
+                <Link href={link} className={`cursor-pointer transition-transform hover:scale-[1.01] active:scale-[0.99] duration-300 ${wrapperClass}`}>
                     {content}
                 </Link>
             )
@@ -72,7 +72,7 @@ export function AdvertisementBanner({
     if (link) {
         return (
             <div className={`max-w-7xl mx-auto px-4 md:px-8 mt-8 md:mt-12 ${visibilityClass}`}>
-                <Link href={link} className="block transition-transform hover:scale-[1.01] active:scale-[0.99] duration-300 w-full">
+                <Link href={link} className="block cursor-pointer transition-transform hover:scale-[1.01] active:scale-[0.99] duration-300 w-full">
                     {content}
                 </Link>
             </div>

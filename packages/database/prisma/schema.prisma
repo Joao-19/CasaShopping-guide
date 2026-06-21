@@ -140,9 +140,11 @@ model Settings {
   id                         Int     @id @default(1)
   backgroundDesktop          String?
   backgroundMobile           String?
-  advertisementBannerMobile  String? // Link do banner mobile (Square/Rect)
-  advertisementBannerDesktop String? // Link do banner desktop (Wide 32:9)
+  advertisementBannerMobile  String? // Imagem/vídeo do banner mobile (Wide 32:9)
+  advertisementBannerDesktop String? // Imagem/vídeo do banner desktop (Wide 32:9)
   advertisementBannerDisplay Int     @default(3) // 1: Mobile, 2: Desktop, 3: Both
+  advertisementBannerLinkDesktop String? // URL de destino ao clicar no anúncio desktop
+  advertisementBannerLinkMobile  String? // URL de destino ao clicar no anúncio mobile
 
   homeTitleBold   String?
   homeTitleNormal String?

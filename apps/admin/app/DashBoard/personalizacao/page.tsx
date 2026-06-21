@@ -21,6 +21,10 @@ export default function PersonalizacaoPage() {
     const [showDesktopAds, setShowDesktopAds] = useState(false);
     const [showMobileAds, setShowMobileAds] = useState(false);
 
+    // Link de destino ao clicar no anúncio (por formato)
+    const [adsDesktopLink, setAdsDesktopLink] = useState("");
+    const [adsMobileLink, setAdsMobileLink] = useState("");
+
     // Sync state with fetched settings
     useEffect(() => {
         if (settings) {
@@ -29,6 +33,8 @@ export default function PersonalizacaoPage() {
             setMobileBanner(s.backgroundMobile || undefined);
             setAdsDesktop(s.advertisementBannerDesktop || undefined);
             setAdsMobile(s.advertisementBannerMobile || undefined);
+            setAdsDesktopLink(s.advertisementBannerLinkDesktop || "");
+            setAdsMobileLink(s.advertisementBannerLinkMobile || "");
             setHomeTitleBold(s.homeTitleBold || "");
             setHomeTitleNormal(s.homeTitleNormal || "");
 
@@ -96,6 +102,8 @@ export default function PersonalizacaoPage() {
                 advertisementBannerDesktop: adsDesktopKey || '',
                 advertisementBannerMobile: adsMobileKey || '',
                 advertisementBannerDisplay: display,
+                advertisementBannerLinkDesktop: adsDesktopLink.trim(),
+                advertisementBannerLinkMobile: adsMobileLink.trim(),
                 homeTitleBold,
                 homeTitleNormal
             } as any);
@@ -249,6 +257,12 @@ export default function PersonalizacaoPage() {
                                             onFileSelect={(file) => handleFileSelect(file, 'adsDesktop')}
                                             onRemove={() => setAdsDesktop(undefined)}
                                         />
+                                        <BaseInput
+                                            label="Link do Anúncio Desktop (opcional)"
+                                            value={adsDesktopLink}
+                                            onChange={(e) => setAdsDesktopLink(e.target.value)}
+                                            placeholder="Ex: /campanha/especial-copa-2026 ou https://..."
+                                        />
                                     </div>
                                     <div className="w-full space-y-4">
                                         <div className="flex items-center space-x-2">
@@ -270,6 +284,12 @@ export default function PersonalizacaoPage() {
                                             isVideo={checkIsVideo(adsMobile)}
                                             onFileSelect={(file) => handleFileSelect(file, 'adsMobile')}
                                             onRemove={() => setAdsMobile(undefined)}
+                                        />
+                                        <BaseInput
+                                            label="Link do Anúncio Mobile (opcional)"
+                                            value={adsMobileLink}
+                                            onChange={(e) => setAdsMobileLink(e.target.value)}
+                                            placeholder="Ex: /campanha/especial-copa-2026 ou https://..."
                                         />
                                     </div>
                                 </div>

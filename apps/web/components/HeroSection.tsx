@@ -252,6 +252,7 @@ export function HeroSection() {
                             src={settings.advertisementBannerMobile}
                             type={settings.advertisementBannerMobile.endsWith('.mp4') ? 'video' : 'image'}
                             alt="Oferta Especial Mobile"
+                            link={settings.advertisementBannerLinkMobile || undefined}
                             withoutWrapper={true}
                             displayMode="mobile"
                         />
@@ -263,6 +264,7 @@ export function HeroSection() {
                             src={settings.advertisementBannerDesktop}
                             type={settings.advertisementBannerDesktop.endsWith('.mp4') ? 'video' : 'image'}
                             alt="Oferta Especial Desktop"
+                            link={settings.advertisementBannerLinkDesktop || undefined}
                             withoutWrapper={true}
                             displayMode="desktop"
                         />

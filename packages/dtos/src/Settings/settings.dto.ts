@@ -7,6 +7,8 @@ export interface Settings {
   advertisementBannerDesktop?: string | null;
   advertisementBannerMobile?: string | null;
   advertisementBannerDisplay?: number;
+  advertisementBannerLinkDesktop?: string | null;
+  advertisementBannerLinkMobile?: string | null;
   homeTitleBold?: string | null;
   homeTitleNormal?: string | null;
 }
@@ -31,6 +33,14 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsInt()
   advertisementBannerDisplay?: number;
+
+  @IsOptional()
+  @IsString()
+  advertisementBannerLinkDesktop?: string;
+
+  @IsOptional()
+  @IsString()
+  advertisementBannerLinkMobile?: string;
 
   @IsOptional()
   @IsString()
