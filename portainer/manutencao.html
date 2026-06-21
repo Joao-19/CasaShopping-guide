@@ -48,12 +48,16 @@
       background-size: cover;
       background-position: center right;
       z-index: 0;
+      /* Leve blur p/ suavizar imperfeicoes da imagem gerada por IA.
+         O overscale evita que as bordas borradas revelem vazios. */
+      filter: blur(3px);
+      transform: scale(1.06);
       animation: slow-zoom 28s ease-in-out infinite alternate;
     }
 
     @keyframes slow-zoom {
-      from { transform: scale(1); }
-      to   { transform: scale(1.08); }
+      from { transform: scale(1.06); }
+      to   { transform: scale(1.12); }
     }
 
     /* Veu escuro pra garantir contraste do texto a esquerda */
