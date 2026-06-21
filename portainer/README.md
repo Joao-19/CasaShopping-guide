@@ -77,10 +77,18 @@ aparecem em **GitHub > repo > Packages**.
 1. **Registries** (só se os pacotes forem privados): Registries > Add
    registry > Custom > URL `ghcr.io`, usuário = seu login GitHub, senha =
    PAT com `read:packages`.
-2. **Rede externa** (uma vez por host): o stack usa a rede externa
-   `web-proxy` (igual ao compose de produção). Crie-a antes:
-   `docker network create web-proxy`
-3. **Stacks > Add stack**:
+2. **Redes externas** (uma vez por host): a stack usa **duas** redes externas:
+   - `web-proxy` (igual ao compose de produção). Se não existir:
+     `docker network create web-proxy`
+   - a rede do **banco existente**, definida em `DB_NETWORK_NAME`
+     (padrão `infra-network`) — é onde o container `postgres` já roda. Ela
+     normalmente **já existe** (é a rede da sua infra). Confirme o nome com
+     `docker network ls`.
+3. **Banco de dados:** a stack **não sobe postgres** — ela reutiliza o seu
+   banco existente. Preencha `DATABASE_URL` (e `DIRECT_URL`) apontando para o
+   host `postgres` (ex.: `postgres://user:pass@postgres:5432/meubanco`). Os
+   serviços alcançam o `postgres` pela rede `DB_NETWORK_NAME`.
+4. **Stacks > Add stack**:
    - **Build method:** *Repository* (Git) — aponte para este repo e o
      caminho do compose do ambiente:
      - DEV → `portainer/docker-compose.dev.yml`
@@ -92,17 +100,18 @@ aparecem em **GitHub > repo > Packages**.
    - **Environment variables:** preencha conforme `portainer/.env.example`.
      Não precisa setar `TAG` — cada compose já fixa o canal do seu ambiente
      (`dev` ou `prod`). Só use `TAG` para fixar uma imutável (rollback).
-4. **Deploy the stack.**
+5. **Deploy the stack.**
 
 Crie **duas stacks** — uma com `docker-compose.dev.yml` e outra com
 `docker-compose.prod.yml` — se quiser os dois ambientes no mesmo Portainer.
 
 > **Fidelidade ao compose de produção:** os `portainer/docker-compose.*.yml`
 > são espelho do `docker-compose.yml` da raiz (mesmos nomes de container,
-> redes, `environment`, healthchecks e portas). As únicas diferenças são as 5
+> `environment`, healthchecks e portas). As únicas diferenças são as 6
 > listadas no cabeçalho do arquivo: imagens via GHCR `${TAG}`,
-> `pull_policy: always`, sem `build:`, sem `watchtower` e sem mount `./.env`
-> (o env vem das variáveis da stack).
+> `pull_policy: always`, sem `build:`, sem `watchtower`, sem mount `./.env`
+> (o env vem das variáveis da stack) e **sem postgres embutido** (reutiliza o
+> banco externo via `DATABASE_URL`/`DIRECT_URL` na rede `DB_NETWORK_NAME`).
 
 ## Atualizar para uma versão nova
 

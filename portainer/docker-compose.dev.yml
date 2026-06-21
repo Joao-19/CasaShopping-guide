@@ -11,8 +11,8 @@
 #                          nas variaveis da stack e redeploy.
 #
 # ESPELHO FIEL do docker-compose.yml da raiz (o que roda em producao hoje).
-# Mantem: nomes de servico/container, redes (casashopping-net + web-proxy),
-# blocos environment, healthchecks, portas e labels.
+# Mantem: nomes de servico/container, blocos environment, healthchecks,
+# portas e labels.
 #
 # Unicas diferencas (estritamente necessarias para o Portainer):
 #   1. image: -> GHCR + ${TAG}   (em vez de joaovvv/*:latest no Docker Hub)
@@ -21,6 +21,9 @@
 #   4. SEM servico watchtower      (redeploy e MANUAL; auto-update brigaria)
 #   5. SEM mount ./.env:/app/.env  (no Portainer o env vem das variaveis da
 #      stack; os blocos environment abaixo ja trazem tudo)
+#   6. SEM postgres embutido       (reutiliza banco EXTERNO ja existente:
+#      DATABASE_URL/DIRECT_URL apontam pro host `postgres`, alcancado pela
+#      rede externa ${DB_NETWORK_NAME:-infra-network})
 #
 # Isolamento: registry GHCR + tags :dev/:prod. O Watchtower de producao so
 # vigia joaovvv/casashopping-*:latest no Docker Hub -> nunca ve estas imagens.
@@ -46,28 +49,6 @@ services:
     networks:
       - web-proxy
 
-  # --- BANCO DE DADOS ---
-  database:
-    image: postgres:15-alpine
-    container_name: casashopping-db
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: ${DB_USER:-admin}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin123}
-      POSTGRES_DB: ${DB_NAME:-casashopping}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - casashopping-net
-      - web-proxy
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d casashopping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   # --- MIGRATION (AUTO-INIT) ---
   db-migration:
     image: ghcr.io/joao-19/casashopping-migration:${TAG:-dev}
@@ -75,12 +56,11 @@ services:
     container_name: casashopping-migration
     restart: on-failure
     environment:
-      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
-    depends_on:
-      database:
-        condition: service_healthy
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
     networks:
       - casashopping-net
+      - db-net
 
   # --- STORAGE ---
   storage:
@@ -115,7 +95,8 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
       - AUTH_SERVICE_URL=http://auth-service:3003
       - USERS_SERVICE_URL=http://users-service:3004
       - STORES_SERVICE_URL=http://stores-service:3005
@@ -128,8 +109,6 @@ services:
       - REPO_PASS=${DEPLOY_PASSWORD}
       - DOCKERHUB_PASSWORD=${DOCKERHUB_PASSWORD}
     depends_on:
-      database:
-        condition: service_started
       auth-service:
         condition: service_started
       users-service:
@@ -145,6 +124,7 @@ services:
     networks:
       - casashopping-net
       - web-proxy
+      - db-net
     healthcheck:
       test:
         [
@@ -165,7 +145,8 @@ services:
       - "3003:3003"
     environment:
       - PORT=3003
-      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
@@ -174,12 +155,11 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_NAME=${ADMIN_NAME}
     depends_on:
-      database:
-        condition: service_started
       db-migration:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+      - db-net
     healthcheck:
       test:
         [
@@ -200,15 +180,15 @@ services:
       - "3004:3004"
     environment:
       - PORT=3004
-      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      database:
-        condition: service_started
       db-migration:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+      - db-net
     healthcheck:
       test:
         [
@@ -310,7 +290,8 @@ services:
       - "3005:3005"
     environment:
       - PORT=3005
-      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
@@ -318,12 +299,11 @@ services:
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
-      database:
-        condition: service_started
       db-migration:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+      - db-net
     healthcheck:
       test:
         [
@@ -344,7 +324,8 @@ services:
       - "3006:3006"
     environment:
       - PORT=3006
-      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
@@ -353,12 +334,11 @@ services:
       - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
     depends_on:
-      database:
-        condition: service_started
       db-migration:
         condition: service_completed_successfully
     networks:
       - casashopping-net
+      - db-net
     healthcheck:
       test:
         [
@@ -370,7 +350,6 @@ services:
       retries: 3
 
 volumes:
-  postgres_data:
   minio_data:
 
 networks:
@@ -378,3 +357,6 @@ networks:
     driver: bridge
   web-proxy:
     external: true
+  db-net:
+    external: true
+    name: ${DB_NETWORK_NAME:-infra-network}
