@@ -333,11 +333,14 @@ export class StorageService {
     // Build key from folder + filename
     const key = folder ? `${folder}/${filename}` : filename;
 
+    // NAO assinar ContentLength: incluir ContentLength faz o aws-sdk colocar
+    // "content-length" em X-Amz-SignedHeaders, o que quebra o upload via browser
+    // no R2/S3 (SignatureDoesNotMatch -> 403 -> erro de CORS). O tamanho ja foi
+    // validado acima, entao nao ha perda. Assim so "host" fica assinado.
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
       ContentType: contentType,
-      ContentLength: contentLength, // Enforce length in signature
     });
 
     try {
