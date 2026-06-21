@@ -1,0 +1,332 @@
+# ============================================================================
+# CasaShopping — Stack PROD para PORTAINER (atras do NGINX CENTRAL)
+# ============================================================================
+# Roda no MESMO servidor/nginx do WePlanner-Infra. O casashopping NAO tem
+# nginx proprio nem publica portas no host: quem faz a borda (80/443 + SSL) e
+# o nginx central, que alcanca os serviços pela rede externa `web-proxy`.
+#
+# Default da versao: TAG=prod (imagens do push em `main`).
+#
+# ESQUEMA DE TAGS (para o Portainer nao se perder):
+#   - Flutuante : :prod -> a stack puxa esta (pull_policy: always); "Pull and
+#                          redeploy" sempre traz a ultima build do canal prod.
+#   - Imutavel  : :prod-AAAAMMDD-HHMM-<sha7> -> ROLLBACK: defina TAG=prod-...
+#
+# TOPOLOGIA (diferenças vs docker-compose.yml da raiz):
+#   1. image: -> GHCR + ${TAG}        (em vez de joaovvv/*:latest no Docker Hub)
+#   2. pull_policy: always            (para o "Pull and redeploy" re-puxar)
+#   3. SEM blocos build:              (Portainer consome imagem pronta do GHCR)
+#   4. SEM servico watchtower          (redeploy e MANUAL)
+#   5. SEM mount ./.env:/app/.env      (env vem das variaveis da stack)
+#   6. SEM postgres embutido           (banco EXTERNO via DATABASE_URL/DIRECT_URL
+#      na rede ${DB_NETWORK_NAME:-infra-network})
+#   7. SEM nginx-proxy proprio         (a borda e o nginx central do WePlanner)
+#   8. SEM ports: publicadas no host   (tudo so na rede docker; evita colidir
+#      com o nginx central / portas do weplanner)
+#
+# O nginx central roteia (config no WePlanner-Infra, repo separado):
+#   /        -> casashopping-web:3001
+#   /api     -> casashopping-gateway:3000
+#   /admin   -> casashopping-admin:3002
+#   /minio/  -> casashopping-storage:9000   (leitura publica de imagens)
+#
+# Variaveis: defina na UI do Portainer (ver portainer/.env.example).
+# ============================================================================
+version: "3.8"
+
+services:
+  # --- MIGRATION (AUTO-INIT) ---
+  db-migration:
+    image: ghcr.io/joao-19/casashopping-migration:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-migration
+    restart: on-failure
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
+    networks:
+      - casashopping-net
+      - db-net
+
+  # --- STORAGE (MinIO) ---
+  storage:
+    image: minio/minio:latest
+    container_name: casashopping-storage
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${STORAGE_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${STORAGE_PASSWORD:-password123}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - casashopping-net
+      - web-proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # --- API GATEWAY ---
+  api-gateway:
+    image: ghcr.io/joao-19/casashopping-api-gateway:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-gateway
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
+      - AUTH_SERVICE_URL=http://auth-service:3003
+      - USERS_SERVICE_URL=http://users-service:3004
+      - STORES_SERVICE_URL=http://stores-service:3005
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - STORE_SERVICE_URL=http://stores-service:3005
+      - PRODUCTS_SERVICE_URL=http://products-service:3006
+      - STORAGE_SERVICE_URL=http://storage-service:3007
+      - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
+      - JWT_SECRET=${JWT_SECRET}
+      - REPO_PASS=${DEPLOY_PASSWORD}
+      - DOCKERHUB_PASSWORD=${DOCKERHUB_PASSWORD}
+    depends_on:
+      auth-service:
+        condition: service_started
+      users-service:
+        condition: service_started
+      stores-service:
+        condition: service_started
+      products-service:
+        condition: service_started
+      storage-service:
+        condition: service_started
+      db-migration:
+        condition: service_completed_successfully
+    networks:
+      - casashopping-net
+      - web-proxy
+      - db-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3000/health'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # --- AUTH SERVICE ---
+  auth-service:
+    image: ghcr.io/joao-19/casashopping-auth:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-auth
+    restart: unless-stopped
+    environment:
+      - PORT=3003
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_NAME=${ADMIN_NAME}
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
+    networks:
+      - casashopping-net
+      - db-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3003/health'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # --- USERS SERVICE ---
+  users-service:
+    image: ghcr.io/joao-19/casashopping-users:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-users
+    restart: unless-stopped
+    environment:
+      - PORT=3004
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
+    networks:
+      - casashopping-net
+      - db-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3004/health'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # --- STORAGE SERVICE ---
+  storage-service:
+    image: ghcr.io/joao-19/casashopping-storage:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-storage-service
+    restart: unless-stopped
+    environment:
+      - PORT=3007
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      - MINIO_INTERNAL_ENDPOINT=http://storage:9000
+      - MINIO_ROOT_USER=${STORAGE_USER:-admin}
+      - MINIO_ROOT_PASSWORD=${STORAGE_PASSWORD:-password123}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - MAX_IMAGE_SIZE_MB=${MAX_IMAGE_SIZE_MB:-5}
+      - MAX_VIDEO_SIZE_MB=${MAX_VIDEO_SIZE_MB:-50}
+      # Cloudflare R2 (S3-compativel): defina via env da stack. Defaults = MinIO.
+      - S3_REGION=${S3_REGION:-us-east-1}
+      - STORAGE_SKIP_BUCKET_SETUP=${STORAGE_SKIP_BUCKET_SETUP:-false}
+    depends_on:
+      - storage
+    networks:
+      - casashopping-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3007/health'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # --- WEB APP ---
+  web:
+    image: ghcr.io/joao-19/casashopping-web:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-web
+    restart: unless-stopped
+    environment:
+      - PORT=3001
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+      - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
+      - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
+      - BASE_PATH=${WEB_BASE_PATH:-}
+      - INTERNAL_API_URL=http://api-gateway:3000
+      - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
+      - NEXT_PUBLIC_GA4_ID=${NEXT_PUBLIC_GA4_ID}
+    depends_on:
+      - api-gateway
+    networks:
+      - casashopping-net
+      - web-proxy
+
+  # --- ADMIN APP ---
+  admin:
+    image: ghcr.io/joao-19/casashopping-admin:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-admin
+    restart: unless-stopped
+    environment:
+      - PORT=3002
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
+      - NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-http://localhost:3001}
+      - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
+      - JWT_SECRET=${JWT_SECRET:-changeme_secret}
+      - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
+      - NEXT_PUBLIC_GA4_ID=${NEXT_PUBLIC_GA4_ID}
+    depends_on:
+      - api-gateway
+    networks:
+      - casashopping-net
+      - web-proxy
+
+  # --- STORES SERVICE ---
+  stores-service:
+    image: ghcr.io/joao-19/casashopping-stores:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-stores
+    restart: unless-stopped
+    environment:
+      - PORT=3005
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
+    networks:
+      - casashopping-net
+      - db-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3005/health'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # --- PRODUCTS SERVICE ---
+  products-service:
+    image: ghcr.io/joao-19/casashopping-products:${TAG:-prod}
+    pull_policy: always
+    container_name: casashopping-products
+    restart: unless-stopped
+    environment:
+      - PORT=3006
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001,http://localhost:3002}
+      - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
+      - STORAGE_SERVICE_URL=http://storage-service:3007
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-casashopping}
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
+    networks:
+      - casashopping-net
+      - db-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3006/health'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  minio_data:
+
+networks:
+  casashopping-net:
+    driver: bridge
+  web-proxy:
+    external: true
+  db-net:
+    external: true
+    name: ${DB_NETWORK_NAME:-infra-network}

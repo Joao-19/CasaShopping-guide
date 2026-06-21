@@ -4,10 +4,18 @@ import {
   IsString,
   IsUrl,
   Matches,
+  ValidateIf,
 } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { Transform } from "class-transformer";
+
+// Campos opcionais: so valida quando REALMENTE preenchido. @IsOptional sozinho
+// nao pula string vazia ("") -> @IsUrl/@Matches estouravam em campos deixados
+// em branco. @ValidateIf (class-validator, sempre ativo) garante o skip mesmo
+// que o @Transform (class-transformer) nao seja aplicado no runtime empacotado.
+const isProvided = (_o: unknown, value: unknown) =>
+  value !== null && value !== undefined && value !== "";
 
 export class CreateStoreDto {
   @ApiProperty({ description: "The name of the store" })
@@ -16,7 +24,7 @@ export class CreateStoreDto {
   name!: string;
 
   @ApiPropertyOptional({ description: "URL slug for the public store page" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsString()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message: "Invalid slug (lowercase letters, numbers and hyphens only).",
@@ -43,7 +51,7 @@ export class CreateStoreDto {
   address!: string;
 
   @ApiPropertyOptional({ description: "Contact phone number" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsString()
   @Transform(({ value }) => {
     if (!value) return null;
@@ -56,31 +64,31 @@ export class CreateStoreDto {
   phone?: string | null;
 
   @ApiPropertyOptional({ description: "Website URL" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   site?: string | null;
 
   @ApiPropertyOptional({ description: "Facebook profile URL" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   facebookLink?: string | null;
 
   @ApiPropertyOptional({ description: "Instagram profile URL" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   instagramLink?: string | null;
 
   @ApiPropertyOptional({ description: "YouTube channel URL" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   youtubeLink?: string | null;
 
   @ApiPropertyOptional({ description: "WhatsApp number" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsString()
   @Transform(({ value }) => {
     if (!value) return null;
@@ -100,7 +108,7 @@ export class UpdateStoreDto {
   name?: string;
 
   @ApiPropertyOptional({ description: "URL slug for the public store page" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsString()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message: "Invalid slug (lowercase letters, numbers and hyphens only).",
@@ -124,7 +132,7 @@ export class UpdateStoreDto {
   address?: string;
 
   @ApiPropertyOptional({ description: "Contact phone number" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsString()
   @Transform(({ value }) => {
     if (!value) return null;
@@ -137,31 +145,31 @@ export class UpdateStoreDto {
   phone?: string | null;
 
   @ApiPropertyOptional({ description: "Website URL" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   site?: string | null;
 
   @ApiPropertyOptional({ description: "Facebook profile URL" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   facebookLink?: string | null;
 
   @ApiPropertyOptional({ description: "Instagram profile URL" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   instagramLink?: string | null;
 
   @ApiPropertyOptional({ description: "YouTube channel URL" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsUrl()
   @Transform(({ value }) => (value === "" ? null : value))
   youtubeLink?: string | null;
 
   @ApiPropertyOptional({ description: "WhatsApp number" })
-  @IsOptional()
+  @ValidateIf(isProvided)
   @IsString()
   @Transform(({ value }) => {
     if (!value) return null;

@@ -1,6 +1,7 @@
 export interface Store {
   id: string;
   name: string;
+  slug?: string | null;
   logoImage?: string | null;
   address: string;
   phone?: string | null;

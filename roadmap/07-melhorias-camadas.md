@@ -29,7 +29,7 @@
 |---|---|---|
 | 1 | **B1** Limites do produto | ✅ `c4bc261` — validado e2e |
 | 2 | **B3** Compartilhar (deep-link + share) | ✅ `eedf36d` — validado e2e |
-| 3 | **B2** Página por lojista | ✅ `bd800e3`+`914f8f3` — validado e2e |
+| 3 | **B2** Página por lojista | ✅ `bd800e3`+`914f8f3` · ⚠️ **acesso faltava — corrigido 2026-06-21** (ver nota) |
 | 4 | **B4** Popups | ✅ atendido pela Newsletter (Frente 6) |
 
 **Rodada 2 — 🟡 EM ANDAMENTO (itens da revisão completa da ata, 2026-06-20)**
@@ -211,6 +211,41 @@ Quando o Figma chegar, implementar fiel. Distinto da B2 (página da loja).
 - [x] Slug único; admin sugere do nome e permite editar; duplicado bloqueado.
 - [x] Slug inexistente → 404.
 - [x] Upload de banner da loja funciona (presigned MinIO).
+
+### ⚠️ Correção 2026-06-21 — a página estava ÓRFÃ (sem ponto de entrada)
+
+A B2 entregou a página `/loja/[slug]`, mas **nada no site linkava pra ela** —
+a validação e2e original só abriu a URL direta, nunca testou o *caminho de
+descoberta* (como o usuário chega lá a partir da home/listagem). Resultado:
+feature isolada, inacessível. Corrigido nesta data ligando os dois fluxos:
+
+1. **Botão "Ver loja"** no `StoreDetailsCard` (modal aberto pela seção "Lojas"
+   da home e pela página `/stores`) → `/loja/${slug}`. O `slug` já vinha no
+   payload da listagem (`stores.findAll` sem `select`) — só não estava ligado.
+2. **Botão "Ver loja"** no bloco da loja dentro do `ProductDetailsCard` (modal
+   do produto, em toda a home/listagem/campanha) → `/loja/${slug}`. Exigiu
+   adicionar `slug` à projeção `store.select` do products-service (3 queries),
+   plumbar `storeSlug` nos 10 mappers que montam o objeto `product` no web, e
+   adicionar `slug` em `Domain/Store` + `HighlightItem.store`.
+
+**Validado e2e (Playwright, UI real, 2026-06-21):** home → "Lojas" → clica
+"Loja Beta" → modal → "Ver loja" → `/loja/loja-beta-2451` renderiza (banner +
+produtos por categoria). `/produtos` → abre produto → bloco da loja → "Ver loja"
+→ `/loja/loja-teste-d833` ("Loja Teste — CasaShopping"). 0 erros de JS (só 404s
+pré-existentes de assets estáticos). Backend confirmado por curl (`store.slug`
+presente em `/stores` e `/products`). Campanha **fora desta rodada** (decisão do dono).
+
+> **Gap correlato ainda aberto (não corrigido — não é regressão):** a página
+> `/campanha/[slug]` também é órfã no site público, mas isso foi **decisão
+> documentada** (`completos/02` §Dia 1: "sem link no menu público, acesso por
+> URL direta"). O entry point natural — o `AdvertisementBanner` apontar pra uma
+> campanha — não existe (o banner nem tem campo `link`). Promover a frente
+> própria se/quando o cliente quiser campanhas descobríveis.
+
+> **Lição (regra de validação):** "validado e2e" só conta quando o teste começa
+> do **fluxo real de descoberta** (home/listagem/menu), não da URL da própria
+> página. Toda página/rota nova precisa de pelo menos um ponto de entrada
+> navegável testado de ponta a ponta.
 
 ### Estado real (verificado 2026-06-20)
 - ❌ Rota `/loja/[slug]` não existe (só `/stores` = listagem geral).

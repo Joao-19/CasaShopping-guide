@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Phone } from "lucide-react";
 import { usePopup, IconInstagram, IconFacebook, IconYoutube } from "@repo/ui";
 
@@ -5,6 +6,7 @@ interface StoreDetailsCardProps {
     store: {
         id: string;
         name: string;
+        slug?: string | null;
         logoImage?: string;
         address: string;
         phone?: string;
@@ -110,6 +112,16 @@ export function StoreDetailsCard({ store }: StoreDetailsCardProps) {
                         </a>
                     )}
                 </div>
+
+                {store.slug && (
+                    <Link
+                        href={`/loja/${store.slug}`}
+                        onClick={hidePopup}
+                        className="w-full bg-[#003ba6] text-white h-[48px] rounded-[8px] font-sans text-[16px] flex items-center justify-center gap-2 hover:bg-[#002a78] transition-colors no-underline"
+                    >
+                        Ver loja
+                    </Link>
+                )}
 
                 <button
                     onClick={hidePopup}

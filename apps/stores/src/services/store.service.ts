@@ -98,9 +98,14 @@ export class StoreService {
   private transformStore(store: Store): Store {
     const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
     const bucketName = process.env.MINIO_BUCKET_NAME || "casashopping";
-    const baseUrl = publicEndpoint
-      ? `${publicEndpoint.replace(/\/$/, "")}/${bucketName}`
-      : process.env.STORAGE_URL || "http://localhost:9000/casashopping";
+    // STORAGE_URL e a base de LEITURA publica (MinIO: endpoint/bucket; R2:
+    // dominio publico pub-*.r2.dev). MINIO_PUBLIC_ENDPOINT e o endpoint S3 de
+    // UPLOAD (privado no R2) — so serve de fallback se STORAGE_URL faltar.
+    const baseUrl =
+      process.env.STORAGE_URL ||
+      (publicEndpoint
+        ? `${publicEndpoint.replace(/\/$/, "")}/${bucketName}`
+        : "http://localhost:9000/casashopping");
     const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 
     const toPublicUrl = (key: string) =>

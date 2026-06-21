@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, formatPriceTier } from "@repo/ui";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
@@ -32,6 +33,7 @@ interface ProductDetailsCardProps {
         storeYoutube?: string | null;
         whatsapp?: string | null;
         storeAddress?: string;
+        storeSlug?: string | null;
     };
 }
 
@@ -342,6 +344,16 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                         </a>
                                     )}
                                 </div>
+
+                                {product.storeSlug && (
+                                    <Link
+                                        href={`/loja/${product.storeSlug}`}
+                                        onClick={close}
+                                        className="w-full bg-[#003ba6] text-white h-[48px] rounded-[8px] font-sans text-[16px] flex items-center justify-center gap-2 hover:bg-[#002a78] transition-colors no-underline"
+                                    >
+                                        Ver loja
+                                    </Link>
+                                )}
 
                                 <button
                                     onClick={handleBackToProduct}

@@ -22,6 +22,7 @@ export interface HighlightItem {
     tags?: string | string[] | null;
     store?: {
         name?: string;
+        slug?: string | null;
         logoImage?: string | null;
         phone?: string | null;
         address?: string | null;
@@ -113,6 +114,7 @@ export function HighlightsSection({ items, title }: HighlightsSectionProps = {})
             id: product.id,
             title: product.name,
             storeName: product.store?.name || "Loja",
+            storeSlug: product.store?.slug ?? undefined,
             price: product.price,
             description: product.description,
             images: product.images,

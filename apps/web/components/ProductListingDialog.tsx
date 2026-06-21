@@ -75,6 +75,7 @@ export function ProductListingDialog({ initialCategory }: ProductListingDialogPr
         id: p.id,
         title: p.name,
         storeName: p.store?.name || "Loja",
+        storeSlug: p.store?.slug ?? undefined,
         price: p.price,
         description: p.description,
         images: p.images?.sort((a, b) => a.index - b.index)
