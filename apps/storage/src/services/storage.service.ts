@@ -22,10 +22,15 @@ export class StorageService {
 
   private createS3Client(endpoint: string): S3Client {
     return new S3Client({
-      region: "us-east-1",
+      // MinIO usa "us-east-1"; Cloudflare R2 usa "auto". Configuravel por env.
+      region: this.configService.get<string>("S3_REGION", "us-east-1"),
       endpoint: endpoint,
       forcePathStyle: true,
       maxAttempts: 3,
+      // aws-sdk v3 adiciona checksum (CRC32) nos PUT por padrao, o que quebra
+      // o R2 (e ja causava 501 no MinIO). WHEN_REQUIRED so envia quando exigido.
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
       credentials: {
         accessKeyId: this.configService.getOrThrow<string>("MINIO_ROOT_USER"),
         secretAccessKey: this.configService.getOrThrow<string>(
@@ -74,6 +79,19 @@ export class StorageService {
 
       let internalClient = this.createS3Client(internalEndpoint);
       this.internalClient = internalClient;
+
+      // R2 (e provedores gerenciados) nao suportam CreateBucket/PutBucketPolicy
+      // /CORS via S3 API — bucket e acesso publico sao geridos no painel do
+      // provedor. STORAGE_SKIP_BUCKET_SETUP=true pula esse auto-config MinIO.
+      if (
+        this.configService.get<string>("STORAGE_SKIP_BUCKET_SETUP", "false") ===
+        "true"
+      ) {
+        this.logger.log(
+          "STORAGE_SKIP_BUCKET_SETUP=true: pulando create/CORS/policy (ex.: Cloudflare R2)."
+        );
+        return;
+      }
 
       try {
         await internalClient.send(
