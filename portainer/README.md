@@ -5,11 +5,33 @@
 > Os dois podem coexistir. Enquanto ninguém criar a stack no Portainer e
 > apontar para o GHCR, **nada** é implantado por aqui.
 
+## ⚠️ Fragilidade: dois modos de deploy em paralelo
+
+Hoje o projeto mantém **dois caminhos de deploy ao mesmo tempo**:
+
+1. **Legado (manual):** `deploy.sh`/`deployNoCache.sh` → Docker Hub
+   (`joaovvv/casashopping-*:latest`) → Watchtower auto-atualiza o servidor.
+2. **Novo (Portainer):** GitHub Actions → GHCR (`:dev`/`:prod`) → redeploy
+   manual na UI do Portainer.
+
+Isso é uma **fragilidade conhecida e temporária**. Enquanto os dois modos
+coexistem é preciso ter atenção redobrada:
+
+- **Duas fontes de imagem** (Docker Hub e GHCR) e dois conjuntos de tags
+  (`:latest` vs `:dev`/`:prod`) — não confundir qual alimenta qual ambiente.
+- Mudanças nos Dockerfiles/serviços afetam **os dois** pipelines; testar em
+  ambos antes de confiar.
+- Risco de **divergência** entre o que roda via Watchtower e o que roda via
+  Portainer se só um lado for atualizado.
+
+O objetivo é **consolidar em um único modo** assim que o ambiente do
+Portainer estiver validado, eliminando essa duplicação.
+
 ## Como funciona (visão geral)
 
 ```
 push em `dev-deploy`  ──> GitHub Actions (deploy-dev.yml)  ──> GHCR :dev
-push em `main`        ──> GitHub Actions (deploy-prod.yml) ──> GHCR :stable
+push em `main`        ──> GitHub Actions (deploy-prod.yml) ──> GHCR :prod
                                                                │
                        (manual, no Portainer: "Pull and redeploy")
                                                                ▼
@@ -21,12 +43,20 @@ push em `main`        ──> GitHub Actions (deploy-prod.yml) ──> GHCR :sta
   nenhum servidor nem disparam redeploy.
 - O **redeploy é manual** no Portainer (botão **Pull and redeploy**).
 
-### Tags publicadas por serviço
+### Esquema de tags (para o Portainer não se perder)
 
-| Canal | Branch | Tag flutuante | Tag imutável (rollback) |
-|-------|--------|---------------|--------------------------|
-| dev | `dev-deploy` | `:dev` | `:dev-AAAAMMDD-HHMM-<sha7>` |
-| prod | `main` | `:stable` | `:stable-AAAAMMDD-HHMM-<sha7>` |
+Cada serviço recebe **duas** tags por publicação:
+
+| Canal | Branch | Compose | Tag flutuante | Tag imutável (rollback) |
+|-------|--------|---------|---------------|--------------------------|
+| dev | `dev-deploy` | `docker-compose.dev.yml` | `:dev` | `:dev-AAAAMMDD-HHMM-<sha7>` |
+| prod | `main` | `docker-compose.prod.yml` | `:prod` | `:prod-AAAAMMDD-HHMM-<sha7>` |
+
+- A **flutuante** (`:dev` / `:prod`) é o que cada stack puxa, com
+  `pull_policy: always`. Cada compose já tem o default do seu canal — a stack
+  de dev nunca puxa imagem de prod e vice-versa.
+- A **imutável** (com data+sha) nunca é sobrescrita — serve para fixar/voltar
+  a uma versão específica (ver **Rollback**).
 
 Serviços: `api-gateway, auth, users, stores, products, storage, migration, web, admin`.
 
@@ -52,20 +82,24 @@ aparecem em **GitHub > repo > Packages**.
    `docker network create web-proxy`
 3. **Stacks > Add stack**:
    - **Build method:** *Repository* (Git) — aponte para este repo e o
-     caminho `portainer/docker-compose.yml`. O método Git resolve o
-     `./default.conf` ao lado pelo mount relativo.
+     caminho do compose do ambiente:
+     - DEV → `portainer/docker-compose.dev.yml`
+     - PROD → `portainer/docker-compose.prod.yml`
+
+     O método Git resolve o `./default.conf` ao lado pelo mount relativo.
      - Alternativa: *Web editor* colando o conteúdo do compose **+** subir
        o `default.conf` como arquivo/volume, ou usar um proxy próprio.
    - **Environment variables:** preencha conforme `portainer/.env.example`.
-     A chave que escolhe a versão é **`TAG`** (`dev` ou `stable`).
+     Não precisa setar `TAG` — cada compose já fixa o canal do seu ambiente
+     (`dev` ou `prod`). Só use `TAG` para fixar uma imutável (rollback).
 4. **Deploy the stack.**
 
-Crie **duas stacks** (uma com `TAG=dev`, outra com `TAG=stable`) se quiser
-os dois ambientes no mesmo Portainer.
+Crie **duas stacks** — uma com `docker-compose.dev.yml` e outra com
+`docker-compose.prod.yml` — se quiser os dois ambientes no mesmo Portainer.
 
-> **Fidelidade ao compose de produção:** o `portainer/docker-compose.yml` é
-> espelho do `docker-compose.yml` da raiz (mesmos nomes de container, redes,
-> `environment`, healthchecks e portas). As únicas diferenças são as 5
+> **Fidelidade ao compose de produção:** os `portainer/docker-compose.*.yml`
+> são espelho do `docker-compose.yml` da raiz (mesmos nomes de container,
+> redes, `environment`, healthchecks e portas). As únicas diferenças são as 5
 > listadas no cabeçalho do arquivo: imagens via GHCR `${TAG}`,
 > `pull_policy: always`, sem `build:`, sem `watchtower` e sem mount `./.env`
 > (o env vem das variáveis da stack).
@@ -75,16 +109,16 @@ os dois ambientes no mesmo Portainer.
 Depois que um push em `main`/`dev-deploy` terminar o build (veja em
 **Actions** no GitHub):
 
-1. Portainer > a stack > **Pull and redeploy** (mantém `TAG` flutuante e
-   re-puxa `:stable`/`:dev`).
+1. Portainer > a stack > **Pull and redeploy** (mantém a tag flutuante e
+   re-puxa `:dev`/`:prod`).
 2. O serviço `db-migration` roda as migrations automaticamente antes dos
    demais subirem (`prisma migrate deploy`).
 
 ## Rollback
 
 1. Descubra a tag imutável desejada (no resumo do run em **Actions**, ou nos
-   Packages do GHCR), ex.: `stable-20260620-1530-a1b2c3d`.
-2. Na stack, mude `TAG` para essa tag imutável e **redeploy**.
+   Packages do GHCR), ex.: `prod-20260621-1530-a1b2c3d`.
+2. Na stack, defina a variável `TAG` para essa tag imutável e **redeploy**.
 
 ## Arquitetura das imagens
 
@@ -100,9 +134,9 @@ runtime). A **única** coisa assada no build é o `basePath` do Next:
 - `web` é buildado na **raiz** (`BASE_PATH=`)
 - `admin` é buildado em **`/admin`**
 
-Isso casa com o `nginx.conf` desta pasta (`/` → web, `/admin` → admin). Se a
-TI quiser outro roteamento, ajuste tanto o `buildArgs` no workflow quanto o
-`nginx.conf`.
+Isso casa com o `default.conf` desta pasta (`/` → web, `/admin` → admin). Se
+a TI quiser outro roteamento, ajuste tanto o `buildArgs` no workflow quanto o
+`default.conf`.
 
 ## O que este pipeline NÃO toca
 

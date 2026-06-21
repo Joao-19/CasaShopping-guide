@@ -1,6 +1,15 @@
 # ============================================================================
-# CasaShopping — Stack para PORTAINER (consome imagens do GHCR)
+# CasaShopping — Stack DEV para PORTAINER (canal :dev no GHCR)
 # ============================================================================
+# Use este arquivo na stack de DESENVOLVIMENTO do Portainer.
+# Default da versao: TAG=dev (imagens do push em `dev-deploy`).
+#
+# ESQUEMA DE TAGS (para o Portainer nao se perder):
+#   - Flutuante : :dev  -> a stack puxa esta (pull_policy: always); "Pull and
+#                          redeploy" sempre traz a ultima build do canal dev.
+#   - Imutavel  : :dev-AAAAMMDD-HHMM-<sha7> -> ROLLBACK: defina TAG=dev-...
+#                          nas variaveis da stack e redeploy.
+#
 # ESPELHO FIEL do docker-compose.yml da raiz (o que roda em producao hoje).
 # Mantem: nomes de servico/container, redes (casashopping-net + web-proxy),
 # blocos environment, healthchecks, portas e labels.
@@ -13,11 +22,11 @@
 #   5. SEM mount ./.env:/app/.env  (no Portainer o env vem das variaveis da
 #      stack; os blocos environment abaixo ja trazem tudo)
 #
-# Isolamento: registry GHCR + tags :dev/:stable. O Watchtower de producao so
+# Isolamento: registry GHCR + tags :dev/:prod. O Watchtower de producao so
 # vigia joaovvv/casashopping-*:latest no Docker Hub -> nunca ve estas imagens.
 #
 # Variaveis: defina na UI do Portainer (ver portainer/.env.example).
-# A chave que escolhe a versao e TAG (dev ou stable).
+# A chave que escolhe a versao e TAG (dev ou prod).
 # ============================================================================
 version: "3.8"
 
@@ -61,7 +70,7 @@ services:
 
   # --- MIGRATION (AUTO-INIT) ---
   db-migration:
-    image: ghcr.io/joao-19/casashopping-migration:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-migration:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-migration
     restart: on-failure
@@ -98,7 +107,7 @@ services:
 
   # --- API GATEWAY ---
   api-gateway:
-    image: ghcr.io/joao-19/casashopping-api-gateway:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-api-gateway:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-gateway
     restart: unless-stopped
@@ -148,7 +157,7 @@ services:
 
   # --- AUTH SERVICE ---
   auth-service:
-    image: ghcr.io/joao-19/casashopping-auth:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-auth:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-auth
     restart: unless-stopped
@@ -183,7 +192,7 @@ services:
 
   # --- USERS SERVICE ---
   users-service:
-    image: ghcr.io/joao-19/casashopping-users:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-users:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-users
     restart: unless-stopped
@@ -212,7 +221,7 @@ services:
 
   # --- STORAGE SERVICE ---
   storage-service:
-    image: ghcr.io/joao-19/casashopping-storage:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-storage:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-storage-service
     restart: unless-stopped
@@ -244,7 +253,7 @@ services:
 
   # --- WEB APP ---
   web:
-    image: ghcr.io/joao-19/casashopping-web:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-web:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-web
     restart: unless-stopped
@@ -269,7 +278,7 @@ services:
 
   # --- ADMIN APP ---
   admin:
-    image: ghcr.io/joao-19/casashopping-admin:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-admin:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-admin
     restart: unless-stopped
@@ -293,7 +302,7 @@ services:
 
   # --- STORES SERVICE ---
   stores-service:
-    image: ghcr.io/joao-19/casashopping-stores:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-stores:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-stores
     restart: unless-stopped
@@ -327,7 +336,7 @@ services:
 
   # --- PRODUCTS SERVICE ---
   products-service:
-    image: ghcr.io/joao-19/casashopping-products:${TAG:-stable}
+    image: ghcr.io/joao-19/casashopping-products:${TAG:-dev}
     pull_policy: always
     container_name: casashopping-products
     restart: unless-stopped

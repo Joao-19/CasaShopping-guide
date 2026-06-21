@@ -2,7 +2,7 @@
 # Deploy Prod (GHCR) — pipeline NOVO, isolado do deploy atual.
 #
 # O QUE FAZ: ao dar push em `main`, builda as 9 imagens e publica no
-# GitHub Container Registry (GHCR) no canal :stable. NADA mais.
+# GitHub Container Registry (GHCR) no canal :prod. NADA mais.
 #
 # O QUE NAO FAZ (de proposito): nao faz push pro Docker Hub, nao mexe no
 # Watchtower, nao faz SSH em servidor nenhum, nao dispara redeploy. O
@@ -10,7 +10,7 @@
 #
 # ISOLAMENTO TOTAL do deploy atual:
 #   - Registry diferente: ghcr.io (atual usa Docker Hub joaovvv/*).
-#   - Tags diferentes: :stable / :stable-<data>-<sha> (atual usa :latest no Docker Hub).
+#   - Tags diferentes: :prod / :prod-<data>-<sha> (atual usa :latest no Docker Hub).
 #   - O Watchtower de producao so vigia joaovvv/casashopping-*:latest no
 #     Docker Hub -> ele NUNCA enxerga nada publicado aqui.
 #   - O workflow ATUAL (.github/workflows/deploy.yml) dispara em `main1`,
@@ -37,7 +37,7 @@ env:
   REGISTRY: ghcr.io
   # Namespace do GHCR (owner do repo em minusculo). Imagens: <PREFIX>-<servico>
   IMAGE_PREFIX: ghcr.io/joao-19/casashopping
-  CHANNEL: stable
+  CHANNEL: prod
   # Arquitetura do host Portainer de PROD. Default amd64 (VPS comum).
   # Se o host for ARM (ex: Oracle Ampere), troque para: linux/arm64
   PLATFORMS: linux/amd64
@@ -48,7 +48,7 @@ jobs:
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - name: Calcular tag imutavel (stable-YYYYMMDD-HHMM-<sha7>)
+      - name: Calcular tag imutavel (prod-YYYYMMDD-HHMM-<sha7>)
         id: tag
         run: |
           echo "tag=${CHANNEL}-$(date -u +'%Y%m%d-%H%M')-$(echo "${GITHUB_SHA}" | cut -c1-7)" >> "$GITHUB_OUTPUT"
