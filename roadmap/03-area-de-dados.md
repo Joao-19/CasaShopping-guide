@@ -44,9 +44,9 @@ Implementação: campos extras no modelo `ProductView` / sessão (`referrer`,
 |------|--------|
 | Favoritos (toggle, lista, tabela `Favorite`) | ✅ ~85% — falta só agregação |
 | GA4/GTM | ⚠️ básico, sem eventos custom |
-| Contagem de views | ✅ pipeline de tracking pronto (Dias 1–2) — falta agregação |
-| Dashboard de dados no admin | ❌ 0% (existe CRUD, não analytics) |
-| Mapa de calor / filtro por período | ❌ 0% |
+| Contagem de views | ✅ tracking + agregação prontos (Dias 1–3) |
+| Dashboard de dados no admin | ✅ `/DashBoard/dados` (favoritos, views, origem) |
+| Mapa de calor / filtro por período | ✅ heatmap por categoria + filtro de período |
 
 ## O que é novo (onde está o custo)
 
@@ -109,15 +109,24 @@ Implementação: campos extras no modelo `ProductView` / sessão (`referrer`,
   productId)` não cobre o range em `viewedAt`. Trocar por `@@index([sessionId,
   productId, viewedAt])` quando o volume justificar (hoje irrelevante).
 
-### Dias 4–5 — API + Dashboard
-- [ ] Endpoints de analytics (ranking favoritos, views por período, dados do heatmap)
-- [ ] Nova rota admin `/DashBoard/dados`
-- [ ] Tabela "Produtos mais favoritados"
-- [ ] Filtro por intervalo de datas
+### Dias 4–5 — API + Dashboard ✅ (concluído 2026-06-22, validado na UI)
+- [x] Endpoints de analytics — feitos no Dia 3 (ver acima).
+- [x] Nova rota admin `/DashBoard/dados` + item "Dados" no Sidebar.
+- [x] "Produtos mais favoritados" (ranking de barras) + "Produtos mais vistos"
+      (com sessões únicas) + totais do período.
+- [x] Filtro por intervalo de datas (presets 7/30/90d + Tudo + custom).
+      `composable/analytics/useAnalytics` controla o período e refaz as 4 queries.
 
-### Dia 6 — Mapa de calor
-- [ ] Componente de heatmap (produtos/categorias) com Recharts/equivalente
-- [ ] Cruzamento com período selecionado
+### Dia 6 — Mapa de calor ✅ (concluído 2026-06-22)
+- [x] Componente de heatmap por categoria (`CategoryHeatmap`) — grid de células
+      com intensidade de cor por views. **Sem Recharts**: gráficos leves em
+      CSS/Tailwind (barras + grid de calor), zero dependência nova ("equivalente").
+- [x] Cruzamento com período selecionado (mesmo filtro afeta todos os widgets).
+- [x] Bônus: breakdown de "Origem do tráfego" (UTM/referrer/direto).
+
+> **Validado na UI** (admin :3002, login real): 4 widgets renderizam com dados
+> corretos; trocar 7d↔30d recalcula tudo (views 10→8, exclui as fora da janela).
+> Componentes leves em `apps/admin/app/DashBoard/dados/components/`.
 
 ### Dia 7 — Deploy Portainer
 - [ ] Configuração do stack/serviço no Portainer
