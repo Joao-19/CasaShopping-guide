@@ -41,6 +41,17 @@ export function useAnalytics() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
 
+  // Selecionar um preset rápido limpa as datas custom — presets e intervalo
+  // personalizado são mutuamente exclusivos, então os campos não ficam exibindo
+  // um range que não está mais ativo.
+  const selectPreset = (p: RangePreset) => {
+    setPreset(p);
+    if (p !== "custom") {
+      setCustomFrom("");
+      setCustomTo("");
+    }
+  };
+
   const range = useMemo(
     () => computeRange(preset, customFrom, customTo),
     [preset, customFrom, customTo]
@@ -69,7 +80,7 @@ export function useAnalytics() {
   return {
     // período
     preset,
-    setPreset,
+    setPreset: selectPreset,
     customFrom,
     setCustomFrom,
     customTo,
