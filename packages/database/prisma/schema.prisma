@@ -91,11 +91,36 @@ model Product {
   favorites      Favorite[]
 
   campaignProducts CampaignProduct[]
+  views            ProductView[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("products")
+}
+
+// --- TRACKING PRÓPRIO DE VISUALIZAÇÕES (Frente 3 — Área de Dados) ---
+// Uma linha por visualização de produto. Dedupe é feito no service por
+// (sessionId, productId) numa janela curta, então cada linha aqui já é uma
+// view "única o suficiente". `userId` é opcional (visitante anônimo).
+// Origem (referrer/utm*/landingPage) é capturada no 1º acesso da sessão.
+model ProductView {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId      String? // usuário logado, quando houver
+  sessionId   String // id de sessão do navegador (base do dedupe)
+  referrer    String? // document.referrer (domínio de origem)
+  utmSource   String? // utm_source
+  utmMedium   String? // utm_medium
+  utmCampaign String? // utm_campaign
+  landingPage String? // 1ª URL da sessão (path)
+  viewedAt    DateTime @default(now())
+
+  @@index([productId])
+  @@index([viewedAt])
+  @@index([sessionId, productId])
+  @@map("product_views")
 }
 
 model ProductImage {

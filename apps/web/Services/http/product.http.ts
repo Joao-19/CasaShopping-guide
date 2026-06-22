@@ -102,3 +102,23 @@ export const getFavoriteIds = async (): Promise<string[]> => {
   const { data } = await http.get<{ ids: string[] }>("/products/favorites/ids");
   return data.ids;
 };
+
+export interface RegisterProductViewPayload {
+  sessionId: string;
+  referrer?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  landingPage?: string;
+}
+
+export const registerProductView = async (
+  id: string,
+  payload: RegisterProductViewPayload
+) => {
+  const { data } = await http.post<{ recorded: boolean }>(
+    `/products/${id}/view`,
+    payload
+  );
+  return data;
+};

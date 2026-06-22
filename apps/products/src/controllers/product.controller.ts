@@ -18,6 +18,8 @@ import {
   Product,
   UpdateProductDto,
   PaginatedResult,
+  RegisterProductViewDto,
+  RegisterProductViewResult,
 } from "@repo/dtos";
 import { JwtAuthGuard, Roles, RolesGuard } from "@repo/auth-guard";
 
@@ -101,6 +103,16 @@ export class ProductController {
     @Req() req: any,
   ): Promise<{ isFavorited: boolean }> {
     return this.productService.toggleFavorite(req.user.userId, id);
+  }
+
+  // Público — registra uma visualização do produto (tracking próprio, Frente 3).
+  // Sem guard: visitantes anônimos também contam. Dedupe por sessão no service.
+  @Post(":id/view")
+  async registerView(
+    @Param("id") id: string,
+    @Body() dto: RegisterProductViewDto,
+  ): Promise<RegisterProductViewResult> {
+    return this.productService.registerView(id, dto);
   }
 
   // Público — detalhe de 1 produto (página /produto/[id]).

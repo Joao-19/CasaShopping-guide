@@ -7,6 +7,8 @@ import {
   Product,
   UpdateProductDto,
   PaginatedResult,
+  RegisterProductViewDto,
+  RegisterProductViewResult,
 } from "@repo/dtos";
 import { firstValueFrom } from "rxjs";
 import { ConfigService } from "@nestjs/config";
@@ -195,6 +197,26 @@ export class ProductGatewayService {
               Authorization: `Bearer ${token}`,
             },
           }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
+  async registerView(
+    id: string,
+    dto: RegisterProductViewDto,
+  ): Promise<RegisterProductViewResult> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<RegisterProductViewResult>(
+          `${this.productsServiceUrl}/products/${id}/view`,
+          dto
         )
       );
       return response.data;
