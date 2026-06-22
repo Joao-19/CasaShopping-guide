@@ -12,6 +12,10 @@ export interface ApiClientConfig extends AxiosRequestConfig {
   }) => void;
   refreshUrl?: string;
   excludedRefreshRoutes?: string[];
+  // Rotas (substring da URL) cujo erro NÃO deve emitir o toast/popup global.
+  // Para chamadas best-effort (ex.: tracking de view) que nunca devem
+  // interromper a UX se falharem. A promise ainda rejeita (quem chama trata).
+  silentErrorRoutes?: string[];
 }
 
 export const createApiClient = (
@@ -20,6 +24,7 @@ export const createApiClient = (
   const {
     refreshUrl = "auth/refresh",
     excludedRefreshRoutes = ["auth/login", "auth/admin/login"],
+    silentErrorRoutes = [],
   } = config;
 
   const getBaseUrl = () => {
@@ -114,7 +119,12 @@ export const createApiClient = (
       // We don't want to spam toast errors when background refresh fails (user might be guest)
       const isRefreshRequest = originalRequest.url?.includes(refreshUrl);
 
-      if (!isRefreshRequest) {
+      // Best-effort routes (ex.: tracking) não devem abrir popup global ao falhar.
+      const isSilentRoute = silentErrorRoutes.some((route) =>
+        originalRequest.url?.includes(route)
+      );
+
+      if (!isRefreshRequest && !isSilentRoute) {
         eventBus.emit("api-error", message);
       }
 

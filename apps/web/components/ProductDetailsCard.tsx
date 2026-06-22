@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, formatPriceTier } from "@repo/ui";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";

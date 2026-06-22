@@ -80,9 +80,34 @@ Implementação: campos extras no modelo `ProductView` / sessão (`referrer`,
 > por usuário, capturar `userId` via auth opcional (guard que não rejeita
 > anônimo) antes da agregação.
 
-### Dia 3 — Agregação
-- [ ] View materializada / job de agregação (views por produto/categoria/período)
-- [ ] Agregação de favoritos por produto
+### Dia 3 — Agregação ✅ (concluído 2026-06-22, validado via API)
+- [x] Camada de agregação em SQL (`apps/products/src/services/analytics.service.ts`)
+      — sem materialização ainda (volume baixo); índices de `product_views`
+      sustentam. Materializar só se a query degradar.
+- [x] Agregação de favoritos por produto (ranking) + views por produto
+      (ranking, com sessões únicas) + heatmap por categoria (views+favoritos,
+      `unnest` da array `categories`, `COUNT(DISTINCT)` p/ não inflar) +
+      breakdown de origem (utm_source → referrer→host → "direto").
+- [x] Endpoints admin `GET /products/analytics/{favorites,views,categories,origins}`
+      com filtro `from`/`to`/`limit`; proxy no gateway (token via cookie).
+      Validado: contagens corretas, dedupe de origem por host, filtro de período,
+      401 sem token.
+
+> **Nota deploy:** o gateway roda `nest start` (sem `--watch`) → exige restart
+> ao mexer em controllers/módulos do gateway (products tem `--watch`).
+
+#### Follow-ups da revisão (3 revisores especialistas — 2026-06-22)
+- ✅ **CRÍTICO resolvido:** falha do tracking de view abria o `ErrorPopup` global
+  (o interceptor do `@repo/api-client` emite `api-error` antes de rejeitar). Fix:
+  opção `silentErrorRoutes` no api-client + `["/view"]` no client do web; `"use
+  client"` explícito no `ProductDetailsCard`. Validado por injeção de 500 na UI:
+  sem popup, página intacta.
+- ⏳ **Pré-deploy (Dia 7/8):** endpoint público `POST /products/:id/view` sem
+  rate limit — `sessionId` vem do cliente; ator pode inflar views/uniqueSessions
+  ou floodar escrita. Adicionar `@nestjs/throttler` antes de produção.
+- ⏳ **Escala (se a telemetria crescer):** índice de dedupe `(sessionId,
+  productId)` não cobre o range em `viewedAt`. Trocar por `@@index([sessionId,
+  productId, viewedAt])` quando o volume justificar (hoje irrelevante).
 
 ### Dias 4–5 — API + Dashboard
 - [ ] Endpoints de analytics (ranking favoritos, views por período, dados do heatmap)

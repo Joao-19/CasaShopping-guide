@@ -5,4 +5,5 @@ export * from "./Products/index.js";
 export * from "./Settings/index.js";
 export * from "./Newsletter/index.js";
 export * from "./CampaignPages/index.js";
+export * from "./Analytics/index.js";
 export * from "./pagination.dto";

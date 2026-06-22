@@ -2,8 +2,10 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { ProductController } from "../controllers/product.controller";
 import { CategoryController } from "../controllers/category.controller";
+import { AnalyticsController } from "../controllers/analytics.controller";
 import { ProductService } from "@/services/product.service";
 import { CategoryService } from "@/services/category.service";
+import { AnalyticsService } from "@/services/analytics.service";
 import { PassportModule } from "@nestjs/passport";
 import { AuthGuardModule } from "@repo/auth-guard";
 
@@ -15,7 +17,12 @@ import { HealthController } from "../controllers/health.controller";
     PassportModule,
     AuthGuardModule,
   ],
-  controllers: [ProductController, CategoryController, HealthController],
-  providers: [ProductService, CategoryService],
+  controllers: [
+    ProductController,
+    CategoryController,
+    AnalyticsController,
+    HealthController,
+  ],
+  providers: [ProductService, CategoryService, AnalyticsService],
 })
 export class ProductModule {}

@@ -9,6 +9,8 @@ const http = createApiClient({
         process.env.NEXT_PUBLIC_API_URL ||
         "http://localhost:3000"
       : process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  // Tracking de view é best-effort — falha não pode abrir o popup global de erro.
+  silentErrorRoutes: ["/view"],
   getToken: () => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("accessToken");
