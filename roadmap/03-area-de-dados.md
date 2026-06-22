@@ -128,9 +128,23 @@ Implementação: campos extras no modelo `ProductView` / sessão (`referrer`,
 > corretos; trocar 7d↔30d recalcula tudo (views 10→8, exclui as fora da janela).
 > Componentes leves em `apps/admin/app/DashBoard/dados/components/`.
 
-### Dia 7 — Deploy Portainer
-- [ ] Configuração do stack/serviço no Portainer
-- [ ] Primeira subida em produção + validação + ajustes de env
+### Dia 7 — Deploy Portainer ⏳ (pendente — requer infra/credenciais; é seu)
+**Estado: pronto pra deploy.** Build de produção dos 4 apps afetados passou
+(`products-service`, `api-gateway`, `web`, `admin`). O que falta é o deploy em si:
+
+- [ ] **Migration em prod:** rodar `20260622_add_product_views` no Postgres de
+      produção (`prisma migrate deploy` via o runner `apps/migration`, como as
+      outras). Tabela nova + índices, idempotente — sem backfill, sem downtime.
+- [ ] **Sem env nova:** view + analytics vivem em services já existentes
+      (products + gateway). Reusam `DATABASE_URL`, `PRODUCTS_SERVICE_URL`,
+      `JWT_SECRET` — confirmar que o gateway de prod tem `JWT_SECRET` (já era
+      necessário p/ campaigns/newsletter/settings).
+- [ ] Rebuild das imagens de `products`, `api-gateway`, `web`, `admin` no Portainer.
+- [ ] **Pré-deploy (hardening — fazer junto):** rate-limit no `POST
+      /products/:id/view` público (`@nestjs/throttler`) — não instalei sozinho
+      pra não mexer em dependência de backend sem você. ~15 min: `ThrottlerModule`
+      no `product.module` + `@Throttle` no endpoint.
+- [ ] Validar em prod: abrir um produto grava view; `/DashBoard/dados` mostra números.
 
 ### Dia 8 — Testes / refino / buffer
 - [ ] Validação de números, performance da agregação, refino de UI

@@ -15,7 +15,7 @@
 
 | # | Frente | Estado | Esforço (c/ IA) | Risco | Detalhe |
 |---|--------|--------|------------------|-------|---------|
-| 3 | **Área de Dados** (favoritos + mapa de calor + origem do visitante) | não iniciada | **~8 dias** | alto (deploy + escala) | `03-area-de-dados.md` |
+| 3 | **Área de Dados** (favoritos + mapa de calor + origem do visitante) | Dias 1–6 ✅ (tracking+analytics+dashboard, validado e2e); falta só deploy (Dia 7) | ~8 dias | alto (deploy + escala) | `03-area-de-dados.md` |
 | 6 | **Newsletter Builder V2** | Fases 0–4 ✅, falta Fase 5 (e2e) | — | baixo | `06-newsletter-builder-v2.md` |
 | 7 | **Melhorias em Camadas** | Rodada 1 (B1/B2/B3/B4) ✅; Rodada 2 (B5/B6/B7/B11) em andamento | baixo/médio | `07-melhorias-camadas.md` |
 
