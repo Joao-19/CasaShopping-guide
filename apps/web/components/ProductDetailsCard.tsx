@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { useFavorites } from "@/composable/useFavorites";
+import { useTrackProductView } from "@/composable/useTrackProductView";
 import { useState } from "react";
 import { ShareButton } from "./ShareButton";
 import 'swiper/css';
@@ -41,6 +42,9 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
     const { hidePopup, showPopup } = usePopup();
     const { isFavorited, toggleFavorite } = useFavorites();
     const { user } = useAuthStore();
+
+    // Tracking próprio de visualização (Frente 3). Best-effort, dedupe no backend.
+    useTrackProductView(product.id);
     const [showStoreDetails, setShowStoreDetails] = useState(false);
     const [descExpanded, setDescExpanded] = useState(false);
 

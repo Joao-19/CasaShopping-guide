@@ -44,7 +44,7 @@ Implementação: campos extras no modelo `ProductView` / sessão (`referrer`,
 |------|--------|
 | Favoritos (toggle, lista, tabela `Favorite`) | ✅ ~85% — falta só agregação |
 | GA4/GTM | ⚠️ básico, sem eventos custom |
-| Contagem de views | ❌ 0% |
+| Contagem de views | ✅ pipeline de tracking pronto (Dias 1–2) — falta agregação |
 | Dashboard de dados no admin | ❌ 0% (existe CRUD, não analytics) |
 | Mapa de calor / filtro por período | ❌ 0% |
 
@@ -61,13 +61,24 @@ Implementação: campos extras no modelo `ProductView` / sessão (`referrer`,
 
 ## Plano de execução
 
-### Dias 1–2 — Tracking backend
-- [ ] Modelo `ProductView` (productId, userId?, viewedAt) + índices + migration
-- [ ] Endpoint `POST /products/:id/view` com dedupe (janela por sessão/usuário)
-- [ ] Disparo no front ao abrir o produto
-- [ ] ✅ *(decidido: tracking próprio de origem)* campos `referrer` / `utmSource` /
-      `utmMedium` / `utmCampaign` / `landingPage` no modelo + captura no 1º acesso
-      da sessão — ver decisão acima
+### Dias 1–2 — Tracking backend ✅ (concluído 2026-06-22, validado e2e na UI)
+- [x] Modelo `ProductView` (productId, userId?, sessionId, viewedAt) + índices
+      (`productId`, `viewedAt`, `sessionId+productId`) + migration idempotente
+      `20260622_add_product_views`
+- [x] Endpoint `POST /products/:id/view` (público) com dedupe por
+      `sessionId+productId` (janela 30min) → `{ recorded: bool }`. Proxy no gateway.
+- [x] Disparo no front: `composable/useTrackProductView` ligado no
+      `ProductDetailsCard` (chokepoint único: página `/produto/[id]` + popup da
+      listagem). Best-effort, não quebra a UI.
+- [x] Campos `referrer` / `utmSource` / `utmMedium` / `utmCampaign` / `landingPage`
+      no modelo + captura no 1º acesso da sessão (`lib/sessionTracking.ts`,
+      sessionStorage `cs_sid`/`cs_origin`). Referrer só conta domínio externo.
+
+> **Pendência herdada para a agregação (Dia 3):** `userId` no `ProductView`
+> existe mas ainda **não é populado** — o endpoint é público (sem guard) e não
+> confiamos em userId vindo do cliente. Para cruzar origem × favoritos × views
+> por usuário, capturar `userId` via auth opcional (guard que não rejeita
+> anônimo) antes da agregação.
 
 ### Dia 3 — Agregação
 - [ ] View materializada / job de agregação (views por produto/categoria/período)

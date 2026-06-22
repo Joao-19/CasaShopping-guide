@@ -15,7 +15,13 @@ import {
   PaginatedResult,
   PRODUCT_DESCRIPTION_MAX_LENGTH,
   PRODUCT_MAX_IMAGES,
+  RegisterProductViewDto,
+  RegisterProductViewResult,
 } from "@repo/dtos";
+
+// Janela de dedupe de views: visualizações repetidas da mesma sessão para o
+// mesmo produto dentro desse intervalo não contam de novo (anti-spam/refresh).
+const VIEW_DEDUPE_WINDOW_MS = 30 * 60 * 1000; // 30 min
 
 const STORAGE_SERVICE_URL =
   process.env.STORAGE_SERVICE_URL || "http://localhost:3007";
@@ -488,5 +494,52 @@ export class ProductService {
       select: { productId: true },
     });
     return favorites.map((f) => f.productId);
+  }
+
+  // Registra uma visualização de produto (tracking próprio — Frente 3).
+  // Dedupe: se a mesma sessão já viu o produto na janela recente, não conta
+  // de novo (evita inflar a métrica com refresh/spam). `userId` é opcional.
+  async registerView(
+    productId: string,
+    data: RegisterProductViewDto,
+    userId?: string,
+  ): Promise<RegisterProductViewResult> {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true },
+    });
+
+    if (!product) {
+      throw new NotFoundException("Product not found");
+    }
+
+    const since = new Date(Date.now() - VIEW_DEDUPE_WINDOW_MS);
+    const recent = await prisma.productView.findFirst({
+      where: {
+        productId,
+        sessionId: data.sessionId,
+        viewedAt: { gte: since },
+      },
+      select: { id: true },
+    });
+
+    if (recent) {
+      return { recorded: false };
+    }
+
+    await prisma.productView.create({
+      data: {
+        productId,
+        userId: userId ?? null,
+        sessionId: data.sessionId,
+        referrer: data.referrer ?? null,
+        utmSource: data.utmSource ?? null,
+        utmMedium: data.utmMedium ?? null,
+        utmCampaign: data.utmCampaign ?? null,
+        landingPage: data.landingPage ?? null,
+      },
+    });
+
+    return { recorded: true };
   }
 }

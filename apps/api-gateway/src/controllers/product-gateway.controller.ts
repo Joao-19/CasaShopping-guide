@@ -17,6 +17,8 @@ import {
   Product,
   UpdateProductDto,
   PaginatedResult,
+  RegisterProductViewDto,
+  RegisterProductViewResult,
 } from "@repo/dtos";
 import { Request } from "express";
 import {
@@ -161,6 +163,17 @@ export class ProductGatewayController {
   ): Promise<{ isFavorited: boolean }> {
     const token = req.cookies["access_token"];
     return this.productGatewayService.toggleFavorite(id, token);
+  }
+
+  // Público — registra visualização do produto (tracking próprio, Frente 3).
+  @Post(":id/view")
+  @ApiOperation({ summary: "Register a product view (own tracking)" })
+  @ApiResponse({ status: 201, description: "View registered (or deduped)." })
+  async registerView(
+    @Param("id") id: string,
+    @Body() dto: RegisterProductViewDto
+  ): Promise<RegisterProductViewResult> {
+    return this.productGatewayService.registerView(id, dto);
   }
 
   // Público — detalhe de 1 produto (página /produto/[id]).
