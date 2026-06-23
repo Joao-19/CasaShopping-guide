@@ -1,8 +1,7 @@
-import type JSZip from "jszip";
 import { CreateProductDto, BulkCreateResult } from "@repo/dtos";
 import productHttp from "@/Services/http/product.http";
 import storageHttp from "@/Services/http/storage.http";
-import { extractEntry } from "./matchImages";
+import type { LoadedArchive } from "./archive";
 import { mapPool, withRetry } from "./pool";
 import type { ResolvedRow } from "./types";
 
@@ -40,7 +39,7 @@ export interface JobSummary {
 
 interface RunParams {
   rows: ResolvedRow[];
-  zip: JSZip | null;
+  archive: LoadedArchive | null;
   uploadImage: UploadImageFn;
   onItems: (items: JobItem[]) => void;
 }
@@ -56,16 +55,22 @@ export interface RunResult {
 // que falharam no servidor.
 export async function runImportJob({
   rows,
-  zip,
+  archive,
   uploadImage,
   onItems,
 }: RunParams): Promise<RunResult> {
+  // Foto importável = resolvida e com origem (arquivo da máquina OU entrada
+  // no zip quando há zip carregado).
+  const uploadable = (im: ResolvedRow["images"][number]) =>
+    im.status === "resolved" &&
+    (im.file != null || (archive != null && !!im.zipEntry));
+
   const items: JobItem[] = rows.map((r, i) => ({
     index: i,
     name: r.name || `Linha ${i + 1}`,
     phase: "pending",
     uploaded: 0,
-    total: r.images.filter((im) => im.status === "resolved" && im.zipEntry).length,
+    total: r.images.filter(uploadable).length,
   }));
   const emit = () => onItems(items.map((x) => ({ ...x })));
   emit();
@@ -76,10 +81,7 @@ export async function runImportJob({
   await mapPool(rows, ITEM_CONCURRENCY, async (row, i) => {
     const item = items[i]!;
     const storeId = row.store.value;
-    const tasks =
-      storeId && zip
-        ? row.images.filter((im) => im.status === "resolved" && im.zipEntry)
-        : [];
+    const tasks = storeId ? row.images.filter(uploadable) : [];
 
     if (tasks.length === 0) {
       item.phase = "uploaded";
@@ -93,7 +95,8 @@ export async function runImportJob({
     const keys = await mapPool(tasks, IMAGE_CONCURRENCY, async (img) => {
       try {
         return await withRetry(async () => {
-          const file = await extractEntry(zip!, img.zipEntry!);
+          // Foto da máquina usa o File direto; senão extrai do arquivo.
+          const file = img.file ?? (await archive!.extract(img.zipEntry!));
           return uploadImage(file, { storeId: storeId ?? undefined });
         }, UPLOAD_ATTEMPTS);
       } catch {

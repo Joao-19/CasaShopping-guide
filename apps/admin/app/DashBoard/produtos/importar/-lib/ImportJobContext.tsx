@@ -8,8 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import type JSZip from "jszip";
 import { useImageUpload } from "@/composable/storage/useImageUpload";
+import type { LoadedArchive } from "./archive";
 import { runImportJob, type JobItem, type JobSummary } from "./runJob";
 import type { ResolvedRow } from "./types";
 
@@ -17,7 +17,7 @@ type JobStatus = "idle" | "running" | "done";
 
 interface StartParams {
   rows: ResolvedRow[];
-  zip: JSZip | null;
+  archive: LoadedArchive | null;
 }
 
 interface ImportJobValue {
@@ -60,7 +60,7 @@ export function ImportJobProvider({ children }: { children: React.ReactNode }) {
 
       runImportJob({
         rows: params.rows,
-        zip: params.zip,
+        archive: params.archive,
         uploadImage,
         onItems: setItems,
       })

@@ -40,9 +40,12 @@ export interface ResolvedValue<T> {
 export interface ImageMatch {
   filename: string; // nome referenciado na planilha
   status: ResolutionStatus;
-  // Entrada real no zip (quando encontrada). `file` é preenchido na
-  // extração; aqui guardamos só o nome resolvido do zip.
+  // Entrada real no zip (quando encontrada). `null` quando a foto não veio
+  // do zip (escolha manual da máquina — ver `file`).
   zipEntry: string | null;
+  // Arquivo escolhido direto da máquina (não está no zip). Quando presente,
+  // o upload usa esse File em vez de extrair do zip.
+  file?: File;
   suggestions?: Array<{ entry: string; score: number }>;
 }
 

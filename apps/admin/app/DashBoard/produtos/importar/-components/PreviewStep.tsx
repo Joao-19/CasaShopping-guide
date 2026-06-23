@@ -1,6 +1,7 @@
 "use client";
 
 import { PriceTier } from "@repo/dtos";
+import type { LoadedArchive } from "../-lib/archive";
 import {
   Table,
   TableBody,
@@ -12,6 +13,7 @@ import {
 import { CategoryMultiSelect } from "../../-components/CategoryMultiSelect";
 import { PRODUCT_CATEGORIES } from "../-lib/categories";
 import type { RowDiagnostics, ResolvedRow } from "../-lib/types";
+import { RowImagesCell } from "./RowImagesCell";
 import { StoreResolveCell } from "./StoreResolveCell";
 import { BulkStoreToolbar } from "./BulkStoreToolbar";
 import {
@@ -39,6 +41,8 @@ function categoryName(id: string) {
 
 interface PreviewStepProps {
   rows: ResolvedRow[];
+  archive: LoadedArchive | null;
+  imageEntries: string[];
   storeNameById: (id: string) => string;
   diagnose: (row: ResolvedRow) => RowDiagnostics;
   importableCount: number;
@@ -54,6 +58,8 @@ interface PreviewStepProps {
 
 export function PreviewStep({
   rows,
+  archive,
+  imageEntries,
   storeNameById,
   diagnose,
   importableCount,
@@ -66,9 +72,6 @@ export function PreviewStep({
   onImport,
   onBack,
 }: PreviewStepProps) {
-  const resolvedImageCount = (row: ResolvedRow) =>
-    row.images.filter((i) => i.status === "resolved").length;
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -186,16 +189,15 @@ export function PreviewStep({
                       />
                     )}
                   </TableCell>
-                  <TableCell
-                    className={`whitespace-nowrap text-sm ${
-                      resolvedImageCount(row) === 0
-                        ? "text-red-600 font-medium"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {resolvedImageCount(row) === 0
-                      ? "sem foto"
-                      : `${resolvedImageCount(row)}/${row.images.length}`}
+                  <TableCell>
+                    <RowImagesCell
+                      row={row}
+                      archive={archive}
+                      entries={imageEntries}
+                      onChange={(images) =>
+                        onUpdateRow(row.index, { images })
+                      }
+                    />
                   </TableCell>
                   <TableCell className="max-w-[220px]">
                     {diag.messages.length === 0 ? (

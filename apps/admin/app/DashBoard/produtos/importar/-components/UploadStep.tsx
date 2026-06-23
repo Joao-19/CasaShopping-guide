@@ -1,12 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { ARCHIVE_ACCEPT } from "../-lib/archive";
 import { downloadTemplate } from "../-lib/template";
 import { HelpModal } from "./HelpModal";
 
 interface UploadStepProps {
   parsing: boolean;
-  onSubmit: (spreadsheet: File, zip: File | null) => void;
+  onSubmit: (spreadsheet: File, archive: File | null) => void;
+}
+
+// Confere se o arquivo bate com a lista do `accept` (ex.: ".xlsx,.csv").
+// Aceita por extensão; se o accept for vazio, aceita tudo.
+function matchesAccept(file: File, accept: string): boolean {
+  if (!accept.trim()) return true;
+  const name = file.name.toLowerCase();
+  return accept
+    .split(",")
+    .map((p) => p.trim().toLowerCase())
+    .filter(Boolean)
+    .some((ext) => name.endsWith(ext));
 }
 
 function FilePicker({
@@ -22,12 +35,46 @@ function FilePicker({
   onPick: (f: File | null) => void;
   hint: string;
 }) {
+  const [dragOver, setDragOver] = useState(false);
+  // Pulso visual de rejeição quando o formato arrastado não bate.
+  const [errorPulse, setErrorPulse] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const dropped = e.dataTransfer.files?.[0];
+    if (!dropped) return;
+    if (!matchesAccept(dropped, accept)) {
+      setErrorPulse(true);
+      return;
+    }
+    onPick(dropped);
+  };
+
   return (
-    <label className="flex flex-col gap-2 cursor-pointer">
+    <label
+      className="flex flex-col gap-2 cursor-pointer"
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+        setErrorPulse(false);
+      }}
+      onDragLeave={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+      }}
+      onDrop={handleDrop}
+    >
       <span className="text-sm font-semibold text-gray-700">{label}</span>
       <div
         className={`flex items-center gap-3 px-4 py-6 border-2 border-dashed rounded-lg transition-colors ${
-          file ? "border-[#1A2B3C] bg-[#1A2B3C]/5" : "border-gray-300 hover:border-[#1A2B3C]"
+          errorPulse
+            ? "border-red-400 bg-red-50"
+            : dragOver
+              ? "border-[#1A2B3C] bg-[#1A2B3C]/10 ring-2 ring-[#1A2B3C]/20"
+              : file
+                ? "border-[#1A2B3C] bg-[#1A2B3C]/5"
+                : "border-gray-300 hover:border-[#1A2B3C]"
         }`}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
@@ -35,16 +82,27 @@ function FilePicker({
         </svg>
         <div className="flex flex-col">
           <span className="text-sm text-gray-700">
-            {file ? file.name : "Clique para selecionar"}
+            {dragOver
+              ? "Solte o arquivo aqui"
+              : file
+                ? file.name
+                : "Clique ou arraste o arquivo"}
           </span>
-          <span className="text-xs text-gray-400">{hint}</span>
+          <span
+            className={`text-xs ${errorPulse ? "text-red-500" : "text-gray-400"}`}
+          >
+            {errorPulse ? `Formato inválido — use ${accept}` : hint}
+          </span>
         </div>
       </div>
       <input
         type="file"
         accept={accept}
         className="hidden"
-        onChange={(e) => onPick(e.target.files?.[0] ?? null)}
+        onChange={(e) => {
+          setErrorPulse(false);
+          onPick(e.target.files?.[0] ?? null);
+        }}
       />
     </label>
   );
@@ -52,7 +110,7 @@ function FilePicker({
 
 export function UploadStep({ parsing, onSubmit }: UploadStepProps) {
   const [spreadsheet, setSpreadsheet] = useState<File | null>(null);
-  const [zip, setZip] = useState<File | null>(null);
+  const [archive, setArchive] = useState<File | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
   return (
@@ -61,8 +119,9 @@ export function UploadStep({ parsing, onSubmit }: UploadStepProps) {
         <div>
           <h2 className="text-lg font-bold text-gray-800">Importar produtos</h2>
           <p className="text-sm text-gray-500">
-            Envie a planilha e o zip de imagens. A ferramenta detecta as
-            colunas, casa as fotos e mostra um preview antes de salvar.
+            Envie a planilha e o arquivo de imagens (.zip ou .rar). A
+            ferramenta detecta as colunas, casa as fotos e mostra um preview
+            antes de salvar.
           </p>
         </div>
         <div className="shrink-0 flex items-center gap-3">
@@ -95,16 +154,16 @@ export function UploadStep({ parsing, onSubmit }: UploadStepProps) {
       />
 
       <FilePicker
-        label="Imagens (.zip) — opcional"
-        accept=".zip"
-        file={zip}
-        onPick={setZip}
+        label="Imagens (.zip / .rar) — opcional"
+        accept={ARCHIVE_ACCEPT}
+        file={archive}
+        onPick={setArchive}
         hint="Nomes dos arquivos batem com a coluna de imagem da planilha"
       />
 
       <button
         disabled={!spreadsheet || parsing}
-        onClick={() => spreadsheet && onSubmit(spreadsheet, zip)}
+        onClick={() => spreadsheet && onSubmit(spreadsheet, archive)}
         className="self-end px-6 py-2 bg-[#1A2B3C] text-white font-medium text-sm rounded-lg hover:bg-[#2c455d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {parsing ? "Lendo arquivos..." : "Continuar"}

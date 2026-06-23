@@ -1,56 +1,10 @@
-import JSZip from "jszip";
 import Fuse from "fuse.js";
+import { IMAGE_EXT } from "./archive";
 import { normalizeKey } from "./normalize";
 import type { ImageMatch } from "./types";
 
 const AUTO_RESOLVE_MAX_DISTANCE = 0.2;
 const SUGGEST_MAX_DISTANCE = 0.5;
-
-const IMAGE_EXT = /\.(jpe?g|png|webp|gif|avif)$/i;
-
-export interface LoadedZip {
-  zip: JSZip;
-  // Nomes das entradas de imagem (caminho dentro do zip). Só nomes — o
-  // conteúdo é decodificado sob demanda em `extractEntry` (lazy), pra
-  // não estourar a memória com zips grandes.
-  entries: string[];
-}
-
-// Carrega o zip e lista as imagens, SEM decodificar os bytes. Ignora
-// pastas e arquivos de sistema (__MACOSX, dotfiles).
-export async function loadZip(file: File): Promise<LoadedZip> {
-  const zip = await JSZip.loadAsync(await file.arrayBuffer());
-  const entries = Object.values(zip.files)
-    .filter(
-      (e) =>
-        !e.dir &&
-        !e.name.startsWith("__MACOSX") &&
-        !e.name.split("/").pop()?.startsWith(".") &&
-        IMAGE_EXT.test(e.name),
-    )
-    .map((e) => e.name);
-  return { zip, entries };
-}
-
-// Decodifica UMA entrada do zip como File (chamado só pras fotos casadas,
-// no momento do upload).
-export async function extractEntry(zip: JSZip, entryName: string): Promise<File> {
-  const entry = zip.file(entryName);
-  if (!entry) throw new Error(`Entrada não encontrada no zip: ${entryName}`);
-  const blob = await entry.async("blob");
-  const basename = entryName.split("/").pop() ?? entryName;
-  return new File([blob], basename, { type: blobType(basename) });
-}
-
-function blobType(name: string): string {
-  const ext = name.split(".").pop()?.toLowerCase();
-  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
-  if (ext === "png") return "image/png";
-  if (ext === "webp") return "image/webp";
-  if (ext === "gif") return "image/gif";
-  if (ext === "avif") return "image/avif";
-  return "application/octet-stream";
-}
 
 function stripExt(name: string): string {
   return name.replace(IMAGE_EXT, "");
@@ -58,6 +12,97 @@ function stripExt(name: string): string {
 
 function basenameKey(entry: string): string {
   return normalizeKey(stripExt(entry.split("/").pop() ?? entry));
+}
+
+// Pasta-pai imediata de uma entrada ("Logos/Velha Bahia/x.png" -> "Velha
+// Bahia"). "" quando o arquivo está na raiz do zip.
+function parentFolder(entry: string): string {
+  const parts = entry.split("/");
+  return parts.length > 1 ? (parts[parts.length - 2] ?? "") : "";
+}
+
+// Duas chaves casam quando uma é PREFIXO da outra em fronteira de palavra
+// — ex.: loja "Avanti Tapetes" começa com "Avanti", ou "Velha Bahia" ==
+// "Velha Bahia". Cobre o padrão "Loja = Marca + sufixo" sem o risco de
+// subconjunto solto (palavras genéricas como "house"/"casa" não bastam:
+// "Eastman House by Sleep Time" NÃO casa "Sleep House"). O espaço final
+// força a fronteira: "avanti" casa "avanti tapetes" mas "av" não casa.
+function keyMatchesStore(key: string, storeKey: string): boolean {
+  if (!key || !storeKey) return false;
+  const a = `${key} `;
+  const b = `${storeKey} `;
+  return b.startsWith(a) || a.startsWith(b);
+}
+
+function entryToMatch(entry: string): ImageMatch {
+  return {
+    filename: entry.split("/").pop() ?? entry,
+    status: "resolved",
+    zipEntry: entry,
+  };
+}
+
+// Fuzzy de reforço: devolve a chave mais próxima do alvo só quando MUITO
+// próxima (cobre grafias levemente diferentes: "Atelie" vs "Ateliê").
+function closestKey(target: string, keys: string[]): string | null {
+  const fuse = new Fuse(
+    keys.map((k) => ({ key: k, norm: normalizeKey(k) })),
+    { keys: ["norm"], includeScore: true, threshold: SUGGEST_MAX_DISTANCE, ignoreLocation: true },
+  );
+  const [top] = fuse.search(target);
+  return top && (top.score ?? 1) <= AUTO_RESOLVE_MAX_DISTANCE ? top.item.key : null;
+}
+
+// Fallback inteligente quando a planilha NÃO traz nome de arquivo: casa as
+// imagens pela LOJA. Cobre os dois padrões comuns de zip/rar:
+//   1. uma PASTA por loja  (Logos/<Loja>/arquivo)  → pega tudo da pasta;
+//   2. um ARQUIVO por loja (Fotos/<Loja>.jpg)       → pega o(s) arquivo(s)
+//      cujo nome bate com a loja.
+// Opera só sobre nomes — nada é decodificado aqui.
+export function matchImagesByStore(
+  storeName: string,
+  entries: string[],
+  max: number,
+): ImageMatch[] {
+  const wanted = normalizeKey(stripExt(storeName.trim()));
+  if (!wanted) return [];
+
+  // Estratégia 1: pasta cujo nome bate com a loja.
+  const byFolder = new Map<string, string[]>();
+  for (const entry of entries) {
+    const folder = parentFolder(entry);
+    if (!folder) continue;
+    const list = byFolder.get(folder) ?? [];
+    list.push(entry);
+    byFolder.set(folder, list);
+  }
+  if (byFolder.size > 0) {
+    const folders = [...byFolder.keys()];
+    const folder =
+      folders.find((f) => keyMatchesStore(normalizeKey(f), wanted)) ??
+      closestKey(wanted, folders);
+    if (folder) {
+      return (byFolder.get(folder) ?? []).slice(0, max).map(entryToMatch);
+    }
+  }
+
+  // Estratégia 2: arquivo(s) cujo basename bate com a loja.
+  const byBasename = entries.filter((e) =>
+    keyMatchesStore(basenameKey(e), wanted),
+  );
+  if (byBasename.length > 0) {
+    return byBasename.slice(0, max).map(entryToMatch);
+  }
+  const fuzzy = closestKey(
+    wanted,
+    entries.map((e) => e.split("/").pop() ?? e),
+  );
+  if (fuzzy) {
+    const hit = entries.find((e) => (e.split("/").pop() ?? e) === fuzzy);
+    if (hit) return [entryToMatch(hit)];
+  }
+
+  return [];
 }
 
 // Casa um nome de arquivo referenciado na planilha com uma entrada do
