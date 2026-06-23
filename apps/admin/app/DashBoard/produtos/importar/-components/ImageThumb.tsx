@@ -2,7 +2,7 @@
 
 import { type RefObject, memo, useEffect, useRef, useState } from "react";
 import type { LoadedArchive } from "../-lib/archive";
-import { loadThumbnail } from "../-lib/thumbnails";
+import { loadLocalThumbnail, loadThumbnail } from "../-lib/thumbnails";
 
 const BOX = "block w-full aspect-square object-cover bg-gray-100";
 
@@ -94,14 +94,19 @@ export const ArchiveThumb = memo(function ArchiveThumb({
 });
 
 // Miniatura de um arquivo escolhido da máquina. A borda de seleção fica no
-// botão que envolve a thumb (igual à do arquivo).
+// botão que envolve a thumb (igual à do arquivo). Redimensionada e cacheada
+// pelo loader (não revoga aqui).
 export const LocalThumb = memo(function LocalThumb({ file }: { file: File }) {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const objectUrl = URL.createObjectURL(file);
-    setUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
+    let alive = true;
+    loadLocalThumbnail(file)
+      .then((u) => alive && setUrl(u))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, [file]);
 
   return (
