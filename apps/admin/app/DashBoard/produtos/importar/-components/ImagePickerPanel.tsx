@@ -1,6 +1,6 @@
 "use client";
 
-import type { RefObject } from "react";
+import { type RefObject, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { LoadedArchive } from "../-lib/archive";
 import { ArchiveThumb, LocalThumb } from "./ImageThumb";
@@ -49,6 +49,7 @@ export function ImagePickerPanel({
   onRemoveLocal,
   onClose,
 }: ImagePickerPanelProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   return createPortal(
     <div
       ref={panelRef}
@@ -72,7 +73,7 @@ export function ImagePickerPanel({
         />
       </div>
 
-      <div className="overflow-y-auto p-3 flex flex-col gap-3">
+      <div ref={scrollRef} className="overflow-y-auto p-3 flex flex-col gap-3">
         {localFiles.length > 0 && (
           <div>
             <p className="text-[11px] font-medium text-gray-500 mb-1.5">
@@ -129,7 +130,12 @@ export function ImagePickerPanel({
                         : "border-transparent hover:border-gray-300"
                     } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
                   >
-                    <ArchiveThumb archive={archive} entry={entry} selected={sel} />
+                    <ArchiveThumb
+                      archive={archive}
+                      entry={entry}
+                      selected={sel}
+                      rootRef={scrollRef}
+                    />
                     {sel && (
                       <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#1A2B3C] text-white flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
