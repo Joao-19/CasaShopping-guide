@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import authHttp from '@/Services/http/auth.http';
 import { useAuthStore } from '@/store/auth.store';
+import { useSessionRefresh } from '@/composable/auth/useSessionRefresh';
 import { Sidebar } from './components/Sidebar';
 import { ImportJobProvider } from './produtos/importar/-lib/ImportJobContext';
 import { ImportJobWidget } from './produtos/importar/-components/ImportJobWidget';
@@ -17,6 +18,9 @@ export default function DashboardLayout({
 }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { setUser } = useAuthStore();
+
+    // Renova o access token antes de expirar, mantendo a sessão viva.
+    useSessionRefresh();
 
     const router = useRouter();
 

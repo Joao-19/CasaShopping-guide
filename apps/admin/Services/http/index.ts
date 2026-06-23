@@ -20,20 +20,38 @@ const getBaseUrl = () => {
 
 import Cookies from "js-cookie";
 
+/**
+ * Persiste os tokens nos cookies lidos pelo middleware e pelo client.
+ *
+ * IMPORTANTE: o `middleware.ts` lê o cookie `token` (e só depois
+ * `accessToken`). Se o refresh não atualizar `token`, o middleware
+ * continua vendo o access token expirado e derruba a sessão na próxima
+ * navegação — por isso `token` é escrito aqui também. Mantém paridade
+ * com o que o `useLogin` grava no login.
+ */
+export const persistTokens = (data: {
+  accessToken: string;
+  refreshToken: string;
+}) => {
+  Cookies.set("token", data.accessToken, { path: "/" });
+  Cookies.set("accessToken", data.accessToken, { path: "/" });
+  Cookies.set("refreshToken", data.refreshToken, { path: "/" });
+  // 'tokens' agregado, mantido para compatibilidade com validações legadas.
+  Cookies.set(
+    "tokens",
+    JSON.stringify({
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+    }),
+    { path: "/" },
+  );
+};
+
 const http = createApiClient({
   baseURL: getBaseUrl(),
   getRefreshToken: () => Cookies.get("refreshToken") || null,
   onTokenRefreshed: (data) => {
-    Cookies.set("accessToken", data.accessToken);
-    Cookies.set("refreshToken", data.refreshToken);
-    // Optional: Update 'tokens' cookie if validation logic relies on it
-    Cookies.set(
-      "tokens",
-      JSON.stringify({
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-      }),
-    );
+    persistTokens(data);
   },
   onRefreshFail: () => {
     if (typeof window !== "undefined") {

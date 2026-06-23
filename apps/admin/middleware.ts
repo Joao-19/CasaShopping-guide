@@ -28,35 +28,51 @@ export async function middleware(request: NextRequest) {
   const token =
     request.cookies.get("token")?.value ||
     request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
   const loginUrl = new URL(`${basePath}/login`, request.url);
 
-  if (!token) {
+  // Sem nenhuma credencial: não há sessão para renovar.
+  if (!token && !refreshToken) {
     return NextResponse.redirect(loginUrl);
   }
 
-  try {
-    const secretKey = process.env.JWT_SECRET || "changeme_secret";
-    const secret = new TextEncoder().encode(secretKey);
+  if (token) {
+    try {
+      const secretKey = process.env.JWT_SECRET || "changeme_secret";
+      const secret = new TextEncoder().encode(secretKey);
 
-    const { payload } = await jwtVerify(token, secret);
-    if (payload.role !== "admin") {
-      console.warn(
-        `[Middleware] Acesso negado: Usuário ${payload.sub} não tem role 'admin'.`,
-      );
+      const { payload } = await jwtVerify(token, secret);
+      if (payload.role !== "admin") {
+        console.warn(
+          `[Middleware] Acesso negado: Usuário ${payload.sub} não tem role 'admin'.`,
+        );
+        const response = NextResponse.redirect(loginUrl);
+        response.cookies.delete("token");
+        response.cookies.delete("accessToken");
+        response.cookies.delete("refreshToken");
+        return response;
+      }
+
+      return NextResponse.next();
+    } catch {
+      // Access token expirado/inválido. NÃO derruba a sessão aqui: se
+      // ainda houver refresh token (7d), deixa a navegação seguir e o
+      // client renova o access token (proativamente ou no 401 da API).
+      // A autorização real continua sendo enforçada no gateway.
+      if (refreshToken) {
+        return NextResponse.next();
+      }
       const response = NextResponse.redirect(loginUrl);
       response.cookies.delete("token");
       response.cookies.delete("accessToken");
       return response;
     }
-
-    return NextResponse.next();
-  } catch (error) {
-    const response = NextResponse.redirect(loginUrl);
-    response.cookies.delete("token");
-    response.cookies.delete("accessToken");
-    return response;
   }
+
+  // Access token ausente, mas há refresh token: permite e deixa o client
+  // renovar. Sem refresh válido o gateway/refresh-fail redireciona depois.
+  return NextResponse.next();
 }
 
 export const config = {
