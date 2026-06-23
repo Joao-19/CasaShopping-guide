@@ -1,15 +1,14 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import type JSZip from "jszip";
 import { toast } from "@repo/ui";
 import storeHttp from "@/Services/http/store.http";
+import { type LoadedArchive, loadArchive } from "./archive";
 import { buildResolvedRows, diagnoseRow, isRowImportable } from "./buildRows";
 import {
   suggestColumnMapping,
   suggestionsToMapping,
 } from "./columnMapping";
-import { loadZip } from "./matchImages";
 import { parseSpreadsheet } from "./parseSpreadsheet";
 import type { StoreOption } from "./resolve";
 import type {
@@ -25,41 +24,75 @@ export function useImport() {
   const [parsing, setParsing] = useState(false);
   const [headers, setHeaders] = useState<string[]>([]);
   const [rawRows, setRawRows] = useState<RawRow[]>([]);
-  const [zip, setZip] = useState<JSZip | null>(null);
+  const [archive, setArchive] = useState<LoadedArchive | null>(null);
   const [imageEntries, setImageEntries] = useState<string[]>([]);
   const [stores, setStores] = useState<StoreOption[]>([]);
   const [suggestions, setSuggestions] = useState<MappingSuggestion[]>([]);
   const [rows, setRows] = useState<ResolvedRow[]>([]);
 
-  // Passo 1: recebe planilha + zip, faz parse e pré-carrega lojas.
+  // Passo 1: recebe planilha + arquivo de imagens, faz parse e pré-carrega
+  // lojas. Cada etapa tem erro próprio — uma falha de rede (lojas) não pode
+  // se passar por "arquivo inválido", nem um zip/rar ruim por "planilha
+  // ruim".
   const onFiles = useCallback(
-    async (spreadsheet: File, zipFile: File | null) => {
+    async (spreadsheet: File, archiveFile: File | null) => {
       setParsing(true);
       try {
-        const [{ headers: hdrs, rows: parsed }, loadedZip, storeList] =
-          await Promise.all([
-            parseSpreadsheet(spreadsheet),
-            zipFile ? loadZip(zipFile) : Promise.resolve(null),
-            storeHttp
-              .list({ limit: 1000 })
-              .then((r) => r.data.map((s) => ({ id: s.id, name: s.name }))),
-          ]);
-
-        if (parsed.length === 0) {
+        // 1) Planilha
+        let parsedSheet;
+        try {
+          parsedSheet = await parseSpreadsheet(spreadsheet);
+        } catch (err) {
+          console.error(err);
+          toast.error(
+            "Não consegui ler a planilha. Confira se é um .xlsx/.csv válido.",
+          );
+          return;
+        }
+        if (parsedSheet.rows.length === 0) {
           toast.error("A planilha não tem linhas de dados.");
           return;
         }
 
-        setHeaders(hdrs);
-        setRawRows(parsed);
-        setZip(loadedZip?.zip ?? null);
-        setImageEntries(loadedZip?.entries ?? []);
+        // 2) Arquivo de imagens (opcional) — .zip ou .rar
+        let loadedArchive: LoadedArchive | null = null;
+        if (archiveFile) {
+          try {
+            loadedArchive = await loadArchive(archiveFile);
+          } catch (err) {
+            console.error(err);
+            toast.error(
+              "Não consegui abrir o arquivo de imagens. Confira se é um .zip ou .rar válido.",
+            );
+            return;
+          }
+          if (loadedArchive.entries.length === 0) {
+            toast.warning(
+              "O arquivo não tem imagens reconhecidas (.jpg .png .webp .gif .avif .svg). Seguindo sem fotos.",
+            );
+          }
+        }
+
+        // 3) Lojas (backend)
+        let storeList;
+        try {
+          const r = await storeHttp.list({ limit: 1000 });
+          storeList = r.data.map((s) => ({ id: s.id, name: s.name }));
+        } catch (err) {
+          console.error(err);
+          toast.error(
+            "Não consegui carregar as lojas (o servidor pode estar fora do ar). Tente de novo.",
+          );
+          return;
+        }
+
+        setHeaders(parsedSheet.headers);
+        setRawRows(parsedSheet.rows);
+        setArchive(loadedArchive);
+        setImageEntries(loadedArchive?.entries ?? []);
         setStores(storeList);
-        setSuggestions(suggestColumnMapping(hdrs));
+        setSuggestions(suggestColumnMapping(parsedSheet.headers));
         setStep("mapping");
-      } catch (err) {
-        console.error(err);
-        toast.error("Falha ao ler os arquivos. Verifique o formato.");
       } finally {
         setParsing(false);
       }
@@ -140,7 +173,7 @@ export function useImport() {
     setStep("upload");
     setHeaders([]);
     setRawRows([]);
-    setZip(null);
+    setArchive(null);
     setImageEntries([]);
     setStores([]);
     setSuggestions([]);
@@ -151,7 +184,8 @@ export function useImport() {
     step,
     parsing,
     headers,
-    zip,
+    archive,
+    imageEntries,
     stores,
     suggestions,
     rows,

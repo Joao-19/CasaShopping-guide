@@ -15,5 +15,6 @@ export function normalizeKey(value: string): string {
   return normalize(value)
     .replace(/[_\-\s]+/g, " ")
     .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, " ") // colapsa espaços que sobraram após remover pontuação
     .trim();
 }

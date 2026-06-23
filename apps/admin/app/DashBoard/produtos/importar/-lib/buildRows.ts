@@ -1,5 +1,5 @@
 import { PRODUCT_MAX_IMAGES } from "@repo/dtos";
-import { matchImageFilename } from "./matchImages";
+import { matchImageFilename, matchImagesByStore } from "./matchImages";
 import { resolvePrice } from "./priceMapping";
 import { resolveCategories, resolveStore, type StoreOption } from "./resolve";
 import type {
@@ -18,22 +18,33 @@ function cell(row: RawRow, header: string | null | undefined): string {
   return (row[header] ?? "").trim();
 }
 
-// Resolve as imagens de uma linha: se há coluna de imagem, casa cada
-// nome listado; senão tenta casar pelo nome do produto (convenção).
+// Resolve as imagens de uma linha. Em ordem de precedência:
+//  1. Coluna Imagem preenchida → casa cada nome listado pelo basename.
+//  2. Coluna vazia + zip/rar organizado por loja → casa pela LOJA, seja
+//     por PASTA (Logos/<Loja>/arquivo) ou por ARQUIVO (Fotos/<Loja>.jpg).
+//  3. Coluna vazia + nada casou pela loja → convenção pelo nome do produto.
 function resolveImages(
   row: RawRow,
   mapping: ColumnMapping,
   productName: string,
+  storeName: string,
   imageEntries: string[],
 ): ImageMatch[] {
   const imageCell = cell(row, mapping.image);
-  const filenames = imageCell
-    ? imageCell.split(/[,;|]/).map((f) => f.trim()).filter(Boolean)
-    : [productName]; // fallback: convenção pelo nome do produto
 
-  return filenames
-    .slice(0, MAX_IMAGES)
-    .map((f) => matchImageFilename(f, imageEntries));
+  if (imageCell) {
+    return imageCell
+      .split(/[,;|]/)
+      .map((f) => f.trim())
+      .filter(Boolean)
+      .slice(0, MAX_IMAGES)
+      .map((f) => matchImageFilename(f, imageEntries));
+  }
+
+  const byStore = matchImagesByStore(storeName, imageEntries, MAX_IMAGES);
+  if (byStore.length > 0) return byStore;
+
+  return [matchImageFilename(productName, imageEntries)];
 }
 
 // Constrói as linhas resolvidas a partir das linhas cruas + mapeamento +
@@ -48,6 +59,7 @@ export function buildResolvedRows(
     const name = cell(row, mapping.name);
     const description = cell(row, mapping.description);
     const isFeaturedRaw = cell(row, mapping.isFeatured);
+    const storeRaw = cell(row, mapping.storeName);
 
     return {
       index,
@@ -56,9 +68,9 @@ export function buildResolvedRows(
       price: resolvePrice(cell(row, mapping.price)),
       categories: resolveCategories(cell(row, mapping.categories)),
       tags: cell(row, mapping.tags) || undefined,
-      store: resolveStore(cell(row, mapping.storeName), stores),
+      store: resolveStore(storeRaw, stores),
       isFeatured: TRUE_VALUES.has(isFeaturedRaw.toLowerCase()),
-      images: resolveImages(row, mapping, name, imageEntries),
+      images: resolveImages(row, mapping, name, storeRaw, imageEntries),
       raw: row,
     };
   });

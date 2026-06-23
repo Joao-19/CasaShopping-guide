@@ -33,7 +33,7 @@ export default function ImportarProdutosPage() {
       toast.warning("Nenhuma linha apta para importar.");
       return;
     }
-    importJob.start({ rows: im.importableRows, zip: im.zip });
+    importJob.start({ rows: im.importableRows, archive: im.archive });
     toast.success("Importação iniciada — acompanhe no card no canto da tela.");
     im.reset();
   }, [importJob, im]);
@@ -79,6 +79,8 @@ export default function ImportarProdutosPage() {
       {im.step === "preview" && (
         <PreviewStep
           rows={im.rows}
+          archive={im.archive}
+          imageEntries={im.imageEntries}
           storeNameById={storeNameById}
           diagnose={im.diagnoseRow}
           importableCount={im.importableRows.length}
