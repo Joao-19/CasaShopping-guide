@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { PriceTier } from "@repo/dtos";
 import type { LoadedArchive } from "../-lib/archive";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@repo/ui";
 import { CategoryMultiSelect } from "../../-components/CategoryMultiSelect";
 import { PRODUCT_CATEGORIES } from "../-lib/categories";
+import { fileKey } from "../-lib/localFiles";
 import type { RowDiagnostics, ResolvedRow } from "../-lib/types";
 import { RowImagesCell } from "./RowImagesCell";
 import { StoreResolveCell } from "./StoreResolveCell";
@@ -72,6 +74,24 @@ export function PreviewStep({
   onImport,
   onBack,
 }: PreviewStepProps) {
+  // Pool compartilhado de fotos da máquina: o que foi escolhido em
+  // qualquer linha fica disponível pra reaproveitar nas outras.
+  const [localPool, setLocalPool] = useState<File[]>([]);
+  const addLocalToPool = useCallback((files: File[]) => {
+    setLocalPool((prev) => {
+      const seen = new Set(prev.map(fileKey));
+      const next = [...prev];
+      for (const f of files) {
+        const k = fileKey(f);
+        if (!seen.has(k)) {
+          next.push(f);
+          seen.add(k);
+        }
+      }
+      return next.length === prev.length ? prev : next;
+    });
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -194,6 +214,8 @@ export function PreviewStep({
                       row={row}
                       archive={archive}
                       entries={imageEntries}
+                      localPool={localPool}
+                      onAddLocalToPool={addLocalToPool}
                       onChange={(images) =>
                         onUpdateRow(row.index, { images })
                       }

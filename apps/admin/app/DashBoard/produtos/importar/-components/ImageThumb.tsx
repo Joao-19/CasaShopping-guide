@@ -1,6 +1,6 @@
 "use client";
 
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { type RefObject, memo, useEffect, useRef, useState } from "react";
 import type { LoadedArchive } from "../-lib/archive";
 import { loadThumbnail } from "../-lib/thumbnails";
 
@@ -21,7 +21,7 @@ function PlaceholderInner({ label }: { label?: string }) {
 // IntersectionObserver com o container de scroll como root. O object URL é
 // cacheado pelo loader (reabrir/rolar não re-extrai), então NÃO revogamos
 // no unmount.
-export function ArchiveThumb({
+export const ArchiveThumb = memo(function ArchiveThumb({
   archive,
   entry,
   selected,
@@ -91,10 +91,11 @@ export function ArchiveThumb({
       )}
     </div>
   );
-}
+});
 
-// Miniatura de um arquivo escolhido da máquina.
-export function LocalThumb({ file, selected }: { file: File; selected?: boolean }) {
+// Miniatura de um arquivo escolhido da máquina. A borda de seleção fica no
+// botão que envolve a thumb (igual à do arquivo).
+export const LocalThumb = memo(function LocalThumb({ file }: { file: File }) {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -104,11 +105,7 @@ export function LocalThumb({ file, selected }: { file: File; selected?: boolean 
   }, [file]);
 
   return (
-    <div
-      className={`${BOX} flex items-center justify-center text-gray-300 rounded-lg overflow-hidden border-2 ${
-        selected ? "border-[#1A2B3C]" : "border-transparent"
-      }`}
-    >
+    <div className={`${BOX} flex items-center justify-center text-gray-300`}>
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url} alt={file.name} className="w-full h-full object-cover" />
@@ -117,4 +114,4 @@ export function LocalThumb({ file, selected }: { file: File; selected?: boolean 
       )}
     </div>
   );
-}
+});

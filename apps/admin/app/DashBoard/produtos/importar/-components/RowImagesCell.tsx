@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PRODUCT_MAX_IMAGES } from "@repo/dtos";
 import type { LoadedArchive } from "../-lib/archive";
+import { fileKey } from "../-lib/localFiles";
 import { normalizeKey } from "../-lib/normalize";
 import type { ImageMatch, ResolvedRow } from "../-lib/types";
 import { ImagePickerPanel } from "./ImagePickerPanel";
@@ -13,6 +14,10 @@ interface RowImagesCellProps {
   row: ResolvedRow;
   archive: LoadedArchive | null;
   entries: string[]; // todas as imagens do arquivo (caminhos)
+  // Pool compartilhado de fotos da máquina (todas as ja escolhidas em
+  // qualquer linha) — permite reaproveitar a mesma foto em outro produto.
+  localPool: File[];
+  onAddLocalToPool: (files: File[]) => void;
   onChange: (images: ImageMatch[]) => void;
 }
 
@@ -36,11 +41,18 @@ export function RowImagesCell({
   row,
   archive,
   entries,
+  localPool,
+  onAddLocalToPool,
   onChange,
 }: RowImagesCellProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const [pos, setPos] = useState<{
+    left: number;
+    top?: number;
+    bottom?: number;
+    maxHeight: number;
+  } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +68,10 @@ export function RowImagesCell({
   const localFiles = useMemo(
     () => row.images.filter((i) => i.file).map((i) => i.file as File),
     [row.images],
+  );
+  const selectedLocalKeys = useMemo(
+    () => new Set(localFiles.map(fileKey)),
+    [localFiles],
   );
   const resolvedCount = selectedEntries.size + localFiles.length;
   const atMax = resolvedCount >= MAX;
@@ -92,53 +108,86 @@ export function RowImagesCell({
     [selectedEntries, localFiles, atMax, emit],
   );
 
+  // Marca/desmarca uma foto da máquina (do pool) PARA ESTA LINHA.
+  const toggleLocal = useCallback(
+    (file: File) => {
+      const k = fileKey(file);
+      if (selectedLocalKeys.has(k)) {
+        emit(
+          selectedEntries,
+          localFiles.filter((f) => fileKey(f) !== k),
+        );
+      } else {
+        if (atMax) return;
+        emit(selectedEntries, [...localFiles, file]);
+      }
+    },
+    [selectedEntries, localFiles, selectedLocalKeys, atMax, emit],
+  );
+
+  // "Do computador": adiciona arquivos novos ao pool compartilhado e já os
+  // seleciona nesta linha (respeitando o limite).
   const addLocalFiles = useCallback(
     (list: FileList | null) => {
       if (!list || list.length === 0) return;
       const incoming = Array.from(list).filter((f) =>
         f.type.startsWith("image/"),
       );
-      const key = (f: File) => `${f.name}:${f.size}`;
-      const seen = new Set(localFiles.map(key));
-      const merged = [...localFiles];
-      for (const f of incoming) {
-        if (!seen.has(key(f))) {
-          merged.push(f);
-          seen.add(key(f));
-        }
-      }
-      emit(selectedEntries, merged);
+      onAddLocalToPool(incoming);
+
+      const already = new Set(localFiles.map(fileKey));
+      const space = MAX - resolvedCount;
+      const toSelect = incoming
+        .filter((f) => !already.has(fileKey(f)))
+        .slice(0, Math.max(0, space));
+      if (toSelect.length > 0) emit(selectedEntries, [...localFiles, ...toSelect]);
     },
-    [selectedEntries, localFiles, emit],
+    [selectedEntries, localFiles, resolvedCount, onAddLocalToPool, emit],
   );
 
-  const removeLocal = useCallback(
-    (file: File) => {
-      emit(
-        selectedEntries,
-        localFiles.filter((f) => f !== file),
-      );
-    },
-    [selectedEntries, localFiles, emit],
-  );
-
-  // Posiciona o painel ao lado/abaixo do botão (fixed, fora do overflow da
-  // tabela). Reposiciona em scroll/resize.
+  // Posiciona o painel ancorado ao botão (fixed, fora do overflow da
+  // tabela). Abre abaixo; se não couber e houver mais espaço acima, abre
+  // ACIMA. maxHeight limitado ao espaço disponível pra nunca sair da tela.
   const reposition = useCallback(() => {
     const r = btnRef.current?.getBoundingClientRect();
     if (!r) return;
     const PANEL_W = 320;
+    const MARGIN = 8;
+    const GAP = 6;
+    const vh = window.innerHeight;
     const left = Math.min(
-      Math.max(8, r.right - PANEL_W),
-      window.innerWidth - PANEL_W - 8,
+      Math.max(MARGIN, r.right - PANEL_W),
+      window.innerWidth - PANEL_W - MARGIN,
     );
-    setPos({ top: r.bottom + 6, left });
+    const spaceBelow = vh - r.bottom - MARGIN;
+    const spaceAbove = r.top - MARGIN;
+    const HARD_MAX = Math.round(vh * 0.7);
+    if (spaceBelow >= 260 || spaceBelow >= spaceAbove) {
+      setPos({ left, top: r.bottom + GAP, maxHeight: Math.min(HARD_MAX, spaceBelow) });
+    } else {
+      setPos({ left, bottom: vh - r.top + GAP, maxHeight: Math.min(HARD_MAX, spaceAbove) });
+    }
   }, []);
 
   useEffect(() => {
     if (!open) return;
     reposition();
-    const onScroll = () => reposition();
+    let raf = 0;
+    // Reposiciona só quando a PÁGINA/tabela rola — ignora o scroll INTERNO
+    // do modal (senão re-renderiza a grade a cada frame e trava o scroll).
+    const onScroll = (e: Event) => {
+      if (
+        panelRef.current &&
+        e.target instanceof Node &&
+        panelRef.current.contains(e.target)
+      )
+        return;
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        reposition();
+      });
+    };
     window.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", reposition);
     const onDown = (e: MouseEvent) => {
@@ -150,6 +199,7 @@ export function RowImagesCell({
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
+      if (raf) cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll, true);
       window.removeEventListener("resize", reposition);
       document.removeEventListener("mousedown", onDown);
@@ -190,10 +240,11 @@ export function RowImagesCell({
           entries={entries}
           filteredEntries={filteredEntries}
           selectedEntries={selectedEntries}
-          localFiles={localFiles}
+          localPool={localPool}
+          selectedLocalKeys={selectedLocalKeys}
           onToggleEntry={toggleEntry}
+          onToggleLocal={toggleLocal}
           onAddLocal={addLocalFiles}
-          onRemoveLocal={removeLocal}
           onClose={() => setOpen(false)}
         />
       )}
