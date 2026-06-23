@@ -1,14 +1,15 @@
 "use client";
 
-import type { RefObject } from "react";
+import { type RefObject, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { LoadedArchive } from "../-lib/archive";
+import { fileKey } from "../-lib/localFiles";
 import { ArchiveThumb, LocalThumb } from "./ImageThumb";
 
 interface ImagePickerPanelProps {
   panelRef: RefObject<HTMLDivElement | null>;
   fileInputRef: RefObject<HTMLInputElement | null>;
-  pos: { top: number; left: number };
+  pos: { left: number; top?: number; bottom?: number; maxHeight: number };
   rowName: string;
   archive: LoadedArchive | null;
   max: number;
@@ -19,12 +20,19 @@ interface ImagePickerPanelProps {
   entries: string[];
   filteredEntries: string[];
   selectedEntries: Set<string>;
-  localFiles: File[];
+  localPool: File[];
+  selectedLocalKeys: Set<string>;
   onToggleEntry: (entry: string) => void;
+  onToggleLocal: (file: File) => void;
   onAddLocal: (list: FileList | null) => void;
-  onRemoveLocal: (file: File) => void;
   onClose: () => void;
 }
+
+const CheckBadge = () => (
+  <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#1A2B3C] text-white flex items-center justify-center">
+    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+  </span>
+);
 
 // Painel flutuante (renderizado em portal, fora do overflow da tabela) com
 // busca + grade de miniaturas do zip e das imagens da máquina. Só
@@ -43,17 +51,26 @@ export function ImagePickerPanel({
   entries,
   filteredEntries,
   selectedEntries,
-  localFiles,
+  localPool,
+  selectedLocalKeys,
   onToggleEntry,
+  onToggleLocal,
   onAddLocal,
-  onRemoveLocal,
   onClose,
 }: ImagePickerPanelProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   return createPortal(
     <div
       ref={panelRef}
-      style={{ position: "fixed", top: pos.top, left: pos.left, width: 320 }}
-      className="z-[60] bg-white border border-gray-200 rounded-xl shadow-2xl flex flex-col max-h-[70vh]"
+      style={{
+        position: "fixed",
+        left: pos.left,
+        top: pos.top,
+        bottom: pos.bottom,
+        width: 320,
+        maxHeight: pos.maxHeight,
+      }}
+      className="z-[60] bg-white border border-gray-200 rounded-xl shadow-2xl flex flex-col"
     >
       <div className="px-3 pt-3 pb-2 border-b border-gray-100">
         <div className="flex items-center justify-between mb-2">
@@ -72,26 +89,34 @@ export function ImagePickerPanel({
         />
       </div>
 
-      <div className="overflow-y-auto p-3 flex flex-col gap-3">
-        {localFiles.length > 0 && (
+      <div ref={scrollRef} className="overflow-y-auto p-3 flex flex-col gap-3">
+        {localPool.length > 0 && (
           <div>
             <p className="text-[11px] font-medium text-gray-500 mb-1.5">
-              Da máquina
+              Da máquina ({localPool.length})
             </p>
             <div className="grid grid-cols-3 gap-2">
-              {localFiles.map((f) => (
-                <div key={`${f.name}:${f.size}`} className="relative group">
-                  <LocalThumb file={f} selected />
+              {localPool.map((f) => {
+                const sel = selectedLocalKeys.has(fileKey(f));
+                const disabled = !sel && atMax;
+                return (
                   <button
+                    key={fileKey(f)}
                     type="button"
-                    onClick={() => onRemoveLocal(f)}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center shadow"
-                    aria-label="Remover"
+                    onClick={() => onToggleLocal(f)}
+                    disabled={disabled}
+                    title={f.name}
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all ${
+                      sel
+                        ? "border-[#1A2B3C] ring-1 ring-[#1A2B3C]/30"
+                        : "border-transparent hover:border-gray-300"
+                    } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
                   >
-                    ×
+                    <LocalThumb file={f} />
+                    {sel && <CheckBadge />}
                   </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -129,12 +154,13 @@ export function ImagePickerPanel({
                         : "border-transparent hover:border-gray-300"
                     } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
                   >
-                    <ArchiveThumb archive={archive} entry={entry} selected={sel} />
-                    {sel && (
-                      <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#1A2B3C] text-white flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                      </span>
-                    )}
+                    <ArchiveThumb
+                      archive={archive}
+                      entry={entry}
+                      selected={sel}
+                      rootRef={scrollRef}
+                    />
+                    {sel && <CheckBadge />}
                   </button>
                 );
               })}
