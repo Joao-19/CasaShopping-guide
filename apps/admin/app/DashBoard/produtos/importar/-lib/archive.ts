@@ -68,15 +68,38 @@ async function loadZipArchive(file: File): Promise<LoadedArchive> {
   };
 }
 
-// O wasm do unrar é servido de /unrar.wasm (copiado pra public/). Carregado
-// uma vez e cacheado entre uploads.
+// O wasm do unrar é servido de public/ (-> /unrar.wasm). Em produção o
+// admin roda sob basePath (ex.: /admin), então o asset fica em
+// /admin/unrar.wasm — daí prefixar com NEXT_PUBLIC_BASE_PATH. Tenta o
+// caminho com prefixo e cai pra raiz (cobre local sem basePath e qualquer
+// divergência de env). Carregado uma vez e cacheado entre uploads.
 let unrarWasm: ArrayBuffer | null = null;
 async function getUnrarWasm(): Promise<ArrayBuffer> {
   if (unrarWasm) return unrarWasm;
-  const res = await fetch("/unrar.wasm");
-  if (!res.ok) throw new Error("Falha ao carregar o leitor de .rar (unrar.wasm).");
-  unrarWasm = await res.arrayBuffer();
-  return unrarWasm;
+
+  // Em prod o admin roda sob basePath (ex.: /admin) — o valor chega via
+  // substituicao do entrypoint no boot. Só prefixa se for um caminho real
+  // (começa com "/"); ignora placeholder não-substituído ou vazio.
+  const raw = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  const base = raw.startsWith("/") ? raw.replace(/\/$/, "") : "";
+  const candidates = base ? [`${base}/unrar.wasm`, "/unrar.wasm"] : ["/unrar.wasm"];
+
+  let lastErr: unknown = null;
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        unrarWasm = await res.arrayBuffer();
+        return unrarWasm;
+      }
+      lastErr = new Error(`HTTP ${res.status} ao buscar ${url}`);
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw new Error(
+    `Falha ao carregar o leitor de .rar (unrar.wasm): ${String(lastErr)}`,
+  );
 }
 
 async function loadRarArchive(file: File): Promise<LoadedArchive> {
