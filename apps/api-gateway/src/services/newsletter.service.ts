@@ -13,6 +13,8 @@ const DEFAULT_TARGETING: NewsletterTargeting = {
   pageTypes: [],
   specificPages: [],
   campaigns: [],
+  startsAt: null,
+  endsAt: null,
 };
 
 function parseTargeting(value: unknown): NewsletterTargeting {
@@ -24,6 +26,8 @@ function parseTargeting(value: unknown): NewsletterTargeting {
         ? (t.specificPages as string[])
         : [],
       campaigns: Array.isArray(t.campaigns) ? (t.campaigns as string[]) : [],
+      startsAt: typeof t.startsAt === "string" ? t.startsAt : null,
+      endsAt: typeof t.endsAt === "string" ? t.endsAt : null,
     };
   }
   return { ...DEFAULT_TARGETING };
@@ -148,6 +152,8 @@ export class NewsletterService {
         pageTypes: data.targeting.pageTypes ?? [],
         specificPages: data.targeting.specificPages ?? [],
         campaigns: data.targeting.campaigns ?? [],
+        startsAt: data.targeting.startsAt ?? null,
+        endsAt: data.targeting.endsAt ?? null,
       };
 
     await this.prisma.$transaction(async (tx) => {

@@ -89,10 +89,10 @@ export default function NewsletterPage() {
       };
 
       await updateNewsletter(dto);
-      toast.success("Newsletter salva com sucesso!");
+      toast.success("Popup promocional salvo com sucesso!");
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao salvar a newsletter.");
+      toast.error("Erro ao salvar o popup promocional.");
     }
   };
 
@@ -111,7 +111,7 @@ export default function NewsletterPage() {
         />
       ) : (
         <div className="flex h-full items-center justify-center text-gray-400">
-          Carregando newsletter...
+          Carregando popup promocional...
         </div>
       )}
     </div>

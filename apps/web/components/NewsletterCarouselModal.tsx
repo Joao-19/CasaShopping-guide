@@ -200,7 +200,18 @@ export function NewsletterCarouselModal() {
     getNewsletter()
       .then((res) => {
         if (cancelled) return;
-        if (res.enabled && res.slides.length > 0) {
+        // Janela de exibição (targeting.startsAt / endsAt): se hoje estiver
+        // fora do intervalo, não mostra. Inputs do admin gravam YYYY-MM-DD.
+        const now = Date.now();
+        const startsAt = res.targeting?.startsAt
+          ? Date.parse(res.targeting.startsAt)
+          : null;
+        const endsAt = res.targeting?.endsAt
+          ? Date.parse(`${res.targeting.endsAt.slice(0, 10)}T23:59:59`)
+          : null;
+        const inWindow =
+          (!startsAt || now >= startsAt) && (!endsAt || now <= endsAt);
+        if (res.enabled && res.slides.length > 0 && inWindow) {
           setData(res);
           // appearDelay em segundos; mínimo de 250ms pra home pintar antes.
           const delayMs = Math.max(250, (res.behavior.appearDelay ?? 0) * 1000);

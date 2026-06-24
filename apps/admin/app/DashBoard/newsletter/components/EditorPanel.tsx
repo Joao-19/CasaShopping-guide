@@ -168,7 +168,7 @@ export function EditorPanel({
     <div className="flex h-full w-[380px] shrink-0 flex-col border-r border-gray-200 bg-white">
       <div className="border-b border-gray-200 px-6 py-5">
         <h2 className="text-base font-semibold text-gray-900">
-          Newsletter Builder
+          Popup promocional
         </h2>
         <p className="mt-0.5 text-sm text-gray-500">
           Crie slides e defina onde o pop-up aparece.
