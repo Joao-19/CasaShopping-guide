@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsISO8601,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -53,6 +54,16 @@ export class CreateCampaignPageDto {
   @IsBoolean()
   isActive?: boolean;
 
+  // Janela de exibição (agendamento). Aceita "YYYY-MM-DD" (input date) ou ISO.
+  // null limpa o limite correspondente. Ambos ausentes/null => sem prazo.
+  @IsOptional()
+  @IsISO8601()
+  startsAt?: string | null;
+
+  @IsOptional()
+  @IsISO8601()
+  endsAt?: string | null;
+
   @IsOptional()
   @IsArray()
   @IsUUID("all", { each: true })
@@ -88,6 +99,16 @@ export class UpdateCampaignPageDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // Janela de exibição (agendamento). Aceita "YYYY-MM-DD" (input date) ou ISO.
+  // null limpa o limite correspondente. Ambos ausentes/null => sem prazo.
+  @IsOptional()
+  @IsISO8601()
+  startsAt?: string | null;
+
+  @IsOptional()
+  @IsISO8601()
+  endsAt?: string | null;
 
   @IsOptional()
   @IsArray()
@@ -128,6 +149,13 @@ export interface CampaignProductView {
   store: CampaignProductStore | null;
 }
 
+// Status efetivo da campanha, derivado de isActive + janela vs. agora:
+// - inactive : isActive=false (desligada no master)
+// - scheduled: ligada, mas a janela ainda não começou
+// - expired  : ligada, mas a janela já terminou
+// - active   : ligada e (sem janela ou dentro dela) => visível no público
+export type CampaignStatus = "active" | "scheduled" | "expired" | "inactive";
+
 // Item de lista (admin) — sem os produtos resolvidos.
 export interface CampaignPageListItem {
   id: string;
@@ -136,6 +164,9 @@ export interface CampaignPageListItem {
   coverDesktop: string | null; // URL pública
   coverMobile: string | null; // URL pública
   isActive: boolean;
+  startsAt: string | null; // ISO (UTC) ou null
+  endsAt: string | null; // ISO (UTC) ou null
+  status: CampaignStatus; // calculado no backend (no momento da leitura)
   productCount: number;
   createdAt: Date;
   updatedAt: Date;
@@ -157,6 +188,9 @@ export interface CampaignPageDetail {
   coverDesktop: string | null; // URL pública
   coverMobile: string | null; // URL pública
   isActive: boolean;
+  startsAt: string | null; // ISO (UTC) ou null
+  endsAt: string | null; // ISO (UTC) ou null
+  status: CampaignStatus; // calculado no backend (no momento da leitura)
   products: CampaignProductView[];
   sections: CampaignSectionView[] | null; // null => vitrine plana
   createdAt: Date;

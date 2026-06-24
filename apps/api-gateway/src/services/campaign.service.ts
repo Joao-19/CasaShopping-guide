@@ -12,6 +12,7 @@ import {
   CampaignProductView,
   CampaignSectionDto,
   CampaignSectionView,
+  CampaignStatus,
   CreateCampaignPageDto,
   PaginatedResult,
   SlugAvailability,
@@ -70,6 +71,34 @@ export class CampaignService {
     }
     cleanKey = cleanKey.startsWith("/") ? cleanKey.slice(1) : cleanKey;
     return `${this.STORAGE_PUBLIC_URL}/${cleanKey}`;
+  }
+
+  // --- Janela de exibição (agendamento) ---
+  // Input do admin vem como "YYYY-MM-DD" (HTML date) ou ISO completo. Guardamos
+  // o início no começo do dia e o fim no fim do dia (UTC), assim o dia final é
+  // inclusivo e o round-trip `.slice(0,10)` no admin devolve a mesma data.
+  private toDateBound(
+    value: string | null | undefined,
+    edge: "start" | "end"
+  ): Date | null {
+    if (!value) return null;
+    const day = value.slice(0, 10); // "YYYY-MM-DD"
+    const time = edge === "start" ? "00:00:00.000" : "23:59:59.999";
+    const d = new Date(`${day}T${time}Z`);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Status efetivo no instante `now`. Espelha o tipo CampaignStatus do DTO.
+  private computeStatus(
+    isActive: boolean,
+    startsAt: Date | null,
+    endsAt: Date | null,
+    now: Date = new Date()
+  ): CampaignStatus {
+    if (!isActive) return "inactive";
+    if (startsAt && now < startsAt) return "scheduled";
+    if (endsAt && now > endsAt) return "expired";
+    return "active";
   }
 
   // União dedup (preserva ordem de 1ª aparição) dos productIds das seções.
@@ -133,6 +162,8 @@ export class CampaignService {
     coverDesktop: string | null;
     coverMobile: string | null;
     isActive: boolean;
+    startsAt: Date | null;
+    endsAt: Date | null;
     sections: Prisma.JsonValue;
     createdAt: Date;
     updatedAt: Date;
@@ -208,6 +239,13 @@ export class CampaignService {
       coverDesktop: this.transformToUrl(campaign.coverDesktop),
       coverMobile: this.transformToUrl(campaign.coverMobile),
       isActive: campaign.isActive,
+      startsAt: campaign.startsAt ? campaign.startsAt.toISOString() : null,
+      endsAt: campaign.endsAt ? campaign.endsAt.toISOString() : null,
+      status: this.computeStatus(
+        campaign.isActive,
+        campaign.startsAt,
+        campaign.endsAt
+      ),
       products,
       sections,
       createdAt: campaign.createdAt,
@@ -247,6 +285,9 @@ export class CampaignService {
         coverDesktop: this.transformToUrl(c.coverDesktop),
         coverMobile: this.transformToUrl(c.coverMobile),
         isActive: c.isActive,
+        startsAt: c.startsAt ? c.startsAt.toISOString() : null,
+        endsAt: c.endsAt ? c.endsAt.toISOString() : null,
+        status: this.computeStatus(c.isActive, c.startsAt, c.endsAt),
         productCount: c._count.products,
         createdAt: c.createdAt,
         updatedAt: c.updatedAt,
@@ -269,13 +310,20 @@ export class CampaignService {
     return this.toDetail(campaign);
   }
 
-  // Público: só campanha ativa; inexistente/inativa => 404.
+  // Público: só campanha "ao vivo" (ativa E dentro da janela); senão => 404.
   async findBySlug(slug: string): Promise<CampaignPageDetail> {
     const campaign = await this.prisma.campaignPage.findUnique({
       where: { slug },
       include: this.detailInclude,
     });
-    if (!campaign || !campaign.isActive)
+    if (
+      !campaign ||
+      this.computeStatus(
+        campaign.isActive,
+        campaign.startsAt,
+        campaign.endsAt
+      ) !== "active"
+    )
       throw new NotFoundException("Campanha não encontrada");
     return this.toDetail(campaign);
   }
@@ -303,6 +351,8 @@ export class CampaignService {
         coverDesktop: this.extractKey(data.coverDesktop),
         coverMobile: this.extractKey(data.coverMobile),
         isActive: data.isActive ?? true,
+        startsAt: this.toDateBound(data.startsAt, "start"),
+        endsAt: this.toDateBound(data.endsAt, "end"),
         sections: this.sectionsForDb(data.sections),
         products: {
           create: this.poolIds(data).map((productId, index) => ({
@@ -348,6 +398,12 @@ export class CampaignService {
             coverMobile: this.extractKey(data.coverMobile),
           }),
           ...(data.isActive !== undefined && { isActive: data.isActive }),
+          ...(data.startsAt !== undefined && {
+            startsAt: this.toDateBound(data.startsAt, "start"),
+          }),
+          ...(data.endsAt !== undefined && {
+            endsAt: this.toDateBound(data.endsAt, "end"),
+          }),
           ...(data.sections !== undefined && {
             sections: this.sectionsForDb(data.sections),
           }),

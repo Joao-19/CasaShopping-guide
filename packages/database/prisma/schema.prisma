@@ -223,7 +223,11 @@ model CampaignPage {
   slug         String  @unique // usado na rota pública /campanha/[slug]
   coverDesktop String? // key do storage (banner desktop)
   coverMobile  String? // key do storage (banner mobile)
-  isActive     Boolean @default(true) // inativa => 404 no público
+  isActive     Boolean @default(true) // master manual; inativa => 404 no público
+  // Janela de exibição (opcional). Dentro do intervalo a campanha fica "ao vivo";
+  // fora dele o público recebe 404 mesmo com isActive=true. Ambos null => sem prazo.
+  startsAt     DateTime? // início da janela (00:00:00 do dia, UTC)
+  endsAt       DateTime? // fim da janela (23:59:59.999 do dia, UTC — dia final incluso)
   // Seções opcionais: [{ id, title, type: "custom"|"highlights", productIds: [] }]
   // null => vitrine plana (todos os `products` num grid). CampaignProduct segue
   // sendo o pool resolvido (union dos productIds das seções).

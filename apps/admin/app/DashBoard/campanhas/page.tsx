@@ -13,10 +13,21 @@ import useCampaign from '@/composable/campaign/useCampaign';
 import campaignHttp from '@/Services/http/campaign.http';
 import { useRedirectUrl } from '@/composable/useRedirectUrl';
 import { CreateCampaignForm } from './-components/CreateCampaignForm';
+import { StatusToggle } from './-components/StatusToggle';
 
 export default function CampanhasPage() {
     const { showPopup, hidePopup } = usePopup();
-    const { campaigns, loading, deleteCampaign, search, setSearch, page, setPage, meta } = useCampaign();
+    const { campaigns, loading, deleteCampaign, updateCampaign, search, setSearch, page, setPage, meta } = useCampaign();
+
+    // Toggle rápido do master isActive direto na lista (sem abrir o modal).
+    const handleToggleActive = async (id: string, next: boolean) => {
+        try {
+            await updateCampaign(id, { isActive: next });
+            toast.success(next ? 'Campanha ativada!' : 'Campanha desativada!');
+        } catch {
+            toast.error('Erro ao atualizar o status da campanha.');
+        }
+    };
     // Base do site público p/ o link "ver página" de cada campanha.
     const webUrl = useRedirectUrl(process.env.NEXT_PUBLIC_WEB_URL, "");
 
@@ -138,9 +149,12 @@ export default function CampanhasPage() {
                                             <span className="text-sm text-gray-700">{campaign.productCount}</span>
                                         </TableCell>
                                         <TableCell>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${campaign.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                                {campaign.isActive ? 'Ativa' : 'Inativa'}
-                                            </span>
+                                            <StatusToggle
+                                                status={campaign.status}
+                                                isActive={campaign.isActive}
+                                                disabled={loading}
+                                                onToggle={(next) => handleToggleActive(campaign.id, next)}
+                                            />
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <button

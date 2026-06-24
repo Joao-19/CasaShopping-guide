@@ -25,6 +25,9 @@ export interface TargetingConfig {
   specificPages: string[];
   /** ids das campanhas selecionadas em "Páginas de campanha" (vazio = todas). */
   campaigns: string[];
+  /** Janela de exibição do pop-up (YYYY-MM-DD ou ISO). null/ausente = sem prazo. */
+  startsAt?: string | null;
+  endsAt?: string | null;
 }
 
 /**

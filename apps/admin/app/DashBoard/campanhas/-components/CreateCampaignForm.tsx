@@ -35,6 +35,10 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
     const [title, setTitle] = useState(initialData?.title ?? "");
     const [slug, setSlug] = useState(initialData?.slug ?? "");
     const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
+    // Janela de exibição (agendamento). Guardamos só a parte da data ("YYYY-MM-DD",
+    // formato do input HTML); o backend converte para o intervalo do dia em UTC.
+    const [startsAt, setStartsAt] = useState(initialData?.startsAt?.slice(0, 10) ?? "");
+    const [endsAt, setEndsAt] = useState(initialData?.endsAt?.slice(0, 10) ?? "");
     // Banners: string = URL existente; File = novo upload pendente.
     const [coverDesktop, setCoverDesktop] = useState<string | File | undefined>(
         initialData?.coverDesktop ?? undefined,
@@ -109,10 +113,17 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         return () => clearTimeout(t);
     }, [slug, initialData?.slug, initialData?.id]);
 
+    // Janela inválida: fim antes do início (comparação lexicográfica de YYYY-MM-DD).
+    const windowInvalid = !!startsAt && !!endsAt && endsAt < startsAt;
+
     // Vitrines opcionais; se houver, toda seção precisa de título.
     const sectionsValid = sections.every((s) => s.title.trim());
     const isValid =
-        !!title.trim() && !!slug.trim() && slugStatus !== "taken" && sectionsValid;
+        !!title.trim() &&
+        !!slug.trim() &&
+        slugStatus !== "taken" &&
+        sectionsValid &&
+        !windowInvalid;
 
     async function resolveCover(value: string | File | undefined) {
         if (value instanceof File) {
@@ -128,7 +139,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         if (saving) return;
         if (!isValid) {
             // Leva o usuário até a aba com o problema.
-            if (!title.trim() || !slug.trim() || slugStatus === "taken")
+            if (!title.trim() || !slug.trim() || slugStatus === "taken" || windowInvalid)
                 setActiveTab("campanha");
             else if (!sectionsValid) setActiveTab("vitrines");
             return;
@@ -144,6 +155,8 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 title: title.trim(),
                 slug: slug.trim(),
                 isActive,
+                startsAt: startsAt || null,
+                endsAt: endsAt || null,
                 coverDesktop: desktopKey ?? "",
                 coverMobile: mobileKey ?? "",
             };
@@ -317,6 +330,61 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                                     />
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="space-y-3 pt-4 border-t border-gray-100">
+                            <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                    Janela de exibição
+                                </p>
+                                {(startsAt || endsAt) && (
+                                    <button
+                                        type="button"
+                                        onClick={() => { setStartsAt(""); setEndsAt(""); }}
+                                        className="text-xs font-medium text-gray-500 hover:text-gray-700"
+                                    >
+                                        Limpar
+                                    </button>
+                                )}
+                            </div>
+                            <p className="text-xs text-gray-400">
+                                Defina o período em que a campanha fica ativa. Fora do prazo o site
+                                mostra 404 e o status vira Agendada/Expirada automaticamente. Deixe
+                                em branco para publicar sem prazo.
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Início
+                                    </Label>
+                                    <BaseInput
+                                        type="date"
+                                        value={startsAt}
+                                        max={endsAt || undefined}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            setStartsAt(e.target.value)
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Fim
+                                    </Label>
+                                    <BaseInput
+                                        type="date"
+                                        value={endsAt}
+                                        min={startsAt || undefined}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            setEndsAt(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            {windowInvalid && (
+                                <p className="text-xs text-red-500">
+                                    A data final precisa ser igual ou posterior à data inicial.
+                                </p>
+                            )}
                         </div>
 
                         <label className="flex items-center gap-2 cursor-pointer pt-4 border-t border-gray-100">
