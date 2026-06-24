@@ -128,6 +128,7 @@ export function PreviewStep({
               <TableHead>Loja</TableHead>
               <TableHead>Preço</TableHead>
               <TableHead>Categorias</TableHead>
+              <TableHead>Tags</TableHead>
               <TableHead>Fotos</TableHead>
               <TableHead>Problemas</TableHead>
             </TableRow>
@@ -208,6 +209,19 @@ export function PreviewStep({
                         }
                       />
                     )}
+                  </TableCell>
+                  <TableCell className="min-w-[180px]">
+                    <input
+                      type="text"
+                      value={row.tags ?? ""}
+                      onChange={(e) =>
+                        onUpdateRow(row.index, {
+                          tags: e.target.value ? e.target.value : undefined,
+                        })
+                      }
+                      placeholder="vazio = remover"
+                      className="w-full px-2 py-1 border border-gray-200 rounded text-sm bg-white placeholder:text-gray-300"
+                    />
                   </TableCell>
                   <TableCell>
                     <RowImagesCell

@@ -288,16 +288,17 @@ function CreateProductFormContent({
                 </div>
             </div>
 
-            {/* Tags - Disabled for now
             <BaseInput
                 id="tags"
                 label="Tags (opcional)"
                 type="text"
-                placeholder="#oferta #novidade"
+                placeholder="oferta, novidade, exclusivo"
                 value={data.tags}
                 onChange={(e) => handlers.setTags(e.target.value)}
             />
-            */}
+            <p className="-mt-3 text-[11px] text-gray-400">
+                Separe por vírgulas. Deixe vazio para remover todas as tags.
+            </p>
 
             {/* Checkboxes */}
             <div className="flex flex-col gap-3 mt-4">
@@ -373,7 +374,7 @@ export function CreateProductForm({
     );
     const [tags, setTags] = useState(() => {
         const t = initialData?.tags;
-        if (Array.isArray(t)) return t.join(' ');
+        if (Array.isArray(t)) return t.join(', ');
         if (typeof t === 'string') return t;
         return "";
     });
@@ -448,7 +449,10 @@ export function CreateProductForm({
             description,
             price,
             categories: categoryList,
-            tags: tags && typeof tags === 'string' ? tags : undefined, // Send undefined if empty string
+            // Sempre envia a string (inclusive vazia) — vazio = remover todas
+            // as tags. Se mandasse undefined, o backend interpretaria como
+            // "não alterar" e o usuário não conseguiria zerar.
+            tags: typeof tags === 'string' ? tags : '',
             storeId,
             images: finalImages,
             showStorePhone,
