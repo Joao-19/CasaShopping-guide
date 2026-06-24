@@ -4,6 +4,7 @@ import {
   IsHexColor,
   IsIn,
   IsInt,
+  IsISO8601,
   IsOptional,
   IsString,
   Max,
@@ -40,6 +41,9 @@ export interface NewsletterTargeting {
   pageTypes: string[];
   specificPages: string[];
   campaigns: string[];
+  /** Janela de exibição (ISO 8601). Opcionais — vazios = sempre. */
+  startsAt?: string | null;
+  endsAt?: string | null;
 }
 
 export interface NewsletterSettings {
@@ -140,6 +144,15 @@ export class NewsletterTargetingDto {
   @IsArray()
   @IsString({ each: true })
   campaigns?: string[];
+
+  // Janela de exibição (opcional). Formato ISO 8601 (YYYY-MM-DD ou completo).
+  @IsOptional()
+  @IsISO8601()
+  startsAt?: string | null;
+
+  @IsOptional()
+  @IsISO8601()
+  endsAt?: string | null;
 }
 
 export class UpdateNewsletterDto {

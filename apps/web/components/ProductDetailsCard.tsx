@@ -10,7 +10,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { useFavorites } from "@/composable/useFavorites";
 import { useTrackProductView } from "@/composable/useTrackProductView";
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ShareButton } from "./ShareButton";
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -53,8 +53,23 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
     const descricao =
         product.description ||
         "Esta peça une design e conforto supremo, sendo ideal para adicionar sofisticação ao seu ambiente.";
-    // Heurística: descrição longa (~> 3 linhas) ganha "ler mais".
-    const descIsLong = descricao.length > 120;
+
+    // "Ler mais" só aparece se o texto realmente está truncado na largura
+    // atual do popup. Mede via DOM (scrollHeight > clientHeight no estado
+    // clampado) — heurística por length dava falso-positivo (botão aparecia
+    // sem nada pra expandir).
+    const descRef = useRef<HTMLParagraphElement>(null);
+    const [descIsClamped, setDescIsClamped] = useState(false);
+    useLayoutEffect(() => {
+        const el = descRef.current;
+        if (!el || descExpanded) return;
+        const check = () =>
+            setDescIsClamped(el.scrollHeight - el.clientHeight > 1);
+        check();
+        const ro = new ResizeObserver(check);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [descricao, descExpanded]);
 
     // Em popup, fechar = hidePopup. Na página /produto/[id] (render direto),
     // o pai passa onClose (ex.: voltar pra listagem) — X não pode ser no-op.
@@ -178,10 +193,13 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                 </div>
 
                                 <div className="w-full">
-                                    <p className={`text-[#888] text-[12px] leading-relaxed ${descExpanded ? "" : "line-clamp-3 min-h-[54px]"}`}>
+                                    <p
+                                        ref={descRef}
+                                        className={`text-[#888] text-[12px] leading-relaxed ${descExpanded ? "" : "line-clamp-3"}`}
+                                    >
                                         {descricao}
                                     </p>
-                                    {descIsLong && (
+                                    {(descIsClamped || descExpanded) && (
                                         <button
                                             type="button"
                                             onClick={() => setDescExpanded((v) => !v)}

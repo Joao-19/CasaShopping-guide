@@ -7,6 +7,7 @@ import { Footer } from "../../components/Footer";
 import { AdvertisementBanner } from "../../components/AdvertisementBanner";
 import { StoresSection } from "../../components/StoresSection";
 import { NewsletterCarouselModal } from "../../components/NewsletterCarouselModal";
+import { BackToTopButton } from "../../components/BackToTopButton";
 
 export default function HomePage() {
     return (
@@ -64,6 +65,7 @@ export default function HomePage() {
                 </div>
 
                 <Footer />
+                <BackToTopButton />
             </div>
         </main>
     );

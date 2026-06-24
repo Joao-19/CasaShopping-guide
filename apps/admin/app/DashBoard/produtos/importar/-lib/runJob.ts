@@ -115,7 +115,10 @@ export async function runImportJob({
     description: row.description,
     price: row.price.value!,
     categories: row.categories.value ?? [],
-    tags: row.tags,
+    // Normaliza separadores: `;`, `|` e quebras de linha viram `,` para casar
+    // com o split por vírgula do backend (product.service). Mantém o que o
+    // usuário ver no preview intacto — a conversão é só no envio.
+    tags: row.tags?.replace(/[;|\n\r]+/g, ",").replace(/,+/g, ","),
     storeId: row.store.value!,
     images: uploadedKeys[i]!.map((path, index) => ({ path, index })),
     isFeatured: row.isFeatured,

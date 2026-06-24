@@ -94,16 +94,18 @@ export default function CampanhaPage() {
             }));
 
     // Grid reutilizável (mesmos cards arredondados da vitrine).
+    // Cada card tem altura responsiva: enxuto no mobile (auto), uniforme no
+    // desktop (h-[372px]) onde sobra largura para o layout 3–4 colunas.
     const renderGrid = (items: typeof products) => (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-7">
             {items.map((product, index) => (
                 <div
                     key={`${product.id}-${index}`}
-                    className="camp-rise h-[372px] group cursor-pointer"
+                    className="camp-rise group cursor-pointer md:h-[372px]"
                     style={{ animationDelay: `${120 + index * 60}ms` }}
                     onClick={() => handleProductClick(product)}
                 >
-                    <div className="h-full rounded-3xl bg-white p-3 shadow-[0_8px_30px_-14px_rgba(20,42,69,0.22)] group-hover:shadow-[0_20px_44px_-16px_rgba(20,42,69,0.34)] transition-all duration-300 group-hover:-translate-y-1.5">
+                    <div className="md:h-full rounded-3xl bg-white p-3 shadow-[0_8px_30px_-14px_rgba(20,42,69,0.22)] group-hover:shadow-[0_20px_44px_-16px_rgba(20,42,69,0.34)] transition-all duration-300 group-hover:-translate-y-1.5">
                         <ProductCardSwiper
                             title={product.title}
                             storeName={product.storeName}
@@ -117,7 +119,7 @@ export default function CampanhaPage() {
                                 }
                                 toggleFavorite(product.id);
                             }}
-                            className="h-full"
+                            className="md:h-full"
                         />
                     </div>
                 </div>
@@ -149,8 +151,11 @@ export default function CampanhaPage() {
                 </div>
             ) : (
                 <div className="flex-1 w-full">
-                    {/* ===== HERO imersivo: banner + título sobreposto ===== */}
-                    <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#01265f] via-[#003ba6] to-[#162e47]">
+                    {/* ===== HERO imersivo: banner + título sobreposto =====
+                        Altura limitada ao viewport (menos a toolbar de 100px) para que
+                        o título da campanha já apareça assim que a página abre, sem
+                        precisar rolar. */}
+                    <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#01265f] via-[#003ba6] to-[#162e47] aspect-square md:aspect-auto md:h-[calc(100svh-100px)] md:max-h-[720px] md:min-h-[480px]">
                         {/* Banner (ou gradiente de fallback com textura) */}
                         {hasBanner ? (
                             <>
@@ -158,17 +163,17 @@ export default function CampanhaPage() {
                                     <img
                                         src={campaign.coverDesktop}
                                         alt={campaign.title}
-                                        className="hidden md:block w-full object-cover"
+                                        className="hidden md:block absolute inset-0 w-full h-full object-cover"
                                     />
                                 )}
                                 <img
                                     src={campaign.coverMobile || campaign.coverDesktop || ""}
                                     alt={campaign.title}
-                                    className="block md:hidden w-full aspect-square object-cover"
+                                    className="block md:hidden absolute inset-0 w-full h-full object-cover"
                                 />
                             </>
                         ) : (
-                            <div className="w-full aspect-[21/9] md:aspect-[32/10] relative">
+                            <div className="absolute inset-0">
                                 {/* malha decorativa suave no fallback */}
                                 <div
                                     className="absolute inset-0 opacity-40"
@@ -187,21 +192,14 @@ export default function CampanhaPage() {
                         {/* Conteúdo do hero */}
                         <div className="absolute inset-x-0 bottom-0">
                             <div className="max-w-7xl mx-auto px-6 md:px-10 pb-12 md:pb-20">
-                                <div className="camp-rise inline-flex items-center gap-2.5 mb-4">
-                                    <span className="h-[2px] w-8 bg-[#7aa2ff] rounded-full" />
-                                    <span className="uppercase tracking-[0.28em] text-[11px] md:text-xs font-semibold text-[#cdddff]">
-                                        Campanha
-                                    </span>
-                                </div>
                                 <h1
                                     className="camp-rise font-bold text-white leading-[1.02] tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-6xl max-w-3xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
-                                    style={{ animationDelay: "80ms" }}
                                 >
                                     {campaign.title}
                                 </h1>
                                 <div
                                     className="camp-rise mt-5 flex items-center gap-3 text-white/80"
-                                    style={{ animationDelay: "160ms" }}
+                                    style={{ animationDelay: "80ms" }}
                                 >
                                     <span className="text-sm md:text-base">
                                         {count} {count === 1 ? "produto selecionado" : "produtos selecionados"}

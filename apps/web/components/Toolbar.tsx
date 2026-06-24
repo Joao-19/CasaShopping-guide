@@ -11,7 +11,7 @@ import { ProfilePopup } from "./ProfilePopup";
 import { LoginRequiredPopup } from "./LoginRequiredPopup";
 
 
-export function Toolbar() {
+export function Toolbar({ sticky = true }: { sticky?: boolean } = {}) {
     const pathname = usePathname();
     const isHome = pathname === "/";
     const { user, setUser } = useAuthStore();
@@ -294,7 +294,7 @@ export function Toolbar() {
 
     return (
         <>
-            <header className="bg-[rgb(0,59,166)] text-white py-4 px-6 shadow-md sticky top-0 z-50 h-[100px]">
+            <header className={`bg-[rgb(0,59,166)] text-white py-4 px-6 shadow-md z-50 h-[100px] ${sticky ? "sticky top-0" : ""}`}>
                 <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
                     <div className="flex items-center gap-8">
                         <Link href="/" className="cursor-pointer">

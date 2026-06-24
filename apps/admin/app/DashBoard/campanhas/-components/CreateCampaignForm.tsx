@@ -201,7 +201,7 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
         <>
         <FormCard
             title={isEditing ? "Editar Campanha" : "Nova Campanha"}
-            className="max-w-3xl w-full max-h-[90vh] overflow-hidden"
+            className="max-w-5xl w-[min(96vw,1100px)] max-h-[90vh] overflow-hidden"
             headerAction={
                 <button
                     type="button"
@@ -232,80 +232,94 @@ export function CreateCampaignForm({ onClose, initialData }: CreateCampaignFormP
                 </div>
 
                 {/* Altura fixa: troca de aba não muda o tamanho do modal. */}
-                <div className="h-[58vh] min-h-0">
+                <div className="h-[62vh] min-h-0">
                 {/* ===== Aba Campanha ===== */}
                 {activeTab === "campanha" && (
-                    <div className="h-full overflow-y-auto pr-1 -mr-1 space-y-5">
+                    <div className="h-full overflow-y-auto pr-1 -mr-1 space-y-6">
                         <div>
-                            <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Título <span className="text-red-500">*</span>
-                            </Label>
-                            <BaseInput
-                                value={title}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                    handleTitleChange(e.target.value)
-                                }
-                                onBlur={() => setTitleBlurred(true)}
-                                placeholder="Ex.: Especial Copa 2026"
-                                error={titleError}
-                            />
+                            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">
+                                Informações básicas
+                            </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Título <span className="text-red-500">*</span>
+                                </Label>
+                                <BaseInput
+                                    value={title}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        handleTitleChange(e.target.value)
+                                    }
+                                    onBlur={() => setTitleBlurred(true)}
+                                    placeholder="Ex.: Especial Copa 2026"
+                                    error={titleError}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    URL da página <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="flex items-start gap-2">
+                                    <span className="h-11 inline-flex items-center text-sm text-gray-400 whitespace-nowrap">
+                                        /campanha/
+                                    </span>
+                                    <div className="flex-1">
+                                        <BaseInput
+                                            value={slug}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleSlugChange(e.target.value)
+                                            }
+                                            onBlur={() => setSlugBlurred(true)}
+                                            placeholder="especial-copa-2026"
+                                            error={slugError}
+                                        />
+                                    </div>
+                                </div>
+                                {slugStatus === "checking" && (
+                                    <p className="text-xs text-gray-400 mt-1">Verificando disponibilidade…</p>
+                                )}
+                                {slugStatus === "available" && (
+                                    <p className="text-xs text-green-600 mt-1">URL disponível.</p>
+                                )}
+                                {slugStatus === "taken" && (
+                                    <p className="text-xs text-red-500 mt-1">Essa URL já existe. Escolha outra.</p>
+                                )}
+                            </div>
+                        </div>
                         </div>
 
-                        <div>
-                            <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                                URL da página <span className="text-red-500">*</span>
-                            </Label>
-                            <div className="flex items-start gap-2">
-                                <span className="h-11 inline-flex items-center text-sm text-gray-400 whitespace-nowrap">
-                                    /campanha/
-                                </span>
-                                <div className="flex-1">
-                                    <BaseInput
-                                        value={slug}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                            handleSlugChange(e.target.value)
-                                        }
-                                        onBlur={() => setSlugBlurred(true)}
-                                        placeholder="especial-copa-2026"
-                                        error={slugError}
+                        <div className="space-y-5 pt-2 border-t border-gray-100">
+                            <div className="pt-4">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">
+                                    Capas da campanha
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-5 items-start">
+                                    <BannerUpload
+                                        label="Capa desktop"
+                                        description="Banner largo (32:9)"
+                                        aspect="banner"
+                                        accept="image/*"
+                                        currentUrl={coverDesktopUrl}
+                                        isVideo={false}
+                                        onFileSelect={(file) => setCoverDesktop(file)}
+                                        onRemove={() => setCoverDesktop(undefined)}
+                                    />
+                                    <BannerUpload
+                                        label="Capa mobile"
+                                        description="Imagem quadrada (1:1)"
+                                        aspect="square"
+                                        accept="image/*"
+                                        currentUrl={coverMobileUrl}
+                                        isVideo={false}
+                                        onFileSelect={(file) => setCoverMobile(file)}
+                                        onRemove={() => setCoverMobile(undefined)}
                                     />
                                 </div>
                             </div>
-                            {slugStatus === "checking" && (
-                                <p className="text-xs text-gray-400 mt-1">Verificando disponibilidade…</p>
-                            )}
-                            {slugStatus === "available" && (
-                                <p className="text-xs text-green-600 mt-1">URL disponível.</p>
-                            )}
-                            {slugStatus === "taken" && (
-                                <p className="text-xs text-red-500 mt-1">Essa URL já existe. Escolha outra.</p>
-                            )}
                         </div>
 
-                        <div className="grid grid-cols-1 gap-5">
-                            <BannerUpload
-                                label="Capa desktop"
-                                description="Banner largo (32:9)"
-                                aspect="banner"
-                                accept="image/*"
-                                currentUrl={coverDesktopUrl}
-                                isVideo={false}
-                                onFileSelect={(file) => setCoverDesktop(file)}
-                                onRemove={() => setCoverDesktop(undefined)}
-                            />
-                            <BannerUpload
-                                label="Capa mobile"
-                                description="Imagem quadrada (1:1)"
-                                aspect="square"
-                                accept="image/*"
-                                currentUrl={coverMobileUrl}
-                                isVideo={false}
-                                onFileSelect={(file) => setCoverMobile(file)}
-                                onRemove={() => setCoverMobile(undefined)}
-                            />
-                        </div>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
+                        <label className="flex items-center gap-2 cursor-pointer pt-4 border-t border-gray-100">
                             <Checkbox
                                 checked={isActive}
                                 onCheckedChange={(checked) => setIsActive(checked as boolean)}
