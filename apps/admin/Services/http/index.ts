@@ -49,6 +49,8 @@ export const persistTokens = (data: {
 
 const http = createApiClient({
   baseURL: getBaseUrl(),
+  getToken: () =>
+    Cookies.get("accessToken") || Cookies.get("token") || null,
   getRefreshToken: () => Cookies.get("refreshToken") || null,
   onTokenRefreshed: (data) => {
     persistTokens(data);

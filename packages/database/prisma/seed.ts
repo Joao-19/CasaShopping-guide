@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/client";
 import { hash } from "bcryptjs"; // Você precisará instalar bcryptjs no packages/database
 import process from "process";
 
