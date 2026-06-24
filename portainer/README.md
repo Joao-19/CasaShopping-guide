@@ -147,6 +147,24 @@ aparecem em **GitHub > repo > Packages**.
 > - **Manter privados** e cadastrar no Portainer um *Registry* `ghcr.io`
 >   com um PAT (classic) com escopo `read:packages`.
 
+## Checklist de pré-voo (antes do primeiro deploy)
+
+Confirme estes pontos **uma vez** por ambiente. Se os quatro estiverem OK, o
+restante é só *Pull and redeploy*:
+
+- [ ] **Arquitetura do host bate com a imagem.** Workflows buildam
+  `linux/amd64` por padrão. Rode `uname -m` no host: `x86_64` → OK; `aarch64`
+  → edite `PLATFORMS: linux/arm64` nos workflows e rebuilde (ver
+  **Arquitetura das imagens**). Imagem de arquitetura errada não sobe.
+- [ ] **Pacotes do GHCR acessíveis pelo Portainer** — públicos **ou** com um
+  *Registry* `ghcr.io` cadastrado (PAT `read:packages`). Ver **Pré-requisitos
+  no GitHub**.
+- [ ] **Redes externas existem** no host: `web-proxy` e a do banco
+  (`DB_NETWORK_NAME`, padrão `infra-network`). Confira com `docker network ls`.
+- [ ] **Variáveis da stack preenchidas** conforme `portainer/.env.example`
+  (com `DATABASE_URL`/`DIRECT_URL` apontando o banco existente +
+  `?schema=casashopping`).
+
 ## Setup no Portainer (uma vez por ambiente)
 
 1. **Registries** (só se os pacotes forem privados): Registries > Add
@@ -226,6 +244,18 @@ runtime). A **única** coisa assada no build é o `basePath` do Next:
 Isso deve casar com o roteamento do **nginx central** (`/` → web, `/admin` →
 admin). Para outro roteamento, ajuste tanto o `buildArgs` no workflow quanto a
 config do nginx central (WePlanner-Infra).
+
+## Resolução de problemas
+
+| Sintoma | Causa provável | O que fazer |
+|---------|----------------|-------------|
+| Portainer não puxa a imagem (`unauthorized` / `manifest unknown` / `denied`) | Pacote do GHCR privado e sem registry cadastrado | Torne os pacotes públicos **ou** cadastre o registry `ghcr.io` com PAT `read:packages` (ver **Pré-requisitos no GitHub**). |
+| Containers em *restart loop* logo após subir (`exec format error` nos logs) | Imagem `amd64` rodando em host ARM (ou vice-versa) | Ajuste `PLATFORMS` no workflow para a arquitetura do host e rebuilde (ver **Checklist de pré-voo**). |
+| Stack falha ao criar com erro de rede (`network web-proxy not found`) | Rede externa ainda não existe no host | Confirme com `docker network ls`; a rede do nginx central e a do banco precisam existir antes. |
+| `db-migration` fica em erro e os demais não sobem | `DATABASE_URL`/`DIRECT_URL` ausente ou apontando banco/host errado | Revise as variáveis da stack; a URL deve alcançar o postgres da infra com `?schema=casashopping`. |
+| Serviços `unhealthy` ou 502 no nginx central | App subiu antes do banco, ou env incompleta (ex.: `JWT_SECRET`) | Verifique os logs do serviço; confirme todas as variáveis de `.env.example`. Um novo *redeploy* refaz a ordem (`depends_on` espera a migration). |
+| Atualizou e a versão antiga continua no ar | Redeploy sem re-pull da tag flutuante | Use **Pull and redeploy** (não só *Redeploy*); `pull_policy: always` exige o pull para trazer a build nova de `:dev`/`:prod`. |
+| Precisa voltar para a versão anterior | — | Defina a variável `TAG` com a tag imutável desejada e redeploy (ver **Rollback**). |
 
 ## O que este pipeline NÃO toca
 
