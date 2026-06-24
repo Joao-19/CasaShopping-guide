@@ -65,3 +65,20 @@ Em produção (Docker), isso já acontece no build da imagem — sem ação extr
 - Compatível com configs antigas: `startsAt`/`endsAt` ausentes → comportamento
   igual ao anterior (sem prazo).
 - `@IsISO8601()` aceita `YYYY-MM-DD` (formato do input HTML `type="date"`).
+
+## Dívida de qualidade pós-revisão (não-bloqueante)
+
+> Levantada na revisão da branch `feat/popup-promocional-ajustes-ui`
+> (FelipeStephan), mergeada em `dev` + `dev-deploy` em 2026-06-24. Nenhum
+> item bloqueia o deploy — a feature funciona. Fica para um momento sem pressa.
+
+| # | Arquivo | Item | Por que não bloqueou |
+|---|---------|------|----------------------|
+| 1 | `apps/admin/.../newsletter/targeting.ts` | `TargetingConfig` não declara `startsAt`/`endsAt`, mas `TargetingPanel` lê/grava esses campos → erro de tipo TS. Fix: adicionar `startsAt?: string \| null; endsAt?: string \| null;` à interface (espelhar o DTO). | Build do admin roda com `ignoreBuildErrors: true`; em runtime o save passa o `targeting` inteiro (spread), então persiste. |
+| 2 | `packages/dtos/.../newsletter.dto.ts` | DTO valida formato ISO mas não `endsAt >= startsAt`. Request direto à API aceita janela invertida (popup nunca aparece). Fix: validador custom no DTO. | Admin valida na UI (`TargetingPanel:204-206`); só falha em chamada direta à API. |
+| 3 | `apps/admin/.../TargetingPanel.tsx:206` | Comparação de datas por string crua; quebra se um lado vier ISO completo e outro `YYYY-MM-DD`. Fix: comparar sobre `toDateInput(...)`. | Hoje ambos os lados vêm do input `type="date"` (`YYYY-MM-DD`), então a comparação lexicográfica funciona. |
+| 4 | `packages/database/prisma/reset-admin.ts` | Senha `Admin@123` hardcoded + impressa no stdout; bcrypt cost 8. Fix: ler `process.env.ADMIN_PASSWORD`, cost ≥ 10, não logar a senha. | Script manual avulso (`tsx`), não importado, sem entry no `package.json` — não roda em build/CI/deploy. |
+
+Item à parte (pré-existente, não desta branch): `webpack-node-externals` é
+dependência implícita (hoisting pnpm) do `auth`/`gateway` — declarar em
+`devDependencies` quando der.

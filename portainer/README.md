@@ -78,6 +78,63 @@ Esse roteamento precisa existir na config do nginx central (repo
 WePlanner-Infra). Os arquivos `default.conf` e `manutencao.html` desta pasta
 são **referência** — não são montados por estas stacks.
 
+## Página de manutenção (opcional, recomendada)
+
+Esta pasta traz uma **página de manutenção pronta** e estilizada com a marca
+do guia — bem mais profissional que o erro padrão do Portainer/nginx quando a
+stack está fora do ar:
+
+- `portainer/manutencao.html` — página standalone (CSS inline, `noindex`).
+- `portainer/magnific_cinematic-wideangle-photo_YVPyuJiWeC.png` — imagem de
+  fundo referenciada pelo HTML (precisa ficar **na mesma pasta** que o HTML).
+
+A página é **autocontida** (só depende do PNG ao lado) e tem fallback de
+gradiente azul da marca caso a imagem não carregue.
+
+### Como ligar no nginx central
+
+A ideia: o nginx serve a página de manutenção (HTTP **503**) enquanto existir
+um **arquivo-flag**, e volta a fazer proxy normal quando o flag some — sem
+precisar editar/recarregar config para entrar e sair de manutenção.
+
+1. **Montar os arquivos** no container do nginx central, ex. em
+   `/usr/share/nginx/maintenance/` (volume read-only):
+
+   ```yaml
+   # serviço nginx central (WePlanner-Infra), trecho de volumes:
+   volumes:
+     - ./casashopping/manutencao.html:/usr/share/nginx/maintenance/manutencao.html:ro
+     - ./casashopping/magnific_cinematic-wideangle-photo_YVPyuJiWeC.png:/usr/share/nginx/maintenance/magnific_cinematic-wideangle-photo_YVPyuJiWeC.png:ro
+   ```
+
+2. **No `server` do nginx central**, ativar via flag e interceptar as rotas do
+   guia (`/`, `/admin`, `/api`):
+
+   ```nginx
+   # Liga a manutenção se o arquivo-flag existir (criar/remover sem reload)
+   set $maintenance 0;
+   if (-f /usr/share/nginx/maintenance/on) { set $maintenance 1; }
+
+   # Em cada location do casashopping ( / , /admin , /api ), no topo:
+   #   if ($maintenance) { return 503; }
+
+   error_page 503 @maintenance;
+   location @maintenance {
+       root /usr/share/nginx/maintenance;
+       rewrite ^.*$ /manutencao.html break;
+       # serve o PNG e demais assets da mesma pasta
+       add_header Cache-Control "no-store";
+   }
+   ```
+
+3. **Entrar em manutenção:** `touch /usr/share/nginx/maintenance/on` no
+   container do nginx. **Sair:** `rm` o mesmo arquivo. Não precisa
+   `nginx -s reload` — o `if (-f ...)` é avaliado por request.
+
+> Alternativa simples (sem flag): apontar `error_page 502 503 504 @maintenance;`
+> para que, sempre que a stack do guia estiver fora do ar, o usuário veja a
+> página da marca em vez do erro cru do nginx.
+
 ## Pré-requisitos no GitHub
 
 Nenhum secret a configurar — os workflows usam o `GITHUB_TOKEN` automático
