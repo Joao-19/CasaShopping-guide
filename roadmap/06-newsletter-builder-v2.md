@@ -1,8 +1,8 @@
 # Frente — Newsletter Builder V2 (refazer fiel ao modelo Figma)
 
-> Refação completa da newsletter para seguir **extremamente fiel** ao modelo
-> `Loopera/wePlanner/Newsletter creation panel V2 - (nao comitar)` (Figma:
-> "Newsletter creation panel").
+> Refação completa da newsletter para seguir **extremamente fiel** a um modelo
+> de referência interno no Figma ("Newsletter creation panel" — fora do repo,
+> não comitar).
 > Substitui a frente anterior — ver `roadmap/05-newsletter-carrossel.md` (modelo
 > antigo: texto sobre imagem 21/9). Branch sugerida: `feat/newsletter-builder-v2`.
 > Base: `dev`. Data: 2026-06-18.
@@ -275,5 +275,5 @@ full-screen 2 painéis). Portar fiel do modelo:
 - Preview usa container queries (`@container`/`@2xl:`) — sem isso o split não
   responde dentro do painel; validar no Tailwind v4 do admin.
 - `NewsletterSection.tsx` (web) = signup de e-mail, **outra feature**. Não mexer.
-- Modelo original em `Loopera/wePlanner/Newsletter creation panel V2 - (nao comitar)`
-  — **não comitar** esse diretório (está fora do repo, é referência).
+- Modelo original num diretório de referência interno **fora do repo**
+  — **não comitar** esse diretório (é só referência).

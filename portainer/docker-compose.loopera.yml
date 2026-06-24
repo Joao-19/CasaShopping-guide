@@ -1,19 +1,19 @@
 # ============================================================================
-# CasaShopping — Stack PROD atras do NGINX CENTRAL (guiacasashopping.loopera.com.br)
+# CasaShopping — Stack PROD atras de um NGINX CENTRAL
 # ============================================================================
-# Variante do docker-compose.prod.yml para rodar no MESMO servidor/nginx que o
-# WePlanner-Infra. Aqui o casashopping NAO tem nginx proprio nem publica portas
-# no host: quem faz a borda (80/443 + SSL) e o nginx-proxy do WePlanner-Infra.
+# Variante do docker-compose.prod.yml para rodar atras de um nginx central
+# (reverse proxy externo). Aqui o casashopping NAO tem nginx proprio nem publica
+# portas no host: quem faz a borda (80/443 + SSL) e o nginx-proxy externo.
 #
 # Diferencas em relacao ao docker-compose.prod.yml:
 #   1. SEM servico `nginx-proxy`        -> o nginx central assume a borda.
 #   2. SEM `ports:` publicadas no host  -> tudo so na rede docker (seguranca +
-#      evita colisao com as portas que o weplanner ja usa).
+#      evita colisao com outras portas ja usadas no host).
 #   3. `web`, `admin`, `api-gateway` e `storage` entram na rede externa
 #      `web-proxy` (a mesma do nginx central) para serem alcancados por nome.
 #   4. Demais servicos ficam so em `casashopping-net` (rede interna).
 #
-# O nginx central roteia (ver bloco server{} no WePlanner-Infra/nginx/default.conf):
+# O nginx central roteia (config fora deste repo):
 #   /        -> casashopping-web:3001
 #   /api     -> casashopping-gateway:3000
 #   /admin   -> casashopping-admin:3002

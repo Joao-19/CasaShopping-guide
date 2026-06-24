@@ -161,7 +161,7 @@ Registrado pra não se perder.
 ### B10 — Revista/PDF do guia para download — DEFERIDO/EXTERNO
 **Risco:** médio · **Deferido** (00:18–00:24).
 Landing "acesse o guia online ou baixe a revista (PDF)"; gerar PDF estilizado
-puxando o conteúdo atual (modelo wePlanner). Conclusão: provavelmente **fora do
+puxando o conteúdo atual (modelo de referência interno). Conclusão: provavelmente **fora do
 guia** (site do Casa Shopping / TI), com toggle de ativar no admin. Futuro.
 
 ### Observações

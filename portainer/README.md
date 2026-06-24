@@ -60,12 +60,11 @@ Cada serviço recebe **duas** tags por publicação:
 
 Serviços: `api-gateway, auth, users, stores, products, storage, migration, web, admin`.
 
-## Topologia: atrás do nginx central
+## Topologia: atrás de um nginx central
 
-As stacks rodam no **mesmo servidor que o WePlanner** e **não têm nginx
-próprio nem publicam portas** no host. Quem faz a borda (80/443 + SSL) é o
-**nginx central** (WePlanner-Infra), que alcança os serviços pela rede
-`web-proxy`:
+As stacks rodam atrás de um **nginx central** (reverse proxy externo) e **não
+têm nginx próprio nem publicam portas** no host. Quem faz a borda (80/443 +
+SSL) é esse nginx central, que alcança os serviços pela rede `web-proxy`:
 
 ```
 /        -> casashopping-web:3001
@@ -74,9 +73,9 @@ próprio nem publicam portas** no host. Quem faz a borda (80/443 + SSL) é o
 /minio/  -> casashopping-storage:9000   (leitura pública de imagens)
 ```
 
-Esse roteamento precisa existir na config do nginx central (repo
-WePlanner-Infra). Os arquivos `default.conf` e `manutencao.html` desta pasta
-são **referência** — não são montados por estas stacks.
+Esse roteamento precisa existir na config do nginx central (fora deste repo).
+Os arquivos `default.conf` e `manutencao.html` desta pasta são **referência** —
+não são montados por estas stacks.
 
 ## Página de manutenção (opcional, recomendada)
 
@@ -101,7 +100,7 @@ precisar editar/recarregar config para entrar e sair de manutenção.
    `/usr/share/nginx/maintenance/` (volume read-only):
 
    ```yaml
-   # serviço nginx central (WePlanner-Infra), trecho de volumes:
+   # serviço nginx central (externo), trecho de volumes:
    volumes:
      - ./casashopping/manutencao.html:/usr/share/nginx/maintenance/manutencao.html:ro
      - ./casashopping/magnific_cinematic-wideangle-photo_YVPyuJiWeC.png:/usr/share/nginx/maintenance/magnific_cinematic-wideangle-photo_YVPyuJiWeC.png:ro
@@ -171,7 +170,7 @@ restante é só *Pull and redeploy*:
    registry > Custom > URL `ghcr.io`, usuário = seu login GitHub, senha =
    PAT com `read:packages`.
 2. **Redes externas** (já devem existir na sua infra): a stack usa **duas**
-   redes externas, compartilhadas com o WePlanner:
+   redes externas já presentes no host:
    - `web-proxy` — rede do **nginx central**; por ela o nginx alcança
      `web`/`admin`/`gateway`/`storage` por nome.
    - a rede do **banco**, definida em `DB_NETWORK_NAME` (padrão
@@ -180,11 +179,11 @@ restante é só *Pull and redeploy*:
 3. **Banco de dados (sem SQL manual):** a stack **não sobe postgres** — ela
    reutiliza o banco que **já existe** na infra usando um **schema próprio**.
    Aponte `DATABASE_URL`/`DIRECT_URL` para o banco existente + `?schema=casashopping`,
-   ex.: `postgres://user:pass@postgres:5432/weplanner_test?schema=casashopping`
+   ex.: `postgres://user:pass@postgres:5432/<db-existente>?schema=casashopping`
    (use o nome do `POSTGRES_DB` da infra, **não** um banco novo). O
    `prisma migrate deploy` cria o schema `casashopping` automaticamente — não
-   precisa rodar `CREATE DATABASE`/`CREATE SCHEMA`. Não colide com o weplanner
-   (que usa o schema `public` no mesmo banco).
+   precisa rodar `CREATE DATABASE`/`CREATE SCHEMA`. Usando um schema próprio,
+   não colide com outras aplicações que compartilhem o mesmo banco.
 4. **Stacks > Add stack**:
    - **Build method:** *Repository* (Git) — aponte para este repo e o
      caminho do compose do ambiente:
@@ -243,7 +242,7 @@ runtime). A **única** coisa assada no build é o `basePath` do Next:
 
 Isso deve casar com o roteamento do **nginx central** (`/` → web, `/admin` →
 admin). Para outro roteamento, ajuste tanto o `buildArgs` no workflow quanto a
-config do nginx central (WePlanner-Infra).
+config do nginx central (fora deste repo).
 
 ## Resolução de problemas
 

@@ -103,7 +103,7 @@ gateway (`:3000`).
 - **Porta 9000 tomada**: o MinIO real está na `:9100` (acima). Em outro ambiente
   (docker-compose próprio), o MinIO sobe na 9000 — conferir a porta efetiva.
 - **Bug no `apps/storage` `ensureBucket` (latente)**: `configureCorsManual(internalEndpoint)` (storage.service.ts:125) usa o endpoint interno mesmo quando o HeadBucket caiu no fallback público — se o interno for inalcançável, o CORS do bucket nunca é aplicado (catch+warn). Localmente o `.env` usa `localhost:9000` nos dois, então não dispara; mas em docker (`storage:9000`) rodando o app fora do compose, dispararia.
-- **Modal de erro global na home** (`z-[9999]`, "Ops! Algo deu errado / Internal server error") aparecia por um **500 do `/stores`** e **fica por cima** do modal da newsletter (`z-[100]`), interceptando cliques. **Resolvido (2026-06-18):** `apps/stores/.env` tinha `DATABASE_URL` **comentado** → o stores caía no DB errado (raiz/weplanner, sem a tabela `stores`) e o Prisma dava `KnownRequestError`. Descomentei a linha (→ casashopping) e reiniciei; `GET /stores` volta 200. Auditoria dos backends: só o `stores` estava comentado (`auth` não tem `DATABASE_URL` mas herda o do `@repo/database` → casashopping; demais ok).
+- **Modal de erro global na home** (`z-[9999]`, "Ops! Algo deu errado / Internal server error") aparecia por um **500 do `/stores`** e **fica por cima** do modal da newsletter (`z-[100]`), interceptando cliques. **Resolvido (2026-06-18):** `apps/stores/.env` tinha `DATABASE_URL` **comentado** → o stores caía no DB errado (o banco padrão da raiz, sem a tabela `stores`) e o Prisma dava `KnownRequestError`. Descomentei a linha (→ casashopping) e reiniciei; `GET /stores` volta 200. Auditoria dos backends: só o `stores` estava comentado (`auth` não tem `DATABASE_URL` mas herda o do `@repo/database` → casashopping; demais ok).
 
 ### Pendente — outros
 - [x] **Segurança (2026-06-19):** `PUT /newsletter` e `PUT /settings` protegidos
@@ -112,7 +112,7 @@ gateway (`:3000`).
       no microserviço storage) — follow-up coordenado. Validação e2e pendente do
       restart do gateway.
 - [ ] **Alinhar `.env` da raiz** (`postgres@.../postgres` → `.../casashopping?schema=public`)
-      pra o runner `apps/migration`/frontends não apontarem pro DB do weplanner
+      pra o runner `apps/migration`/frontends não apontarem pro DB errado (o banco padrão `postgres`)
 - [ ] (Opcional) Persistir "já visto" além da sessão / re-exibir ao trocar slides
 - [ ] (Opcional) Imagem mobile dedicada por slide (hoje 1 imagem, aspect 21/9)
 - [ ] (Opcional) Decompor `personalizacao/page.tsx` (430 linhas; `BannerUpload` inline)
@@ -120,7 +120,7 @@ gateway (`:3000`).
 ## Banco (resolvido em 2026-06-18)
 
 Postgres em `localhost:5432` é **compartilhado** entre projetos, cada um no seu
-**database dedicado** (`rpg_gaming`, `weplanner_test`). Faltava o database
+**database dedicado**. Faltava o database
 `casashopping` — que **todos os `apps/*/.env` dos backends já esperam**
 (`.../casashopping?schema=public`). Por isso o Products falhava no init do
 Prisma (`PrismaClientInitializationError`): o database não existia.
@@ -137,10 +137,10 @@ cd packages/database && npx prisma migrate deploy   # -> up to date
 - **Tentativa anterior descartada:** cheguei a criar um *schema* `casashopping`
   dentro do database `postgres` — abordagem errada (os `.env` dos apps querem um
   *database*, não schema). Esse schema foi removido (`DROP SCHEMA ... CASCADE`),
-  sem afetar o weplanner (que mora no `public` do `postgres`).
+  sem afetar as outras aplicações do servidor (que moram no `public` do `postgres`).
 - **Atenção:** o `.env` da **raiz** está como
   `postgresql://postgres@127.0.0.1:5432/postgres` (sem `casashopping`) — aponta
-  pro DB do weplanner. Os backends não usam ele (têm `.env` próprio), mas o
+  pro DB padrão `postgres`. Os backends não usam ele (têm `.env` próprio), mas o
   runner `apps/migration`/frontends podem. Recomendado alinhar pra
   `.../casashopping?schema=public`.
 

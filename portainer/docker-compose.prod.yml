@@ -1,9 +1,9 @@
 # ============================================================================
-# CasaShopping — Stack PROD para PORTAINER (atras do NGINX CENTRAL)
+# CasaShopping — Stack PROD para PORTAINER (atras de um NGINX CENTRAL)
 # ============================================================================
-# Roda no MESMO servidor/nginx do WePlanner-Infra. O casashopping NAO tem
-# nginx proprio nem publica portas no host: quem faz a borda (80/443 + SSL) e
-# o nginx central, que alcanca os serviços pela rede externa `web-proxy`.
+# Roda atras de um nginx central (reverse proxy externo). O casashopping NAO
+# tem nginx proprio nem publica portas no host: quem faz a borda (80/443 + SSL)
+# e o nginx central, que alcanca os serviços pela rede externa `web-proxy`.
 #
 # Default da versao: TAG=prod (imagens do push em `main`).
 #
@@ -20,11 +20,11 @@
 #   5. SEM mount ./.env:/app/.env      (env vem das variaveis da stack)
 #   6. SEM postgres embutido           (banco EXTERNO via DATABASE_URL/DIRECT_URL
 #      na rede ${DB_NETWORK_NAME:-infra-network})
-#   7. SEM nginx-proxy proprio         (a borda e o nginx central do WePlanner)
+#   7. SEM nginx-proxy proprio         (a borda e o nginx central externo)
 #   8. SEM ports: publicadas no host   (tudo so na rede docker; evita colidir
-#      com o nginx central / portas do weplanner)
+#      com o nginx central / outras portas ja usadas no host)
 #
-# O nginx central roteia (config no WePlanner-Infra, repo separado):
+# O nginx central roteia (config fora deste repo):
 #   /        -> casashopping-web:3001
 #   /api     -> casashopping-gateway:3000
 #   /admin   -> casashopping-admin:3002

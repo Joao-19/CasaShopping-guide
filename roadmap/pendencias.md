@@ -45,7 +45,7 @@ dar tempo"). Risco alto / estudo isolado.
 ## B10 — Revista/PDF do guia para download
 
 **Origem:** ata 00:18–00:24. Landing "acesse o guia online ou baixe a revista
-(PDF)"; PDF estilizado puxando o conteúdo atual (modelo wePlanner).
+(PDF)"; PDF estilizado puxando o conteúdo atual (modelo de referência interno).
 
 **Estado atual:** o Casa Shopping **já tem** a revista/PDF do lado deles.
 
