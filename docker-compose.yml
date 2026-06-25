@@ -1,4 +1,20 @@
-version: "3.8"
+# ============================================================================
+# CasaShopping Guide - Stack PROD self-contained (GHCR)
+#
+# Imagens vem do GHCR, publicadas por .github/workflows/deploy-prod.yml ao dar
+# push em `main` (canal :prod). O HOST NAO BUILDA nada - so faz pull + up.
+#
+# Deploy = ato manual e deliberado (NAO ha mais watchtower):
+#   docker compose pull && docker compose up -d
+#   (ou "Pull and redeploy" no Portainer)
+#
+# Os volumes do Postgres e do MinIO sao EXTERNOS, apontando para os volumes
+# JA EXISTENTES (casashopping-guide_*). Assim os dados nunca sao recriados nem
+# zerados - vale tanto via CLI quanto via Portainer (qualquer nome de stack).
+#
+# Para fixar uma versao imutavel: defina TAG no .env (ex.: TAG=prod-20260625-XXXX);
+# o default e :prod (flutuante, ultimo build de main).
+# ============================================================================
 
 services:
   nginx-proxy:
@@ -7,8 +23,10 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/nginx/ssl/cloudflare:/etc/nginx/ssl/cloudflare:ro
     depends_on:
       - api-gateway
       - web
@@ -40,14 +58,9 @@ services:
 
   # --- MIGRATION (AUTO-INIT) ---
   db-migration:
-    build:
-      context: .
-      dockerfile: apps/migration/Dockerfile
-    image: joaovvv/casashopping-migration:latest
+    image: ghcr.io/joao-19/casashopping-migration:${TAG:-prod}
     container_name: casashopping-migration
     restart: on-failure
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-admin123}@database:5432/${DB_NAME:-casashopping}?schema=public
     depends_on:
@@ -81,14 +94,9 @@ services:
 
   # --- API GATEWAY ---
   api-gateway:
-    image: joaovvv/casashopping-api-gateway:latest
-    build:
-      context: .
-      dockerfile: apps/api-gateway/Dockerfile
+    image: ghcr.io/joao-19/casashopping-api-gateway:${TAG:-prod}
     container_name: casashopping-gateway
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3000:3000"
     environment:
@@ -103,8 +111,6 @@ services:
       - STORAGE_SERVICE_URL=http://storage-service:3007
       - STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
       - JWT_SECRET=${JWT_SECRET}
-      - REPO_PASS=${DEPLOY_PASSWORD}
-      - DOCKERHUB_PASSWORD=${DOCKERHUB_PASSWORD}
     depends_on:
       database:
         condition: service_started
@@ -137,14 +143,9 @@ services:
 
   # --- AUTH SERVICE ---
   auth-service:
-    image: joaovvv/casashopping-auth-service:latest
-    build:
-      context: .
-      dockerfile: apps/auth/Dockerfile
+    image: ghcr.io/joao-19/casashopping-auth:${TAG:-prod}
     container_name: casashopping-auth
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3003:3003"
     environment:
@@ -178,14 +179,9 @@ services:
 
   # --- USERS SERVICE ---
   users-service:
-    image: joaovvv/casashopping-users-service:latest
-    build:
-      context: .
-      dockerfile: apps/users/Dockerfile
+    image: ghcr.io/joao-19/casashopping-users:${TAG:-prod}
     container_name: casashopping-users
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3004:3004"
     environment:
@@ -213,14 +209,9 @@ services:
 
   # --- STORAGE SERVICE ---
   storage-service:
-    image: joaovvv/casashopping-storage-service:latest
-    build:
-      context: .
-      dockerfile: apps/storage/Dockerfile
+    image: ghcr.io/joao-19/casashopping-storage:${TAG:-prod}
     container_name: casashopping-storage-service
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3007:3007"
     environment:
@@ -251,20 +242,9 @@ services:
 
   # --- WEB APP ---
   web:
-    image: joaovvv/casashopping-web:latest
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-      args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
-        - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
-        - NEXT_PUBLIC_STORAGE_URL=${STORAGE_URL:-http://localhost:9000/casashopping}
-        - BASE_PATH=${WEB_BASE_PATH:-}
-        - NEXT_PUBLIC_BASE_PATH=${WEB_BASE_PATH:-}
+    image: ghcr.io/joao-19/casashopping-web:${TAG:-prod}
     container_name: casashopping-web
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3001:3001"
     environment:
@@ -286,20 +266,9 @@ services:
 
   # --- ADMIN APP ---
   admin:
-    image: joaovvv/casashopping-admin:latest
-    build:
-      context: .
-      dockerfile: apps/admin/Dockerfile
-      args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
-        - NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST:-localhost}
-        - NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-http://localhost:3001}
-        - BASE_PATH=${ADMIN_BASE_PATH:-}
-        - NEXT_PUBLIC_BASE_PATH=${ADMIN_BASE_PATH:-}
+    image: ghcr.io/joao-19/casashopping-admin:${TAG:-prod}
     container_name: casashopping-admin
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3002:3002"
     environment:
@@ -320,14 +289,9 @@ services:
 
   # --- STORES SERVICE ---
   stores-service:
-    image: joaovvv/casashopping-stores-service:latest
-    build:
-      context: .
-      dockerfile: apps/stores/Dockerfile
+    image: ghcr.io/joao-19/casashopping-stores:${TAG:-prod}
     container_name: casashopping-stores
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3005:3005"
     environment:
@@ -360,14 +324,9 @@ services:
 
   # --- PRODUCTS SERVICE ---
   products-service:
-    image: joaovvv/casashopping-products-service:latest
-    build:
-      context: .
-      dockerfile: apps/products/Dockerfile
+    image: ghcr.io/joao-19/casashopping-products:${TAG:-prod}
     container_name: casashopping-products
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     ports:
       - "3006:3006"
     environment:
@@ -398,33 +357,16 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-  # --- WATCHTOWER (AUTO-UPDATE) ---
-  watchtower:
-    image: containrrr/watchtower
-    container_name: casashopping-watchtower
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "8080:8080"
-    environment:
-      # Fix API version mismatch
-      - DOCKER_API_VERSION=1.44
-      # Auth for private repos
-      - REPO_USER=${DOCKERHUB_USER}
-      - REPO_PASS=${DOCKERHUB_PASSWORD}
-      # HTTP API Mode
-      - WATCHTOWER_HTTP_API_UPDATE=true
-      - WATCHTOWER_HTTP_API_TOKEN=${DEPLOY_PASSWORD}
-    command: --cleanup --label-enable --http-api-periodic-polls --include-stopped --revive-stopped
-    networks:
-      - casashopping-net
 
+# Volumes EXTERNOS: apontam para os volumes ja existentes do projeto
+# `casashopping-guide`. NUNCA recriados/zerados, independente do nome da stack.
 volumes:
   postgres_data:
+    external: true
+    name: casashopping-guide_postgres_data
   minio_data:
+    external: true
+    name: casashopping-guide_minio_data
 
 networks:
   casashopping-net:
