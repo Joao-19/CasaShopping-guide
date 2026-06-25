@@ -73,11 +73,12 @@ export function useImport() {
           }
         }
 
-        // 3) Lojas (backend)
+        // 3) Lojas (backend) — universo COMPLETO via /stores/options. O
+        // list() paginado capa em 25 no backend e deixaria milhares de
+        // lojas invisíveis ao matching.
         let storeList;
         try {
-          const r = await storeHttp.list({ limit: 1000 });
-          storeList = r.data.map((s) => ({ id: s.id, name: s.name }));
+          storeList = await storeHttp.options();
         } catch (err) {
           console.error(err);
           toast.error(

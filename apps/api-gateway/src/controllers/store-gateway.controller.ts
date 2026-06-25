@@ -15,6 +15,7 @@ import {
   UpdateStoreDto,
   Store,
   PaginatedResult,
+  StoreOption,
 } from "@repo/dtos";
 import { Request } from "express";
 import {
@@ -67,6 +68,13 @@ export class StoreGatewayController {
   }
 
   // Rotas específicas ANTES de ":id" para não serem sombreadas.
+  @Get("options")
+  @ApiOperation({ summary: "List all stores as lightweight {id,name} options" })
+  @ApiResponse({ status: 200, description: "Return all store options." })
+  async findAllOptions(): Promise<StoreOption[]> {
+    return this.storeGatewayService.findAllOptions();
+  }
+
   @Get("slug-available")
   @ApiOperation({ summary: "Check if a store slug is available" })
   @ApiResponse({ status: 200, description: "Slug availability." })

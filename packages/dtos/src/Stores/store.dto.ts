@@ -181,6 +181,14 @@ export class UpdateStoreDto {
   whatsapp?: string | null;
 }
 
+// Forma enxuta de loja (id + nome) para casamento em massa — ex.: importação
+// de produtos precisa do universo COMPLETO de lojas, sem paginação nem o
+// payload pesado de Store (URLs de imagem, datas etc.).
+export interface StoreOption {
+  id: string;
+  name: string;
+}
+
 export interface Store {
   id: string;
   name: string;

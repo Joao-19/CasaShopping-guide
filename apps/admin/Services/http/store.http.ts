@@ -1,5 +1,5 @@
 import http from "./index";
-import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
+import { CreateStoreDto, Store, PaginatedResult, StoreOption } from "@repo/dtos";
 
 export default {
   create(form: CreateStoreDto) {
@@ -41,6 +41,13 @@ export default {
         },
       })
       .then((res) => res.data);
+  },
+
+  // Universo COMPLETO de lojas (id + nome), sem paginação — para o
+  // casamento em massa da importação. NÃO usar o list() paginado aqui: ele
+  // capa em 25 no backend e deixa milhares de lojas fora do matching.
+  options() {
+    return http.get<StoreOption[]>("stores/options").then((res) => res.data);
   },
 
   getById(id: string) {

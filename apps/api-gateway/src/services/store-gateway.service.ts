@@ -1,6 +1,6 @@
 import { Injectable, HttpException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
-import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
+import { CreateStoreDto, Store, PaginatedResult, StoreOption } from "@repo/dtos";
 import { firstValueFrom } from "rxjs";
 import { ConfigService } from "@nestjs/config";
 
@@ -60,6 +60,22 @@ export class StoreGatewayService {
             params: { page, search, limit },
             headers,
           },
+        ),
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500,
+      );
+    }
+  }
+
+  async findAllOptions(): Promise<StoreOption[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<StoreOption[]>(
+          `${this.storesServiceUrl}/stores/options`,
         ),
       );
       return response.data;

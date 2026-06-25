@@ -15,6 +15,7 @@ import {
   Store,
   UpdateStoreDto,
   PaginatedResult,
+  StoreOption,
 } from "@repo/dtos";
 import { JwtAuthGuard, Roles, RolesGuard } from "@repo/auth-guard";
 
@@ -39,6 +40,11 @@ export class StoreController {
   }
 
   // Rotas específicas ANTES de ":id" para ":id" não as sombrear.
+  @Get("options")
+  async findAllOptions(): Promise<StoreOption[]> {
+    return this.storeService.findAllOptions();
+  }
+
   @Get("slug-available")
   async slugAvailable(
     @Query("slug") slug: string,

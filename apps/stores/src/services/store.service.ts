@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { prisma } from "@repo/database";
-import { CreateStoreDto, Store, PaginatedResult } from "@repo/dtos";
+import { CreateStoreDto, Store, PaginatedResult, StoreOption } from "@repo/dtos";
 
 const STORAGE_SERVICE_URL =
   process.env.STORAGE_SERVICE_URL || "http://storage-service:3007";
@@ -163,6 +163,18 @@ export class StoreService {
         limit: take,
       },
     };
+  }
+
+  // Universo COMPLETO de lojas (id + nome), sem paginação. Serve o
+  // casamento em massa da importação de produtos, que precisa de todos os
+  // nomes para resolver — o /stores paginado (cap 25) deixava milhares de
+  // lojas invisíveis ao matching. Payload mínimo: sem transform de imagem.
+  async findAllOptions(): Promise<StoreOption[]> {
+    return prisma.store.findMany({
+      where: { deletedAt: null },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    });
   }
 
   async findOne(id: string): Promise<Store> {
