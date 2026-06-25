@@ -84,25 +84,7 @@ graph TD
    cd casashopping-guide
    ```
 
-## Deployment
-
-To deploy the application:
-
-1. Ensure `.env` is configured locally.
-2. Run `./deploy.sh`.
-
-### Updating Environment Variables
-
-To update environment variables:
-
-1. Edit the `.env` file **on the server**.
-2. Wait for the next deployment OR trigger a restart.
-   - If using Watchtower, the next time it updates the image, it will restart the container.
-   - Since the `.env` file is **mounted** into the container, the new values will be read at startup.
-
-**Note:** Changes to `.env` will **NOT** take effect immediately. The container must restart to read the file again. You can trigger a deploy from local (`./deploy.sh`) to force an update/restart.
-
-3. Copie os arquivos de ambiente de exemplo:
+2. Copie os arquivos de ambiente de exemplo:
 
    ```bash
    cp .env.example .env
@@ -116,25 +98,25 @@ To update environment variables:
    cp apps/storage/.env.example apps/storage/.env
    ```
 
-4. Instale as dependências:
+3. Instale as dependências:
 
    ```bash
    pnpm install
    ```
 
-5. Suba o banco de dados e o MinIO:
+4. Suba o banco de dados e o MinIO:
 
    ```bash
    docker-compose up -d database storage
    ```
 
-6. Execute as migrations do Prisma:
+5. Execute as migrations do Prisma:
 
    ```bash
    pnpm --filter @repo/database db:migrate
    ```
 
-7. Inicie todos os serviços em modo de desenvolvimento:
+6. Inicie todos os serviços em modo de desenvolvimento:
    ```bash
    pnpm dev
    ```
@@ -147,6 +129,38 @@ To update environment variables:
 | Admin Panel   | http://localhost:3002 |
 | API Gateway   | http://localhost:3000 |
 | MinIO Console | http://localhost:9001 |
+
+---
+
+## Deployment (Produção)
+
+O build e a publicação das imagens são automatizados via **GitHub Actions**, e o
+redeploy no servidor é **manual e deliberado** (não há mais Watchtower — ele
+revertia a prod para builds antigos do Docker Hub e foi removido).
+
+1. Faça merge/push na branch:
+   - `main` → builda as 9 imagens e publica no **GHCR** no canal `:prod`
+     (`.github/workflows/deploy-prod.yml`).
+   - `dev-deploy` → publica no canal `:dev` (`.github/workflows/deploy-dev.yml`).
+2. No servidor (ou via Portainer → **Pull and redeploy**), aplique as imagens novas:
+
+   ```bash
+   docker compose pull
+   docker compose up -d
+   ```
+
+As imagens vêm de `ghcr.io/joao-19/casashopping-*:${TAG:-prod}` (públicas). Para
+fixar uma versão imutável, defina `TAG` no `.env` (ex.:
+`TAG=prod-YYYYMMDD-HHMM-<sha>`); o padrão é `:prod` (último build de `main`).
+
+> O `nginx-proxy` usa `resolver` dinâmico do Docker — ao recriar containers ele
+> re-resolve os IPs sozinho, sem precisar de reload.
+
+### Atualizando variáveis de ambiente
+
+As mudanças no `.env` **não** entram em vigor na hora: o `.env` é montado no
+container e lido apenas no startup. Edite o `.env` **no servidor** e force um
+restart com `docker compose up -d` para reler os valores.
 
 ---
 
