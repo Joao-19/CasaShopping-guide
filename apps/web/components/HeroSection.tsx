@@ -10,11 +10,12 @@ import { AdvertisementBanner } from "./AdvertisementBanner";
 
 export function HeroSection() {
     const basePath = process.env.BASE_PATH || "";
-    // Default Fallbacks
-    const defaultDesktopVideo = `${basePath}/backgroundsHome/MudaTudoCamapnhaWEB.mp4`;
+    // Fallback padrão do template (sem banner configurado no admin → exibe o
+    // vídeo padrão da 1ª entrega; nunca o banner antigo de liquidação 2025).
+    const defaultDesktopVideo = `${basePath}/backgroundsHome/FundoPadraoDesktop.mp4`;
     const defaultDesktopImage = `${basePath}/backgroundsHome/FUNDO.jpg`;
     const defaultMobileImage = `${basePath}/backgroundsHome/FUNDO-MOBILE.jpg`;
-    const defaultMobileVideo = `${basePath}/backgroundsHome/MudaTudoCamapnhaMOBILE.mp4`;
+    const defaultMobileVideo = `${basePath}/backgroundsHome/FundoPadraoMobile.mp4`;
 
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
@@ -45,12 +46,6 @@ export function HeroSection() {
 
     const titleBold = settings?.homeTitleBold || "Encontre o melhor ";
     const titleNormal = settings?.homeTitleNormal || "da decoração e design para o seu lar.";
-
-    const homeText = {
-        // title: "Encontre o melhor da decoração e design para o seu lar.",
-        title: "Liquidação muda tudo",
-        subtitle: "Encontre o melhor da decoração e design para o seu lar."
-    };
 
     const handleSearch = () => {
         if (query.trim()) {
