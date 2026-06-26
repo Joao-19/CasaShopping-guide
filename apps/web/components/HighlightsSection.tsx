@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useCallback } from 'react';
-import { MediaCard, usePopup, formatPriceTier, IconHeart, BaseText } from "@repo/ui";
+import { MediaCard, usePopup, IconHeart, BaseText, PriceText } from "@repo/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts } from "../Services/http/product.http";
 import { useFavorites } from "@/composable/useFavorites";
@@ -15,7 +15,8 @@ import { useAuthStore } from "@/store/auth.store";
 export interface HighlightItem {
     id: string;
     name: string;
-    price: string;
+    price: string | null;
+    priceText?: string | null;
     description?: string;
     images: string[];
     showStorePhone?: boolean;
@@ -87,6 +88,7 @@ export function HighlightsSection({ items, title }: HighlightsSectionProps = {})
         id: p.id,
         name: p.name,
         price: p.price,
+        priceText: p.priceText,
         description: p.description,
         images: (p.images ?? [])
             .slice()
@@ -116,6 +118,7 @@ export function HighlightsSection({ items, title }: HighlightsSectionProps = {})
             storeName: product.store?.name || "Loja",
             storeSlug: product.store?.slug ?? undefined,
             price: product.price,
+            priceText: product.priceText,
             description: product.description,
             images: product.images,
             showStorePhone: product.showStorePhone,
@@ -206,14 +209,13 @@ export function HighlightsSection({ items, title }: HighlightsSectionProps = {})
 
                                         {/* Content Bottom */}
                                         <div className="absolute bottom-6 left-6 right-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                                            {/* Price Tier $$$ */}
-                                            {formatPriceTier(product.price || 'MEDIUM') && (
-                                                <BaseText
-                                                    text={formatPriceTier(product.price || 'MEDIUM')}
-                                                    color="white"
-                                                    size="large"
-                                                    className="font-bold mb-1"
-                                                />
+                                            {/* Preço */}
+                                            {product.priceText ? (
+                                                <div className="text-white text-lg font-bold mb-1">
+                                                    <PriceText value={product.priceText} fullClassName="text-white/70" promoClassName="text-white" />
+                                                </div>
+                                            ) : (
+                                                <div className="text-white/90 text-sm font-medium mb-1">Sob consulta</div>
                                             )}
 
                                             {/* Title */}

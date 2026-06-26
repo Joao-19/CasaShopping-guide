@@ -8,7 +8,6 @@ import useProduct from "@/composable/product/useProduct";
 import useStore from "@/composable/store/useStore";
 import {
     CreateProductDto,
-    PriceTier,
     Product,
     ProductImage,
     PRODUCT_DESCRIPTION_MAX_LENGTH,
@@ -50,7 +49,7 @@ interface CreateProductFormContentProps {
     data: {
         name: string;
         description: string;
-        price: PriceTier;
+        priceText: string;
         categories: string[];
         tags: string;
         storeId: string;
@@ -61,7 +60,7 @@ interface CreateProductFormContentProps {
     handlers: {
         setName: (v: string) => void;
         setDescription: (v: string) => void;
-        setPrice: (v: PriceTier) => void;
+        setPriceText: (v: string) => void;
         setCategories: (v: string[]) => void;
         setTags: (v: string) => void;
         setStoreId: (v: string) => void;
@@ -261,18 +260,19 @@ function CreateProductFormContent({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="mb-4">
                     <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Faixa de Preço
+                        Preço
                     </Label>
-                    <select
-                        value={data.price}
-                        onChange={(e) => handlers.setPrice(e.target.value as PriceTier)}
+                    <input
+                        type="text"
+                        value={data.priceText}
+                        onChange={(e) => handlers.setPriceText(e.target.value)}
+                        placeholder="R$ 7.847  ou  R$ 7.847 por R$ 4.708,20"
                         className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#1A2B3C] bg-white"
-                    >
-                        <option value={PriceTier.LOW}>Baixo ($)</option>
-                        <option value={PriceTier.MEDIUM}>Médio ($$)</option>
-                        <option value={PriceTier.HIGH}>Alto ($$$)</option>
-                        <option value={PriceTier.ON_REQUEST}>Sem Valor</option>
-                    </select>
+                    />
+                    <p className="mt-1 text-[11px] text-gray-400">
+                        Texto livre — aparece igual no site. Use &quot;por&quot; para
+                        promoção (de/por). Vazio = sem preço.
+                    </p>
                 </div>
 
                 <div className="mb-4">
@@ -366,9 +366,7 @@ export function CreateProductForm({
     // Form State
     const [name, setName] = useState(initialData?.name || "");
     const [description, setDescription] = useState(initialData?.description || "");
-    const [price, setPrice] = useState<PriceTier>(
-        initialData?.price || PriceTier.MEDIUM
-    );
+    const [priceText, setPriceText] = useState(initialData?.priceText || "");
     const [categories, setCategories] = useState<string[]>(
         initialData?.categories || []
     );
@@ -447,7 +445,7 @@ export function CreateProductForm({
         const submissionData: CreateProductDto = {
             name,
             description,
-            price,
+            priceText: priceText || undefined,
             categories: categoryList,
             // Sempre envia a string (inclusive vazia) — vazio = remover todas
             // as tags. Se mandasse undefined, o backend interpretaria como
@@ -509,7 +507,7 @@ export function CreateProductForm({
                     data={{
                         name,
                         description,
-                        price,
+                        priceText,
                         categories,
                         tags,
                         storeId,
@@ -520,7 +518,7 @@ export function CreateProductForm({
                     handlers={{
                         setName,
                         setDescription,
-                        setPrice,
+                        setPriceText,
                         setCategories,
                         setTags,
                         setStoreId,

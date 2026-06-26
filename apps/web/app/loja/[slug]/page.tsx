@@ -87,6 +87,7 @@ export default function LojaPage() {
         storeName: p.store?.name || store?.name || "Loja",
         storeSlug: p.store?.slug ?? store?.slug ?? undefined,
         price: p.price,
+        priceText: p.priceText,
         description: p.description,
         categories: (p.categories as string[]) ?? [],
         images:
@@ -238,6 +239,7 @@ export default function LojaPage() {
                                                     title={product.title}
                                                     storeName={product.storeName}
                                                     price={product.price}
+                                                    priceText={product.priceText}
                                                     images={product.images}
                                                     isFavorited={isFavorited(product.id)}
                                                     onWishlistClick={() => {

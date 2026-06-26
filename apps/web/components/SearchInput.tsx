@@ -62,6 +62,7 @@ export function SearchInput({ variant = "solid" }: SearchInputProps) {
             storeName: product.store?.name || "Loja",
             storeSlug: product.store?.slug ?? undefined,
             price: product.price,
+            priceText: product.priceText,
             description: product.description,
             images: product.images?.sort((a: any, b: any) => a.index - b.index)
                 .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],

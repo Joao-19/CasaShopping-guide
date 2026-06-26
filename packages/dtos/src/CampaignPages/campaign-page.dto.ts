@@ -140,7 +140,8 @@ export interface CampaignProductView {
   id: string;
   name: string;
   description: string;
-  price: string;
+  price: string | null;
+  priceText: string | null;
   tags: string | null;
   storeId: string;
   images: string[]; // URLs públicas resolvidas, na ordem do index

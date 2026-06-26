@@ -77,6 +77,7 @@ export function ProductListingDialog({ initialCategory }: ProductListingDialogPr
         storeName: p.store?.name || "Loja",
         storeSlug: p.store?.slug ?? undefined,
         price: p.price,
+        priceText: p.priceText,
         description: p.description,
         images: p.images?.sort((a, b) => a.index - b.index)
             .map((img) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
@@ -156,6 +157,7 @@ export function ProductListingDialog({ initialCategory }: ProductListingDialogPr
                                     title={product.title}
                                     storeName={product.storeName}
                                     price={product.price}
+                                    priceText={product.priceText}
                                     images={product.images}
                                     isFavorited={isFavorited(product.id)}
                                     onWishlistClick={() => toggleFav(product.id)}

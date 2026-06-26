@@ -31,6 +31,7 @@ export function ProdutoDetail({ id }: { id: string }) {
               storeName: product.store?.name || "Loja",
               storeSlug: product.store?.slug ?? undefined,
               price: product.price,
+              priceText: product.priceText,
               description: product.description,
               images:
                   product.images

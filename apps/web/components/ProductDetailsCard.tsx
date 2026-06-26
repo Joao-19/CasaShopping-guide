@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, formatPriceTier } from "@repo/ui";
+import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, PriceText } from "@repo/ui";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
 import { LoginRequiredPopup } from "./LoginRequiredPopup";
@@ -21,7 +21,8 @@ interface ProductDetailsCardProps {
     product: {
         id: string;
         title: string;
-        price: number | string; // Allow string if passing raw price, but we assume number usually
+        price: number | string | null; // legado: faixa qualitativa
+        priceText?: string | null; // oficial: preço em texto livre (de/por)
         storeName: string;
         storeLogo?: string;
         description?: string;
@@ -188,7 +189,11 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                         {product.title}
                                     </h2>
                                     <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap">
-                                        {formatPriceTier(String(product.price))}
+                                        {product.priceText ? (
+                                            <PriceText value={product.priceText} promoClassName="text-[#162e47]" />
+                                        ) : (
+                                            <span className="text-[15px] font-medium text-[#5b6b7d]">Sob consulta</span>
+                                        )}
                                     </span>
                                 </div>
 

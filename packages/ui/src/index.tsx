@@ -13,6 +13,7 @@ export { default as BaseInput } from "./inputs/BaseInput";
 export * from "./table";
 export * from "./confirmation-card";
 export * from "./Texts/BaseText";
+export * from "./Texts/PriceText";
 export * from "./icons/IconHeart";
 export * from "./icons/IconSearch";
 export * from "./icons/IconInstagram";
