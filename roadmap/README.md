@@ -31,6 +31,10 @@
 > **Newsletter (Carrossel V1)** — substituída pela Frente 6. Registro em
 > `05-newsletter-carrossel.md`.
 
+> **Infra/Deploy (Frente 10)** — `10-infra-portainer-nginx.md`: nginx em stack
+> separada, app no Portainer (Git), tela de manutenção + pendências de infra
+> (ACL/segurança, limpeza, R2). Base já feita: GHCR + escravo/VPN.
+
 ## Recomendação de sprints (2 semanas = 10 dias úteis)
 
 A ordem cabe em **2 sprints**:
