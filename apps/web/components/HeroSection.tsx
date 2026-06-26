@@ -22,12 +22,19 @@ export function HeroSection() {
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [settings, setSettings] = useState<Settings | null>(null);
+    // Só sabemos qual background usar depois que as settings carregam. Antes
+    // disso não renderizamos nada (evita o "flash" do default antes do banner
+    // configurado aparecer).
+    const [settingsLoaded, setSettingsLoaded] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { showPopup } = usePopup();
     const router = useRouter();
 
     useEffect(() => {
-        getSettings().then(setSettings).catch(console.error);
+        getSettings()
+            .then(setSettings)
+            .catch(console.error)
+            .finally(() => setSettingsLoaded(true));
     }, []);
 
     // Determine Desktop Background
@@ -120,10 +127,12 @@ export function HeroSection() {
     return (
         <div className="relative h-[600px] md:h-[800px] w-full">
             <div className="absolute inset-0">
-                {/* Desktop Background */}
+                {/* Desktop Background — só renderiza após as settings carregarem
+                    (evita flash do default antes do banner configurado). */}
                 <div className="hidden md:block absolute inset-0">
-                    {isDesktopVideo ? (
+                    {settingsLoaded && (isDesktopVideo ? (
                         <video
+                            key={finalDesktopUrl}
                             src={finalDesktopUrl}
                             className="w-full h-full object-cover"
                             loop
@@ -133,17 +142,19 @@ export function HeroSection() {
                         />
                     ) : (
                         <img
+                            key={finalDesktopUrl}
                             src={finalDesktopUrl}
                             alt="Background"
                             className="w-full h-full object-cover"
                         />
-                    )}
+                    ))}
                 </div>
 
-                {/* Mobile Background */}
+                {/* Mobile Background — idem desktop. */}
                 <div className="block md:hidden absolute inset-0">
-                    {isMobileVideo ? (
+                    {settingsLoaded && (isMobileVideo ? (
                         <video
+                            key={finalMobileUrl}
                             src={finalMobileUrl}
                             className="w-full h-full object-cover"
                             loop
@@ -153,11 +164,12 @@ export function HeroSection() {
                         />
                     ) : (
                         <img
+                            key={finalMobileUrl}
                             src={finalMobileUrl}
                             alt="Background Mobile"
                             className="w-full h-full object-cover"
                         />
-                    )}
+                    ))}
                 </div>
                 <div className="absolute inset-0 bg-linear-to-r from-[#0d1b2a]/90 via-[#0d1b2a]/40 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 h-48 bg-linear-to-t from-[#f0f1f3] to-transparent z-10 pointer-events-none"></div>
