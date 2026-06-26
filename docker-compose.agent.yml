@@ -1,0 +1,48 @@
+# ============================================================================
+# Portainer Agent (escravo) + Tailscale (VPN) — administracao remota segura.
+#
+# Stack SEPARADA da aplicacao. NAO toca em DB, MinIO, nginx nem nos apps;
+# so adiciona administracao remota segura ao host.
+#
+# O agent compartilha o namespace de rede do tailscale
+# (network_mode: service:tailscale), entao a porta 9001 SO existe dentro da
+# VPN (tailnet) — NUNCA exposta na internet nem publicada no host.
+#
+# Bootstrap (1a vez, MANUAL na VM, fora do Portainer — o mestre so consegue
+# gerenciar a stack do app depois que este agent existir).
+# IMPORTANTE: rodar com PROJETO PROPRIO (-p), senao ele cai no mesmo projeto
+# da app e um "up -d --remove-orphans" da app apagaria este agent:
+#   docker compose -p casashopping-agent -f docker-compose.agent.yml up -d
+#
+# Depois, no Portainer MESTRE:
+#   Add environment -> Docker Standalone -> Agent
+#   -> casashopping-prod.<sua-tailnet>.ts.net:9001   (sem tcp://, http:// etc.)
+# ============================================================================
+
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: casashopping-tailscale
+    hostname: casashopping-prod        # nome do no na tailnet (vira o MagicDNS)
+    restart: always
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY:-}
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - ./tailscale/data:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+
+  portainer_agent:
+    image: portainer/agent:latest
+    container_name: casashopping-portainer-agent
+    restart: unless-stopped
+    depends_on:
+      - tailscale
+    # Compartilha a rede do tailscale: o :9001 fica acessivel SO pela tailnet.
+    network_mode: "service:tailscale"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes

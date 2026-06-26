@@ -42,3 +42,6 @@ yarn-error.log*
 
 #only dev files
 docker-compose dev.yml
+
+# Tailscale state (chaves do no — NUNCA commitar)
+tailscale/
