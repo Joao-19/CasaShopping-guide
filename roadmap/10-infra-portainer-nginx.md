@@ -23,7 +23,7 @@ Já concluído (ver memória do projeto e commits):
 | F1 | Nginx em **compose separado** (stack própria, estratégica) | Alta | Médio (borda/SSL) | decisão de SSL (host mount vs env) |
 | F2 | **Levar o projeto** (app stack) pro Portainer via Git | Alta | Médio (.env/bind mounts) | depende de F1 |
 | F3 | **Tela de manutenção** no `default.conf` do nginx | Média | Baixo | depende de F1 |
-| F4 | Verificar **isolamento da ACL** (cliente ⊥ minha infra) | Alta (seg.) | Baixo | — |
+| F4 | ✅ **FEITO** — isolamento da ACL (cliente ⊥ minha infra) provado | Alta (seg.) | — | concluído 2026-06-26 |
 | F5 | Limpeza de disco (image/builder prune) | Média | Baixo | — |
 | F6 | Portainer mestre via **MagicDNS** (não IP) | Baixa | Baixo | — |
 | F7 | **Watchdog** agent↔tailscale (reata sozinho) | Baixa | Baixo | — |
@@ -112,21 +112,29 @@ toggle manual funciona.
 
 ---
 
-## F4 — Verificar isolamento da ACL (segurança)
+## F4 — Isolamento da ACL (segurança) ✅ FEITO (2026-06-26)
 
-**Objetivo:** **provar** que o servidor do cliente (`casashopping-prod`) não
+**Objetivo:** provar que o servidor do cliente (`casashopping-prod`) não
 alcança a infra do dono (`home`, `weplanner-*`).
 
-**Testes (no servidor do cliente):**
-```
-docker exec casashopping-tailscale tailscale status      # nao deve ver home/weplanner
-docker exec casashopping-tailscale tailscale ping home              # deve FALHAR
-docker exec casashopping-tailscale tailscale ping weplanner-infra-1 # deve FALHAR
-```
-E confirmar que **weplanner segue no ar** (ACL é tailnet-wide).
+**Como ficou:**
+- `casashopping-prod-1` taggeado `tag:casashopping` (não é member, sem regra de
+  `src` → não inicia conexão com ninguém).
+- Portainer mestre (`home`, 100.78.223.35) liberado **por IP/host alias** na ACL,
+  independente de tag → não trava mesmo se a máquina estiver taggeada.
+- ACL com bloco `tests` → o Tailscale **recusa salvar** se trancaria/não isolasse
+  (rede de segurança anti-lockout).
 
-**DoD:** pings do cliente p/ infra do dono falham; admin ainda gerencia o
-casashopping; weplanner intacto.
+**⚠️ ARMADILHA do teste (aprendizado):** `tailscale ping` (disco) **e** `--tsmp`
+**NÃO** enxergam a ACL — sempre dão "pong". Só **`tailscale ping --icmp <nó>`**
+testa a ACL.
+
+**Prova final:**
+```
+docker exec casashopping-tailscale tailscale ping --icmp home              # timeout ✅
+docker exec casashopping-tailscale tailscale ping --icmp weplanner-infra-1 # timeout ✅
+```
+Ambos deram **timeout** = cliente bloqueado. Portainer segue conectado; weplanner intacto.
 
 ---
 
