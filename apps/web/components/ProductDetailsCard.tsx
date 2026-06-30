@@ -186,11 +186,11 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
 
                             {/* Info Section */}
                             <div className="flex flex-col gap-[24px] items-start w-full px-[32px] pb-[32px] pt-[20px] bg-[#f0f1f3]">
-                                <div className="flex justify-between items-start w-full">
-                                    <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight flex-1 pr-4" title={product.title}>
+                                <div className="flex flex-col gap-[8px] w-full">
+                                    <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight w-full" title={product.title}>
                                         {product.title}
                                     </h2>
-                                    <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap min-w-0">
+                                    <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap self-end max-w-full">
                                         {product.priceText ? (
                                             <PriceText value={product.priceText} />
                                         ) : (
