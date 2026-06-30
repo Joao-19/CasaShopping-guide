@@ -2,7 +2,6 @@ export interface PageTypeRule {
   id: string;
   label: string;
   description: string;
-  locked?: boolean;
 }
 
 export interface ProjectPage {
@@ -28,18 +27,20 @@ export interface TargetingConfig {
   /** Janela de exibição do pop-up (YYYY-MM-DD ou ISO). null/ausente = sem prazo. */
   startsAt?: string | null;
   endsAt?: string | null;
+  /** Exibir na home. Ausente/undefined = true (legado sempre exibia). */
+  showOnHome?: boolean;
 }
 
 /**
  * Regras gerais — aplicam-se a toda página daquele tipo sem listar uma a uma.
- * "home" fica como padrão fixo: o pop-up sempre exibe na home.
+ * "home" é o estado padrão (ligado), mas pode ser desativado pelo switch
+ * (backed por `targeting.showOnHome`, não por `pageTypes`).
  */
 export const PAGE_TYPES: PageTypeRule[] = [
   {
     id: "home",
     label: "Página inicial (Home)",
-    description: "Exibição padrão na home do site",
-    locked: true,
+    description: "Exibição na home do site",
   },
   {
     id: "store-profiles",

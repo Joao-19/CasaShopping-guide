@@ -44,6 +44,11 @@ export interface NewsletterTargeting {
   /** Janela de exibição (ISO 8601). Opcionais — vazios = sempre. */
   startsAt?: string | null;
   endsAt?: string | null;
+  /**
+   * Exibir o pop-up na home. Default (ausente/undefined) = true, pra não
+   * regredir configs legadas que sempre exibiam na home. false = home off.
+   */
+  showOnHome?: boolean;
 }
 
 export interface NewsletterSettings {
@@ -153,6 +158,12 @@ export class NewsletterTargetingDto {
   @IsOptional()
   @IsISO8601()
   endsAt?: string | null;
+
+  // Home tem switch próprio (default true quando ausente). false = não
+  // exibir na home — ver NewsletterTargeting.showOnHome.
+  @IsOptional()
+  @IsBoolean()
+  showOnHome?: boolean;
 }
 
 export class UpdateNewsletterDto {

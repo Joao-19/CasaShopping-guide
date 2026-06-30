@@ -211,7 +211,10 @@ export function NewsletterCarouselModal() {
           : null;
         const inWindow =
           (!startsAt || now >= startsAt) && (!endsAt || now <= endsAt);
-        if (res.enabled && res.slides.length > 0 && inWindow) {
+        // Home tem switch próprio: showOnHome === false desativa o pop-up na
+        // home. Ausente/undefined = true (legado sempre exibia).
+        const showOnHome = res.targeting?.showOnHome !== false;
+        if (res.enabled && res.slides.length > 0 && inWindow && showOnHome) {
           setData(res);
           // appearDelay em segundos; mínimo de 250ms pra home pintar antes.
           const delayMs = Math.max(250, (res.behavior.appearDelay ?? 0) * 1000);
