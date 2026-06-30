@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import useEmblaCarousel from "embla-carousel-react";
 import {
   getNewsletter,
   NewsletterSettings,
   NewsletterSlide,
 } from "../Services/http/newsletter.http";
+import { matchesNewsletterTargeting } from "./newsletterTargeting";
 
 const SESSION_KEY = "newsletter_modal_seen";
 
@@ -186,9 +188,11 @@ export function NewsletterCarouselModal() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pathname = usePathname();
 
   // Busca a config e decide se abre (uma vez por sessão), respeitando o
-  // atraso configurado em behavior.appearDelay.
+  // atraso configurado em behavior.appearDelay e a segmentação por página.
+  // Re-avalia a cada troca de rota (navegação SPA não remonta o componente).
   useEffect(() => {
     let cancelled = false;
     if (
@@ -198,7 +202,7 @@ export function NewsletterCarouselModal() {
       return;
     }
     getNewsletter()
-      .then((res) => {
+      .then(async (res) => {
         if (cancelled) return;
         // Janela de exibição (targeting.startsAt / endsAt): se hoje estiver
         // fora do intervalo, não mostra. Inputs do admin gravam YYYY-MM-DD.
@@ -211,22 +215,25 @@ export function NewsletterCarouselModal() {
           : null;
         const inWindow =
           (!startsAt || now >= startsAt) && (!endsAt || now <= endsAt);
-        // Home tem switch próprio: showOnHome === false desativa o pop-up na
-        // home. Ausente/undefined = true (legado sempre exibia).
-        const showOnHome = res.targeting?.showOnHome !== false;
-        if (res.enabled && res.slides.length > 0 && inWindow && showOnHome) {
-          setData(res);
-          // appearDelay em segundos; mínimo de 250ms pra home pintar antes.
-          const delayMs = Math.max(250, (res.behavior.appearDelay ?? 0) * 1000);
-          openTimerRef.current = setTimeout(() => setOpen(true), delayMs);
-        }
+        if (!(res.enabled && res.slides.length > 0 && inWindow)) return;
+        // Segmentação por página (home/loja/produto/campanha). Só exibe se a
+        // página atual casa com a config; senão, ignora silenciosamente.
+        const matches = await matchesNewsletterTargeting(
+          pathname,
+          res.targeting,
+        );
+        if (cancelled || !matches) return;
+        setData(res);
+        // appearDelay em segundos; mínimo de 250ms pra página pintar antes.
+        const delayMs = Math.max(250, (res.behavior.appearDelay ?? 0) * 1000);
+        openTimerRef.current = setTimeout(() => setOpen(true), delayMs);
       })
       .catch(() => {});
     return () => {
       cancelled = true;
       if (openTimerRef.current) clearTimeout(openTimerRef.current);
     };
-  }, []);
+  }, [pathname]);
 
   const close = useCallback(() => {
     setOpen(false);

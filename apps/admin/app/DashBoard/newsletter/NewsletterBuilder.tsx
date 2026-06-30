@@ -173,7 +173,7 @@ export function NewsletterBuilder({
                 onCheckedChange={(v) => update("enabled", v)}
               />
               <span className="text-sm font-medium text-gray-700">
-                Exibir na home
+                Pop-up ativo
               </span>
             </label>
           </div>
