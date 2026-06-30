@@ -41,6 +41,7 @@ export default function CampanhaPage() {
             title: p.name,
             storeName: p.store?.name || "Loja",
             price: p.price,
+            priceText: p.priceText,
             description: p.description,
             images: p.images,
             showStorePhone: p.showStorePhone,
@@ -86,6 +87,7 @@ export default function CampanhaPage() {
                 id: p.id,
                 name: p.name,
                 price: p.price,
+                priceText: p.priceText,
                 description: p.description,
                 images: p.images,
                 showStorePhone: p.showStorePhone,
@@ -110,6 +112,7 @@ export default function CampanhaPage() {
                             title={product.title}
                             storeName={product.storeName}
                             price={product.price}
+                            priceText={product.priceText}
                             images={product.images}
                             isFavorited={isFavorited(product.id)}
                             onWishlistClick={() => {

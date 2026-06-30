@@ -113,7 +113,7 @@ export async function runImportJob({
   const products: CreateProductDto[] = rows.map((row, i) => ({
     name: row.name,
     description: row.description,
-    price: row.price.value!,
+    priceText: row.priceText || undefined,
     categories: row.categories.value ?? [],
     // Normaliza separadores: `;`, `|` e quebras de linha viram `,` para casar
     // com o split por vírgula do backend (product.service). Mantém o que o

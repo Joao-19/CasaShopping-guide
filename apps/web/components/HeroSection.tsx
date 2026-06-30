@@ -1,5 +1,5 @@
 "use client";
-import { IconSearch, usePopup, formatPriceTier } from "@repo/ui";
+import { IconSearch, usePopup, PriceText } from "@repo/ui";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { getSettings, Settings } from "../Services/http/settings.http";
@@ -104,6 +104,7 @@ export function HeroSection() {
             storeName: product.store?.name || "Loja",
             storeSlug: product.store?.slug ?? undefined,
             price: product.price,
+            priceText: product.priceText,
             description: product.description,
             images: product.images?.sort((a: any, b: any) => a.index - b.index)
                 .map((img: any) => img.path.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')) || [],
@@ -226,14 +227,12 @@ export function HeroSection() {
                                                     <span className="text-base font-medium text-[#162e47] truncate">{product.name}</span>
                                                     <div className="flex items-center justify-between w-full mt-1">
                                                         <span className="text-sm text-gray-400 truncate flex-1">{product.store?.name || "Loja"}</span>
-                                                        {product.price && formatPriceTier(product.price) && (
-                                                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${product.price === 'HIGH' ? 'bg-purple-100 text-purple-700' :
-                                                                product.price === 'MEDIUM' ? 'bg-blue-100 text-blue-700' :
-                                                                    product.price === 'ON_REQUEST' ? 'hidden' : // Should be handled by formatPriceTier check but safe to add
-                                                                        'bg-slate-100 text-slate-700'
-                                                                }`}>
-                                                                {formatPriceTier(product.price)}
+                                                        {product.priceText ? (
+                                                            <span className="text-xs font-semibold text-[#162e47] shrink-0 ml-2 text-right">
+                                                                <PriceText value={product.priceText} promoClassName="text-emerald-600" />
                                                             </span>
+                                                        ) : (
+                                                            <span className="text-xs font-medium text-gray-400 shrink-0 ml-2">Sob consulta</span>
                                                         )}
                                                     </div>
                                                 </div>

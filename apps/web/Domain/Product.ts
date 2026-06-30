@@ -18,7 +18,8 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  price: PriceTier; // This corresponds to the price tier enum
+  price: PriceTier | null; // legado: faixa qualitativa
+  priceText: string | null; // oficial: preço em texto livre (de/por)
   categories: string[];
   tags: string | null;
   storeId: string;

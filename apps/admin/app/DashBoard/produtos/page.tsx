@@ -10,7 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from "@repo/ui/table";
-import { ConfirmationCard, formatPriceTier } from '@repo/ui';
+import { ConfirmationCard } from '@repo/ui';
 import { CreateProductForm } from './-components/CreateProductForm';
 
 export default function ProdutosPage() {
@@ -121,13 +121,11 @@ export default function ProdutosPage() {
                                             <div className="text-xs text-gray-500 truncate max-w-[200px]">{product.description}</div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.price === 'HIGH' ? 'bg-purple-100 text-purple-700' :
-                                                product.price === 'MEDIUM' ? 'bg-blue-100 text-blue-700' :
-                                                    product.price === 'ON_REQUEST' ? 'bg-gray-100 text-gray-700' :
-                                                        'bg-slate-100 text-slate-700'
-                                                }`}>
-                                                {product.price === 'ON_REQUEST' ? 'Sem Valor' : formatPriceTier(product.price)}
-                                            </span>
+                                            {product.priceText ? (
+                                                <span className="text-sm text-gray-700">{product.priceText}</span>
+                                            ) : (
+                                                <span className="text-xs text-gray-400">Sob consulta</span>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-wrap gap-1">

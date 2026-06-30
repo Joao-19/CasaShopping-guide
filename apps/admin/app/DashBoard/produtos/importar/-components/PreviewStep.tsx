@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PriceTier } from "@repo/dtos";
 import type { LoadedArchive } from "../-lib/archive";
 import {
   Table,
@@ -22,14 +21,6 @@ import {
   StoreResolutionPanel,
   type UnresolvedStoreGroup,
 } from "./StoreResolutionPanel";
-
-// Mesmos rótulos do form de criação de produto (CreateProductForm).
-const PRICE_LABELS: Record<PriceTier, string> = {
-  [PriceTier.LOW]: "Baixo ($)",
-  [PriceTier.MEDIUM]: "Médio ($$)",
-  [PriceTier.HIGH]: "Alto ($$$)",
-  [PriceTier.ON_REQUEST]: "Sem Valor",
-};
 
 const SEVERITY_DOT: Record<RowDiagnostics["severity"], string> = {
   ok: "bg-green-500",
@@ -161,27 +152,15 @@ export function PreviewStep({
                     />
                   </TableCell>
                   <TableCell>
-                    <select
-                      value={row.price.value ?? PriceTier.ON_REQUEST}
+                    <input
+                      type="text"
+                      value={row.priceText}
                       onChange={(e) =>
-                        onUpdateRow(row.index, {
-                          price: {
-                            status: "resolved",
-                            value: e.target.value as PriceTier,
-                            raw: row.price.raw,
-                          },
-                        })
+                        onUpdateRow(row.index, { priceText: e.target.value })
                       }
-                      className={`px-2 py-1 border rounded text-sm bg-white ${
-                        row.price.status === "missing" ? "border-red-400" : "border-gray-200"
-                      }`}
-                    >
-                      {Object.values(PriceTier).map((t) => (
-                        <option key={t} value={t}>
-                          {PRICE_LABELS[t]}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="R$ 7.847 por R$ 4.708,20"
+                      className="px-2 py-1 border border-gray-200 rounded text-sm bg-white w-[180px]"
+                    />
                   </TableCell>
                   <TableCell className="min-w-[180px]">
                     {row.categories.status === "resolved" ? (
