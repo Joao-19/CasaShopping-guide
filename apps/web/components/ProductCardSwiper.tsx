@@ -4,7 +4,7 @@ import { ComponentProps, useState } from "react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
-import { cn, IconHeart, PriceText } from "@repo/ui";
+import { cn, IconHeart, PriceText, SobConsulta } from "@repo/ui";
 
 // Import Swiper styles
 import "swiper/css";
@@ -108,7 +108,7 @@ export function ProductCardSwiper({
                     </div>
                 ) : (
                     <div className="absolute bottom-3 right-3 font-medium text-white text-xs bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">
-                        Sob consulta
+                        <SobConsulta />
                     </div>
                 )}
 

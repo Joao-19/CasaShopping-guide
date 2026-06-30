@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BaseText, Button, Label, FormCard, toast } from "@repo/ui";
+import { BaseText, Button, Label, FormCard, toast, PriceText, parsePriceText } from "@repo/ui";
 import BaseInput from "@repo/ui/inputs/BaseInput";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
 import useProduct from "@/composable/product/useProduct";
@@ -273,6 +273,27 @@ function CreateProductFormContent({
                         Texto livre — aparece igual no site. Use &quot;por&quot; para
                         promoção (de/por). Vazio = sem preço.
                     </p>
+                    {/* Preview ao vivo: mostra exatamente como vai aparecer no
+                        site (de/por detectado, auto-R$). Reduz erro de formato. */}
+                    <div className="mt-2 flex items-center gap-2 text-[11px]">
+                        <span className="text-gray-400">No site:</span>
+                        {data.priceText.trim() ? (
+                            <>
+                                <span className="font-semibold text-[#1A2B3C]">
+                                    <PriceText value={data.priceText} />
+                                </span>
+                                {parsePriceText(data.priceText) && (
+                                    <span className="text-emerald-600 font-medium">
+                                        ✓ promoção (de/por)
+                                    </span>
+                                )}
+                            </>
+                        ) : (
+                            <span className="font-medium text-gray-500">
+                                Sob consulta
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 <div className="mb-4">

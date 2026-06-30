@@ -1,18 +1,33 @@
 import { cn } from "../lib/utils";
 
+// Prefixa "R$ " automaticamente quando o trecho COMEÇA com número e ainda
+// não tem "R$". Texto que começa com letra (ex.: "Sob consulta", "A partir
+// de 1.450", "Consulte") fica intacto — não dá pra adivinhar moeda nele.
+//   "7.847"        -> "R$ 7.847"
+//   "R$ 7.847"     -> "R$ 7.847"   (mantém)
+//   "A partir 500" -> "A partir 500" (mantém)
+export function withCurrency(text: string): string {
+  const t = text.trim();
+  if (!t) return t;
+  if (/^r\$/i.test(t)) return t;
+  if (/^\d/.test(t)) return `R$ ${t}`;
+  return t;
+}
+
 // Detecta o padrão promocional "de/por" no texto livre de preço.
 // Separador combinado com o cliente: a palavra " por " (espaço + por +
 // espaço), case-insensitive. Divide no PRIMEIRO " por ":
 //   "R$ 7.847 por R$ 4.708,20" -> { full: "R$ 7.847", promo: "R$ 4.708,20" }
 // Qualquer texto sem " por " (ou com um lado vazio) não é promoção.
+// Cada lado passa por `withCurrency` (auto "R$" quando for número puro).
 export function parsePriceText(
   value?: string | null,
 ): { full: string; promo: string } | null {
   if (!value) return null;
   const match = value.match(/^(.*?)\s+por\s+(.+)$/i);
   if (!match) return null;
-  const full = match[1]!.trim();
-  const promo = match[2]!.trim();
+  const full = withCurrency(match[1]!.trim());
+  const promo = withCurrency(match[2]!.trim());
   if (!full || !promo) return null;
   return { full, promo };
 }
@@ -38,7 +53,8 @@ export function PriceText({
 
   const promo = parsePriceText(value);
   if (!promo) {
-    return <span className={className}>{value}</span>;
+    // Simples (sem "por"): aplica auto-"R$" e exibe.
+    return <span className={className}>{withCurrency(value)}</span>;
   }
 
   return (
@@ -46,7 +62,12 @@ export function PriceText({
       <s className={cn("font-normal opacity-60 mr-1.5", fullClassName)}>
         {promo.full}
       </s>
-      <span className={cn("font-bold", promoClassName)}>{promo.promo}</span>
+      {/* Destaque padrão da promoção: cor primary do guia (#003ba6). Telas
+          com fundo escuro sobrescrevem via `promoClassName` (cn → última
+          classe vence) para manter legibilidade. */}
+      <span className={cn("font-bold text-[#003ba6]", promoClassName)}>
+        {promo.promo}
+      </span>
     </span>
   );
 }
