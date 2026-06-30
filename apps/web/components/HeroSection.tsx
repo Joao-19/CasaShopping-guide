@@ -1,5 +1,5 @@
 "use client";
-import { IconSearch, usePopup, PriceText } from "@repo/ui";
+import { IconSearch, usePopup, PriceText, SobConsulta } from "@repo/ui";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { getSettings, Settings } from "../Services/http/settings.http";
@@ -225,7 +225,7 @@ export function HeroSection() {
                                                                 <PriceText value={product.priceText} />
                                                             </span>
                                                         ) : (
-                                                            <span className="text-xs font-medium text-gray-400 shrink-0 ml-2">Sob consulta</span>
+                                                            <SobConsulta className="text-xs font-medium text-gray-400 shrink-0 ml-2" />
                                                         )}
                                                     </div>
                                                 </div>

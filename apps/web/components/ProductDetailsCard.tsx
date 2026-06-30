@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, PriceText } from "@repo/ui";
+import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, PriceText, SobConsulta } from "@repo/ui";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
 import { LoginRequiredPopup } from "./LoginRequiredPopup";
@@ -60,6 +60,8 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
     // clampado) — heurística por length dava falso-positivo (botão aparecia
     // sem nada pra expandir).
     const descRef = useRef<HTMLParagraphElement>(null);
+    // Alvo do CTA "Sob consulta": rola até os botões de contato da loja.
+    const contactsRef = useRef<HTMLDivElement>(null);
     const [descIsClamped, setDescIsClamped] = useState(false);
     useLayoutEffect(() => {
         const el = descRef.current;
@@ -192,7 +194,12 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                         {product.priceText ? (
                                             <PriceText value={product.priceText} />
                                         ) : (
-                                            <span className="text-[15px] font-medium text-[#5b6b7d]">Sob consulta</span>
+                                            <SobConsulta
+                                                className="text-[15px] font-medium text-[#5b6b7d] hover:text-[#162e47]"
+                                                onClick={() =>
+                                                    contactsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+                                                }
+                                            />
                                         )}
                                     </span>
                                 </div>
@@ -244,7 +251,7 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex gap-[8px] w-full items-center">
+                                <div ref={contactsRef} className="flex gap-[8px] w-full items-center">
                                     <button
                                         onClick={handleToggleFavorite}
                                         className={cn(

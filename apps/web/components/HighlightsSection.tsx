@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useCallback } from 'react';
-import { MediaCard, usePopup, IconHeart, BaseText, PriceText } from "@repo/ui";
+import { MediaCard, usePopup, IconHeart, BaseText, PriceText, SobConsulta } from "@repo/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getProducts } from "../Services/http/product.http";
 import { useFavorites } from "@/composable/useFavorites";
@@ -215,7 +215,7 @@ export function HighlightsSection({ items, title }: HighlightsSectionProps = {})
                                                     <PriceText value={product.priceText} fullClassName="text-white/70" promoClassName="text-emerald-300" />
                                                 </div>
                                             ) : (
-                                                <div className="text-white/90 text-sm font-medium mb-1">Sob consulta</div>
+                                                <div className="text-white/90 text-sm font-medium mb-1"><SobConsulta /></div>
                                             )}
 
                                             {/* Title */}
