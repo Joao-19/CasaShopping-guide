@@ -62,9 +62,10 @@ export function PriceText({
       <s className={cn("font-normal opacity-60 mr-1.5", fullClassName)}>
         {promo.full}
       </s>
-      {/* Destaque padrão da promoção: verde "oferta". Telas com fundo escuro
-          sobrescrevem via `promoClassName` (cn → última classe vence). */}
-      <span className={cn("font-bold text-emerald-600", promoClassName)}>
+      {/* Destaque padrão da promoção: cor primary do guia (#003ba6). Telas
+          com fundo escuro sobrescrevem via `promoClassName` (cn → última
+          classe vence) para manter legibilidade. */}
+      <span className={cn("font-bold text-[#003ba6]", promoClassName)}>
         {promo.promo}
       </span>
     </span>
