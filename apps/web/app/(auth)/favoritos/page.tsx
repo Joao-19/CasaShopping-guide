@@ -90,6 +90,7 @@ export default function FavoritesPage() {
                                             title={mappedProduct.title}
                                             storeName={mappedProduct.storeName}
                                             price={mappedProduct.price}
+                                            priceText={mappedProduct.priceText}
                                             images={mappedProduct.images}
                                             isFavorited={isFavorited(mappedProduct.id)}
                                             onWishlistClick={() => {

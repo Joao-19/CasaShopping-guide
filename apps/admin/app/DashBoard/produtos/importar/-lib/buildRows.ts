@@ -1,6 +1,5 @@
 import { PRODUCT_MAX_IMAGES } from "@repo/dtos";
 import { matchImageFilename, matchImagesByStore } from "./matchImages";
-import { resolvePrice } from "./priceMapping";
 import { resolveCategories, resolveStore, type StoreOption } from "./resolve";
 import type {
   ColumnMapping,
@@ -65,7 +64,7 @@ export function buildResolvedRows(
       index,
       name,
       description,
-      price: resolvePrice(cell(row, mapping.price)),
+      priceText: cell(row, mapping.price),
       categories: resolveCategories(cell(row, mapping.categories)),
       tags: cell(row, mapping.tags) || undefined,
       store: resolveStore(storeRaw, stores),
@@ -112,10 +111,7 @@ export function diagnoseRow(row: ResolvedRow): RowDiagnostics {
   else if (row.categories.status === "ambiguous")
     warn(`Categoria parcial: "${row.categories.raw}"`);
 
-  if (row.price.status === "missing")
-    block(`Preço não reconhecido: "${row.price.raw}"`);
-  else if (row.price.status === "ambiguous")
-    warn("Preço assumido como 'sem valor' — confirme");
+  // Preço é texto livre: nunca bloqueia nem alerta. Vazio é válido.
 
   const matchedImages = row.images.filter((i) => i.status === "resolved");
   const ambiguousImages = row.images.filter((i) => i.status === "ambiguous");

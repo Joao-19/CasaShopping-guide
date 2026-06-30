@@ -25,6 +25,9 @@ export interface NewsletterTargeting {
   pageTypes: string[];
   specificPages: string[];
   campaigns: string[];
+  // Janela de exibição (ISO 8601). Opcionais — usados no modal do carrossel.
+  startsAt?: string | null;
+  endsAt?: string | null;
 }
 
 export interface NewsletterSettings {

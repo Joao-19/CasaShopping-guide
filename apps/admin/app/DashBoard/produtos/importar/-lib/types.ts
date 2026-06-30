@@ -1,5 +1,3 @@
-import { PriceTier } from "@repo/dtos";
-
 // Campos internos do produto que a planilha alimenta. `image` é a coluna
 // (opcional) que referencia o nome do arquivo no zip.
 export type ProductField =
@@ -54,7 +52,9 @@ export interface ResolvedRow {
   index: number; // índice na planilha (0-based)
   name: string;
   description: string;
-  price: ResolvedValue<PriceTier>;
+  // Preço em texto livre, exibido exatamente como digitado. Sem resolução
+  // nem bloqueio — vazio é válido.
+  priceText: string;
   categories: ResolvedValue<string[]>;
   tags?: string;
   store: ResolvedValue<string>; // value = storeId

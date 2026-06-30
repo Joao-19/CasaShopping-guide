@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, formatPriceTier } from "@repo/ui";
+import { IconArrowLeft, IconInstagram, IconFacebook, IconYoutube, cn, PriceText, SobConsulta } from "@repo/ui";
 import { X, Phone, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePopup } from "@repo/ui";
 import { LoginRequiredPopup } from "./LoginRequiredPopup";
@@ -21,7 +21,8 @@ interface ProductDetailsCardProps {
     product: {
         id: string;
         title: string;
-        price: number | string; // Allow string if passing raw price, but we assume number usually
+        price: number | string | null; // legado: faixa qualitativa
+        priceText?: string | null; // oficial: preço em texto livre (de/por)
         storeName: string;
         storeLogo?: string;
         description?: string;
@@ -59,6 +60,8 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
     // clampado) — heurística por length dava falso-positivo (botão aparecia
     // sem nada pra expandir).
     const descRef = useRef<HTMLParagraphElement>(null);
+    // Alvo do CTA "Sob consulta": rola até os botões de contato da loja.
+    const contactsRef = useRef<HTMLDivElement>(null);
     const [descIsClamped, setDescIsClamped] = useState(false);
     useLayoutEffect(() => {
         const el = descRef.current;
@@ -183,12 +186,21 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
 
                             {/* Info Section */}
                             <div className="flex flex-col gap-[24px] items-start w-full px-[32px] pb-[32px] pt-[20px] bg-[#f0f1f3]">
-                                <div className="flex justify-between items-start w-full">
-                                    <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight flex-1 pr-4" title={product.title}>
+                                <div className="flex flex-col gap-[8px] w-full">
+                                    <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight w-full" title={product.title}>
                                         {product.title}
                                     </h2>
-                                    <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap">
-                                        {formatPriceTier(String(product.price))}
+                                    <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap self-end max-w-full">
+                                        {product.priceText ? (
+                                            <PriceText value={product.priceText} />
+                                        ) : (
+                                            <SobConsulta
+                                                className="text-[15px] font-medium text-[#5b6b7d] hover:text-[#162e47]"
+                                                onClick={() =>
+                                                    contactsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+                                                }
+                                            />
+                                        )}
                                     </span>
                                 </div>
 
@@ -239,7 +251,7 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex gap-[8px] w-full items-center">
+                                <div ref={contactsRef} className="flex gap-[8px] w-full items-center">
                                     <button
                                         onClick={handleToggleFavorite}
                                         className={cn(

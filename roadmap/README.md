@@ -35,6 +35,12 @@
 > separada, app no Portainer (Git), tela de manutenção + pendências de infra
 > (ACL/segurança, limpeza, R2). Base já feita: GHCR + escravo/VPN.
 
+> **Ajustes do cliente (Frente 11)** — `11-ajustes-cliente-junho.md` (nova,
+> 2026-06-26): 5 pedidos pós-entrega. Prioritário = **preço em texto livre
+> (de/por)**. Demais: destaque só com produto, fallback de banner sem 2025,
+> exclusão em massa, logos em massa (já pronto via script). Classificação
+> demanda-nova × já-entregue em `../DEMANDA-NOVA-AJUSTES-JUNHO.md` (raiz).
+
 ## Recomendação de sprints (2 semanas = 10 dias úteis)
 
 A ordem cabe em **2 sprints**:

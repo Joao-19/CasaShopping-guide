@@ -4,7 +4,7 @@ import { ComponentProps, useState } from "react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
-import { cn, IconHeart, formatPriceTier } from "@repo/ui";
+import { cn, IconHeart, PriceText, SobConsulta } from "@repo/ui";
 
 // Import Swiper styles
 import "swiper/css";
@@ -22,7 +22,8 @@ const isVideoUrl = (url: string): boolean => {
 interface ProductCardSwiperProps extends ComponentProps<"div"> {
     title: string;
     storeName: string;
-    price?: PriceTier | string;
+    price?: PriceTier | string | null;
+    priceText?: string | null;
     images: string[];
     onWishlistClick?: () => void;
     isFavorited?: boolean;
@@ -33,6 +34,7 @@ export function ProductCardSwiper({
     title,
     storeName,
     price = 'MEDIUM',
+    priceText,
     images,
     className,
     onWishlistClick,
@@ -100,9 +102,13 @@ export function ProductCardSwiper({
                 </Swiper>
 
                 {/* Price Tag */}
-                {formatPriceTier(price as string) && (
-                    <div className="absolute bottom-3 right-3 font-bold text-white text-sm bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">
-                        {formatPriceTier(price as string)}
+                {priceText ? (
+                    <div className="absolute bottom-3 right-3 max-w-[70%] text-right font-bold text-white text-sm bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">
+                        <PriceText value={priceText} fullClassName="text-white/70" promoClassName="text-white" />
+                    </div>
+                ) : (
+                    <div className="absolute bottom-3 right-3 font-medium text-white text-xs bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">
+                        <SobConsulta />
                     </div>
                 )}
 

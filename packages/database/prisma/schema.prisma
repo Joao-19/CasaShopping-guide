@@ -79,7 +79,10 @@ model Product {
   id          String    @id @default(uuid())
   name        String
   description String
-  price       PriceTier
+  // price (PriceTier) é legado — mantido para dados antigos. O campo oficial
+  // agora é priceText (texto livre: "R$ 7.847" ou "R$ 7.847 por R$ 4.708,20").
+  price       PriceTier?
+  priceText   String?
   categories  String[]
   tags        String?
 

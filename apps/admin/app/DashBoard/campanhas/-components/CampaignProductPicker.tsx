@@ -27,7 +27,9 @@ import storeHttp from "@/Services/http/store.http";
 export interface SelectedProduct {
     id: string;
     name: string;
-    price: string;
+    // Faixa de preço legada (PriceTier). Opcional: produtos novos usam preço
+    // em texto livre e não têm tier — aqui fica null e exibe "Sem Valor".
+    price: string | null;
 }
 
 const CATEGORIES = [
@@ -47,8 +49,8 @@ const PRICES = [
     { v: "ON_REQUEST", n: "Sem valor" },
 ];
 
-const priceLabel = (p: string) =>
-    p === "ON_REQUEST" ? "Sem Valor" : formatPriceTier(p);
+const priceLabel = (p: string | null) =>
+    !p || p === "ON_REQUEST" ? "Sem Valor" : formatPriceTier(p);
 
 interface CampaignProductPickerProps {
     open?: boolean;

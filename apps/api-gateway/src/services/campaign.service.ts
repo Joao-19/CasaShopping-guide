@@ -173,7 +173,8 @@ export class CampaignService {
         id: string;
         name: string;
         description: string;
-        price: string;
+        price: string | null;
+        priceText: string | null;
         tags: string | null;
         storeId: string;
         showStorePhone: boolean;
@@ -197,6 +198,7 @@ export class CampaignService {
       name: cp.product.name,
       description: cp.product.description,
       price: cp.product.price,
+      priceText: cp.product.priceText,
       tags: cp.product.tags,
       storeId: cp.product.storeId,
       images: [...cp.product.images]

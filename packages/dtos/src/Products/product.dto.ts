@@ -18,6 +18,7 @@ import { Type } from "class-transformer";
 /** Limites de campos do produto — fonte única (DTO + form admin + service). */
 export const PRODUCT_DESCRIPTION_MAX_LENGTH = 500;
 export const PRODUCT_MAX_IMAGES = 5;
+export const PRODUCT_PRICE_TEXT_MAX_LENGTH = 120;
 
 export enum PriceTier {
   LOW = "LOW",
@@ -47,8 +48,17 @@ export class CreateProductDto {
   @MaxLength(PRODUCT_DESCRIPTION_MAX_LENGTH)
   description!: string;
 
+  // Legado: faixa qualitativa. Opcional — o campo oficial agora é priceText.
+  @IsOptional()
   @IsEnum(PriceTier)
-  price!: PriceTier;
+  price?: PriceTier;
+
+  // Preço em texto livre, exibido exatamente como digitado.
+  // Ex.: "R$ 7.847" ou promocional "R$ 7.847 por R$ 4.708,20".
+  @IsOptional()
+  @IsString()
+  @MaxLength(PRODUCT_PRICE_TEXT_MAX_LENGTH)
+  priceText?: string;
 
   @IsArray()
   @IsString({ each: true })
@@ -115,6 +125,11 @@ export class UpdateProductDto {
   price?: PriceTier;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(PRODUCT_PRICE_TEXT_MAX_LENGTH)
+  priceText?: string;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   categories?: string[];
@@ -147,7 +162,8 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  price: PriceTier;
+  price: PriceTier | null;
+  priceText: string | null;
   categories: string[];
   tags: string | null;
   storeId: string;

@@ -6,7 +6,7 @@ import type { MappingSuggestion, ProductField } from "../-lib/types";
 const FIELD_LABELS: Record<ProductField, string> = {
   name: "Nome do produto *",
   description: "Descrição",
-  price: "Faixa de preço",
+  price: "Preço",
   categories: "Categorias",
   tags: "Tags",
   storeName: "Loja",

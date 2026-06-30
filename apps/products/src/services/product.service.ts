@@ -64,7 +64,8 @@ export class ProductService {
       data: {
         name: data.name,
         description: data.description,
-        price: data.price,
+        price: data.price ?? null,
+        priceText: data.priceText ?? null,
         categories: data.categories,
         tags: data.tags,
         storeId: data.storeId,
