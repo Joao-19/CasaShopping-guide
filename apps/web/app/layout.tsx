@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 import { GlobalErrorListener } from "../components/GlobalErrorListener";
+import { NewsletterCarouselModal } from "../components/NewsletterCarouselModal";
 import { GoogleTagManagerScript, GoogleTagManagerNoscript, GoogleAnalytics4Script } from "@repo/ui";
 
 
@@ -42,6 +43,9 @@ export default function RootLayout({
         <Providers>
           <GlobalErrorListener />
           {children}
+          {/* Pop-up promocional: montado globalmente; ele mesmo decide em quais
+              páginas aparece (segmentação por home/loja/produto/campanha). */}
+          <NewsletterCarouselModal />
         </Providers>
       </body>
     </html>
