@@ -103,6 +103,11 @@ export function TargetingPanel({ targeting, onChange }: TargetingPanelProps) {
   );
 
   const togglePageType = (id: string) => {
+    // Home tem flag própria (showOnHome), não entra em `pageTypes`.
+    if (id === "home") {
+      onChange({ ...targeting, showOnHome: targeting.showOnHome === false });
+      return;
+    }
     const enabled = targeting.pageTypes.includes(id);
     onChange({
       ...targeting,
@@ -111,6 +116,12 @@ export function TargetingPanel({ targeting, onChange }: TargetingPanelProps) {
         : [...targeting.pageTypes, id],
     });
   };
+
+  // Home liga por padrão (legado sempre exibia); só `false` desativa.
+  const isTypeChecked = (id: string) =>
+    id === "home"
+      ? targeting.showOnHome !== false
+      : targeting.pageTypes.includes(id);
 
   const toggleSpecificPage = (id: string) => {
     const enabled = targeting.specificPages.includes(id);
@@ -184,9 +195,8 @@ export function TargetingPanel({ targeting, onChange }: TargetingPanelProps) {
   );
 
   const activeRuleCount =
-    PAGE_TYPES.filter(
-      (t) => t.locked || targeting.pageTypes.includes(t.id),
-    ).length + selectedPages.length;
+    PAGE_TYPES.filter((t) => isTypeChecked(t.id)).length +
+    selectedPages.length;
 
   // Janela de exibição (datas) — guardadas dentro do mesmo objeto `targeting`.
   // Inputs HTML `type="date"` trabalham com YYYY-MM-DD; convertemos para ISO
@@ -213,8 +223,8 @@ export function TargetingPanel({ targeting, onChange }: TargetingPanelProps) {
           ativa{activeRuleCount === 1 ? "" : "s"}
         </p>
         <p className="mt-0.5 text-xs text-violet-700/80">
-          A Home é o padrão e sempre exibe o pop-up. Adicione mais regras
-          abaixo para outras páginas.
+          A Home vem ligada por padrão, mas pode ser desativada no switch
+          abaixo. Adicione mais regras para outras páginas.
         </p>
       </div>
 
@@ -276,7 +286,7 @@ export function TargetingPanel({ targeting, onChange }: TargetingPanelProps) {
 
         <div className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200">
           {PAGE_TYPES.map((type) => {
-            const checked = type.locked || targeting.pageTypes.includes(type.id);
+            const checked = isTypeChecked(type.id);
             const showCampaigns =
               type.id === "campaign-pages" && checked && campaigns.length > 0;
             return (
@@ -287,11 +297,6 @@ export function TargetingPanel({ targeting, onChange }: TargetingPanelProps) {
                       <p className="text-sm font-medium text-gray-900">
                         {type.label}
                       </p>
-                      {type.locked && (
-                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
-                          Padrão
-                        </span>
-                      )}
                     </div>
                     <p className="truncate text-xs text-gray-400">
                       {type.description}
@@ -299,7 +304,6 @@ export function TargetingPanel({ targeting, onChange }: TargetingPanelProps) {
                   </div>
                   <Switch
                     checked={checked}
-                    disabled={type.locked}
                     onCheckedChange={() => togglePageType(type.id)}
                   />
                 </div>
