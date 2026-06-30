@@ -1,13 +1,14 @@
 import * as XLSX from "xlsx";
 import { PRODUCT_CATEGORIES } from "./categories";
 
-// Exemplos que, juntos, exercitam TODAS as opções: as 4 faixas de preço,
-// as 6 categorias (incl. multi-categoria), com/sem foto, tags e destaque.
+// Exemplos que, juntos, exercitam TODAS as opções: preço em texto livre
+// (de/por, simples e vazio), as 6 categorias (incl. multi-categoria),
+// com/sem foto, tags e destaque.
 const TEMPLATE_ROWS = [
   {
     Nome: "Sofá Retrátil 3 Lugares",
     Loja: "Nome exato da loja cadastrada",
-    "Preço": "Alto",
+    "Preço": "R$ 7.847 por R$ 4.708,20",
     Categorias: "Sala",
     "Descrição": "Sofá retrátil e reclinável, 3 lugares.",
     Tags: "sofa; sala de estar",
@@ -17,7 +18,7 @@ const TEMPLATE_ROWS = [
   {
     Nome: "Cama Box Casal",
     Loja: "Nome exato da loja cadastrada",
-    "Preço": "Médio",
+    "Preço": "R$ 3.299,90",
     Categorias: "Quarto",
     "Descrição": "Cama box casal com baú.",
     Tags: "cama; quarto",
@@ -27,7 +28,7 @@ const TEMPLATE_ROWS = [
   {
     Nome: "Gabinete para Banheiro",
     Loja: "Nome exato da loja cadastrada",
-    "Preço": "Médio",
+    "Preço": "R$ 1.450",
     Categorias: "Banheiro",
     "Descrição": "Gabinete com cuba e espelheira.",
     Tags: "banheiro; gabinete",
@@ -37,7 +38,7 @@ const TEMPLATE_ROWS = [
   {
     Nome: "Conjunto Mesa + Cadeiras Cozinha",
     Loja: "Nome exato da loja cadastrada",
-    "Preço": "Alto",
+    "Preço": "R$ 5.200 por R$ 3.990",
     Categorias: "Cozinha; Sala",
     "Descrição": "Mesa com 4 cadeiras (multi-categoria).",
     Tags: "mesa; cozinha",
@@ -47,7 +48,7 @@ const TEMPLATE_ROWS = [
   {
     Nome: "Conjunto para Varanda",
     Loja: "Nome exato da loja cadastrada",
-    "Preço": "Baixo",
+    "Preço": "R$ 899",
     Categorias: "Área Externa",
     "Descrição": "Mesa e cadeiras em fibra sintética.",
     Tags: "varanda; externa",
@@ -57,9 +58,9 @@ const TEMPLATE_ROWS = [
   {
     Nome: "Escrivaninha Home Office",
     Loja: "Nome exato da loja cadastrada",
-    "Preço": "Sem valor",
+    "Preço": "",
     Categorias: "Escritório",
-    "Descrição": "Sem foto neste exemplo — pode importar mesmo assim.",
+    "Descrição": "Preço vazio e sem foto — pode importar mesmo assim.",
     Tags: "escritorio; home office",
     Destaque: "Não",
     Imagem: "",
@@ -85,7 +86,10 @@ function buildOptionsSheet(): XLSX.WorkSheet {
     ["Coluna", "Valores aceitos / regra"],
     ["Nome", "Texto livre (obrigatório)"],
     ["Loja", "Nome EXATO de uma loja já cadastrada (obrigatório)"],
-    ["Preço", "Baixo  |  Médio  |  Alto  |  Sem valor"],
+    [
+      "Preço",
+      'Texto livre — aparece igual no site. Promoção (de/por): use "por"  →  ex.: R$ 7.847 por R$ 4.708,20. Simples: R$ 3.299,90. Vazio = "Sob consulta".',
+    ],
     [
       "Categorias",
       PRODUCT_CATEGORIES.map((c) => c.name).join("  |  "),
@@ -122,7 +126,7 @@ export function downloadTemplate() {
   produtos["!cols"] = [
     { wch: 32 },
     { wch: 28 },
-    { wch: 10 },
+    { wch: 26 },
     { wch: 20 },
     { wch: 44 },
     { wch: 22 },
