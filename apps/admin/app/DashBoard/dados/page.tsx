@@ -18,15 +18,17 @@ export default function DadosPage() {
 
   return (
     <>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <Header
-          title="Dados"
-          subtitle="Favoritos, visualizações e origem do tráfego."
-        />
-        <ExportDataDialog />
-      </div>
+      <Header
+        title="Dados"
+        subtitle="Favoritos, visualizações e origem do tráfego."
+      />
 
       <div className="space-y-6">
+        <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <h2 className="text-xl font-bold text-[#1A2B3C]">Relatórios</h2>
+          <ExportDataDialog />
+        </div>
+
         <DateRangeFilter
           preset={a.preset}
           setPreset={a.setPreset}
