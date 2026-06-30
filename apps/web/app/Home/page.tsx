@@ -6,7 +6,6 @@ import { ProductShowcase } from "../../components/ProductShowcase";
 import { Footer } from "../../components/Footer";
 import { AdvertisementBanner } from "../../components/AdvertisementBanner";
 import { StoresSection } from "../../components/StoresSection";
-import { NewsletterCarouselModal } from "../../components/NewsletterCarouselModal";
 import { BackToTopButton } from "../../components/BackToTopButton";
 
 export default function HomePage() {
@@ -14,8 +13,6 @@ export default function HomePage() {
         <main className="w-full h-full flex flex-col flex-1 overflow-x-hidden">
             <div className="min-h-screen bg-[#f0f1f3] font-sans antialiased">
                 <Toolbar />
-
-                <NewsletterCarouselModal />
 
                 <HeroSection />
 
