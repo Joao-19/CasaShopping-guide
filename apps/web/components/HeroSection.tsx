@@ -222,7 +222,7 @@ export function HeroSection() {
                                                         <span className="text-sm text-gray-400 truncate flex-1">{product.store?.name || "Loja"}</span>
                                                         {product.priceText ? (
                                                             <span className="text-xs font-semibold text-[#162e47] shrink-0 ml-2 text-right">
-                                                                <PriceText value={product.priceText} promoClassName="text-emerald-600" />
+                                                                <PriceText value={product.priceText} />
                                                             </span>
                                                         ) : (
                                                             <span className="text-xs font-medium text-gray-400 shrink-0 ml-2">Sob consulta</span>

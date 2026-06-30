@@ -104,7 +104,7 @@ export function ProductCardSwiper({
                 {/* Price Tag */}
                 {priceText ? (
                     <div className="absolute bottom-3 right-3 max-w-[70%] text-right font-bold text-white text-sm bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">
-                        <PriceText value={priceText} fullClassName="text-white/70" promoClassName="text-white" />
+                        <PriceText value={priceText} fullClassName="text-white/70" promoClassName="text-emerald-300" />
                     </div>
                 ) : (
                     <div className="absolute bottom-3 right-3 font-medium text-white text-xs bg-black/40 backdrop-blur-md px-2 py-1 rounded-md font-[Open_Sans] z-10 pointer-events-none">

@@ -212,7 +212,7 @@ export function HighlightsSection({ items, title }: HighlightsSectionProps = {})
                                             {/* Preço */}
                                             {product.priceText ? (
                                                 <div className="text-white text-lg font-bold mb-1">
-                                                    <PriceText value={product.priceText} fullClassName="text-white/70" promoClassName="text-white" />
+                                                    <PriceText value={product.priceText} fullClassName="text-white/70" promoClassName="text-emerald-300" />
                                                 </div>
                                             ) : (
                                                 <div className="text-white/90 text-sm font-medium mb-1">Sob consulta</div>
