@@ -190,7 +190,7 @@ export function ProductDetailsCard({ product, onClose }: ProductDetailsCardProps
                                     <h2 className="font-semibold text-[#162e47] text-[20px] leading-tight flex-1 pr-4" title={product.title}>
                                         {product.title}
                                     </h2>
-                                    <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap">
+                                    <span className="font-semibold text-[#162e47] text-[20px] whitespace-nowrap min-w-0">
                                         {product.priceText ? (
                                             <PriceText value={product.priceText} />
                                         ) : (

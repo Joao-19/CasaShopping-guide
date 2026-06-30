@@ -11,7 +11,7 @@
 
 | # | Item | Estado atual | É demanda nova? | Esforço | Risco |
 |---|------|--------------|-----------------|---------|-------|
-| 4 | **Preço em texto livre (de/por)** ⭐ | Existe só enum qualitativo `PriceTier` (Baixo/Médio/Alto/Sob consulta) | **Sim** — muda contrato do campo | ~2 dias | médio (migration + cross-stack) |
+| 4 | **Preço em texto livre (de/por)** ⭐ | ✅ **CONCLUÍDO + deployado dev-deploy (2026-06-30)** — Q1–Q6 fechadas | **Sim** — mudou contrato do campo | ~2 dias | médio (migration + cross-stack) |
 | 1 | **Lojas em destaque só com produto** | Topo lista TODAS as lojas, sem filtro | **Sim** | ~1 dia | baixo |
 | 2 | **Banner: trocar fallback 2025 → vídeo do template** | Fallback hardcoded É a liquidação 2025 (`MudaTudo`); título fixo "Liquidação muda tudo" | **Sim** | ~0,5 dia | baixo (mas depende de asset) |
 | 3 | **Exclusão de produtos em massa** | Só exclusão 1 a 1 | **Sim** | ~1,5 dia | baixo |
@@ -63,26 +63,64 @@ preço, exibe normal.
 planilha de lote) → site mostra `R$ 7.847` riscado + `R$ 4.708,20` realçado;
 digito `R$ 7.847` → site mostra exatamente isso; nenhum formato é rejeitado.
 
-**Decisões do cliente (2026-06-26) — fechadas:**
-1. **Tiers $/$$/$$$ removidos.** Produtos atuais ficam **sem valor**. O
-   fallback do tier saiu de toda a UI (web + admin).
-2. **Vazio → "Sob consulta".** Produto sem `priceText` exibe "Sob consulta"
-   (o card do produto já leva às formas de contato da loja). ✅ implementado.
-3. **Separador:** só `por`, ou valor direto (sem de/por). ✅ é exatamente isso.
+**Decisões do cliente (Q1–Q6) — TODAS fechadas (2026-06-29/30):**
+1. **Q1 — Tiers $/$$/$$$ removidos.** Produtos atuais ficam **sem valor**
+   ("Sob consulta"). Fallback do tier saiu de toda a UI (web + admin). ✅
+2. **Q2 — Vazio → "Sob consulta" como CTA.** Produto sem `priceText` exibe
+   "Sob consulta"; no **card de detalhe** virou **botão** que rola até os
+   contatos da loja; na **listagem** o clique no card já abre o card de
+   contato. Componente compartilhado `packages/ui/.../SobConsulta.tsx`. ✅
+3. **Q3 — Auto-`R$`.** `withCurrency()` no `PriceText`: prefixa `R$ ` quando
+   o trecho **começa com número** e ainda não tem R$; texto que começa com
+   letra ("A partir de…") fica intacto. Aplica nos 2 lados do `por`. **Não
+   reformata o número** (`7847` → `R$ 7847`, não `R$ 7.847`). ✅
+4. **Q4 — Separador:** só `" por "`, ou valor direto. Texto livre (o cliente
+   recusou por escrito a abordagem de campos estruturados). + **preview ao
+   vivo no form do admin** mostrando como vai renderizar (mitiga erro de
+   formato, já que o sistema não força o lojista). ✅
+5. **Q5 — Cor do destaque:** `primary` do guia (`#003ba6`) nas telas claras;
+   **branco** nas telas de fundo escuro (destaques/swiper) por legibilidade.
+   (Cliente: "põe a primary, depois eu mudo se quiser".) ✅
+6. **Q6 — Visibilidade do preço por produto: DESCARTADO.** A ideia era variar
+   o que aparece por surface (ex.: home só o preço final, destaques o de/por).
+   Cliente: **"morre por aqui"**. → de/por aparece **em todos os locais**
+   (comportamento atual). **Não implementar.**
 
-**Estado: ✅ implementado e validado e2e (admin cadastro/edição + 3
-renders no site: de/por, único, "Sob consulta").** Falta só: import em lote
-testado com `.xlsx` real (lógica pronta) e os 2 itens abaixo.
+**Estado: ✅ implementado, validado e2e na UI e DEPLOYADO em `dev-deploy`
+(GHCR) — 2026-06-30.** Validação: preview do admin (auto-R$ + de/por +
+"✓ promoção"), `SobConsulta` botão no card de detalhe, listagem com o
+componente. Gates: typecheck admin verde; web só com erro pré-existente
+(websocket TS2742, build ignora); madge sem ciclo de Provider.
 
-**Pendências menores (confirmar com cliente):**
-- **Auto-`R$`** (resposta 3): se o texto não tiver `R$`, acrescentar
-  automaticamente? Cliente "acha melhor se der; senão seguimos padrão de
-  digitar". Opcional — baixo esforço, mas tem casos de borda ("a partir
-  de…"). Decidir se vale.
-- **Visibilidade do preço por produto** (resposta 6): opção de escolher se o
-  preço aparece **na home** ou **só no card do produto**. Cliente: "temos que
-  avaliar". → vira sub-item de config por produto (flag), fora do escopo
-  imediato do item 4.
+**Como a feature chegou no `dev`:** isolada da branch
+`feat/frente11-item4-preco-texto-livre` via **cherry-pick** de 2 commits
+(essa branch tem outras features **não pagas** — nunca pushar/mergear ela
+inteira). Ajustes Q2–Q5 + auto-R$ feitos direto no `dev`.
+
+**⚠️ Contradição do Excel do cliente (2026-06-30) — NÃO resolvida:**
+o `.xlsx` que o cliente enviou para importar usa um **modelo estruturado**
+(`Preço De` / `Preço Por` numéricos + `Unidade` m²/rolo/kit + `Forma de
+Pagamento` + `Observações`) — ou seja, o **de/por estruturado** que ele
+**recusou por escrito na Q4**, mais 2 conceitos novos (unidade, forma de
+pagamento) que nenhuma resposta mencionou. **Decisão: seguir o combinado
+(texto livre).** Consequências:
+- Aquele `.xlsx` **não importa direto**: o import casaria a coluna `Preço`
+  (tier "Baixo") como preço e **ignora** De/Por/Unidade/Forma de Pagamento.
+- As **74 lojas** do arquivo **não batem** com os nomes cadastrados
+  (`Avanti Tapetes`≠`Avanti`, `a.thebaldigaleria`≠`A Thebaldi Galeria`,
+  `Abra Casa`≠`AbraCasa`…) → travariam no resolver.
+- Para usar: reformatar o arquivo pro modelo **texto livre** (compor
+  `"R$ 1.900 o m² por R$ 760 o m²"` na coluna Preço) — referência:
+  `teste-importacao-preco.xlsx` (raiz). Ou revisitar o modelo estruturado
+  como evolução (Opção 1: schema+migration+dtos+backends+admin+~10 telas).
+- **Molde de import (`template.ts`)** já foi atualizado pro texto livre
+  (exemplos de/por + aba Opções) nesta frente.
+
+**Pendência adjacente (fora do escopo do item 4):** o **picker de campanhas**
+(`CampaignProductPicker`) ainda roda no tier legado — filtro `$/$$/$$$` e
+exibe "Sem Valor" pros produtos novos (que não têm tier). Só o type-error
+foi corrigido (price nullable). Migrar o picker pro `priceText` é decisão de
+produto à parte (texto livre não dá pra filtrar por faixa).
 
 ---
 
@@ -220,6 +258,9 @@ do script: sem acento, case-insensitive). Ver perguntas abaixo.
 
 - **Item 2:** vídeo da sala com sofá (template, 1ª entrega) — **pendente
   de recuperar**.
-- **Item 4:** decisão sobre aposentar ou não os tiers $/$$/$$$.
+- ~~**Item 4:** decisão sobre aposentar tiers~~ — ✅ resolvido (removidos).
+- **Item 4 / import:** o `.xlsx` do cliente está em modelo estruturado
+  (incompatível com o combinado texto livre) e com nomes de loja que não
+  batem — precisa reformatar o arquivo OU revisitar o modelo estruturado.
 - **Contrato:** cliente ofereceu enviar o contrato — conferir se há item
   fora destes 5 antes de fechar o escopo da frente.
