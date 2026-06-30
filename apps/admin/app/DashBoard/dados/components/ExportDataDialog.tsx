@@ -101,7 +101,7 @@ export function ExportDataDialog() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#1A2B3C] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#243a52]"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1A2B3C] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#243a52] lg:w-auto"
       >
         <Download className="size-4" />
         Exportar planilha
