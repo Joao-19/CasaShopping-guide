@@ -28,6 +28,8 @@ export interface NewsletterTargeting {
   // Janela de exibição (ISO 8601). Opcionais — usados no modal do carrossel.
   startsAt?: string | null;
   endsAt?: string | null;
+  // Switch da home (default true quando ausente). false = não exibir na home.
+  showOnHome?: boolean;
 }
 
 export interface NewsletterSettings {

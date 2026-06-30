@@ -5,6 +5,7 @@ import { useAnalytics } from "@/composable/analytics/useAnalytics";
 import { DateRangeFilter } from "./components/DateRangeFilter";
 import { RankingBars } from "./components/RankingBars";
 import { CategoryHeatmap } from "./components/CategoryHeatmap";
+import { ExportDataDialog } from "./components/ExportDataDialog";
 
 // Painel de dados (Frente 3 — Área de Dados): produtos mais favoritados,
 // mais vistos, mapa de calor por categoria e origem do tráfego, com filtro
@@ -17,10 +18,13 @@ export default function DadosPage() {
 
   return (
     <>
-      <Header
-        title="Dados"
-        subtitle="Favoritos, visualizações e origem do tráfego."
-      />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <Header
+          title="Dados"
+          subtitle="Favoritos, visualizações e origem do tráfego."
+        />
+        <ExportDataDialog />
+      </div>
 
       <div className="space-y-6">
         <DateRangeFilter

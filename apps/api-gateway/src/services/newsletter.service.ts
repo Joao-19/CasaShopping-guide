@@ -15,6 +15,7 @@ const DEFAULT_TARGETING: NewsletterTargeting = {
   campaigns: [],
   startsAt: null,
   endsAt: null,
+  showOnHome: true,
 };
 
 function parseTargeting(value: unknown): NewsletterTargeting {
@@ -28,6 +29,8 @@ function parseTargeting(value: unknown): NewsletterTargeting {
       campaigns: Array.isArray(t.campaigns) ? (t.campaigns as string[]) : [],
       startsAt: typeof t.startsAt === "string" ? t.startsAt : null,
       endsAt: typeof t.endsAt === "string" ? t.endsAt : null,
+      // Legado (ausente) = true: sempre exibia na home.
+      showOnHome: typeof t.showOnHome === "boolean" ? t.showOnHome : true,
     };
   }
   return { ...DEFAULT_TARGETING };
@@ -154,6 +157,8 @@ export class NewsletterService {
         campaigns: data.targeting.campaigns ?? [],
         startsAt: data.targeting.startsAt ?? null,
         endsAt: data.targeting.endsAt ?? null,
+        // Ausente = true (legado sempre exibia na home); false = home off.
+        showOnHome: data.targeting.showOnHome ?? true,
       };
 
     await this.prisma.$transaction(async (tx) => {
