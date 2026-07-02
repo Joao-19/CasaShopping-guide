@@ -21,6 +21,10 @@ model User {
   refreshToken String? @db.Text
   profileImage String?
 
+  // Consentimento LGPD: data/hora em que o usuário aceitou a Política de
+  // Privacidade no cadastro. Null = cadastros antigos, antes do aceite.
+  privacyAcceptedAt DateTime?
+
   // Auditoria
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

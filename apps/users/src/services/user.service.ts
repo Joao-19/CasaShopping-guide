@@ -94,6 +94,24 @@ export class UserService {
     return result;
   }
 
+  // Consentimento LGPD do usuário já cadastrado (gate no login). Grava a
+  // data/hora real do aceite. Idempotente: não sobrescreve um aceite
+  // anterior, para preservar o timestamp original do consentimento.
+  async acceptPrivacy(id: string) {
+    const current = await prisma.user.findUnique({ where: { id } });
+    if (!current) return null;
+
+    const user = current.privacyAcceptedAt
+      ? current
+      : await prisma.user.update({
+          where: { id },
+          data: { privacyAcceptedAt: new Date() },
+        });
+
+    const { password, refreshToken, ...result } = user;
+    return result;
+  }
+
   async *exportUsers() {
     const batchSize = 1000;
     let skip = 0;

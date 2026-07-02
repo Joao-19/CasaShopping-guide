@@ -29,6 +29,7 @@ export interface RegisterForm {
   email: string;
   password: string;
   phone: string;
+  privacyAccepted: boolean;
 }
 
 export interface RegisterResponse extends User {

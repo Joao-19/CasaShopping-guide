@@ -35,6 +35,16 @@
 > separada, app no Portainer (Git), tela de manutenção + pendências de infra
 > (ACL/segurança, limpeza, R2). Base já feita: GHCR + escravo/VPN.
 
+> **Pedidos do cliente / jul (Frente 12)** — `12-sync-lojas-site-principal.md`
+> (nova, 2026-07-02): 3 pedidos p/ finalizar a entrega. **(1)** aceite de
+> política de privacidade no cadastro; **(2)** campos Cidade/Bairro/Data
+> de Nascimento no cadastro + CEP automático via **ViaCEP** (grátis, sem
+> chave); **(3)** alinhar lojas com `casashopping.com` — site é ASP SSR
+> **sem API**, só scraping (frágil) ou integração de verdade; **decisão:
+> seguir de B** (pedir acesso ao banco/webhook), scraper desenhado mas
+> **não implementado**. Itens 1 e 2 tocam schema/dtos/auth (migration
+> aditiva) — área sensível.
+
 > **Ajustes do cliente (Frente 11)** — `11-ajustes-cliente-junho.md` (nova,
 > 2026-06-26): 5 pedidos pós-entrega. Prioritário = **preço em texto livre
 > (de/por)**. Demais: destaque só com produto, fallback de banner sem 2025,

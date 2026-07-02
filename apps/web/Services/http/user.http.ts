@@ -83,4 +83,12 @@ export default {
       .delete<{ message: string }>("/users/me")
       .then((res) => res.data);
   },
+  acceptPrivacy() {
+    return http
+      .patch<UserProfile & { privacyAcceptedAt: string | null }>(
+        "/users/me/privacy",
+        {}
+      )
+      .then((res) => res.data);
+  },
 };
