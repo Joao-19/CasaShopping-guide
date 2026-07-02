@@ -126,6 +126,12 @@ export class UserController {
     }
   }
 
+  @Patch("me/privacy")
+  async acceptPrivacy(@Headers("authorization") authHeader: string) {
+    const userId = this.getUserIdFromToken(authHeader);
+    return this.userService.acceptPrivacy(userId);
+  }
+
   @Delete("me")
   async deleteMe(@Headers("authorization") authHeader: string) {
     const userId = this.getUserIdFromToken(authHeader);

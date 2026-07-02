@@ -4,6 +4,8 @@ import {
   IsString,
   MinLength,
   Matches,
+  IsBoolean,
+  Equals,
 } from "class-validator";
 import { Transform } from "class-transformer";
 
@@ -38,6 +40,14 @@ export class CreateUserDto {
     message: "A senha deve conter letras maiúsculas e minúsculas.",
   })
   password!: string;
+
+  // Aceite da Política de Privacidade (LGPD). Obrigatoriamente true — o
+  // timestamp do consentimento é gravado no servidor (privacyAcceptedAt).
+  @IsBoolean()
+  @Equals(true, {
+    message: "É necessário aceitar a Política de Privacidade.",
+  })
+  privacyAccepted!: boolean;
 }
 
 export class UpdateProfileImageDto {
