@@ -111,6 +111,28 @@ export class UserGatewayService {
     }
   }
 
+  async acceptPrivacy(token: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.patch<any>(
+          `${this.usersServiceUrl}/user/me/privacy`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data || "Internal Server Error",
+        error.response?.status || 500
+      );
+    }
+  }
+
   async deleteMe(token: string): Promise<any> {
     try {
       const response = await firstValueFrom(

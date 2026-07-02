@@ -13,7 +13,10 @@ import {
 } from "@repo/ui/card";
 import { FormCard } from "@repo/ui/cards/FormCard";
 import BaseInput from "@repo/ui/inputs/BaseInput";
+import { Checkbox } from "@repo/ui/components/checkbox";
 import Link from "next/link";
+
+const PRIVACY_POLICY_URL = "https://www.casashopping.com/politicadeprivacidade/";
 import { UnloggedToolbar } from "@repo/ui/UnloggedToolbar";
 import { UnloggedFooter } from "@repo/ui/UnloggedFooter";
 import useForm, { useFormField, useValidator } from "@repo/ui/useForm";
@@ -26,12 +29,14 @@ interface RegisterFormProps {
         email: string;
         phone: string;
         password: string;
+        privacyAccepted: boolean;
     };
     setFormData: {
         setName: (val: string) => void;
         setEmail: (val: string) => void;
         setPhone: (val: string) => void;
         setPassword: (val: string) => void;
+        setPrivacyAccepted: (val: boolean) => void;
     };
     loading: boolean;
     onSubmit: (e: React.FormEvent) => void;
@@ -39,8 +44,8 @@ interface RegisterFormProps {
 
 const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterFormProps) => {
     const validator = useValidator();
-    const { name, email, phone, password } = formData;
-    const { setName, setEmail, setPhone, setPassword } = setFormData;
+    const { name, email, phone, password, privacyAccepted } = formData;
+    const { setName, setEmail, setPhone, setPassword, setPrivacyAccepted } = setFormData;
 
     const nameField = useFormField(name, [validator.rules.required]);
     const emailField = useFormField(email, [validator.rules.required, validator.rules.email]);
@@ -52,6 +57,11 @@ const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterForm
             "Senha deve ter maiúsculas e minúsculas",
     ]);
     const phoneField = useFormField(phone, []);
+    const privacyField = useFormField(privacyAccepted, [
+        (value: boolean) =>
+            value === true ||
+            "Você precisa aceitar a Política de Privacidade para continuar.",
+    ]);
 
     return (
         <form onSubmit={onSubmit} className="w-full h-min-[300px]">
@@ -102,6 +112,37 @@ const RegisterForm = ({ formData, setFormData, loading, onSubmit }: RegisterForm
                 onBlur={passwordField.onBlur}
             />
 
+            <div className="mt-4">
+                <label className="flex items-start gap-2 cursor-pointer select-none">
+                    <Checkbox
+                        id="privacy"
+                        checked={privacyAccepted}
+                        onCheckedChange={(checked) => {
+                            setPrivacyAccepted(checked === true);
+                            privacyField.onBlur();
+                        }}
+                        className="mt-0.5"
+                    />
+                    <span className="text-sm text-gray-600 leading-snug">
+                        Li e concordo com os termos descritos na{" "}
+                        <Link
+                            href={PRIVACY_POLICY_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary font-semibold hover:underline"
+                        >
+                            Política de Privacidade do CasaShopping
+                        </Link>
+                        .
+                    </span>
+                </label>
+                {privacyField.error && (
+                    <p className="invalidField mt-1 text-sm text-red-500">
+                        {privacyField.error}
+                    </p>
+                )}
+            </div>
+
             <Button
                 type="submit"
                 disabled={loading}
@@ -119,6 +160,7 @@ const RegisterPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
+    const [privacyAccepted, setPrivacyAccepted] = useState(false);
     const [loading, setLoading] = useState(false);
     const { register } = userRegister();
     const { FormProvider, validateAll } = useForm();
@@ -137,6 +179,7 @@ const RegisterPage = () => {
                 email,
                 password,
                 phone,
+                privacyAccepted,
             });
 
             toast.success("Conta criada com sucesso!");
@@ -178,8 +221,8 @@ const RegisterPage = () => {
                         <CardContent>
                             <FormProvider>
                                 <RegisterForm
-                                    formData={{ name, email, phone, password }}
-                                    setFormData={{ setName, setEmail, setPhone, setPassword }}
+                                    formData={{ name, email, phone, password, privacyAccepted }}
+                                    setFormData={{ setName, setEmail, setPhone, setPassword, setPrivacyAccepted }}
                                     loading={loading}
                                     onSubmit={handleRegister}
                                 />

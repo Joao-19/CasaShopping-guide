@@ -95,6 +95,15 @@ export class UserGatewayController {
     stream.pipe(res);
   }
 
+  @Patch("me/privacy")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Accept privacy policy (logged-in user)" })
+  @ApiResponse({ status: 200, description: "Privacy consent recorded." })
+  async acceptPrivacy(@Req() req: Request): Promise<any> {
+    const token = req.cookies["access_token"];
+    return this.userGatewayService.acceptPrivacy(token);
+  }
+
   @Delete("me")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Delete current user account" })

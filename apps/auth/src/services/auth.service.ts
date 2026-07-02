@@ -38,10 +38,19 @@ export class AuthService implements OnModuleInit {
 
     const passwordHash = await bcrypt.hash(data.password, 6);
 
+    // `privacyAccepted` é flag de contrato, não coluna. O consentimento é
+    // registrado como timestamp gravado no servidor (fonte da verdade LGPD).
+    const { privacyAccepted, ...rest } = data;
+
     try {
       console.log(`[AuthService] Attempting to create user in DB...`);
       const newUser = await prisma.user.create({
-        data: { ...data, email, password: passwordHash },
+        data: {
+          ...rest,
+          email,
+          password: passwordHash,
+          privacyAcceptedAt: privacyAccepted ? new Date() : null,
+        },
       });
       console.log(`[AuthService] User created successfully: ${newUser.id}`);
 
