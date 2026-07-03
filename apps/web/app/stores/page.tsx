@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
 import { Search } from "lucide-react";
 import { Toolbar } from "../../components/Toolbar";
 import { Footer } from "../../components/Footer";
 import useStore from "../../composable/store/useStore";
 import { usePopup } from "@repo/ui";
 import { StoreDetailsCard } from "../../components/StoreDetailsCard";
+import { StoreLogo } from "../../components/StoreLogo";
 import {
     Pagination,
     PaginationContent,
@@ -17,7 +17,6 @@ import {
 } from "@repo/ui";
 
 const StoreCard = ({ store }: { store: any }) => {
-    const [imgError, setImgError] = useState(false);
     const { showPopup } = usePopup();
 
     return (
@@ -26,18 +25,11 @@ const StoreCard = ({ store }: { store: any }) => {
             className="bg-white rounded-2xl p-4 md:p-6 flex flex-col items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group border border-gray-100"
         >
             <div className="w-24 h-24 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-colors">
-                {!imgError && store.logoImage && store.logoImage.length > 2 ? (
-                    <img
-                        src={store.logoImage.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')}
-                        alt={store.name}
-                        className="w-full h-full object-cover"
-                        onError={() => setImgError(true)}
-                    />
-                ) : (
-                    <div className="text-[#1A2B3C] font-bold text-2xl">
-                        {store.name.substring(0, 2).toUpperCase()}
-                    </div>
-                )}
+                <StoreLogo
+                    name={store.name}
+                    logoImage={store.logoImage}
+                    initialsClassName="text-2xl text-[#1A2B3C]"
+                />
             </div>
             <div className="text-center w-full">
                 <h3

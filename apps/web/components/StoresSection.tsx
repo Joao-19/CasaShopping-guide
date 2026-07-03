@@ -8,6 +8,7 @@ import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useId } from "react";
 import { usePopup } from "@repo/ui";
 import { StoreDetailsCard } from "./StoreDetailsCard";
+import { StoreLogo } from "./StoreLogo";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -96,17 +97,12 @@ export function StoresSection() {
                                 youtubeLink: store.youtubeLink ?? null
                             }} />)} className="flex flex-col items-center gap-3 w-full cursor-pointer">
                                 <div className="relative w-24 h-24 md:w-24 md:h-24 rounded-full overflow-hidden border border-gray-100 shadow-sm transition-all duration-300 group-hover/card:shadow-md group-hover/card:scale-105 bg-white flex items-center justify-center">
-                                    {store.logoImage ? (
-                                        <img
-                                            src={store.logoImage.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')}
-                                            alt={store.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <span className="text-2xl font-bold text-gray-300 select-none">
-                                            {store.name.charAt(0).toUpperCase()}
-                                        </span>
-                                    )}
+                                    <StoreLogo
+                                        name={store.name}
+                                        logoImage={store.logoImage}
+                                        initialsLength={1}
+                                        initialsClassName="text-2xl text-gray-300"
+                                    />
                                 </div>
                                 <span className="text-sm md:text-base font-medium text-[#1A2B3C] text-center line-clamp-2 max-w-[120px] group-hover/card:text-[#003BA6] transition-colors">{store.name}</span>
                             </div>
