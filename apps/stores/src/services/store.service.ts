@@ -120,6 +120,30 @@ export class StoreService {
     return store;
   }
 
+  // Converte um valor de logo/banner na KEY canônica do storage:
+  //  - key relativa ("stores/x.jpg")           -> ela mesma (sem barra inicial)
+  //  - URL absoluta do NOSSO storage           -> a key relativa correspondente
+  //  - URL externa (outro host) / vazio / nulo -> null (não é arquivo deletável)
+  // Isso existe porque transformStore devolve URL ABSOLUTA na leitura; sem
+  // canonicalizar, o update comparava "absoluta != relativa" e deletava o
+  // arquivo real num simples save da loja (incidente jul/2026 — logos sumiram).
+  private toStorageKey(value?: string | null): string | null {
+    if (!value) return null;
+    if (!value.startsWith("http")) return value.replace(/^\/+/, "");
+    const bucket = process.env.MINIO_BUCKET_NAME || "casashopping";
+    const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT;
+    const bases = [
+      process.env.STORAGE_URL,
+      publicEndpoint ? `${publicEndpoint.replace(/\/$/, "")}/${bucket}` : null,
+      "http://localhost:9000/casashopping",
+    ].filter((b): b is string => Boolean(b));
+    for (const b of bases) {
+      const base = b.replace(/\/$/, "");
+      if (value.startsWith(base + "/")) return value.slice(base.length + 1);
+    }
+    return null; // URL de outro host — não mexe
+  }
+
   async findAll(
     page: number = 1,
     search?: string,
@@ -220,11 +244,13 @@ export class StoreService {
 
       // 4. Get store to delete logo + banner
       const store = await tx.store.findUnique({ where: { id } });
-      if (store?.logoImage) {
-        await this.deleteFileFromStorage(store.logoImage);
+      const logoKey = this.toStorageKey(store?.logoImage);
+      if (logoKey) {
+        await this.deleteFileFromStorage(logoKey);
       }
-      if (store?.bannerImage) {
-        await this.deleteFileFromStorage(store.bannerImage);
+      const bannerKey = this.toStorageKey(store?.bannerImage);
+      if (bannerKey) {
+        await this.deleteFileFromStorage(bannerKey);
       }
 
       // 5. Soft delete the store
@@ -270,8 +296,20 @@ export class StoreService {
       modifiedAt: new Date(),
     };
 
-    // Remove image if it's sent as file (handled separately) or handle as needed
-    // For now, we sanitize strictly what is in the DTO that maps to DB fields
+    // Normaliza logo/banner para KEY relativa antes de gravar. A leitura
+    // (transformStore) devolve URL absoluta; se o cliente reenviar essa URL num
+    // save (ex.: admin editando só o telefone), gravamos de volta a key relativa
+    // e evitamos tanto a "falsa mudança" quanto a deleção indevida abaixo.
+    if (updateData.logoImage !== undefined) {
+      const k = this.toStorageKey(updateData.logoImage);
+      if (k !== null) updateData.logoImage = k;
+    }
+    if (updateData.bannerImage !== undefined) {
+      const k = this.toStorageKey(updateData.bannerImage);
+      if (k !== null) updateData.bannerImage = k;
+    }
+
+    // Remove image if it's sent as file (handled separately)
     delete updateData.image;
 
     const updatedStore = await prisma.store.update({
@@ -279,24 +317,26 @@ export class StoreService {
       data: updateData,
     });
 
-    // Cleanup old image if changed or removed
-    // We check if data.logoImage is explicitly set (meaning it's part of the update)
-    // and if it's different from the existing one.
-    // If data.logoImage is "" (empty string), it means removal.
+    // Deleta o arquivo antigo SOMENTE quando a key canônica muda de verdade
+    // (troca real de logo/banner) — comparando keys normalizadas, nunca
+    // "absoluta vs relativa". Se a loja perdeu a imagem (""), a antiga também
+    // é removida. Assim um save que não mexe na imagem NÃO apaga o arquivo.
+    const oldLogoKey = this.toStorageKey(existingStore.logoImage);
     if (
       data.logoImage !== undefined &&
-      existingStore.logoImage &&
-      data.logoImage !== existingStore.logoImage
+      oldLogoKey &&
+      oldLogoKey !== this.toStorageKey(updateData.logoImage)
     ) {
-      await this.deleteFileFromStorage(existingStore.logoImage);
+      await this.deleteFileFromStorage(oldLogoKey);
     }
 
+    const oldBannerKey = this.toStorageKey(existingStore.bannerImage);
     if (
       data.bannerImage !== undefined &&
-      existingStore.bannerImage &&
-      data.bannerImage !== existingStore.bannerImage
+      oldBannerKey &&
+      oldBannerKey !== this.toStorageKey(updateData.bannerImage)
     ) {
-      await this.deleteFileFromStorage(existingStore.bannerImage);
+      await this.deleteFileFromStorage(oldBannerKey);
     }
 
     return this.transformStore(updatedStore);
