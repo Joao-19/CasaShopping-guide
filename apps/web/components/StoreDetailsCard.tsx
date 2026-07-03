@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Phone } from "lucide-react";
 import { usePopup, IconInstagram, IconFacebook, IconYoutube } from "@repo/ui";
+import { StoreLogo } from "./StoreLogo";
 
 interface StoreDetailsCardProps {
     store: {
@@ -47,17 +48,12 @@ export function StoreDetailsCard({ store }: StoreDetailsCardProps) {
 
             <div className="w-full flex justify-center mt-4">
                 <div className="w-[190px] h-[190px] relative flex items-center justify-center">
-                    {store.logoImage ? (
-                        <img
-                            src={store.logoImage.replace('localhost', process.env.NEXT_PUBLIC_API_HOST || 'localhost')}
-                            alt={store.name}
-                            className="w-full h-full object-contain"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-[#1A2B3C] font-bold text-4xl">
-                            {store.name.substring(0, 2).toUpperCase()}
-                        </div>
-                    )}
+                    <StoreLogo
+                        name={store.name}
+                        logoImage={store.logoImage}
+                        fit="contain"
+                        initialsClassName="bg-white rounded-full text-4xl text-[#1A2B3C]"
+                    />
                 </div>
             </div>
 

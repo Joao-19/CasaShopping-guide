@@ -17,6 +17,7 @@ import { BackToTopButton } from "../../../components/BackToTopButton";
 import { ProductCardSwiper } from "../../../components/ProductCardSwiper";
 import { ProductDetailsCard } from "../../../components/ProductDetailsCard";
 import { LoginRequiredPopup } from "../../../components/LoginRequiredPopup";
+import { StoreLogo } from "../../../components/StoreLogo";
 import { useFavorites } from "../../../composable/useFavorites";
 import { useAuthStore } from "@/store/auth.store";
 import storeHttp from "../../../Services/http/store.http";
@@ -158,11 +159,13 @@ export default function LojaPage() {
 
                         <div className="relative w-full max-w-7xl mx-auto px-6 lg:px-0 py-6 flex flex-col items-center text-center md:items-start md:text-left gap-3">
                             <div className="w-[80px] h-[80px] md:w-[110px] md:h-[110px] rounded-full bg-white shadow-lg overflow-hidden flex items-center justify-center shrink-0">
-                                {store.logoImage ? (
-                                    <img src={store.logoImage} alt={store.name} className="w-full h-full object-contain" />
-                                ) : (
-                                    <span className="text-3xl font-bold text-[#162e47]">{store.name[0]}</span>
-                                )}
+                                <StoreLogo
+                                    name={store.name}
+                                    logoImage={store.logoImage}
+                                    fit="contain"
+                                    initialsLength={1}
+                                    initialsClassName="text-3xl text-[#162e47]"
+                                />
                             </div>
                             <div className="text-white w-full">
                                 <h1 className="text-2xl md:text-4xl font-bold !text-white drop-shadow-md leading-tight">{store.name}</h1>
