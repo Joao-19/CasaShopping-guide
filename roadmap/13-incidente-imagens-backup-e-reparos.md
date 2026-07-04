@@ -27,15 +27,18 @@ então o dano passa despercebido.
 Objetivo: antes de qualquer reparo, garantir que **todo** byte de imagem
 (logo, banner, produto) esteja salvo e restaurável com **um** comando.
 
-### Scripts
+### Scripts (python3 puro — nativo no Ubuntu, SEM jq/curl/pip/apt)
 
-- `scripts/backup-images.sh` — **100% só leitura**. GET nas rotas públicas
+O servidor é do cliente; não dá pra instalar pacote. Por isso os scripts usam
+só a stdlib do `python3` (já presente em qualquer EC2 Ubuntu).
+
+- `scripts/backup-images.py` — **100% só leitura**. GET nas rotas públicas
   (`/stores`, `/products`) + download das imagens por URL pública. Salva:
   - `objects/<key>` → os bytes, **no mesmo caminho da key** do storage
     (o caminho relativo A `objects/` **é** a key → restore exato).
   - `manifest-stores.json`, `manifest-products.json`, `manifest.json` (resumo).
   - Sem credencial, sem escrita em prod, sem deleção.
-- `scripts/restore-images.sh` — **só PUT**, nunca deleta, nunca toca no banco.
+- `scripts/restore-images.py` — **só PUT**, nunca deleta, nunca toca no banco.
   - DRY-RUN por padrão; grava só com `CONFIRM=1`.
   - Reenvia cada arquivo pra key EXATA via o mesmo presign do app; **aborta**
     o arquivo se o backend devolver key diferente (trava de segurança).
@@ -46,24 +49,33 @@ Objetivo: antes de qualquer reparo, garantir que **todo** byte de imagem
 
 ```bash
 # BACKUP (rode antes de tudo; guarde a pasta ./backup-imagens)
-bash scripts/backup-images.sh
+python3 scripts/backup-images.py
 
 # RESTORE — passo 1: ver o que faria (não grava)
-ADMIN_TOKEN=<token_admin> bash scripts/restore-images.sh
+ADMIN_TOKEN=<token_admin> python3 scripts/restore-images.py
 # RESTORE — passo 2: recuperar só o que sumiu (mais seguro)
-ADMIN_TOKEN=<token_admin> ONLY_MISSING=1 CONFIRM=1 bash scripts/restore-images.sh
+ADMIN_TOKEN=<token_admin> ONLY_MISSING=1 CONFIRM=1 python3 scripts/restore-images.py
 # RESTORE — restaurar tudo (força todos os bytes de volta)
-ADMIN_TOKEN=<token_admin> CONFIRM=1 bash scripts/restore-images.sh
+ADMIN_TOKEN=<token_admin> CONFIRM=1 python3 scripts/restore-images.py
 ```
 
 `ADMIN_TOKEN` = cookie `access_token` de um admin logado.
 
-### Critério de aceite da Parte 1
-- [ ] `backup-images.sh` roda em prod e baixa lojas + produtos sem falha
-      (`objects: falha 0`).
-- [ ] `restore-images.sh` em DRY-RUN lista os mesmos arquivos.
+### Validação (feita em 2026-07-03, contra prod)
+- [x] `backup-images.py` rodou contra prod: 108 lojas, 81 produtos, **188 keys
+      únicas**, falha 0, ~27 MB.
+- [x] `restore-images.py` em DRY-RUN listou os arquivos.
+- [x] Guarda de integridade: aborta (exit 2) se o FS fundir keys.
+- [ ] **Rodar o backup autoritativo no servidor Linux** (não no Windows — ver
+      gotcha de case-sensitivity). Esperado: 188 arquivos, falha 0.
 - [ ] Teste de fumaça: restaurar UMA key conhecida com `CONFIRM=1` e conferir
       no navegador. Só depois seguir pra Parte 2.
+
+> **Achado #1 confirmado em dados reais:** loja *Studio do Sono* tem a logo em
+> `stores/56a44c97.../studio-do-sono.webp` e um produto com imagem em
+> `stores/56a44c97.../Studio-do-Sono.webp` — mesma pasta, diferindo só na caixa.
+> No MinIO (Linux) coexistem; se a caixa batesse igual, a imagem do produto teria
+> sobrescrito a logo. É a brecha #1 quase disparada. Reforça a urgência da 2.1.
 
 ---
 
@@ -72,29 +84,41 @@ ADMIN_TOKEN=<token_admin> CONFIRM=1 bash scripts/restore-images.sh
 **Regra de ouro:** nenhum passo começa sem o backup da Parte 1 validado.
 Ordem do menor risco pro maior. Cada item vira commit atômico em `dev`.
 
-### 2.1 — Key única no upload (fecha o achado #1) — risco baixo
+### 2.1 — Key única no upload (fecha o achado #1) — risco baixo — ✅ CÓDIGO FEITO
 - Espelhar o padrão que a web já usa: `useImageUpload.ts` (admin) passa a
   gerar filename único (`{uuid}-{nome}.webp`) para produto, logo e banner.
 - Sem mudança de contrato, sem migration. Restore continua exato (usa a key
   gravada no manifesto, não gera uuid).
-- **Aceite:** subir imagem de produto com mesmo nome de arquivo da logo NÃO
-  altera nem apaga a logo (validar na UI com Playwright).
+- **Status:** feito em `dev` (`a86cf2a`), `tsc --noEmit` verde. `key.match(/stores\/.*$/)`
+  no CreateProductForm continua ok com o prefixo.
+- **Falta:** validar upload real na UI (subir imagem de produto com mesmo nome
+  de arquivo da logo NÃO altera nem apaga a logo). Fazer antes de considerar pronto.
 
-### 2.2 — Guarda de concorrência no update (fecha o achado #2a) — risco médio
-- `store.update` (e `product.update`): comparar `modifiedAt`/`updatedAt`
-  recebido com o do banco; se divergir, responder **409** em vez de gravar por
-  cima. Front trata o 409 pedindo recarregar.
-- Alternativa/complemento: front não reenviar `logoImage`/`bannerImage` quando
-  não houve troca real.
-- **Aceite:** dois saves concorrentes na mesma loja — o segundo (stale) é
-  rejeitado com 409; a logo do primeiro permanece no bucket.
+### 2.2 — Lost-update em edição concorrente (achado #2a) — ⏳ AGUARDA DECISÃO
+O vetor de perda de imagem existe em loja E produto: o save "velho" reenvia a
+lista/URL antiga e o backend deleta o arquivo que o outro admin acabou de subir.
+Duas abordagens (perguntado ao usuário, sem resposta ainda):
+- **Leve (frontend, recomendada):** front só envia `logoImage`/`bannerImage`/
+  imagens quando REALMENTE mudaram (novo upload ou remoção). Um "salvar telefone"
+  omite as imagens → backend não deleta nada. Fecha o vetor de perda de imagem.
+  Baixo risco, sem backend/dtos/migration. Não protege campos de texto contra
+  last-write-wins (aceitável — o incidente é imagem).
+- **Robusto (optimistic concurrency):** `modifiedAt`/version no update → 409 +
+  reload no front. Protege TODOS os campos. Cross-service (dtos+backend+front),
+  mais escopo/risco.
+- **Aceite (leve):** com um form aberto e a imagem trocada por outro caminho, um
+  save que não mexe na imagem NÃO apaga o arquivo do outro (validar na UI).
+- **Nota técnica (leve):** em store.update, omitir `logoImage` deixa
+  `updateData.logoImage === undefined` → bloco de deleção não roda (já é o
+  comportamento atual). Em produto, o form hoje reconstrói `images` sempre;
+  precisa passar a só reenviar quando houver mudança real.
 
 ### 2.3 — Constraints no banco (fecha o achado #2b) — risco: migration
 - Migration idempotente: `@@unique([storeId, name])` em Product e unicidade de
   `name` em Store (avaliar case-insensitive).
-- **Pré-requisito obrigatório:** varrer duplicatas existentes ANTES (a
-  constraint falha se já houver duplicata). Script de checagem read-only
-  primeiro; só criar a migration com o banco limpo.
+- **Pré-requisito — ✅ VERIFICADO (2026-07-03):** varredura de duplicatas via
+  manifest do backup: 108 lojas, 81 produtos, **0 duplicatas** (case-insensitive).
+  Banco limpo → constraints seguras de adicionar.
 - **Rodar contra produção:** só com OK explícito do cliente (regra de área
   sensível). Testar local + `prisma migrate status` antes.
 
@@ -107,6 +131,10 @@ Ordem do menor risco pro maior. Cada item vira commit atômico em `dev`.
 ---
 
 ## Gotchas / decisões
+- **Backup só é confiável em FS case-sensitive (Linux).** Keys no mesmo folder
+  podem diferir só na caixa (ex.: `studio-do-sono.webp` × `Studio-do-Sono.webp`).
+  Windows/macOS fundem as duas num arquivo → snapshot incompleto. O script tem
+  guarda que aborta (exit 2) nesse caso. Rodar no EC2 (`python3 scripts/backup-images.py`).
 - Restore usa presign (não credencial S3) — casa com o stack e roda de qualquer
   máquina; precisa só de um token de admin.
 - Endpoint `/storage/upload-url` está com o guard comentado
