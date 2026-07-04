@@ -124,8 +124,17 @@ Duas abordagens (perguntado ao usuário, sem resposta ainda):
 - **Pré-requisito — ✅ VERIFICADO (2026-07-03):** varredura de duplicatas via
   manifest do backup: 108 lojas, 81 produtos, **0 duplicatas** (case-insensitive).
   Banco limpo → constraints seguras de adicionar.
+- **Status:** ✅ migration escrita — `20260703_add_unique_store_product_name`.
+  Índices funcionais/parciais em SQL cru (LOWER(name); loja parcial em
+  `deletedAt IS NULL`). **Testada localmente** em Postgres 15 descartável:
+  idempotente (2ª rodada = NOTICE skip) + 7/7 casos (rejeita dup case-insensitive
+  de loja/produto; permite outro store, nome novo, e loja soft-deleted reusando
+  nome ativo). Não altera `schema.prisma`, não precisa `prisma generate`.
+- **Follow-up opcional:** mapear erro P2002 (unique violation em corrida) para
+  409 no product/store service — hoje a corrida rara cairia em 500 (o duplicado
+  já é impedido; é só cosmético).
 - **Rodar contra produção:** só com OK explícito do cliente (regra de área
-  sensível). Testar local + `prisma migrate status` antes.
+  sensível). Aplicar antes na dev-deploy; conferir `prisma migrate status`.
 
 ### Sequência segura
 1. Backup validado (Parte 1). ← trava de segurança
