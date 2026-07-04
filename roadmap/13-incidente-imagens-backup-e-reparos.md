@@ -94,7 +94,12 @@ Ordem do menor risco pro maior. Cada item vira commit atômico em `dev`.
 - **Falta:** validar upload real na UI (subir imagem de produto com mesmo nome
   de arquivo da logo NÃO altera nem apaga a logo). Fazer antes de considerar pronto.
 
-### 2.2 — Lost-update em edição concorrente (achado #2a) — ⏳ AGUARDA DECISÃO
+### 2.2 — Lost-update em edição concorrente (achado #2a) — ✅ CÓDIGO FEITO (leve)
+**Decisão:** abordagem Leve (frontend). Feito em `dev` (`5327421`), tsc verde.
+- Loja: `logoImage`/`bannerImage` só entram no payload com novo upload ou remoção.
+- Produto: `images` só é reenviado quando muda (upload/remoção/reordenação).
+- **Falta:** validar na UI (edição concorrente não apaga imagem do outro).
+
 O vetor de perda de imagem existe em loja E produto: o save "velho" reenvia a
 lista/URL antiga e o backend deleta o arquivo que o outro admin acabou de subir.
 Duas abordagens (perguntado ao usuário, sem resposta ainda):
