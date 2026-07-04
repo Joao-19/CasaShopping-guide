@@ -409,9 +409,17 @@ export function CreateStoreForm({ onClose, initialData }: CreateStoreFormProps) 
                 instagramLink,
                 youtubeLink,
                 whatsapp: cleanPhone(whatsapp), // Add whatsapp here
-                logoImage: imageKey || '', // Send string path to DB
-                bannerImage: bannerKey,
             };
+
+            // Só envia logo/banner quando REALMENTE mudou (novo upload ou remoção).
+            // Numa edição que não mexe na imagem, omitir o campo faz o backend não
+            // tocar nele — evita o lost-update que deletava a imagem que outro
+            // admin acabou de trocar (achado #2a). Na criação, sempre envia.
+            const logoTouched = !!image || imageRemoved;
+            if (!isEditing || logoTouched) submissionData.logoImage = imageKey || '';
+
+            const bannerTouched = !!banner || bannerRemoved;
+            if (!isEditing || bannerTouched) submissionData.bannerImage = bannerKey;
 
             if (isEditing && initialData?.id) {
                 await updateStore(initialData.id, submissionData);

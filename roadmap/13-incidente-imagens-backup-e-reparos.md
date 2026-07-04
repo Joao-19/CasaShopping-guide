@@ -84,31 +84,62 @@ ADMIN_TOKEN=<token_admin> CONFIRM=1 python3 scripts/restore-images.py
 **Regra de ouro:** nenhum passo começa sem o backup da Parte 1 validado.
 Ordem do menor risco pro maior. Cada item vira commit atômico em `dev`.
 
-### 2.1 — Key única no upload (fecha o achado #1) — risco baixo
+### 2.1 — Key única no upload (fecha o achado #1) — risco baixo — ✅ CÓDIGO FEITO
 - Espelhar o padrão que a web já usa: `useImageUpload.ts` (admin) passa a
   gerar filename único (`{uuid}-{nome}.webp`) para produto, logo e banner.
 - Sem mudança de contrato, sem migration. Restore continua exato (usa a key
   gravada no manifesto, não gera uuid).
-- **Aceite:** subir imagem de produto com mesmo nome de arquivo da logo NÃO
-  altera nem apaga a logo (validar na UI com Playwright).
+- **Status:** feito em `dev` (`a86cf2a`), `tsc --noEmit` verde. `key.match(/stores\/.*$/)`
+  no CreateProductForm continua ok com o prefixo.
+- **✅ VALIDADO na dev-deploy (loopera, 2026-07-04):** produto na Abra Casa com 2 fotos
+  de mesmo nome do arquivo da logo (`magnific-...vuVT0FPa47.webp`). Resultado: 3 objetos
+  distintos no R2 — logo (`.../magnific-....webp`, intacta, 200) + img1 (`.../efae5aac-...-magnific-...`)
+  + img2 (`.../b9a0e2a9-...-magnific-...`), tamanhos 296KB/81KB/487KB. Zero colisão, logo preservada.
 
-### 2.2 — Guarda de concorrência no update (fecha o achado #2a) — risco médio
-- `store.update` (e `product.update`): comparar `modifiedAt`/`updatedAt`
-  recebido com o do banco; se divergir, responder **409** em vez de gravar por
-  cima. Front trata o 409 pedindo recarregar.
-- Alternativa/complemento: front não reenviar `logoImage`/`bannerImage` quando
-  não houve troca real.
-- **Aceite:** dois saves concorrentes na mesma loja — o segundo (stale) é
-  rejeitado com 409; a logo do primeiro permanece no bucket.
+### 2.2 — Lost-update em edição concorrente (achado #2a) — ✅ CÓDIGO FEITO (leve)
+**Decisão:** abordagem Leve (frontend). Feito em `dev` (`5327421`), tsc verde.
+- Loja: `logoImage`/`bannerImage` só entram no payload com novo upload ou remoção.
+- Produto: `images` só é reenviado quando muda (upload/remoção/reordenação).
+- **✅ VALIDADO na dev-deploy (loopera, 2026-07-04):** editando só o telefone da loja, o
+  `PUT /api/stores/{id}` saiu SEM `logoImage`/`bannerImage` (payload: name, slug, address,
+  phone, site, redes). Logo intacta (key inalterada, 200). Sem o campo no payload, um save
+  concorrente não tem como reverter/apagar a imagem que outro admin subiu.
+
+O vetor de perda de imagem existe em loja E produto: o save "velho" reenvia a
+lista/URL antiga e o backend deleta o arquivo que o outro admin acabou de subir.
+Duas abordagens (perguntado ao usuário, sem resposta ainda):
+- **Leve (frontend, recomendada):** front só envia `logoImage`/`bannerImage`/
+  imagens quando REALMENTE mudaram (novo upload ou remoção). Um "salvar telefone"
+  omite as imagens → backend não deleta nada. Fecha o vetor de perda de imagem.
+  Baixo risco, sem backend/dtos/migration. Não protege campos de texto contra
+  last-write-wins (aceitável — o incidente é imagem).
+- **Robusto (optimistic concurrency):** `modifiedAt`/version no update → 409 +
+  reload no front. Protege TODOS os campos. Cross-service (dtos+backend+front),
+  mais escopo/risco.
+- **Aceite (leve):** com um form aberto e a imagem trocada por outro caminho, um
+  save que não mexe na imagem NÃO apaga o arquivo do outro (validar na UI).
+- **Nota técnica (leve):** em store.update, omitir `logoImage` deixa
+  `updateData.logoImage === undefined` → bloco de deleção não roda (já é o
+  comportamento atual). Em produto, o form hoje reconstrói `images` sempre;
+  precisa passar a só reenviar quando houver mudança real.
 
 ### 2.3 — Constraints no banco (fecha o achado #2b) — risco: migration
 - Migration idempotente: `@@unique([storeId, name])` em Product e unicidade de
   `name` em Store (avaliar case-insensitive).
-- **Pré-requisito obrigatório:** varrer duplicatas existentes ANTES (a
-  constraint falha se já houver duplicata). Script de checagem read-only
-  primeiro; só criar a migration com o banco limpo.
+- **Pré-requisito — ✅ VERIFICADO (2026-07-03):** varredura de duplicatas via
+  manifest do backup: 108 lojas, 81 produtos, **0 duplicatas** (case-insensitive).
+  Banco limpo → constraints seguras de adicionar.
+- **Status:** ✅ migration escrita — `20260703_add_unique_store_product_name`.
+  Índices funcionais/parciais em SQL cru (LOWER(name); loja parcial em
+  `deletedAt IS NULL`). **Testada localmente** em Postgres 15 descartável:
+  idempotente (2ª rodada = NOTICE skip) + 7/7 casos (rejeita dup case-insensitive
+  de loja/produto; permite outro store, nome novo, e loja soft-deleted reusando
+  nome ativo). Não altera `schema.prisma`, não precisa `prisma generate`.
+- **Follow-up opcional:** mapear erro P2002 (unique violation em corrida) para
+  409 no product/store service — hoje a corrida rara cairia em 500 (o duplicado
+  já é impedido; é só cosmético).
 - **Rodar contra produção:** só com OK explícito do cliente (regra de área
-  sensível). Testar local + `prisma migrate status` antes.
+  sensível). Aplicar antes na dev-deploy; conferir `prisma migrate status`.
 
 ### Sequência segura
 1. Backup validado (Parte 1). ← trava de segurança

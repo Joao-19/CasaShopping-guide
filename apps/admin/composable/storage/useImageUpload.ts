@@ -53,7 +53,17 @@ export function useImageUpload() {
       // Sanitize filename (remove spaces and special chars)
       const sanitizeFilename = (name: string) =>
         name.replace(/[^a-zA-Z0-9.-]/g, "-");
-      const finalFilename = sanitizeFilename(finalFile.name);
+
+      // Prefixo único por upload. A key final é `folder/filename`; sem isto,
+      // dois arquivos com o mesmo nome no mesmo folder (ex.: imagem de produto
+      // e logo da loja, ambas em `stores/{storeId}/`) colidem — o segundo
+      // sobrescreve/deleta o primeiro (incidente das logos, jul/2026). Espelha
+      // o que a web já faz em useProfileImageUpload. randomUUID com fallback.
+      const uniquePrefix =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const finalFilename = `${uniquePrefix}-${sanitizeFilename(finalFile.name)}`;
 
       // 1. Get Presigned URL
       const { data } = await axios.post(
