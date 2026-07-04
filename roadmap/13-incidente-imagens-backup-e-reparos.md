@@ -62,11 +62,20 @@ ADMIN_TOKEN=<token_admin> CONFIRM=1 python3 scripts/restore-images.py
 `ADMIN_TOKEN` = cookie `access_token` de um admin logado.
 
 ### Validação (feita em 2026-07-03, contra prod)
-- [x] `backup-images.py` rodou contra prod: 108 lojas, 81 produtos, 187 objetos,
-      **falha 0**, ~27 MB.
-- [x] `restore-images.py` em DRY-RUN listou os mesmos 187 arquivos.
+- [x] `backup-images.py` rodou contra prod: 108 lojas, 81 produtos, **188 keys
+      únicas**, falha 0, ~27 MB.
+- [x] `restore-images.py` em DRY-RUN listou os arquivos.
+- [x] Guarda de integridade: aborta (exit 2) se o FS fundir keys.
+- [ ] **Rodar o backup autoritativo no servidor Linux** (não no Windows — ver
+      gotcha de case-sensitivity). Esperado: 188 arquivos, falha 0.
 - [ ] Teste de fumaça: restaurar UMA key conhecida com `CONFIRM=1` e conferir
       no navegador. Só depois seguir pra Parte 2.
+
+> **Achado #1 confirmado em dados reais:** loja *Studio do Sono* tem a logo em
+> `stores/56a44c97.../studio-do-sono.webp` e um produto com imagem em
+> `stores/56a44c97.../Studio-do-Sono.webp` — mesma pasta, diferindo só na caixa.
+> No MinIO (Linux) coexistem; se a caixa batesse igual, a imagem do produto teria
+> sobrescrito a logo. É a brecha #1 quase disparada. Reforça a urgência da 2.1.
 
 ---
 
@@ -110,6 +119,10 @@ Ordem do menor risco pro maior. Cada item vira commit atômico em `dev`.
 ---
 
 ## Gotchas / decisões
+- **Backup só é confiável em FS case-sensitive (Linux).** Keys no mesmo folder
+  podem diferir só na caixa (ex.: `studio-do-sono.webp` × `Studio-do-Sono.webp`).
+  Windows/macOS fundem as duas num arquivo → snapshot incompleto. O script tem
+  guarda que aborta (exit 2) nesse caso. Rodar no EC2 (`python3 scripts/backup-images.py`).
 - Restore usa presign (não credencial S3) — casa com o stack e roda de qualquer
   máquina; precisa só de um token de admin.
 - Endpoint `/storage/upload-url` está com o guard comentado

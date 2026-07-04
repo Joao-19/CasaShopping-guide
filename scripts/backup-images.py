@@ -149,10 +149,23 @@ with open(os.path.join(outdir, "manifest.json"), "w", encoding="utf-8") as f:
         "objects": {"downloaded": dl_ok, "skipped": dl_skip, "failed": dl_fail},
     }, f, ensure_ascii=False, indent=2)
 
+# Integridade: nº de keys únicas baixadas deve bater com nº de arquivos no
+# disco. Se não bater, o filesystem fundiu keys (Windows/macOS são
+# case-INSENSITIVE: "Foo.webp" e "foo.webp" viram o mesmo arquivo) e o
+# snapshot está INCOMPLETO. O backup DEVE rodar em FS case-sensitive (Linux).
+on_disk = sum(len(files) for _, _, files in os.walk(objdir))
+fs_folded = len(saved) - on_disk
+
 print("  ----------------------------------------")
 print(f"  Lojas: {len(stores)} | Produtos: {len(products)}")
 print(f"  Objetos: baixados {dl_ok} | ja existiam {dl_skip} | falha {dl_fail}")
+print(f"  Arquivos no disco: {on_disk} (de {len(saved)} keys unicas)")
 print(f"  Snapshot: {outdir}")
 if dl_fail:
     print(f"  ATENCAO: {dl_fail} arquivo(s) falharam (ver linhas '!' acima).", file=sys.stderr)
+if fs_folded > 0:
+    print(f"  ERRO DE INTEGRIDADE: {fs_folded} key(s) foram FUNDIDAS pelo filesystem "
+          f"(case-insensitive). Snapshot INCOMPLETO. Rode em Linux (case-sensitive).",
+          file=sys.stderr)
+    sys.exit(2)
 print("  Restore:  python3 scripts/restore-images.py")
