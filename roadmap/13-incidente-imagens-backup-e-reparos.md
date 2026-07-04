@@ -27,15 +27,18 @@ então o dano passa despercebido.
 Objetivo: antes de qualquer reparo, garantir que **todo** byte de imagem
 (logo, banner, produto) esteja salvo e restaurável com **um** comando.
 
-### Scripts
+### Scripts (python3 puro — nativo no Ubuntu, SEM jq/curl/pip/apt)
 
-- `scripts/backup-images.sh` — **100% só leitura**. GET nas rotas públicas
+O servidor é do cliente; não dá pra instalar pacote. Por isso os scripts usam
+só a stdlib do `python3` (já presente em qualquer EC2 Ubuntu).
+
+- `scripts/backup-images.py` — **100% só leitura**. GET nas rotas públicas
   (`/stores`, `/products`) + download das imagens por URL pública. Salva:
   - `objects/<key>` → os bytes, **no mesmo caminho da key** do storage
     (o caminho relativo A `objects/` **é** a key → restore exato).
   - `manifest-stores.json`, `manifest-products.json`, `manifest.json` (resumo).
   - Sem credencial, sem escrita em prod, sem deleção.
-- `scripts/restore-images.sh` — **só PUT**, nunca deleta, nunca toca no banco.
+- `scripts/restore-images.py` — **só PUT**, nunca deleta, nunca toca no banco.
   - DRY-RUN por padrão; grava só com `CONFIRM=1`.
   - Reenvia cada arquivo pra key EXATA via o mesmo presign do app; **aborta**
     o arquivo se o backend devolver key diferente (trava de segurança).
@@ -46,22 +49,22 @@ Objetivo: antes de qualquer reparo, garantir que **todo** byte de imagem
 
 ```bash
 # BACKUP (rode antes de tudo; guarde a pasta ./backup-imagens)
-bash scripts/backup-images.sh
+python3 scripts/backup-images.py
 
 # RESTORE — passo 1: ver o que faria (não grava)
-ADMIN_TOKEN=<token_admin> bash scripts/restore-images.sh
+ADMIN_TOKEN=<token_admin> python3 scripts/restore-images.py
 # RESTORE — passo 2: recuperar só o que sumiu (mais seguro)
-ADMIN_TOKEN=<token_admin> ONLY_MISSING=1 CONFIRM=1 bash scripts/restore-images.sh
+ADMIN_TOKEN=<token_admin> ONLY_MISSING=1 CONFIRM=1 python3 scripts/restore-images.py
 # RESTORE — restaurar tudo (força todos os bytes de volta)
-ADMIN_TOKEN=<token_admin> CONFIRM=1 bash scripts/restore-images.sh
+ADMIN_TOKEN=<token_admin> CONFIRM=1 python3 scripts/restore-images.py
 ```
 
 `ADMIN_TOKEN` = cookie `access_token` de um admin logado.
 
-### Critério de aceite da Parte 1
-- [ ] `backup-images.sh` roda em prod e baixa lojas + produtos sem falha
-      (`objects: falha 0`).
-- [ ] `restore-images.sh` em DRY-RUN lista os mesmos arquivos.
+### Validação (feita em 2026-07-03, contra prod)
+- [x] `backup-images.py` rodou contra prod: 108 lojas, 81 produtos, 187 objetos,
+      **falha 0**, ~27 MB.
+- [x] `restore-images.py` em DRY-RUN listou os mesmos 187 arquivos.
 - [ ] Teste de fumaça: restaurar UMA key conhecida com `CONFIRM=1` e conferir
       no navegador. Só depois seguir pra Parte 2.
 
