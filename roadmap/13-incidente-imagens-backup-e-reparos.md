@@ -149,6 +149,23 @@ Duas abordagens (perguntado ao usuário, sem resposta ainda):
 
 ---
 
+## Pendência pós-deploy (achado 2026-07-04) — dado pré-existente colidido
+
+Varredura do backup de prod: **1 key compartilhada por 2 entidades** (colisão
+anterior ao fix, ainda gravada):
+- `stores/43f2d473-7409-4199-b984-7c407bdaa5c4/Lider.webp`
+  → LOGO da loja **Lider** **E** imagem do produto **"Sofá Ilha Modo, 2,60m x 1,55m"**.
+
+Risco: apagar/editar a imagem desse produto deleta o arquivo da logo (e vice-versa).
+Os fixes só impedem colisões NOVAS; esta é histórica. As outras 187 keys são
+exclusivas. (Par "Studio do Sono" maiúsc/minúsc NÃO é problema em prod — R2 é
+case-sensitive, 2 objetos distintos.)
+
+**Correção (baixo risco, próxima sessão):** pela UI (que agora gera key única),
+re-subir a imagem correta de UM dos dois (o produto OU a logo) para desgrudá-los.
+Definir com o cliente qual imagem é a certa para cada um antes (podem estar iguais
+hoje). Nada urgente; não quebra em uso normal.
+
 ## Gotchas / decisões
 - **Backup só é confiável em FS case-sensitive (Linux).** Keys no mesmo folder
   podem diferir só na caixa (ex.: `studio-do-sono.webp` × `Studio-do-Sono.webp`).
