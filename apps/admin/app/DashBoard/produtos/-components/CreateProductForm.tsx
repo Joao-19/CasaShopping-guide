@@ -419,10 +419,22 @@ export function CreateProductForm({
 
         if (!validateAll()) return;
 
-        // Upload new images
+        // Detecta se as imagens REALMENTE mudaram (novo upload, remoção, adição
+        // ou reordenação). Numa edição que não mexe nas imagens, não reenviamos
+        // o array — o backend então deixa as imagens intactas em vez de
+        // deletar+recriar, evitando apagar a imagem que outro admin acabou de
+        // adicionar (achado #2a). Na criação, sempre envia.
+        const origPaths = (initialData?.images || []).map((im: ProductImage) => im.path);
+        const imagesChanged =
+            images.some((im) => im?.file) ||
+            images.length !== origPaths.length ||
+            images.some((im, i) => im?.path !== origPaths[i]);
+        const sendImages = !isEditing || imagesChanged;
+
+        // Upload new images (só quando há mudança real)
         const finalImages = [];
         try {
-            for (let i = 0; i < images.length; i++) {
+            if (sendImages) for (let i = 0; i < images.length; i++) {
                 const img = images[i];
                 if (!img) continue;
 
@@ -473,7 +485,7 @@ export function CreateProductForm({
             // "não alterar" e o usuário não conseguiria zerar.
             tags: typeof tags === 'string' ? tags : '',
             storeId,
-            images: finalImages,
+            ...(sendImages ? { images: finalImages } : {}),
             showStorePhone,
             isFeatured,
         };
