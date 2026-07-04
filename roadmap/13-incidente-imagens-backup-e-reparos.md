@@ -91,14 +91,19 @@ Ordem do menor risco pro maior. Cada item vira commit atômico em `dev`.
   gravada no manifesto, não gera uuid).
 - **Status:** feito em `dev` (`a86cf2a`), `tsc --noEmit` verde. `key.match(/stores\/.*$/)`
   no CreateProductForm continua ok com o prefixo.
-- **Falta:** validar upload real na UI (subir imagem de produto com mesmo nome
-  de arquivo da logo NÃO altera nem apaga a logo). Fazer antes de considerar pronto.
+- **✅ VALIDADO na dev-deploy (loopera, 2026-07-04):** produto na Abra Casa com 2 fotos
+  de mesmo nome do arquivo da logo (`magnific-...vuVT0FPa47.webp`). Resultado: 3 objetos
+  distintos no R2 — logo (`.../magnific-....webp`, intacta, 200) + img1 (`.../efae5aac-...-magnific-...`)
+  + img2 (`.../b9a0e2a9-...-magnific-...`), tamanhos 296KB/81KB/487KB. Zero colisão, logo preservada.
 
 ### 2.2 — Lost-update em edição concorrente (achado #2a) — ✅ CÓDIGO FEITO (leve)
 **Decisão:** abordagem Leve (frontend). Feito em `dev` (`5327421`), tsc verde.
 - Loja: `logoImage`/`bannerImage` só entram no payload com novo upload ou remoção.
 - Produto: `images` só é reenviado quando muda (upload/remoção/reordenação).
-- **Falta:** validar na UI (edição concorrente não apaga imagem do outro).
+- **✅ VALIDADO na dev-deploy (loopera, 2026-07-04):** editando só o telefone da loja, o
+  `PUT /api/stores/{id}` saiu SEM `logoImage`/`bannerImage` (payload: name, slug, address,
+  phone, site, redes). Logo intacta (key inalterada, 200). Sem o campo no payload, um save
+  concorrente não tem como reverter/apagar a imagem que outro admin subiu.
 
 O vetor de perda de imagem existe em loja E produto: o save "velho" reenvia a
 lista/URL antiga e o backend deleta o arquivo que o outro admin acabou de subir.
