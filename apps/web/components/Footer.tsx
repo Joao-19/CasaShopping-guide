@@ -37,8 +37,8 @@ export function Footer() {
                             <li>CEP 22775-900</li>
                         </ul>
                         <ul className="flex flex-col gap-1 text-white/70 text-sm font-sans mt-2">
-                            <li>Segunda a Sábado: 10h às 22h</li>
-                            <li>Domingos e Feriados: 15h às 21h</li>
+                            <li>Segunda a Sábado: 10h às 20h</li>
+                            <li>Domingos e Feriados: 14h às 20h</li>
                         </ul>
                     </div>
                     <div className="flex flex-col gap-4">
