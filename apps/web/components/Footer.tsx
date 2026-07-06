@@ -16,8 +16,9 @@ const links = {
     sobre: "https://www.casashopping.com/sobre/",
     trabalheConosco: "https://www.casashopping.com/contato/",
     faleConosco: "https://www.casashopping.com/contato/",
-    // politicaPrivacidade: "https://www.casashopping.com.br/politica-privacidade",
-    // termosUso: "https://www.casashopping.com.br/termos-de-uso",
+    // Mesma URL usada no consentimento obrigatorio do login/registro.
+    politicaPrivacidade: "https://www.casashopping.com/politicadeprivacidade/",
+    termosUso: "https://www.casashopping.com/politicadeprivacidade/",
 }
 
 function openNewTab(url: string) {
@@ -53,8 +54,8 @@ export function Footer() {
                         <h3 className="text-white font-bold text-lg font-sans">Ajuda</h3>
                         <ul className="flex flex-col gap-3 text-white/70 text-sm font-sans">
                             <li><button onClick={() => openNewTab(links.faleConosco)} className="hover:text-white transition-colors">Fale Conosco</button></li>
-                            <li><button className="hover:text-white transition-colors">Política de Privacidade</button></li>
-                            <li><button className="hover:text-white transition-colors">Termos de Uso</button></li>
+                            <li><button onClick={() => openNewTab(links.politicaPrivacidade)} className="hover:text-white transition-colors cursor-pointer">Política de Privacidade</button></li>
+                            <li><button onClick={() => openNewTab(links.termosUso)} className="hover:text-white transition-colors cursor-pointer">Termos de Uso</button></li>
                         </ul>
                     </div>
                     <div className="flex flex-col gap-4">
@@ -75,8 +76,8 @@ export function Footer() {
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between text-white/50 text-xs font-sans">
                     <span className="text-gray-400">© {new Date().getFullYear()} CasaShopping. Todos os direitos reservados.</span>
                     <div className="flex gap-6 mt-4 md:mt-0">
-                        <span className="text-gray-400 whitespace-nowrap cursor-pointer hover:text-white transition-colors">Política de Privacidade</span>
-                        <span className="text-gray-400 whitespace-nowrap cursor-pointer hover:text-white transition-colors">Termos de Uso</span>
+                        <button onClick={() => openNewTab(links.politicaPrivacidade)} className="text-gray-400 whitespace-nowrap cursor-pointer hover:text-white transition-colors">Política de Privacidade</button>
+                        <button onClick={() => openNewTab(links.termosUso)} className="text-gray-400 whitespace-nowrap cursor-pointer hover:text-white transition-colors">Termos de Uso</button>
                     </div>
                 </div>
             </div>
