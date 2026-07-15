@@ -19,6 +19,7 @@ const getBaseUrl = () => {
 };
 
 import Cookies from "js-cookie";
+import { sessionCookieOptions } from "./cookie-options";
 
 /**
  * Persiste os tokens nos cookies lidos pelo middleware e pelo client.
@@ -33,9 +34,11 @@ export const persistTokens = (data: {
   accessToken: string;
   refreshToken: string;
 }) => {
-  Cookies.set("token", data.accessToken, { path: "/" });
-  Cookies.set("accessToken", data.accessToken, { path: "/" });
-  Cookies.set("refreshToken", data.refreshToken, { path: "/" });
+  const options = sessionCookieOptions();
+
+  Cookies.set("token", data.accessToken, options);
+  Cookies.set("accessToken", data.accessToken, options);
+  Cookies.set("refreshToken", data.refreshToken, options);
   // 'tokens' agregado, mantido para compatibilidade com validações legadas.
   Cookies.set(
     "tokens",
@@ -43,7 +46,7 @@ export const persistTokens = (data: {
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
     }),
-    { path: "/" },
+    options,
   );
 };
 

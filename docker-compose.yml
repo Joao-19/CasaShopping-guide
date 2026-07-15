@@ -27,6 +27,9 @@ services:
     volumes:
       - ./default.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/nginx/ssl/cloudflare:/etc/nginx/ssl/cloudflare:ro
+      # Pagina de manutencao servida pelo error_page 502/503/504 do default.conf
+      - ./portainer/manutencao.html:/usr/share/nginx/maintenance/manutencao.html:ro
+      - ./portainer/magnific_cinematic-wideangle-photo_YVPyuJiWeC.png:/usr/share/nginx/maintenance/magnific_cinematic-wideangle-photo_YVPyuJiWeC.png:ro
     depends_on:
       - api-gateway
       - web

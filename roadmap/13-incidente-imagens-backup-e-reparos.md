@@ -91,14 +91,19 @@ Ordem do menor risco pro maior. Cada item vira commit atômico em `dev`.
   gravada no manifesto, não gera uuid).
 - **Status:** feito em `dev` (`a86cf2a`), `tsc --noEmit` verde. `key.match(/stores\/.*$/)`
   no CreateProductForm continua ok com o prefixo.
-- **Falta:** validar upload real na UI (subir imagem de produto com mesmo nome
-  de arquivo da logo NÃO altera nem apaga a logo). Fazer antes de considerar pronto.
+- **✅ VALIDADO na dev-deploy (loopera, 2026-07-04):** produto na Abra Casa com 2 fotos
+  de mesmo nome do arquivo da logo (`magnific-...vuVT0FPa47.webp`). Resultado: 3 objetos
+  distintos no R2 — logo (`.../magnific-....webp`, intacta, 200) + img1 (`.../efae5aac-...-magnific-...`)
+  + img2 (`.../b9a0e2a9-...-magnific-...`), tamanhos 296KB/81KB/487KB. Zero colisão, logo preservada.
 
 ### 2.2 — Lost-update em edição concorrente (achado #2a) — ✅ CÓDIGO FEITO (leve)
 **Decisão:** abordagem Leve (frontend). Feito em `dev` (`5327421`), tsc verde.
 - Loja: `logoImage`/`bannerImage` só entram no payload com novo upload ou remoção.
 - Produto: `images` só é reenviado quando muda (upload/remoção/reordenação).
-- **Falta:** validar na UI (edição concorrente não apaga imagem do outro).
+- **✅ VALIDADO na dev-deploy (loopera, 2026-07-04):** editando só o telefone da loja, o
+  `PUT /api/stores/{id}` saiu SEM `logoImage`/`bannerImage` (payload: name, slug, address,
+  phone, site, redes). Logo intacta (key inalterada, 200). Sem o campo no payload, um save
+  concorrente não tem como reverter/apagar a imagem que outro admin subiu.
 
 O vetor de perda de imagem existe em loja E produto: o save "velho" reenvia a
 lista/URL antiga e o backend deleta o arquivo que o outro admin acabou de subir.
@@ -143,6 +148,23 @@ Duas abordagens (perguntado ao usuário, sem resposta ainda):
 4. 2.3: checar duplicatas → migration local → **OK do cliente** → prod.
 
 ---
+
+## Pendência pós-deploy (achado 2026-07-04) — dado pré-existente colidido
+
+Varredura do backup de prod: **1 key compartilhada por 2 entidades** (colisão
+anterior ao fix, ainda gravada):
+- `stores/43f2d473-7409-4199-b984-7c407bdaa5c4/Lider.webp`
+  → LOGO da loja **Lider** **E** imagem do produto **"Sofá Ilha Modo, 2,60m x 1,55m"**.
+
+Risco: apagar/editar a imagem desse produto deleta o arquivo da logo (e vice-versa).
+Os fixes só impedem colisões NOVAS; esta é histórica. As outras 187 keys são
+exclusivas. (Par "Studio do Sono" maiúsc/minúsc NÃO é problema em prod — R2 é
+case-sensitive, 2 objetos distintos.)
+
+**Correção (baixo risco, próxima sessão):** pela UI (que agora gera key única),
+re-subir a imagem correta de UM dos dois (o produto OU a logo) para desgrudá-los.
+Definir com o cliente qual imagem é a certa para cada um antes (podem estar iguais
+hoje). Nada urgente; não quebra em uso normal.
 
 ## Gotchas / decisões
 - **Backup só é confiável em FS case-sensitive (Linux).** Keys no mesmo folder
