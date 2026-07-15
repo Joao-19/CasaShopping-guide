@@ -4,6 +4,7 @@ import Admin from "@/Domain/User";
 import authHttp, { LoginForm } from "@/Services/http/auth.http";
 import { useAuthStore } from "@/store/auth.store";
 import { useHttp } from "@repo/api-client";
+import { sessionCookieOptions } from "@/Services/http/cookie-options";
 import Cookies from "js-cookie";
 
 const useLogin = () => {
@@ -25,12 +26,14 @@ const useLogin = () => {
         authStore.setUser(user);
 
         // Salva tokens nos cookies para o Middleware validar
+        const options = sessionCookieOptions();
+
         if (accessToken) {
-          Cookies.set("token", accessToken, { path: "/" });
-          Cookies.set("accessToken", accessToken, { path: "/" });
+          Cookies.set("token", accessToken, options);
+          Cookies.set("accessToken", accessToken, options);
         }
         if (refreshToken) {
-          Cookies.set("refreshToken", refreshToken, { path: "/" });
+          Cookies.set("refreshToken", refreshToken, options);
         }
       } else {
         console.warn("[useLogin] User not found in response:", resp);

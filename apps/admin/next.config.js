@@ -1,6 +1,17 @@
 /** @type {import('next').NextConfig} */
 import path from 'path';
 
+// Hosts autorizados a embedar o painel num iframe (dashboard externo).
+// Mantenha restrito: os cookies de sessao sao SameSite=None (exigencia do
+// iframe cross-site), entao este header e a unica barreira contra
+// clickjacking. Curinga *.lovable.app nao serve — a plataforma e
+// multi-tenant, qualquer conta gratuita ganha um host .lovable.app.
+const FRAME_ANCESTORS = [
+    "'self'",
+    "https://casashopping-dashboard.lovable.app",
+    "https://id-preview--1d0aea7f-6527-4240-b1c3-29ceef1d14be.lovable.app",
+];
+
 const nextConfig = {
     allowedDevOrigins: ["192.168.0.13", "172.245.190.165"],
     output: "standalone",
@@ -12,6 +23,19 @@ const nextConfig = {
                 source: "/",
                 destination: "/DashBoard/lojas/",
                 permanent: false,
+            },
+        ];
+    },
+    async headers() {
+        return [
+            {
+                source: "/:path*",
+                headers: [
+                    {
+                        key: "Content-Security-Policy",
+                        value: `frame-ancestors ${FRAME_ANCESTORS.join(" ")};`,
+                    },
+                ],
             },
         ];
     },
