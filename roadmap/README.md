@@ -35,6 +35,18 @@
 > separada, app no Portainer (Git), tela de manutenção + pendências de infra
 > (ACL/segurança, limpeza, R2). Base já feita: GHCR + escravo/VPN.
 
+> **Sessão em httpOnly / XSS (Frente 14)** — `14-sessao-httponly-xss.md`
+> (nova, 2026-07-15): tokens hoje são legíveis por JS (js-cookie no admin,
+> localStorage no web) → um XSS exfiltra o `refreshToken` (7d, renovável
+> pra sempre) e vira chave de admin permanente. Migrar pra cookie
+> `httpOnly` (o gateway já os grava, hoje inertes). ~4–6 dias, risco alto,
+> **sem migration**. Toca `auth-guard`, `api-client` e `api-gateway` —
+> área sensível. **Pré-requisito de qualquer integração de API com
+> terceiro.** Tem 4 decisões (D1–D4) a fechar antes de codar e 5 gotchas
+> — em especial: o `/auth/refresh` hoje só está protegido por uma
+> coincidência de nomenclatura, e a Frente do iframe (`cfecb1d`) depende
+> de `SameSite=None` — não quebrar.
+
 > **Pedidos do cliente / jul (Frente 12)** — `12-sync-lojas-site-principal.md`
 > (nova, 2026-07-02): 3 pedidos p/ finalizar a entrega. **(1)** aceite de
 > política de privacidade no cadastro; **(2)** campos Cidade/Bairro/Data
